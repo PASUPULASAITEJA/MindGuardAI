@@ -295,3 +295,4 @@ This document tracks all development milestones, model iterations, API updates, 
 - **[2026-06-04 14:11]** fix(survey): generate automated self-care recommendations based on score
 - **[2026-06-04 14:54]** feat(frontend): add Lucide icon integration across dashboard navigation items
 - **[2026-06-04 15:56]** refactor(mood): handle null emotion score edge cases in mood history parser
+- **[2026-06-04 16:04]** feat(alerts): track alert resolution lifecycle from trigger to counselor sign-off
