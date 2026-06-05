@@ -297,3 +297,4 @@ This document tracks all development milestones, model iterations, API updates, 
 - **[2026-06-04 15:56]** refactor(mood): handle null emotion score edge cases in mood history parser
 - **[2026-06-04 16:04]** feat(alerts): track alert resolution lifecycle from trigger to counselor sign-off
 - **[2026-06-05 08:44]** feat(counselor): implement urgent case escalation workflow to clinical leads
+- **[2026-06-05 12:30]** feat(docker): add docker-compose restart policies for resilience
