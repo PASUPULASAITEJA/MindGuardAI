@@ -306,3 +306,4 @@ This document tracks all development milestones, model iterations, API updates, 
 - **[2026-06-05 20:06]** feat(admin): add configurable risk threshold settings in admin panel
 - **[2026-06-05 20:46]** test(security): add rate limiting per IP address on password reset routes
 - **[2026-06-05 20:57]** style(db): add database seeding script with realistic clinical fixtures
+- **[2026-06-05 21:01]** fix(docs): add database schema ER diagram to docs/DATABASE.md
