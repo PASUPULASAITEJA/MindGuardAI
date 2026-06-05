@@ -6,3 +6,4 @@ This document tracks all development milestones, model iterations, API updates, 
 - **[2026-06-04 15:05]** fix(admin): implement system audit log viewer for compliance tracking
 - **[2026-06-05 09:04]** feat(ml): integrate DAIC-WOZ depression assessment dataset parser
 - **[2026-06-05 09:06]** perf(survey): generate automated clinical risk severity interpretation
+- **[2026-06-05 09:38]** test(ml): add token truncation handling in text preprocessing pipeline
