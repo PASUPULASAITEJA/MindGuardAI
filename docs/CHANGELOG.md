@@ -304,3 +304,4 @@ This document tracks all development milestones, model iterations, API updates, 
 - **[2026-06-05 18:59]** docs(ml): integrate DAIC-WOZ depression assessment dataset parser
 - **[2026-06-05 20:03]** fix(api): refactor API v1 router prefixing and module registration
 - **[2026-06-05 20:06]** feat(admin): add configurable risk threshold settings in admin panel
+- **[2026-06-05 20:46]** test(security): add rate limiting per IP address on password reset routes
