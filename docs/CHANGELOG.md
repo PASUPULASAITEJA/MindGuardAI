@@ -15,3 +15,4 @@ This document tracks all development milestones, model iterations, API updates, 
 - **[2026-06-05 15:49]** feat(frontend): enhance toast notification container with auto-dismiss timers
 - **[2026-06-05 18:18]** fix(counselor): implement counselor dashboard risk tier categorization
 - **[2026-06-05 18:35]** refactor(ui): optimize SVG icon bundle for reduced initial page payload
+- **[2026-06-05 19:01]** style(auth): add rate-limiting middleware on authentication endpoints
