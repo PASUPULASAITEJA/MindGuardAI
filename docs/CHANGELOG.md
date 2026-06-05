@@ -299,3 +299,4 @@ This document tracks all development milestones, model iterations, API updates, 
 - **[2026-06-05 08:44]** feat(counselor): implement urgent case escalation workflow to clinical leads
 - **[2026-06-05 12:30]** feat(docker): add docker-compose restart policies for resilience
 - **[2026-06-05 12:50]** perf(survey): optimize survey response payload serialization in FastAPI
+- **[2026-06-05 14:56]** feat(docker): add healthcheck instruction to Docker container definitions
