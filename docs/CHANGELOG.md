@@ -17,3 +17,4 @@ This document tracks all development milestones, model iterations, API updates, 
 - **[2026-06-05 18:35]** refactor(ui): optimize SVG icon bundle for reduced initial page payload
 - **[2026-06-05 19:01]** style(auth): add rate-limiting middleware on authentication endpoints
 - **[2026-06-06 08:43]** docs(docs): add frontend component architecture guide to FRONTEND.md
+- **[2026-06-06 09:27]** perf(security): validate file extension and MIME types on voice upload endpoint
