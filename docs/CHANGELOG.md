@@ -20,3 +20,4 @@ This document tracks all development milestones, model iterations, API updates, 
 - **[2026-06-06 09:27]** perf(security): validate file extension and MIME types on voice upload endpoint
 - **[2026-06-06 09:29]** refactor(docs): update project synopsis and table of contents in main README
 - **[2026-06-06 09:39]** refactor(cache): implement in-memory LRU cache for survey scoring definitions
+- **[2026-06-06 09:43]** feat(alerts): implement multi-tier alert escalation logic for crisis events
