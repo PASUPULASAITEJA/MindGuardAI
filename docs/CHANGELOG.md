@@ -31,3 +31,4 @@ This document tracks all development milestones, model iterations, API updates, 
 - **[2026-06-07 08:56]** fix(alerts): implement automated alert resolution audit trail logging
 - **[2026-06-07 10:04]** fix(db): optimize database connection pooling with max overflow limits
 - **[2026-06-07 10:11]** feat(ui): implement collapsible navigation accordion for submenus
+- **[2026-06-07 11:05]** refactor(ui): improve table responsiveness on compact display viewports
