@@ -313,3 +313,4 @@ This document tracks all development milestones, model iterations, API updates, 
 - **[2026-06-06 16:08]** fix(frontend): implement dark and light theme switching with CSS variables
 - **[2026-06-06 20:05]** feat(ui): refactor button variant styles with Tailwind utility classes
 - **[2026-06-06 20:30]** feat(frontend): enhance toast notification container with auto-dismiss timers
+- **[2026-06-07 11:31]** chore(docs): update README with quickstart guides for Docker and local setup
