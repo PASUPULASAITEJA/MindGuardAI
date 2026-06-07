@@ -33,3 +33,4 @@ This document tracks all development milestones, model iterations, API updates, 
 - **[2026-06-07 10:11]** feat(ui): implement collapsible navigation accordion for submenus
 - **[2026-06-07 11:05]** refactor(ui): improve table responsiveness on compact display viewports
 - **[2026-06-07 11:40]** feat(ml): normalize emotion score vectors across 7 primary categories
+- **[2026-06-07 13:14]** feat(admin): export anonymized institutional analytics to CSV/JSON
