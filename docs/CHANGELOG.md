@@ -44,3 +44,4 @@ This document tracks all development milestones, model iterations, API updates, 
 - **[2026-06-08 14:04]** docs(auth): implement JWT refresh token rotation mechanism
 - **[2026-06-08 16:31]** fix(docs): add database schema ER diagram to docs/DATABASE.md
 - **[2026-06-08 17:09]** feat(ml): add ONNX model export script for high-throughput inference
+- **[2026-06-08 17:31]** fix(analytics): implement cache layer for expensive institutional aggregations
