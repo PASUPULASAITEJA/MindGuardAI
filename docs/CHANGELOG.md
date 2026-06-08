@@ -38,3 +38,4 @@ This document tracks all development milestones, model iterations, API updates, 
 - **[2026-06-07 18:01]** feat(test): add frontend component tests for login and dashboard views
 - **[2026-06-08 09:01]** fix(survey): implement survey completion progress indicator and state machine
 - **[2026-06-08 09:40]** feat(docker): document local docker deployment instructions in DOCKER.md
+- **[2026-06-08 10:09]** fix(frontend): refactor form input components with unified error states
