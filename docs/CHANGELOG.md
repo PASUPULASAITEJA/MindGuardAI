@@ -324,3 +324,4 @@ This document tracks all development milestones, model iterations, API updates, 
 - **[2026-06-08 13:47]** feat(auth): add unit tests for token decoding and validation
 - **[2026-06-08 14:28]** perf(frontend): add smooth chart animations with recharts integration
 - **[2026-06-08 14:47]** refactor(perf): enable HTTP keep-alive headers on internal service gateways
+- **[2026-06-08 21:50]** refactor(auth): enhance whitelist verification for institutional email domains
