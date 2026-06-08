@@ -318,3 +318,4 @@ This document tracks all development milestones, model iterations, API updates, 
 - **[2026-06-07 14:46]** refactor(ui): add subtle hover transitions to dashboard metric cards
 - **[2026-06-07 17:45]** refactor(db): refactor base repository with generic CRUD operations
 - **[2026-06-07 19:08]** docs(security): mask sensitive personally identifiable information in audit logs
+- **[2026-06-08 08:57]** perf(counselor): encrypt sensitive clinical notes in database storage
