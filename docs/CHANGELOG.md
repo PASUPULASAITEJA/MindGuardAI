@@ -339,3 +339,4 @@ This document tracks all development milestones, model iterations, API updates, 
 - **[2026-06-09 15:18]** docs(api): add CORS preflight request caching and security headers
 - **[2026-06-09 17:30]** refactor(perf): optimize string parsing in sentiment preprocessing routines
 - **[2026-06-09 17:36]** test(counselor): add search and filter capabilities to student wellness list
+- **[2026-06-09 21:16]** feat(analytics): aggregate sentiment trend lines by academic department
