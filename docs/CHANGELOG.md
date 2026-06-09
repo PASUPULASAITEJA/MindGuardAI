@@ -51,3 +51,4 @@ This document tracks all development milestones, model iterations, API updates, 
 - **[2026-06-09 12:07]** feat(ui): refine color contrast ratios for WCAG AA compliance
 - **[2026-06-09 14:02]** fix(api): implement request validation exception handler in FastAPI app
 - **[2026-06-09 14:25]** test(counselor): add counselor shift handover and case assignment logic
+- **[2026-06-09 16:38]** feat(analytics): aggregate sentiment trend lines by academic department
