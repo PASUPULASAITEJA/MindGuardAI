@@ -328,3 +328,4 @@ This document tracks all development milestones, model iterations, API updates, 
 - **[2026-06-09 08:26]** perf(auth): add rate-limiting middleware on authentication endpoints
 - **[2026-06-09 09:04]** fix(mood): implement daily mood streak calculation logic
 - **[2026-06-09 09:06]** test(ui): add animated pulse indicator on active critical alerts
+- **[2026-06-09 09:14]** refactor(db): implement soft-delete query filter for active user entities
