@@ -49,3 +49,4 @@ This document tracks all development milestones, model iterations, API updates, 
 - **[2026-06-09 09:29]** feat(test): implement mock fixtures for ML transformer inference pipeline
 - **[2026-06-09 10:14]** refactor(frontend): add smooth chart animations with recharts integration
 - **[2026-06-09 12:07]** feat(ui): refine color contrast ratios for WCAG AA compliance
+- **[2026-06-09 14:02]** fix(api): implement request validation exception handler in FastAPI app
