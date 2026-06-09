@@ -336,3 +336,4 @@ This document tracks all development milestones, model iterations, API updates, 
 - **[2026-06-09 12:55]** feat(analytics): generate risk distribution heatmaps for counselor review
 - **[2026-06-09 13:23]** feat(security): enforce password entropy checks during user registration
 - **[2026-06-09 14:12]** refactor(ml): normalize emotion score vectors across 7 primary categories
+- **[2026-06-09 15:18]** docs(api): add CORS preflight request caching and security headers
