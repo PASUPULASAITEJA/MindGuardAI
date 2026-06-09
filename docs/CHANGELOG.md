@@ -327,3 +327,4 @@ This document tracks all development milestones, model iterations, API updates, 
 - **[2026-06-08 21:50]** refactor(auth): enhance whitelist verification for institutional email domains
 - **[2026-06-09 08:26]** perf(auth): add rate-limiting middleware on authentication endpoints
 - **[2026-06-09 09:04]** fix(mood): implement daily mood streak calculation logic
+- **[2026-06-09 09:06]** test(ui): add animated pulse indicator on active critical alerts
