@@ -45,3 +45,4 @@ This document tracks all development milestones, model iterations, API updates, 
 - **[2026-06-08 16:31]** fix(docs): add database schema ER diagram to docs/DATABASE.md
 - **[2026-06-08 17:09]** feat(ml): add ONNX model export script for high-throughput inference
 - **[2026-06-08 17:31]** fix(analytics): implement cache layer for expensive institutional aggregations
+- **[2026-06-09 09:18]** fix(security): add rate limiting per IP address on password reset routes
