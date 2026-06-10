@@ -56,3 +56,4 @@ This document tracks all development milestones, model iterations, API updates, 
 - **[2026-06-09 19:17]** refactor(db): add foreign key cascade rules to assessment responses
 - **[2026-06-09 20:39]** feat(security): implement token blacklisting for revoked session management
 - **[2026-06-09 21:05]** perf(db): add database seeding script with realistic clinical fixtures
+- **[2026-06-10 08:07]** test(test): add unit tests for clinical survey scoring boundary values
