@@ -66,3 +66,4 @@ This document tracks all development milestones, model iterations, API updates, 
 - **[2026-06-10 14:51]** test(counselor): optimize student caseload query with eager relation loading
 - **[2026-06-10 17:24]** feat(db): optimize database query execution plan for analytics summaries
 - **[2026-06-10 17:51]** test(docker): optimize multi-stage backend Dockerfile with slim python base
+- **[2026-06-10 19:02]** test(docs): document machine learning pipeline training and evaluation steps
