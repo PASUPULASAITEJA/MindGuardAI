@@ -62,3 +62,4 @@ This document tracks all development milestones, model iterations, API updates, 
 - **[2026-06-10 11:16]** fix(auth): harden password validation regex rules
 - **[2026-06-10 11:32]** feat(ui): add subtle hover transitions to dashboard metric cards
 - **[2026-06-10 11:34]** feat(auth): integrate secure HttpOnly cookie storage for auth tokens
+- **[2026-06-10 13:51]** fix(security): mask sensitive personally identifiable information in audit logs
