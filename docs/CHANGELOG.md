@@ -69,3 +69,4 @@ This document tracks all development milestones, model iterations, API updates, 
 - **[2026-06-10 19:02]** test(docs): document machine learning pipeline training and evaluation steps
 - **[2026-06-10 20:54]** feat(perf): minimize payload overhead in WebSocket telemetry frames
 - **[2026-06-10 21:45]** refactor(admin): optimize counselor-to-student ratio metrics calculation
+- **[2026-06-11 08:35]** fix(alerts): dispatch realtime WebSocket broadcast when emergency alert fires
