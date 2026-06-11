@@ -75,3 +75,4 @@ This document tracks all development milestones, model iterations, API updates, 
 - **[2026-06-11 10:16]** perf(counselor): add counselor intervention note logging with timestamp tracking
 - **[2026-06-11 11:22]** feat(ml): optimize transformer model memory footprint during inference
 - **[2026-06-11 12:12]** fix(docs): document clinical references and scoring rubrics for PHQ9/GAD7
+- **[2026-06-11 12:14]** fix(perf): profile backend memory utilization during large batch exports
