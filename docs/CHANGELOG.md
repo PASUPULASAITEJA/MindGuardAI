@@ -357,3 +357,4 @@ This document tracks all development milestones, model iterations, API updates, 
 - **[2026-06-11 11:27]** feat(api): add request correlation ID header for distributed request tracing
 - **[2026-06-11 12:08]** test(survey): add unit tests for PHQ-9 and GAD-7 scoring edge cases
 - **[2026-06-11 12:54]** refactor(cache): optimize user profile cache lookup to avoid redundant queries
+- **[2026-06-11 15:44]** feat(admin): enforce institutional access boundary checks on admin routes
