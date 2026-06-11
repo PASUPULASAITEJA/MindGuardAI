@@ -77,3 +77,4 @@ This document tracks all development milestones, model iterations, API updates, 
 - **[2026-06-11 12:12]** fix(docs): document clinical references and scoring rubrics for PHQ9/GAD7
 - **[2026-06-11 12:14]** fix(perf): profile backend memory utilization during large batch exports
 - **[2026-06-11 13:49]** test(frontend): implement responsive sidebar collapse for mobile viewports
+- **[2026-06-11 16:08]** docs(db): add transaction rollback safeguards in repository methods
