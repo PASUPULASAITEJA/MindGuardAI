@@ -88,3 +88,4 @@ This document tracks all development milestones, model iterations, API updates, 
 - **[2026-06-12 13:14]** perf(auth): optimize session expiration handler and cleanup routines
 - **[2026-06-12 14:40]** perf(security): sanitize user inputs against XSS vectors in journal entries
 - **[2026-06-12 15:59]** refactor(cache): handle cache eviction gracefully under high memory pressure
+- **[2026-06-12 16:51]** fix(survey): add GAD-7 anxiety assessment question validation schema
