@@ -92,3 +92,4 @@ This document tracks all development milestones, model iterations, API updates, 
 - **[2026-06-12 17:06]** feat(test): implement automated database rollback tests for failed transactions
 - **[2026-06-12 19:46]** feat(alerts): format alert email templates with student emergency context
 - **[2026-06-12 20:09]** feat(ui): implement custom scrollbar styling for mood journal lists
+- **[2026-06-12 21:40]** perf(analytics): add percentage change indicators to dashboard metrics cards
