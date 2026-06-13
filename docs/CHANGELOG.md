@@ -95,3 +95,4 @@ This document tracks all development milestones, model iterations, API updates, 
 - **[2026-06-12 21:40]** perf(analytics): add percentage change indicators to dashboard metrics cards
 - **[2026-06-13 08:25]** feat(test): add end-to-end integration test suite for user authentication
 - **[2026-06-13 08:52]** feat(docs): update README with quickstart guides for Docker and local setup
+- **[2026-06-13 13:12]** feat(analytics): correlate exam periods with anxiety assessment score spikes
