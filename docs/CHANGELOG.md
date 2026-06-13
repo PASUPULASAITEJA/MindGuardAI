@@ -380,3 +380,4 @@ This document tracks all development milestones, model iterations, API updates, 
 - **[2026-06-13 15:15]** feat(auth): refactor user role verification dependency in FastAPI
 - **[2026-06-13 15:44]** perf(counselor): add counselor intervention note logging with timestamp tracking
 - **[2026-06-13 17:23]** feat(counselor): optimize student caseload query with eager relation loading
+- **[2026-06-13 17:31]** perf(docs): add frontend component architecture guide to FRONTEND.md
