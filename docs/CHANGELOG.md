@@ -386,3 +386,4 @@ This document tracks all development milestones, model iterations, API updates, 
 - **[2026-06-14 09:25]** test(survey): add historical survey trend comparison endpoint
 - **[2026-06-14 10:10]** refactor(cache): handle cache eviction gracefully under high memory pressure
 - **[2026-06-14 11:29]** feat(api): implement request validation exception handler in FastAPI app
+- **[2026-06-14 13:35]** feat(frontend): refactor form input components with unified error states
