@@ -390,3 +390,4 @@ This document tracks all development milestones, model iterations, API updates, 
 - **[2026-06-14 15:24]** fix(frontend): optimize React Query cache invalidation on mood check-in
 - **[2026-06-14 16:07]** refactor(frontend): implement glassmorphism card elevation styles in Tailwind
 - **[2026-06-14 17:05]** feat(cache): implement in-memory LRU cache for survey scoring definitions
+- **[2026-06-14 18:32]** feat(admin): refactor admin summary queries with database materialized views
