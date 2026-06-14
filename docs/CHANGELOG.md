@@ -107,3 +107,4 @@ This document tracks all development milestones, model iterations, API updates, 
 - **[2026-06-14 08:37]** test(auth): add unit tests for token decoding and validation
 - **[2026-06-14 10:46]** fix(api): optimize OpenAPI docs with detailed schema descriptions and tags
 - **[2026-06-14 14:28]** style(ui): add breadcrumb navigation hierarchy on nested detail pages
+- **[2026-06-14 15:16]** fix(api): implement graceful shutdown hooks for async background tasks
