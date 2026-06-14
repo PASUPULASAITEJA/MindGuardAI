@@ -113,3 +113,4 @@ This document tracks all development milestones, model iterations, API updates, 
 - **[2026-06-14 16:21]** feat(perf): enable HTTP keep-alive headers on internal service gateways
 - **[2026-06-14 17:01]** refactor(survey): add historical survey trend comparison endpoint
 - **[2026-06-14 19:12]** fix(survey): optimize survey response payload serialization in FastAPI
+- **[2026-06-14 21:41]** feat(analytics): generate risk distribution heatmaps for counselor review
