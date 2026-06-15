@@ -393,3 +393,4 @@ This document tracks all development milestones, model iterations, API updates, 
 - **[2026-06-14 18:32]** feat(admin): refactor admin summary queries with database materialized views
 - **[2026-06-14 20:28]** feat(db): optimize database connection pooling with max overflow limits
 - **[2026-06-15 08:49]** style(docker): add non-root user execution in production container setup
+- **[2026-06-15 09:55]** refactor(perf): tune async database connection pool recycle parameters
