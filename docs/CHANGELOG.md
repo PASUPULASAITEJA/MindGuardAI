@@ -399,3 +399,4 @@ This document tracks all development milestones, model iterations, API updates, 
 - **[2026-06-15 12:33]** feat(auth): add audit logging for failed login attempts
 - **[2026-06-15 13:51]** refactor(api): add health check probe endpoint with database ping
 - **[2026-06-15 14:08]** feat(security): enforce strict Content-Security-Policy and HSTS response headers
+- **[2026-06-15 14:49]** feat(docs): document machine learning pipeline training and evaluation steps
