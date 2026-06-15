@@ -403,3 +403,4 @@ This document tracks all development milestones, model iterations, API updates, 
 - **[2026-06-15 14:52]** feat(security): validate file extension and MIME types on voice upload endpoint
 - **[2026-06-15 15:29]** feat(docs): add detailed API endpoint documentation and request examples
 - **[2026-06-15 16:05]** style(alerts): dispatch realtime WebSocket broadcast when emergency alert fires
+- **[2026-06-15 16:45]** fix(mood): implement voice journal audio duration and format validation
