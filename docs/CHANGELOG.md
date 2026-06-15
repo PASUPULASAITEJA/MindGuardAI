@@ -120,3 +120,4 @@ This document tracks all development milestones, model iterations, API updates, 
 - **[2026-06-15 13:51]** feat(admin): refactor admin summary queries with database materialized views
 - **[2026-06-15 16:21]** feat(alerts): prevent alert storming with deduplication window for same student
 - **[2026-06-15 16:35]** refactor(survey): add unit tests for PHQ-9 and GAD-7 scoring edge cases
+- **[2026-06-15 18:27]** fix(ml): implement fallback rule-based sentiment classifier for edge cases
