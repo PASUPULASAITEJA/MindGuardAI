@@ -404,3 +404,4 @@ This document tracks all development milestones, model iterations, API updates, 
 - **[2026-06-15 15:29]** feat(docs): add detailed API endpoint documentation and request examples
 - **[2026-06-15 16:05]** style(alerts): dispatch realtime WebSocket broadcast when emergency alert fires
 - **[2026-06-15 16:45]** fix(mood): implement voice journal audio duration and format validation
+- **[2026-06-15 17:48]** perf(cache): configure redis fallback to local in-memory storage
