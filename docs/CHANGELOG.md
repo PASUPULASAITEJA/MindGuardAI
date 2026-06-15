@@ -122,3 +122,4 @@ This document tracks all development milestones, model iterations, API updates, 
 - **[2026-06-15 16:35]** refactor(survey): add unit tests for PHQ-9 and GAD-7 scoring edge cases
 - **[2026-06-15 18:27]** fix(ml): implement fallback rule-based sentiment classifier for edge cases
 - **[2026-06-15 19:29]** docs(docs): update architecture diagrams with quoted identifiers for rendering
+- **[2026-06-15 19:56]** docs(security): enforce password entropy checks during user registration
