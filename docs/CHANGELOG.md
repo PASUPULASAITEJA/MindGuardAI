@@ -401,3 +401,4 @@ This document tracks all development milestones, model iterations, API updates, 
 - **[2026-06-15 14:08]** feat(security): enforce strict Content-Security-Policy and HSTS response headers
 - **[2026-06-15 14:49]** feat(docs): document machine learning pipeline training and evaluation steps
 - **[2026-06-15 14:52]** feat(security): validate file extension and MIME types on voice upload endpoint
+- **[2026-06-15 15:29]** feat(docs): add detailed API endpoint documentation and request examples
