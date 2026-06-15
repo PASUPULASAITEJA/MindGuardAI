@@ -114,3 +114,4 @@ This document tracks all development milestones, model iterations, API updates, 
 - **[2026-06-14 17:01]** refactor(survey): add historical survey trend comparison endpoint
 - **[2026-06-14 19:12]** fix(survey): optimize survey response payload serialization in FastAPI
 - **[2026-06-14 21:41]** feat(analytics): generate risk distribution heatmaps for counselor review
+- **[2026-06-15 11:30]** feat(survey): generate automated self-care recommendations based on score
