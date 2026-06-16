@@ -123,3 +123,4 @@ This document tracks all development milestones, model iterations, API updates, 
 - **[2026-06-15 18:27]** fix(ml): implement fallback rule-based sentiment classifier for edge cases
 - **[2026-06-15 19:29]** docs(docs): update architecture diagrams with quoted identifiers for rendering
 - **[2026-06-15 19:56]** docs(security): enforce password entropy checks during user registration
+- **[2026-06-16 08:29]** feat(test): verify test coverage reporting with pytest-cov integration
