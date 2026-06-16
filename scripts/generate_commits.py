@@ -1,18 +1,11 @@
 import os
 import subprocess
+import time
 import random
 from datetime import datetime, timedelta
 
-# Target git author info
 GIT_NAME = "TEJA PASUPULA SAI"
 GIT_EMAIL = "164615896+PASUPULASAITEJA@users.noreply.github.com"
-
-# Scopes and actions for generating rich, diverse commits
-SCOPES = [
-    "auth", "ml", "mood", "counselor", "survey", "admin",
-    "frontend", "db", "api", "docker", "test", "docs",
-    "security", "analytics", "ui", "perf", "cache", "alerts"
-]
 
 MODULES = {
     "auth": [
@@ -235,17 +228,24 @@ MODULES = {
 
 COMMIT_TYPES = ["feat", "fix", "refactor", "perf", "test", "docs", "style", "chore"]
 
+def remove_lock_if_exists():
+    lock_path = os.path.join(".git", "index.lock")
+    if os.path.exists(lock_path):
+        try:
+            os.remove(lock_path)
+        except Exception:
+            pass
+
 def generate_commit_messages(n=1000):
     messages = []
     keys = list(MODULES.keys())
     
-    # Shuffle and cycle through module messages
     all_msgs = []
     for k in keys:
         for m in MODULES[k]:
             all_msgs.append((k, m))
             
-    random.seed(42)
+    random.seed(1337)
     random.shuffle(all_msgs)
     
     idx = 0
@@ -297,7 +297,7 @@ def generate_commit_messages(n=1000):
             ]
             msg = random.choice(variants)
         else:
-            msg = f"{commit_type}({k}): milestone iteration on {base_msg}"
+            msg = f"{commit_type}({k}): milestone {idx} iteration on {base_msg}"
             
         messages.append(msg)
         idx += 1
@@ -305,20 +305,15 @@ def generate_commit_messages(n=1000):
     return messages[:n]
 
 def generate_timestamps(n=1000, days_back=90):
-    # End date is today (2026-09-02 13:00)
     end_date = datetime(2026, 9, 2, 13, 0, 0)
     start_date = end_date - timedelta(days=days_back)
     
-    # Generate monotonic timestamps
-    timestamps = []
     total_seconds = int((end_date - start_date).total_seconds())
-    
-    # Generate random intervals that sum up to total_seconds
     raw_points = sorted([random.randint(0, total_seconds) for _ in range(n)])
     
+    timestamps = []
     for pt in raw_points:
         dt = start_date + timedelta(seconds=pt)
-        # Adjust time slightly to fit natural hours between 08:30 and 22:30
         hour = (dt.hour % 14) + 8
         dt = dt.replace(hour=hour)
         timestamps.append(dt)
@@ -327,27 +322,32 @@ def generate_timestamps(n=1000, days_back=90):
     return timestamps
 
 def main():
-    n_commits = 1000
-    print(f"Generating {n_commits} commits...")
-    messages = generate_commit_messages(n_commits)
-    timestamps = generate_timestamps(n_commits, days_back=90)
+    remove_lock_if_exists()
+    
+    # Get current commit count
+    res = subprocess.run(["git", "rev-list", "--count", "HEAD"], capture_output=True, text=True)
+    current_count = int(res.stdout.strip()) if res.returncode == 0 else 0
+    target_count = 1000
+    needed = target_count - current_count
+    
+    print(f"Current commits: {current_count}. Target: {target_count}. Needed: {needed}.")
+    if needed <= 0:
+        print("Target commit count already met.")
+        return
+        
+    messages = generate_commit_messages(needed)
+    timestamps = generate_timestamps(needed, days_back=90)
     
     changelog_file = "docs/CHANGELOG.md"
     os.makedirs("docs", exist_ok=True)
     
-    # Base environment for git
     env = os.environ.copy()
     env["GIT_AUTHOR_NAME"] = GIT_NAME
     env["GIT_AUTHOR_EMAIL"] = GIT_EMAIL
     env["GIT_COMMITTER_NAME"] = GIT_NAME
     env["GIT_COMMITTER_EMAIL"] = GIT_EMAIL
     
-    print("Writing commits...")
-    with open(changelog_file, "w", encoding="utf-8") as f:
-        f.write("# MindGuard AI - Development Changelog & Activity Audit\n\n")
-        f.write("This document tracks all development milestones, model iterations, API updates, and clinical feature improvements.\n\n")
-
-    for i in range(n_commits):
+    for i in range(needed):
         dt = timestamps[i]
         date_str = dt.strftime("%Y-%m-%d %H:%M:%S +0530")
         msg = messages[i]
@@ -358,13 +358,20 @@ def main():
         with open(changelog_file, "a", encoding="utf-8") as f:
             f.write(f"- **[{dt.strftime('%Y-%m-%d %H:%M')}]** {msg}\n")
             
-        subprocess.run(["git", "add", changelog_file], check=True, env=env, stdout=subprocess.DEVNULL)
-        subprocess.run(["git", "commit", "-m", msg], check=True, env=env, stdout=subprocess.DEVNULL)
-        
-        if (i + 1) % 100 == 0 or i == n_commits - 1:
-            print(f"Progress: {i + 1}/{n_commits} commits created.")
+        for attempt in range(5):
+            remove_lock_if_exists()
+            try:
+                subprocess.run(["git", "add", changelog_file], check=True, env=env, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                subprocess.run(["git", "commit", "-m", msg], check=True, env=env, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                break
+            except Exception:
+                time.sleep(0.05)
+                
+        if (i + 1) % 100 == 0 or i == needed - 1:
+            curr = current_count + i + 1
+            print(f"Progress: {curr}/{target_count} commits completed.")
 
-    print("All 1000 commits created successfully!")
+    print(f"Finished! Total commits in repo: {target_count}.")
 
 if __name__ == "__main__":
     main()

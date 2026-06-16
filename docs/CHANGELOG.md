@@ -413,3 +413,4 @@ This document tracks all development milestones, model iterations, API updates, 
 - **[2026-06-16 13:35]** fix(alerts): implement multi-tier alert escalation logic for crisis events
 - **[2026-06-16 13:42]** test(db): configure SQLite WAL mode and busy timeout parameters
 - **[2026-06-16 15:01]** feat(docker): document local docker deployment instructions in DOCKER.md
+- **[2026-06-16 15:13]** perf(auth): integrate secure HttpOnly cookie storage for auth tokens
