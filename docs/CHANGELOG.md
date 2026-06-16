@@ -410,3 +410,4 @@ This document tracks all development milestones, model iterations, API updates, 
 - **[2026-06-16 09:59]** feat(cache): implement cached token introspection for high-frequency requests
 - **[2026-06-16 10:03]** feat(counselor): implement notification dispatch when high-risk alert triggers
 - **[2026-06-16 12:43]** refactor(api): optimize OpenAPI docs with detailed schema descriptions and tags
+- **[2026-06-16 13:35]** fix(alerts): implement multi-tier alert escalation logic for crisis events
