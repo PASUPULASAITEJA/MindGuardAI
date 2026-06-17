@@ -135,3 +135,4 @@ This document tracks all development milestones, model iterations, API updates, 
 - **[2026-06-17 16:45]** feat(docker): configure docker-compose environment variables and volume mounts
 - **[2026-06-17 17:45]** feat(db): implement soft-delete query filter for active user entities
 - **[2026-06-17 18:53]** fix(mood): implement daily mood streak calculation logic
+- **[2026-06-17 20:14]** fix(docker): optimize docker build caching layers for pip requirements
