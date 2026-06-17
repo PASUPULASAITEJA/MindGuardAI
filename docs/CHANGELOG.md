@@ -429,3 +429,4 @@ This document tracks all development milestones, model iterations, API updates, 
 - **[2026-06-17 18:52]** feat(alerts): format alert email templates with student emergency context
 - **[2026-06-17 19:48]** refactor(admin): implement aggregated campus wellness index calculation
 - **[2026-06-17 20:38]** fix(perf): implement lazy loading for high-resolution dashboard assets
+- **[2026-06-17 20:41]** fix(ml): add token truncation handling in text preprocessing pipeline
