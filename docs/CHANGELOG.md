@@ -425,3 +425,4 @@ This document tracks all development milestones, model iterations, API updates, 
 - **[2026-06-17 16:30]** feat(docs): document clinical references and scoring rubrics for PHQ9/GAD7
 - **[2026-06-17 16:49]** feat(analytics): correlate exam periods with anxiety assessment score spikes
 - **[2026-06-17 18:02]** feat(db): implement Alembic revision for alert notification status
+- **[2026-06-17 18:11]** chore(mood): integrate sentiment polarity calculation for journal entries
