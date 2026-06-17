@@ -420,3 +420,4 @@ This document tracks all development milestones, model iterations, API updates, 
 - **[2026-06-16 17:50]** feat(db): add foreign key cascade rules to assessment responses
 - **[2026-06-17 09:02]** fix(docs): update architecture diagrams with quoted identifiers for rendering
 - **[2026-06-17 11:25]** refactor(alerts): prevent alert storming with deduplication window for same student
+- **[2026-06-17 13:18]** feat(auth): harden password validation regex rules
