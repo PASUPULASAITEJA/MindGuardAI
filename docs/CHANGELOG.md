@@ -148,3 +148,4 @@ This document tracks all development milestones, model iterations, API updates, 
 - **[2026-06-18 12:38]** feat(alerts): track alert resolution lifecycle from trigger to counselor sign-off
 - **[2026-06-18 15:20]** docs(api): add request correlation ID header for distributed request tracing
 - **[2026-06-18 17:57]** perf(cache): implement cached token introspection for high-frequency requests
+- **[2026-06-18 18:49]** feat(counselor): implement notification dispatch when high-risk alert triggers
