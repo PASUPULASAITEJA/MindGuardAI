@@ -142,3 +142,4 @@ This document tracks all development milestones, model iterations, API updates, 
 - **[2026-06-18 11:01]** fix(frontend): add loading skeleton placeholders for data fetching states
 - **[2026-06-18 11:03]** refactor(api): add query parameter validation for date range filters
 - **[2026-06-18 11:06]** fix(docker): add healthcheck instruction to Docker container definitions
+- **[2026-06-18 11:07]** docs(mood): add mood trend aggregation endpoint with date range filtering
