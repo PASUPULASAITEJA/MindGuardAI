@@ -140,3 +140,4 @@ This document tracks all development milestones, model iterations, API updates, 
 - **[2026-06-17 21:42]** chore(docs): document security practices and compliance guidelines in docs
 - **[2026-06-18 08:31]** test(ml): optimize batch inference throughput for sentiment pipeline
 - **[2026-06-18 11:01]** fix(frontend): add loading skeleton placeholders for data fetching states
+- **[2026-06-18 11:03]** refactor(api): add query parameter validation for date range filters
