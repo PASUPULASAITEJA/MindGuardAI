@@ -146,3 +146,4 @@ This document tracks all development milestones, model iterations, API updates, 
 - **[2026-06-18 11:32]** feat(docker): add docker-compose restart policies for resilience
 - **[2026-06-18 12:18]** test(cache): add telemetry metrics for cache hit and miss ratios
 - **[2026-06-18 12:38]** feat(alerts): track alert resolution lifecycle from trigger to counselor sign-off
+- **[2026-06-18 15:20]** docs(api): add request correlation ID header for distributed request tracing
