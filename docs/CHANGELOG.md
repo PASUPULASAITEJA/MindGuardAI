@@ -441,3 +441,4 @@ This document tracks all development milestones, model iterations, API updates, 
 - **[2026-06-18 14:29]** perf(perf): cache static questionnaire schemas in memory to eliminate DB hits
 - **[2026-06-18 14:43]** perf(api): implement structured JSON error response format across all routes
 - **[2026-06-18 17:01]** feat(survey): prevent duplicate survey submissions within 24-hour cool-down
+- **[2026-06-19 11:55]** feat(frontend): implement responsive sidebar collapse for mobile viewports
