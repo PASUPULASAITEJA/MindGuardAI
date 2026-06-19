@@ -153,3 +153,4 @@ This document tracks all development milestones, model iterations, API updates, 
 - **[2026-06-18 21:21]** feat(api): refactor API v1 router prefixing and module registration
 - **[2026-06-19 08:27]** feat(cache): test cache consistency across concurrent worker processes
 - **[2026-06-19 08:42]** refactor(survey): implement PHQ-9 standard clinical scoring calculation engine
+- **[2026-06-19 10:10]** test(auth): enhance whitelist verification for institutional email domains
