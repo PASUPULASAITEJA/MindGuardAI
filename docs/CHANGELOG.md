@@ -443,3 +443,4 @@ This document tracks all development milestones, model iterations, API updates, 
 - **[2026-06-18 17:01]** feat(survey): prevent duplicate survey submissions within 24-hour cool-down
 - **[2026-06-19 11:55]** feat(frontend): implement responsive sidebar collapse for mobile viewports
 - **[2026-06-19 12:15]** feat(docs): document security practices and compliance guidelines in docs
+- **[2026-06-19 12:32]** refactor(counselor): implement counselor dashboard risk tier categorization
