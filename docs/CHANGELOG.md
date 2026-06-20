@@ -454,3 +454,4 @@ This document tracks all development milestones, model iterations, API updates, 
 - **[2026-06-20 12:28]** test(security): implement role authorization checks on counselor clinical notes
 - **[2026-06-20 13:47]** test(ml): add ONNX model export script for high-throughput inference
 - **[2026-06-20 17:49]** feat(test): add unit tests for clinical survey scoring boundary values
+- **[2026-06-20 18:08]** fix(alerts): add SMS/Email notification queue for emergency counselor dispatch
