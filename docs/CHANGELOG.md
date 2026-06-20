@@ -166,3 +166,4 @@ This document tracks all development milestones, model iterations, API updates, 
 - **[2026-06-20 15:00]** chore(perf): tune async database connection pool recycle parameters
 - **[2026-06-20 15:32]** feat(security): implement role authorization checks on counselor clinical notes
 - **[2026-06-20 15:38]** fix(admin): enforce institutional access boundary checks on admin routes
+- **[2026-06-20 17:25]** refactor(admin): add user status activation and deactivation endpoints
