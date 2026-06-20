@@ -167,3 +167,4 @@ This document tracks all development milestones, model iterations, API updates, 
 - **[2026-06-20 15:32]** feat(security): implement role authorization checks on counselor clinical notes
 - **[2026-06-20 15:38]** fix(admin): enforce institutional access boundary checks on admin routes
 - **[2026-06-20 17:25]** refactor(admin): add user status activation and deactivation endpoints
+- **[2026-06-20 17:58]** fix(mood): implement voice journal audio duration and format validation
