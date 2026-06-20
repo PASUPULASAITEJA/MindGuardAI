@@ -451,3 +451,4 @@ This document tracks all development milestones, model iterations, API updates, 
 - **[2026-06-19 17:26]** feat(alerts): implement counselor acknowledgment timestamp tracking on alerts
 - **[2026-06-19 21:12]** feat(test): test alert escalation state transitions under high load
 - **[2026-06-19 21:14]** feat(api): implement graceful shutdown hooks for async background tasks
+- **[2026-06-20 12:28]** test(security): implement role authorization checks on counselor clinical notes
