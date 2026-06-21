@@ -179,3 +179,4 @@ This document tracks all development milestones, model iterations, API updates, 
 - **[2026-06-21 16:55]** feat(admin): add configurable risk threshold settings in admin panel
 - **[2026-06-21 20:55]** feat(frontend): optimize React Query cache invalidation on mood check-in
 - **[2026-06-21 21:05]** docs(db): add composite index on mood_logs user_id and created_at
+- **[2026-06-21 21:55]** chore(auth): add audit logging for failed login attempts
