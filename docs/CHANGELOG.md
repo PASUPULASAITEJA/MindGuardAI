@@ -171,3 +171,4 @@ This document tracks all development milestones, model iterations, API updates, 
 - **[2026-06-20 20:23]** feat(auth): implement password reset token generation with expiration
 - **[2026-06-21 08:09]** style(auth): refactor user role verification dependency in FastAPI
 - **[2026-06-21 08:37]** refactor(test): add benchmark test for batch mood analytics calculation
+- **[2026-06-21 10:19]** feat(perf): cache static questionnaire schemas in memory to eliminate DB hits
