@@ -169,3 +169,4 @@ This document tracks all development milestones, model iterations, API updates, 
 - **[2026-06-20 17:25]** refactor(admin): add user status activation and deactivation endpoints
 - **[2026-06-20 17:58]** fix(mood): implement voice journal audio duration and format validation
 - **[2026-06-20 20:23]** feat(auth): implement password reset token generation with expiration
+- **[2026-06-21 08:09]** style(auth): refactor user role verification dependency in FastAPI
