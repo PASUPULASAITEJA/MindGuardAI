@@ -468,3 +468,4 @@ This document tracks all development milestones, model iterations, API updates, 
 - **[2026-06-22 15:00]** feat(survey): generate automated clinical risk severity interpretation
 - **[2026-06-22 16:09]** feat(ui): optimize SVG icon bundle for reduced initial page payload
 - **[2026-06-22 16:23]** feat(ui): improve table responsiveness on compact display viewports
+- **[2026-06-22 16:30]** feat(docker): reduce frontend production Docker image size using Nginx alpine
