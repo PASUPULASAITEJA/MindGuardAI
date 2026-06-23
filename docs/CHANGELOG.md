@@ -198,3 +198,4 @@ This document tracks all development milestones, model iterations, API updates, 
 - **[2026-06-23 13:00]** feat(auth): resolve issue in add rate-limiting middleware on authentication endpoints
 - **[2026-06-23 14:16]** feat(docs): enhance add frontend component architecture guide to FRONTEND.md
 - **[2026-06-23 15:05]** feat(security): enhance validate file extension and MIME types on voice upload endpoint
+- **[2026-06-23 15:45]** feat(docs): improve update project synopsis and table of contents in main README
