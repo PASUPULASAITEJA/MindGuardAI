@@ -479,3 +479,4 @@ This document tracks all development milestones, model iterations, API updates, 
 - **[2026-06-23 17:23]** refactor(counselor): optimize and implement urgent case escalation workflow to clinical leads
 - **[2026-06-23 18:35]** chore(docker): update add docker-compose restart policies for resilience
 - **[2026-06-23 20:48]** perf(survey): enhance optimize survey response payload serialization in FastAPI
+- **[2026-06-24 11:36]** feat(docker): optimize and add healthcheck instruction to Docker container definitions
