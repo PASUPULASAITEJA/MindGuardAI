@@ -483,3 +483,4 @@ This document tracks all development milestones, model iterations, API updates, 
 - **[2026-06-24 12:14]** feat(auth): improve implement JWT refresh token rotation mechanism
 - **[2026-06-24 14:43]** test(ml): update integrate DAIC-WOZ depression assessment dataset parser
 - **[2026-06-24 15:59]** feat(api): improve refactor API v1 router prefixing and module registration
+- **[2026-06-24 17:39]** feat(admin): update add configurable risk threshold settings in admin panel
