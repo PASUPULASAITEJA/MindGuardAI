@@ -214,3 +214,4 @@ This document tracks all development milestones, model iterations, API updates, 
 - **[2026-06-24 21:12]** fix(ui): optimize and improve table responsiveness on compact display viewports
 - **[2026-06-25 08:41]** refactor(ml): enhance normalize emotion score vectors across 7 primary categories
 - **[2026-06-25 09:16]** feat(admin): update export anonymized institutional analytics to CSV/JSON
+- **[2026-06-25 09:38]** style(cache): improve add cache invalidation trigger on new survey submission
