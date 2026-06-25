@@ -485,3 +485,4 @@ This document tracks all development milestones, model iterations, API updates, 
 - **[2026-06-24 15:59]** feat(api): improve refactor API v1 router prefixing and module registration
 - **[2026-06-24 17:39]** feat(admin): update add configurable risk threshold settings in admin panel
 - **[2026-06-24 19:44]** refactor(security): optimize and add rate limiting per IP address on password reset routes
+- **[2026-06-25 09:48]** perf(db): improve add database seeding script with realistic clinical fixtures
