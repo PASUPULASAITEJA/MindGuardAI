@@ -223,3 +223,4 @@ This document tracks all development milestones, model iterations, API updates, 
 - **[2026-06-25 15:37]** fix(perf): resolve issue in implement lazy loading for high-resolution dashboard assets
 - **[2026-06-25 17:36]** refactor(auth): enhance implement JWT refresh token rotation mechanism
 - **[2026-06-26 08:04]** refactor(docs): improve add database schema ER diagram to docs/DATABASE.md
+- **[2026-06-26 08:36]** fix(ml): update add ONNX model export script for high-throughput inference
