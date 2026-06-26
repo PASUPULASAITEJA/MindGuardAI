@@ -233,3 +233,4 @@ This document tracks all development milestones, model iterations, API updates, 
 - **[2026-06-26 16:58]** refactor(counselor): improve add counselor shift handover and case assignment logic
 - **[2026-06-26 18:05]** fix(analytics): optimize and aggregate sentiment trend lines by academic department
 - **[2026-06-26 18:51]** feat(survey): enhance prevent duplicate survey submissions within 24-hour cool-down
+- **[2026-06-26 19:17]** refactor(db): enhance add foreign key cascade rules to assessment responses
