@@ -241,3 +241,4 @@ This document tracks all development milestones, model iterations, API updates, 
 - **[2026-06-27 12:34]** fix(ui): optimize and add animated pulse indicator on active critical alerts
 - **[2026-06-27 12:40]** feat(auth): resolve issue in harden password validation regex rules
 - **[2026-06-27 14:38]** fix(ui): enhance add subtle hover transitions to dashboard metric cards
+- **[2026-06-27 15:03]** feat(auth): update integrate secure HttpOnly cookie storage for auth tokens
