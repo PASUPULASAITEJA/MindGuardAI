@@ -505,3 +505,4 @@ This document tracks all development milestones, model iterations, API updates, 
 - **[2026-06-27 18:04]** perf(frontend): enhance add smooth chart animations with recharts integration
 - **[2026-06-27 21:30]** feat(perf): improve enable HTTP keep-alive headers on internal service gateways
 - **[2026-06-28 11:07]** feat(auth): optimize and enhance whitelist verification for institutional email domains
+- **[2026-06-28 12:15]** feat(auth): optimize and add rate-limiting middleware on authentication endpoints
