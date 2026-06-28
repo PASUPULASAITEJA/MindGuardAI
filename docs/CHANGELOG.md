@@ -254,3 +254,4 @@ This document tracks all development milestones, model iterations, API updates, 
 - **[2026-06-28 09:58]** fix(security): optimize and encrypt sensitive survey assessment data at rest
 - **[2026-06-28 10:16]** fix(counselor): enhance add counselor intervention note logging with timestamp tracking
 - **[2026-06-28 10:37]** perf(ml): resolve issue in optimize transformer model memory footprint during inference
+- **[2026-06-28 10:54]** fix(docs): enhance document clinical references and scoring rubrics for PHQ9/GAD7
