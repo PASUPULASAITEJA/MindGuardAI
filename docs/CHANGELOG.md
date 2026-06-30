@@ -277,3 +277,4 @@ This document tracks all development milestones, model iterations, API updates, 
 - **[2026-06-30 08:25]** fix(docs): optimize and update README with quickstart guides for Docker and local setup
 - **[2026-06-30 08:33]** perf(analytics): enhance correlate exam periods with anxiety assessment score spikes
 - **[2026-06-30 09:37]** fix(alerts): improve implement counselor acknowledgment timestamp tracking on alerts
+- **[2026-06-30 11:36]** fix(docs): update add detailed API endpoint documentation and request examples
