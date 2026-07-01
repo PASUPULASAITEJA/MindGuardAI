@@ -286,3 +286,4 @@ This document tracks all development milestones, model iterations, API updates, 
 - **[2026-06-30 19:08]** feat(db): resolve issue in refactor base repository with generic CRUD operations
 - **[2026-06-30 19:54]** feat(auth): resolve issue in add unit tests for token decoding and validation
 - **[2026-06-30 21:25]** feat(api): improve optimize OpenAPI docs with detailed schema descriptions and tags
+- **[2026-07-01 08:45]** feat(ui): enhance add breadcrumb navigation hierarchy on nested detail pages
