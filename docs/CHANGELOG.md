@@ -538,3 +538,4 @@ This document tracks all development milestones, model iterations, API updates, 
 - **[2026-07-01 20:13]** fix(survey): update add unit tests for PHQ-9 and GAD-7 scoring edge cases
 - **[2026-07-02 09:48]** feat(cache): optimize and optimize user profile cache lookup to avoid redundant queries
 - **[2026-07-02 11:37]** feat(admin): improve enforce institutional access boundary checks on admin routes
+- **[2026-07-02 13:02]** perf(test): optimize and test CORS and rate-limiting middleware behavior
