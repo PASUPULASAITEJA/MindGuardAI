@@ -580,3 +580,4 @@ This document tracks all development milestones, model iterations, API updates, 
 - **[2026-07-07 14:32]** fix(api): resolve issue in add health check probe endpoint with database ping
 - **[2026-07-07 14:44]** refactor(security): update enforce strict Content-Security-Policy and HSTS response headers
 - **[2026-07-07 14:50]** test(docs): update document machine learning pipeline training and evaluation steps
+- **[2026-07-07 15:19]** test(security): enhance validate file extension and MIME types on voice upload endpoint
