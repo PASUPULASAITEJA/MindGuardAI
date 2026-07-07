@@ -582,3 +582,4 @@ This document tracks all development milestones, model iterations, API updates, 
 - **[2026-07-07 14:50]** test(docs): update document machine learning pipeline training and evaluation steps
 - **[2026-07-07 15:19]** test(security): enhance validate file extension and MIME types on voice upload endpoint
 - **[2026-07-07 15:52]** refactor(docs): optimize and add detailed API endpoint documentation and request examples
+- **[2026-07-07 16:41]** perf(alerts): improve dispatch realtime WebSocket broadcast when emergency alert fires
