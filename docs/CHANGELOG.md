@@ -572,3 +572,4 @@ This document tracks all development milestones, model iterations, API updates, 
 - **[2026-07-06 15:31]** feat(cache): enhance implement in-memory LRU cache for survey scoring definitions
 - **[2026-07-06 17:42]** refactor(admin): enhance refactor admin summary queries with database materialized views
 - **[2026-07-07 08:40]** test(db): update optimize database connection pooling with max overflow limits
+- **[2026-07-07 10:31]** fix(docker): update add non-root user execution in production container setup
