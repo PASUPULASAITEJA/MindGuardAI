@@ -602,3 +602,4 @@ This document tracks all development milestones, model iterations, API updates, 
 - **[2026-07-10 17:30]** perf(alerts): enhance prevent alert storming with deduplication window for same student
 - **[2026-07-11 08:24]** refactor(auth): optimize and harden password validation regex rules
 - **[2026-07-11 09:32]** fix(ui): resolve issue in add breadcrumb navigation hierarchy on nested detail pages
+- **[2026-07-11 10:26]** feat(docs): enhance document clinical references and scoring rubrics for PHQ9/GAD7
