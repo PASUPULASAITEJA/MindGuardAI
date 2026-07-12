@@ -604,3 +604,4 @@ This document tracks all development milestones, model iterations, API updates, 
 - **[2026-07-11 09:32]** fix(ui): resolve issue in add breadcrumb navigation hierarchy on nested detail pages
 - **[2026-07-11 10:26]** feat(docs): enhance document clinical references and scoring rubrics for PHQ9/GAD7
 - **[2026-07-11 11:13]** test(analytics): improve correlate exam periods with anxiety assessment score spikes
+- **[2026-07-12 08:37]** fix(db): improve implement Alembic revision for alert notification status
