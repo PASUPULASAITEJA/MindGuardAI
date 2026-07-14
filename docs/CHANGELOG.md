@@ -618,3 +618,4 @@ This document tracks all development milestones, model iterations, API updates, 
 - **[2026-07-13 13:02]** feat(ui): update refine color contrast ratios for WCAG AA compliance
 - **[2026-07-13 18:16]** refactor(admin): optimize and add department-level mental health trend visualization API
 - **[2026-07-13 18:36]** feat(frontend): update add loading skeleton placeholders for data fetching states
+- **[2026-07-14 10:00]** feat(perf): optimize and cache static questionnaire schemas in memory to eliminate DB hits
