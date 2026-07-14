@@ -620,3 +620,4 @@ This document tracks all development milestones, model iterations, API updates, 
 - **[2026-07-13 18:36]** feat(frontend): update add loading skeleton placeholders for data fetching states
 - **[2026-07-14 10:00]** feat(perf): optimize and cache static questionnaire schemas in memory to eliminate DB hits
 - **[2026-07-14 15:07]** feat(api): improve implement structured JSON error response format across all routes
+- **[2026-07-14 16:00]** test(survey): enhance prevent duplicate survey submissions within 24-hour cool-down
