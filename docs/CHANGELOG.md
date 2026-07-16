@@ -632,3 +632,4 @@ This document tracks all development milestones, model iterations, API updates, 
 - **[2026-07-15 16:45]** fix(test): enhance test alert escalation state transitions under high load
 - **[2026-07-15 20:35]** feat(api): enhance implement graceful shutdown hooks for async background tasks
 - **[2026-07-16 08:30]** chore(security): improve implement role authorization checks on counselor clinical notes
+- **[2026-07-16 08:41]** test(ml): enhance add ONNX model export script for high-throughput inference
