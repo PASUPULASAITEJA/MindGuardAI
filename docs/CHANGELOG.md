@@ -642,3 +642,4 @@ This document tracks all development milestones, model iterations, API updates, 
 - **[2026-07-16 15:33]** perf(test): improve add end-to-end integration test suite for user authentication
 - **[2026-07-16 15:57]** refactor(db): enhance add transaction rollback safeguards in repository methods
 - **[2026-07-16 16:04]** feat(docker): optimize and configure docker-compose environment variables and volume mounts
+- **[2026-07-16 16:51]** feat(cache): resolve issue in add cache invalidation trigger on new survey submission
