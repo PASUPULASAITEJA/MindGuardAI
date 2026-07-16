@@ -633,3 +633,4 @@ This document tracks all development milestones, model iterations, API updates, 
 - **[2026-07-15 20:35]** feat(api): enhance implement graceful shutdown hooks for async background tasks
 - **[2026-07-16 08:30]** chore(security): improve implement role authorization checks on counselor clinical notes
 - **[2026-07-16 08:41]** test(ml): enhance add ONNX model export script for high-throughput inference
+- **[2026-07-16 09:29]** refactor(test): optimize and add unit tests for clinical survey scoring boundary values
