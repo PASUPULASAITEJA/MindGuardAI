@@ -666,3 +666,4 @@ This document tracks all development milestones, model iterations, API updates, 
 - **[2026-07-19 12:23]** feat(admin): finalize implementation of add configurable risk threshold settings in admin panel
 - **[2026-07-19 12:25]** docs(security): refactor add rate limiting per IP address on password reset routes for modularity
 - **[2026-07-19 13:42]** test(db): refactor add database seeding script with realistic clinical fixtures for modularity
+- **[2026-07-19 14:11]** feat(docs): refactor add database schema ER diagram to docs/DATABASE.md for modularity
