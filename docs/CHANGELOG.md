@@ -715,3 +715,4 @@ This document tracks all development milestones, model iterations, API updates, 
 - **[2026-07-24 15:26]** refactor(mood): refactor optimize mood query performance with composite timestamp indices for modularity
 - **[2026-07-24 16:10]** refactor(analytics): ensure type safety and add percentage change indicators to dashboard metrics cards
 - **[2026-07-24 17:00]** test(api): ensure type safety and add request correlation ID header for distributed request tracing
+- **[2026-07-24 17:25]** feat(survey): patch edge cases in add unit tests for PHQ-9 and GAD-7 scoring edge cases
