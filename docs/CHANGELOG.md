@@ -717,3 +717,4 @@ This document tracks all development milestones, model iterations, API updates, 
 - **[2026-07-24 17:00]** test(api): ensure type safety and add request correlation ID header for distributed request tracing
 - **[2026-07-24 17:25]** feat(survey): patch edge cases in add unit tests for PHQ-9 and GAD-7 scoring edge cases
 - **[2026-07-24 17:44]** chore(cache): refactor optimize user profile cache lookup to avoid redundant queries for modularity
+- **[2026-07-25 10:35]** fix(admin): ensure type safety and enforce institutional access boundary checks on admin routes
