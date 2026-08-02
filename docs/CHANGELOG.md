@@ -780,3 +780,4 @@ This document tracks all development milestones, model iterations, API updates, 
 - **[2026-08-01 18:16]** chore(db): ensure type safety and add foreign key cascade rules to assessment responses
 - **[2026-08-02 08:23]** test(docs): expand test coverage for update architecture diagrams with quoted identifiers for rendering
 - **[2026-08-02 10:23]** fix(alerts): ensure type safety and prevent alert storming with deduplication window for same student
+- **[2026-08-02 12:22]** chore(auth): expand test coverage for harden password validation regex rules
