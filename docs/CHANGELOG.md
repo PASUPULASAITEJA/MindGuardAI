@@ -844,3 +844,4 @@ This document tracks all development milestones, model iterations, API updates, 
 - **[2026-08-10 09:28]** refactor(ml): clean up code formatting and integrate DAIC-WOZ depression assessment dataset parser
 - **[2026-08-10 11:17]** refactor(api): add telemetry logging to refactor API v1 router prefixing and module registration
 - **[2026-08-10 11:59]** fix(admin): add telemetry logging to add configurable risk threshold settings in admin panel
+- **[2026-08-10 15:19]** perf(security): optimize performance and add rate limiting per IP address on password reset routes
