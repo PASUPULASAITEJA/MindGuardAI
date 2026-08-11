@@ -853,3 +853,4 @@ This document tracks all development milestones, model iterations, API updates, 
 - **[2026-08-11 11:13]** chore(frontend): verify resilience and implement dark and light theme switching with CSS variables
 - **[2026-08-11 12:38]** perf(ui): add telemetry logging to refactor button variant styles with Tailwind utility classes
 - **[2026-08-11 14:15]** fix(frontend): verify resilience and enhance toast notification container with auto-dismiss timers
+- **[2026-08-11 16:01]** style(docs): verify resilience and update README with quickstart guides for Docker and local setup
