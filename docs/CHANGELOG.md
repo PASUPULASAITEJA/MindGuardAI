@@ -923,3 +923,4 @@ This document tracks all development milestones, model iterations, API updates, 
 - **[2026-08-21 13:45]** fix(docs): add telemetry logging to add frontend component architecture guide to FRONTEND.md
 - **[2026-08-21 13:58]** docs(analytics): verify resilience and optimize time-series aggregation query with window functions
 - **[2026-08-21 14:08]** feat(security): verify resilience and sanitize user inputs against XSS vectors in journal entries
+- **[2026-08-21 14:42]** docs(survey): validate input constraints for add historical survey trend comparison endpoint
