@@ -934,3 +934,4 @@ This document tracks all development milestones, model iterations, API updates, 
 - **[2026-08-23 11:19]** fix(db): clean up code formatting and optimize database connection pooling with max overflow limits
 - **[2026-08-23 13:18]** perf(docker): verify resilience and add non-root user execution in production container setup
 - **[2026-08-23 15:17]** perf(perf): verify resilience and tune async database connection pool recycle parameters
+- **[2026-08-23 16:29]** test(perf): add telemetry logging to benchmark ML inference latency under concurrent request load
