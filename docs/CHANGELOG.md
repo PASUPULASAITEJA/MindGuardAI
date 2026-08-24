@@ -940,3 +940,4 @@ This document tracks all development milestones, model iterations, API updates, 
 - **[2026-08-23 17:47]** refactor(api): add telemetry logging to add health check probe endpoint with database ping
 - **[2026-08-23 18:44]** refactor(security): validate input constraints for enforce strict Content-Security-Policy and HSTS response headers
 - **[2026-08-24 08:53]** feat(docs): clean up code formatting and document machine learning pipeline training and evaluation steps
+- **[2026-08-24 10:17]** feat(security): validate input constraints for validate file extension and MIME types on voice upload endpoint
