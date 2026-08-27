@@ -962,3 +962,4 @@ This document tracks all development milestones, model iterations, API updates, 
 - **[2026-08-27 10:36]** style(alerts): clean up code formatting and prevent alert storming with deduplication window for same student
 - **[2026-08-27 15:34]** style(auth): add telemetry logging to harden password validation regex rules
 - **[2026-08-27 17:06]** feat(ui): verify resilience and add breadcrumb navigation hierarchy on nested detail pages
+- **[2026-08-27 17:34]** feat(docs): add telemetry logging to document clinical references and scoring rubrics for PHQ9/GAD7
