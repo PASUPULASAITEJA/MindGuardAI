@@ -964,3 +964,4 @@ This document tracks all development milestones, model iterations, API updates, 
 - **[2026-08-27 17:06]** feat(ui): verify resilience and add breadcrumb navigation hierarchy on nested detail pages
 - **[2026-08-27 17:34]** feat(docs): add telemetry logging to document clinical references and scoring rubrics for PHQ9/GAD7
 - **[2026-08-27 19:03]** docs(analytics): verify resilience and correlate exam periods with anxiety assessment score spikes
+- **[2026-08-28 11:24]** refactor(db): optimize performance and implement Alembic revision for alert notification status
