@@ -969,3 +969,4 @@ This document tracks all development milestones, model iterations, API updates, 
 - **[2026-08-28 16:55]** fix(alerts): add telemetry logging to format alert email templates with student emergency context
 - **[2026-08-29 08:42]** test(admin): verify resilience and implement aggregated campus wellness index calculation
 - **[2026-08-29 09:26]** refactor(perf): optimize performance and implement lazy loading for high-resolution dashboard assets
+- **[2026-08-29 09:57]** fix(ml): add telemetry logging to add token truncation handling in text preprocessing pipeline
