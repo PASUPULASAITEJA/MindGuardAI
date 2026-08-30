@@ -979,3 +979,4 @@ This document tracks all development milestones, model iterations, API updates, 
 - **[2026-08-30 14:11]** style(admin): optimize performance and add department-level mental health trend visualization API
 - **[2026-08-30 14:26]** test(frontend): clean up code formatting and add loading skeleton placeholders for data fetching states
 - **[2026-08-30 15:02]** feat(perf): verify resilience and cache static questionnaire schemas in memory to eliminate DB hits
+- **[2026-08-30 15:12]** fix(api): verify resilience and implement structured JSON error response format across all routes
