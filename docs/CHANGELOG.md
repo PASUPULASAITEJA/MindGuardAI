@@ -992,3 +992,4 @@ This document tracks all development milestones, model iterations, API updates, 
 - **[2026-09-01 09:38]** feat(test): optimize performance and test alert escalation state transitions under high load
 - **[2026-09-01 13:06]** fix(api): clean up code formatting and implement graceful shutdown hooks for async background tasks
 - **[2026-09-01 13:22]** chore(security): clean up code formatting and implement role authorization checks on counselor clinical notes
+- **[2026-09-01 14:02]** perf(ml): validate input constraints for add ONNX model export script for high-throughput inference
