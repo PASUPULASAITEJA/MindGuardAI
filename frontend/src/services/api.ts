@@ -113,7 +113,92 @@ api.interceptors.response.use(
       }
     }
     
-    return Promise.reject(error);
+      return Promise.reject(error);
+    }
+  );
+
+  export interface ChatMessageItem {
+    id: string;
+    conversation_id: string;
+    sender: "STUDENT" | "ASSISTANT" | "SYSTEM";
+    message: string;
+    intent?: string;
+    primary_emotion?: string;
+    emotion_scores?: Record<string, number>;
+    sentiment_score?: number;
+    risk_level: "GREEN" | "YELLOW" | "RED";
+    is_crisis_flag: boolean;
+    created_at: string;
   }
-);
-export default api;
+
+  export interface ConversationSummary {
+    id: string;
+    student_id: string;
+    title: string;
+    summary?: string;
+    current_risk_level: string;
+    created_at: string;
+    updated_at: string;
+    message_count?: number;
+  }
+
+  export interface ChatResponsePayload {
+    conversation_id: string;
+    message_id: string;
+    response: string;
+    intent: {
+      label: string;
+      confidence: number;
+      secondary_intents: string[];
+    };
+    emotion: {
+      primary: string;
+      confidence: number;
+      emotion_scores: Record<string, number>;
+    };
+    risk: {
+      level: "GREEN" | "YELLOW" | "RED";
+      score: number;
+      requires_safety_workflow: boolean;
+      requires_human_review: boolean;
+    };
+    suggested_actions: string[];
+    safety_alert?: {
+      severity: string;
+      helpline: string;
+      counselor_escalation: boolean;
+      message: string;
+    } | null;
+    created_at: string;
+  }
+
+  export const chatAPI = {
+    createConversation: async (title?: string) => {
+      const res = await api.post<ConversationSummary>("/chat/conversations", { title });
+      return res.data;
+    },
+    listConversations: async () => {
+      const res = await api.get<ConversationSummary[]>("/chat/conversations");
+      return res.data;
+    },
+    getConversationDetails: async (conversationId: string) => {
+      const res = await api.get<{ conversation: ConversationSummary; messages: ChatMessageItem[] }>(
+        `/chat/conversations/${conversationId}`
+      );
+      return res.data;
+    },
+    sendMessage: async (conversationId: string, message: string) => {
+      const res = await api.post<ChatResponsePayload>(
+        `/chat/conversations/${conversationId}/messages`,
+        { message }
+      );
+      return res.data;
+    },
+    getMessages: async (conversationId: string) => {
+      const res = await api.get<ChatMessageItem[]>(`/chat/conversations/${conversationId}/messages`);
+      return res.data;
+    }
+  };
+
+  export default api;
+
