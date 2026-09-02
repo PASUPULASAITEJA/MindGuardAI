@@ -91,15 +91,16 @@ class MLService:
         joy_score = 0.70
         
         # Simple counts
-        for word in depressive_keywords:
-            if word in normalized_text:
-                sadness_score += 0.25
-        for word in anxiety_keywords:
-            if word in normalized_text:
-                anxiety_score += 0.25
-        for word in joy_keywords:
-            if word in normalized_text:
-                joy_score += 0.25
+        dep_hits = sum(1 for word in depressive_keywords if word in normalized_text)
+        anx_hits = sum(1 for word in anxiety_keywords if word in normalized_text)
+        joy_hits = sum(1 for word in joy_keywords if word in normalized_text)
+
+        sadness_score += dep_hits * 0.35
+        anxiety_score += anx_hits * 0.35
+        joy_score += joy_hits * 0.25
+
+        if dep_hits > 0 or anx_hits > 0:
+            joy_score = max(0.05, joy_score - (dep_hits + anx_hits) * 0.30)
 
         # Normalize score bounds
         total = anxiety_score + sadness_score + joy_score
