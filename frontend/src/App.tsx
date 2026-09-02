@@ -30,7 +30,8 @@ function App() {
       <ThemeProvider>
         <Router>
           <Routes>
-            {/* Public auth pages */}
+            {/* Root & Public auth pages */}
+            <Route path="/" element={<Navigate to="/login" replace />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
 
