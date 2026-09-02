@@ -4,7 +4,7 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.dependencies import get_current_active_user, get_db
+from app.api.dependencies import get_current_user, get_db
 from app.models.users import User, UserRole
 from app.models.chat import Conversation, ChatMessage
 from app.schemas.chatbot import (
@@ -24,7 +24,7 @@ router = APIRouter(prefix="/chat", tags=["AI Wellness Chatbot"])
 @router.post("/conversations", response_model=ConversationSummary, status_code=status.HTTP_201_CREATED)
 async def create_conversation(
     payload: CreateConversationRequest = CreateConversationRequest(),
-    current_user: User = Depends(get_current_active_user),
+    current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)
 ):
     """
@@ -54,7 +54,7 @@ async def create_conversation(
 
 @router.get("/conversations", response_model=List[ConversationSummary])
 async def list_conversations(
-    current_user: User = Depends(get_current_active_user),
+    current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)
 ):
     """
@@ -86,7 +86,7 @@ async def list_conversations(
 @router.get("/conversations/{conversation_id}", response_model=ConversationDetailResponse)
 async def get_conversation_details(
     conversation_id: UUID,
-    current_user: User = Depends(get_current_active_user),
+    current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)
 ):
     """
@@ -146,7 +146,7 @@ async def get_conversation_details(
 async def send_message(
     conversation_id: UUID,
     payload: SendMessageRequest,
-    current_user: User = Depends(get_current_active_user),
+    current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)
 ):
     """
@@ -169,7 +169,7 @@ async def send_message(
 @router.get("/conversations/{conversation_id}/messages", response_model=List[ChatMessageItem])
 async def get_messages(
     conversation_id: UUID,
-    current_user: User = Depends(get_current_active_user),
+    current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)
 ):
     """
@@ -213,7 +213,7 @@ async def get_messages(
 @router.post("/behavioral-features", status_code=status.HTTP_200_OK)
 async def ingest_behavioral_features(
     payload: BehavioralFeaturesPayload,
-    current_user: User = Depends(get_current_active_user),
+    current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)
 ):
     """
