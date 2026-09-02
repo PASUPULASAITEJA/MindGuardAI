@@ -12,6 +12,7 @@ import {
   Users,
   X,
   Settings,
+  MessageSquare,
 } from "lucide-react";
 import { useAuth, UserRole } from "@/contexts/AuthContext";
 import { cn } from "@/utils/cn";
