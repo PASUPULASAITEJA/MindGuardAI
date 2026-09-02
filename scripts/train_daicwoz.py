@@ -10,7 +10,9 @@ from sklearn.model_selection import train_test_split
 
 # Directory Paths
 BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-DATA_DIR = r"E:\Dataset\daicwoz\daicwoz"
+DATA_DIR = os.path.join(BASE_DIR, "Dataset", "daicwoz", "daicwoz")
+if not os.path.exists(DATA_DIR):
+    DATA_DIR = os.path.join(BASE_DIR, "Dataset", "daicwoz")
 MODEL_DIR = os.path.join(BASE_DIR, "backend", "app", "ml", "models")
 os.makedirs(MODEL_DIR, exist_ok=True)
 
@@ -41,13 +43,11 @@ def extract_participant_transcripts(data_dir: str):
         pid = int(pid_match.group(1))
 
         try:
-            # DAIC-WOZ transcripts are tab-separated
             df_t = pd.read_csv(fpath, sep='\t', on_bad_lines='skip')
             if "speaker" in df_t.columns and "value" in df_t.columns:
                 part_texts = df_t[df_t["speaker"].str.lower() == "participant"]["value"].dropna().astype(str).tolist()
                 cleaned_texts = [mask_pii(t) for t in part_texts if len(t.strip()) > 2]
                 
-                # Full aggregated text for participant
                 full_text = " ".join(cleaned_texts)
                 records.append({
                     "Participant_ID": pid,
@@ -68,9 +68,9 @@ def train_risk_model(data_dir: str):
     """
     Trains the Random Forest Clinical Risk Classifier using DAIC-WOZ PHQ-8 ground truth and transcript features.
     """
-    print("\n=======================================================")
-    print("  1. Training Clinical Risk Assessment Model (Random Forest)")
-    print("=======================================================")
+    print("\n=======================================================", flush=True)
+    print("  1. Training Clinical Risk Assessment Model (Random Forest)", flush=True)
+    print("=======================================================", flush=True)
 
     train_csv = os.path.join(data_dir, "train_split_Depression_AVEC2017.csv")
     dev_csv = os.path.join(data_dir, "dev_split_Depression_AVEC2017.csv")
@@ -78,18 +78,14 @@ def train_risk_model(data_dir: str):
     df_train = pd.read_csv(train_csv)
     df_dev = pd.read_csv(dev_csv)
     df_labels = pd.concat([df_train, df_dev], ignore_index=True)
-    print(f"Loaded {len(df_labels)} clinically evaluated participants (Train + Dev).")
+    print(f"Loaded {len(df_labels)} clinically evaluated participants (Train + Dev).", flush=True)
 
     df_participants, _ = extract_participant_transcripts(data_dir)
-    print(f"Extracted transcripts for {len(df_participants)} participants.")
+    print(f"Extracted transcripts for {len(df_participants)} participants.", flush=True)
 
-    # Merge labels with transcripts
     df_merged = pd.merge(df_labels, df_participants, on="Participant_ID", how="inner")
-    print(f"Aligned dataset: {len(df_merged)} participants with complete clinical and textual data.")
+    print(f"Aligned dataset: {len(df_merged)} participants with complete clinical and textual data.", flush=True)
 
-    # Compute NLP & Clinical features matching MindGuard's 9-feature schema:
-    # [anxiety, sadness, joy, sentiment_score, self_reported_score, sleep_hours, study_hours, exam_stress_index, rolling_sentiment_7d]
-    
     rows = []
     y = []
 
@@ -97,14 +93,12 @@ def train_risk_model(data_dir: str):
         phq_score = float(row.get("PHQ8_Score", 0))
         binary_label = int(row.get("PHQ8_Binary", 1 if phq_score >= 10 else 0))
 
-        # Sub-scores (0 to 3)
         no_interest = float(row.get("PHQ8_NoInterest", 0))
         depressed = float(row.get("PHQ8_Depressed", 0))
         sleep_issue = float(row.get("PHQ8_Sleep", 0))
         tired = float(row.get("PHQ8_Tired", 0))
         concentrating = float(row.get("PHQ8_Concentrating", 0))
 
-        # Synthesize MindGuard normalized features:
         sadness = min(1.0, max(0.05, (depressed / 3.0) * 0.7 + (phq_score / 24.0) * 0.3))
         joy = max(0.02, 1.0 - (no_interest / 3.0) * 0.7 - (phq_score / 24.0) * 0.3)
         anxiety = min(1.0, max(0.05, (concentrating / 3.0) * 0.5 + (tired / 3.0) * 0.5))
@@ -121,7 +115,6 @@ def train_risk_model(data_dir: str):
         exam_stress_index = min(10.0, max(1.0, concentrating * 2.5 + 2.0))
         rolling_sentiment_7d = sentiment_score
 
-        # 9 MindGuard Features
         feat_vector = [
             anxiety,
             sadness,
@@ -134,10 +127,8 @@ def train_risk_model(data_dir: str):
             rolling_sentiment_7d
         ]
         
-        # High risk label: Binary PHQ8 == 1 or PHQ score >= 10
         target = 1 if (binary_label == 1 or phq_score >= 10) else 0
 
-        # Augment with subtle realistic jitter to increase sample robustness
         for _ in range(5):
             jitter = np.random.normal(0, 0.02, len(feat_vector))
             rows.append(np.clip(np.array(feat_vector) + jitter, 0.0, 10.0))
@@ -158,21 +149,21 @@ def train_risk_model(data_dir: str):
 
     y_pred = model.predict(X_test)
     acc = accuracy_score(y_test, y_pred) * 100
-    print(f"\n--- Random Forest Clinical Risk Model Results ---")
-    print(classification_report(y_test, y_pred, target_names=["Low/Med Risk", "High Risk"]))
-    print(f"Accuracy: {acc:.2f}%")
+    print(f"\n--- Random Forest Clinical Risk Model Results ---", flush=True)
+    print(classification_report(y_test, y_pred, target_names=["Low/Med Risk", "High Risk"]), flush=True)
+    print(f"Accuracy: {acc:.2f}%", flush=True)
 
     joblib.dump(model, RISK_MODEL_PATH)
-    print(f"SUCCESS: Saved trained Risk Model to {RISK_MODEL_PATH}")
+    print(f"SUCCESS: Saved trained Risk Model to {RISK_MODEL_PATH}", flush=True)
     return model
 
 def train_emotion_nlp_model(data_dir: str):
     """
     Trains / fine-tunes the DistilBERT emotion classifier using conversational transcripts from DAIC-WOZ.
     """
-    print("\n=======================================================")
-    print("  2. Training Emotion Detection Model (DistilBERT)    ")
-    print("=======================================================")
+    print("\n=======================================================", flush=True)
+    print("  2. Training Emotion Detection Model (DistilBERT)    ", flush=True)
+    print("=======================================================", flush=True)
 
     try:
         import torch
@@ -180,13 +171,12 @@ def train_emotion_nlp_model(data_dir: str):
         from transformers import AutoTokenizer, AutoModelForSequenceClassification
         from torch.optim import AdamW
     except ImportError:
-        print("PyTorch / Transformers not available. Skipping neural fine-tuning.")
+        print("PyTorch / Transformers not available. Skipping neural fine-tuning.", flush=True)
         return
 
     _, df_utterances = extract_participant_transcripts(data_dir)
-    print(f"Loaded {len(df_utterances)} participant conversational utterances from DAIC-WOZ.")
+    print(f"Loaded {len(df_utterances)} participant conversational utterances from DAIC-WOZ.", flush=True)
 
-    # Target Emotion Classes: 0: joy, 1: sadness, 2: anxiety, 3: anger, 4: fear, 5: surprise
     def assign_emotion(text: str) -> int:
         t = text.lower()
         if any(w in t for w in ["anxi", "worr", "nerv", "stress", "panic", "overwhelm", "pressure", "scared"]):
@@ -204,14 +194,16 @@ def train_emotion_nlp_model(data_dir: str):
         return 0  # default stable/joy
 
     df_utterances["label"] = df_utterances["text"].apply(assign_emotion)
-    print(f"Emotion Class Distribution:\n{df_utterances['label'].value_counts().sort_index()}")
+    print(f"Emotion Class Distribution:\n{df_utterances['label'].value_counts().sort_index()}", flush=True)
 
-    # Select balanced sample for CPU training speed
     sample_df = df_utterances.sample(n=min(400, len(df_utterances)), random_state=42).reset_index(drop=True)
+
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    print(f"Using device: {device}", flush=True)
 
     model_name = "distilbert-base-uncased"
     tokenizer = AutoTokenizer.from_pretrained(model_name)
-    model = AutoModelForSequenceClassification.from_pretrained(model_name, num_labels=6)
+    model = AutoModelForSequenceClassification.from_pretrained(model_name, num_labels=6).to(device)
 
     texts = sample_df["text"].tolist()
     labels = sample_df["label"].tolist()
@@ -242,35 +234,38 @@ def train_emotion_nlp_model(data_dir: str):
             }
 
     dataset = TextDataset(texts, labels, tokenizer)
-    loader = DataLoader(dataset, batch_size=8, shuffle=True)
+    loader = DataLoader(dataset, batch_size=16, shuffle=True)
 
     optimizer = AdamW(model.parameters(), lr=3e-5)
     model.train()
-    print("Fine-tuning DistilBERT on DAIC-WOZ utterances (1 epoch)...")
+    print("Fine-tuning DistilBERT on DAIC-WOZ utterances (1 epoch)...", flush=True)
 
     for step, batch in enumerate(loader):
         optimizer.zero_grad()
+        input_ids = batch["input_ids"].to(device)
+        attention_mask = batch["attention_mask"].to(device)
+        labels_t = batch["labels"].to(device)
+
         outputs = model(
-            input_ids=batch["input_ids"],
-            attention_mask=batch["attention_mask"],
-            labels=batch["labels"]
+            input_ids=input_ids,
+            attention_mask=attention_mask,
+            labels=labels_t
         )
         loss = outputs.loss
         loss.backward()
         optimizer.step()
-        if (step + 1) % 15 == 0 or step == len(loader) - 1:
-            print(f"Step [{step + 1}/{len(loader)}] - Batch Loss: {loss.item():.4f}")
+        if (step + 1) % 5 == 0 or step == len(loader) - 1:
+            print(f"Step [{step + 1}/{len(loader)}] - Batch Loss: {loss.item():.4f}", flush=True)
 
-    # Save state dict
     torch.save(model.state_dict(), NLP_MODEL_PATH)
-    print(f"SUCCESS: Saved trained DistilBERT NLP model to {NLP_MODEL_PATH}")
+    print(f"SUCCESS: Saved trained DistilBERT NLP model to {NLP_MODEL_PATH}", flush=True)
 
 if __name__ == "__main__":
-    print("=======================================================")
-    print(" MindGuard AI: Training Pipeline with DAIC-WOZ Dataset ")
-    print("=======================================================")
+    print("=======================================================", flush=True)
+    print(" MindGuard AI: Training Pipeline with DAIC-WOZ Dataset ", flush=True)
+    print("=======================================================", flush=True)
     train_risk_model(DATA_DIR)
     train_emotion_nlp_model(DATA_DIR)
-    print("\n=======================================================")
-    print(" ALL MODELS TRAINED AND SAVED SUCCESSFULLY! ")
-    print("=======================================================")
+    print("\n=======================================================", flush=True)
+    print(" ALL MODELS TRAINED AND SAVED SUCCESSFULLY! ", flush=True)
+    print("=======================================================", flush=True)
