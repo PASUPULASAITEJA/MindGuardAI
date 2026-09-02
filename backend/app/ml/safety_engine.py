@@ -24,7 +24,8 @@ RED_PATTERNS = [
 YELLOW_PATTERNS = [
     (r"\b(can'?t take this anymore|so overwhelmed|breaking down|having a panic attack|hyperventilating)\b", "ACUTE_PANIC_OR_OVERWHELM"),
     (r"\b(failing everything|ruined my life|worthless|hopeless|crying non stop|can'?t stop crying)\b", "ACUTE_EMOTIONAL_DISTRESS"),
-    (r"\b(nobody cares|completely alone|isolated|drowning in stress|extreme burnout)\b", "SEVERE_ISOLATION_OR_BURNOUT")
+    (r"\b(nobody cares|completely alone|isolated|drowning in stress|extreme burnout)\b", "SEVERE_ISOLATION_OR_BURNOUT"),
+    (r"\b(stressed|stress|freaking out|failing|scared of failing|cannot cope|can't cope|so worried|finals|midterm)\b", "ACADEMIC_OR_EMOTIONAL_STRESS")
 ]
 
 class SafetyEngine:
