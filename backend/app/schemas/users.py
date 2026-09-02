@@ -1,0 +1,76 @@
+from datetime import datetime
+from typing import Optional
+from uuid import UUID
+from pydantic import BaseModel, EmailStr, Field, model_validator
+from app.models.users import UserRole
+
+class UserBase(BaseModel):
+    email: EmailStr = Field(..., description="User email address")
+    role: UserRole = Field(..., description="Role of the user (STUDENT, COUNSELOR, ADMIN)")
+
+class UserCreate(UserBase):
+    password: str = Field(..., min_length=8, description="Cleartext password (min 8 characters)")
+
+    @model_validator(mode="after")
+    def validate_institutional_email(self):
+        from app.core.whitelist import is_email_whitelisted
+        email_str = str(self.email).lower().strip()
+        if is_email_whitelisted(email_str):
+            return self
+
+        if self.role == UserRole.STUDENT:
+            if not (email_str.endswith("@nmims.in") or email_str.endswith("@nmims.edu.in")):
+                raise ValueError("Student registration requires a valid university email ending with @nmims.in or @nmims.edu.in.")
+        elif self.role in (UserRole.COUNSELOR, UserRole.ADMIN):
+            if not email_str.endswith("@nmims.edu"):
+                role_label = "Counselor" if self.role == UserRole.COUNSELOR else "Admin"
+                raise ValueError(f"{role_label} registration requires an institutional staff email ending with @nmims.edu.")
+        return self
+
+class UserUpdate(BaseModel):
+    email: Optional[EmailStr] = None
+    role: Optional[UserRole] = None
+    is_active: Optional[bool] = None
+    password: Optional[str] = Field(None, min_length=8)
+
+class UserResponse(BaseModel):
+    id: UUID
+    email: EmailStr
+    role: UserRole
+    is_active: bool
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+# Schema specific to registration API response
+class UserRegisterResponse(BaseModel):
+    id: UUID
+    email: EmailStr
+    role: UserRole
+
+    class Config:
+        from_attributes = True
+
+# Schema for profile endpoint response
+class UserProfileResponse(BaseModel):
+    id: UUID
+    email: EmailStr
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class AdminUserResponse(BaseModel):
+    id: UUID
+    email: EmailStr
+    role: UserRole
+    is_active: bool
+
+    class Config:
+        from_attributes = True
+
+class UserDirectoryResponse(BaseModel):
+    users: list[AdminUserResponse]
+    page: int
+    total_pages: int
