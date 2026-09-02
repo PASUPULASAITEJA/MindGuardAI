@@ -8,6 +8,7 @@ import DashboardLayout from "./components/layouts/DashboardLayout";
 import { ThemeProvider } from "./contexts/ThemeContext";
 
 import StudentDashboard from "./pages/student/StudentDashboard";
+import StudentChatbot from "./pages/student/StudentChatbot";
 import CounselorDashboard from "./pages/counselor/CounselorDashboard";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import Settings from "./pages/settings/Settings";
@@ -43,6 +44,19 @@ function App() {
                     subtitle="Your secure, private space to track mental wellness indices and journal check-ins."
                   >
                     <StudentDashboard />
+                  </DashboardLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/student/chat"
+              element={
+                <ProtectedRoute allowedRoles={["STUDENT"]}>
+                  <DashboardLayout
+                    title="AI Wellness Companion"
+                    subtitle="Confidential, 24/7 AI-guided mental health support, emotional reflection, and coping tools."
+                  >
+                    <StudentChatbot />
                   </DashboardLayout>
                 </ProtectedRoute>
               }

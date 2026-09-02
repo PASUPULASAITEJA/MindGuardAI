@@ -25,6 +25,7 @@ type SidebarItem = {
 const roleNavigation: Record<UserRole, SidebarItem[]> = {
   STUDENT: [
     { label: "Overview", to: "/student/dashboard", icon: LayoutDashboard },
+    { label: "AI Wellness Chat", to: "/student/chat", icon: MessageSquare },
     { label: "Check-In", to: "/student/check-in", icon: ClipboardCheck },
     { label: "Mood History", to: "/student/history", icon: Activity },
     { label: "Resources", to: "/student/resources", icon: BookOpen },
