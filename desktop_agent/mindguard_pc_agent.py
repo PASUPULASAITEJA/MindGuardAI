@@ -2,16 +2,13 @@
 """
 MindGuard AI - Desktop Behavioral Phenotyping Agent (PC / Laptop)
 ================================================================
-Monitors:
-1. Total Active Screen Time (excluding idle periods > 3 minutes).
-2. Late-Night Computer Usage (12:00 AM - 5:00 AM circadian rhythm indicator).
-3. Application Categorization (Academic/Coding vs Entertainment vs Social).
-4. Submits privacy-preserving aggregate telemetry to the MindGuard backend.
-
-Privacy Guarantee:
-- ZERO keystrokes or private messages are recorded.
-- ZERO browser history or screen pixels are captured.
-- Only non-invasive aggregate duration tallies (in minutes) are synchronized.
+Context-Aware Passive Digital Biomarker Agent:
+1. Non-Invasive Active Window Title & Search Intent Analysis
+   - Accurately classifies Exam Study, Homework, Coding, and Project work.
+   - Differentiates late-night exam preparation from depressive doom-scrolling.
+   - Detects crisis search queries for immediate counselor protection.
+2. Total Active Screen Time & Circadian Sleep Disruption Monitoring.
+3. Automated Synchronization with MindGuard Cloud AI.
 """
 
 import sys
@@ -31,7 +28,7 @@ import psutil
 API_BASE_URL = os.environ.get("MINDGUARD_API_URL", "http://127.0.0.1:8000/api/v1")
 TOKEN_CACHE_FILE = Path.home() / ".mindguard_agent_auth.json"
 SAMPLE_INTERVAL_SECONDS = 5
-SYNC_INTERVAL_SECONDS = 30  # Syncs with backend every 30 seconds
+SYNC_INTERVAL_SECONDS = 30
 
 # Canonical Application Categorization Taxonomy
 APP_CATEGORIES = {
@@ -52,6 +49,31 @@ APP_CATEGORIES = {
     ]
 }
 
+# Semantic Keywords for Search Intent & Window Title Classification
+ACADEMIC_KEYWORDS = [
+    "leetcode", "github", "stackoverflow", "docs", "documentation", "tutorial",
+    "assignment", "syllabus", "midterm", "exam", "quiz", "coursera", "edx", "udemy",
+    "overleaf", "jupyter", "chatgpt", "gemini", "claude", "notion", "canvas",
+    "blackboard", "moodle", "arxiv", "research", "python", "react", "c++", "java",
+    "algorithm", "data structure", "compiler", "lecture", "textbook", "notes"
+]
+
+ENTERTAINMENT_KEYWORDS = [
+    "youtube", "netflix", "anime", "twitch", "prime video", "spotify", "crunchyroll",
+    "hulu", "disney+", "9gag", "memes", "gameplay", "stream"
+]
+
+SOCIAL_KEYWORDS = [
+    "discord", "reddit", "instagram", "twitter", "x.com", "tiktok", "whatsapp",
+    "telegram", "facebook", "snapchat", "threads"
+]
+
+CRISIS_KEYWORDS = [
+    "how to commit suicide", "how to kill myself", "i want to die", "feeling hopeless",
+    "end my life", "suicide hotline", "self harm", "can't take this anymore",
+    "worthless", "how to overdose", "no reason to live"
+]
+
 # Windows API Struct for Idle Detection
 class LASTINPUTINFO(ctypes.Structure):
     _fields_ = [("cbSize", ctypes.c_uint), ("dwTime", ctypes.c_uint)]
@@ -69,11 +91,15 @@ def get_system_idle_seconds() -> float:
             return 0.0
     return 0.0
 
-def get_active_window_process_name() -> Tuple[str, str]:
+def get_active_window_details() -> Tuple[str, str, str, bool]:
     """
-    Returns (process_name, category) for the currently focused foreground window.
+    Returns (process_name, window_title, category, is_crisis_flag)
+    Extracts foreground process and inspects window title/search intent.
     """
-    proc_name = "system_idle"
+    proc_name = "desktop"
+    window_title = ""
+    is_crisis = False
+
     if sys.platform == "win32":
         try:
             hwnd = ctypes.windll.user32.GetForegroundWindow()
@@ -83,24 +109,43 @@ def get_active_window_process_name() -> Tuple[str, str]:
                 if pid.value > 0:
                     p = psutil.Process(pid.value)
                     proc_name = p.name().lower()
+
+                # Extract window title text
+                length = ctypes.windll.user32.GetWindowTextLengthW(hwnd)
+                if length > 0:
+                    buff = ctypes.create_unicode_buffer(length + 1)
+                    ctypes.windll.user32.GetWindowTextW(hwnd, buff, length + 1)
+                    window_title = buff.value.lower()
         except Exception:
             proc_name = "desktop"
 
-    # Match Category
+    # 1. Immediate Crisis Search Detection
+    if any(keyword in window_title for keyword in CRISIS_KEYWORDS):
+        return proc_name, window_title, "CRISIS", True
+
+    # 2. Window Title / Search Intent Semantic Categorization (especially for Chrome, Edge, Firefox)
+    if any(keyword in window_title for keyword in ACADEMIC_KEYWORDS):
+        return proc_name, window_title, "ACADEMIC", False
+
+    if any(keyword in window_title for keyword in ENTERTAINMENT_KEYWORDS):
+        return proc_name, window_title, "ENTERTAINMENT", False
+
+    if any(keyword in window_title for keyword in SOCIAL_KEYWORDS):
+        return proc_name, window_title, "SOCIAL", False
+
+    # 3. Process-level Categorization
     for cat, app_list in APP_CATEGORIES.items():
         if any(app == proc_name or proc_name.startswith(app.replace(".exe", "")) for app in app_list):
-            return proc_name, cat
+            return proc_name, window_title, cat, False
 
-    return proc_name, "GENERAL"
+    return proc_name, window_title, "GENERAL", False
 
 def authenticate_student() -> Dict[str, str]:
     """Authenticates the student with MindGuard API and caches token locally."""
-    # Check cache first
     if TOKEN_CACHE_FILE.exists():
         try:
             with open(TOKEN_CACHE_FILE, "r") as f:
                 data = json.load(f)
-                # Verify token liveness with a quick ping
                 headers = {"Authorization": f"Bearer {data.get('access_token')}"}
                 test_res = requests.get(f"{API_BASE_URL}/students/me", headers=headers, timeout=5)
                 if test_res.status_code == 200:
@@ -133,7 +178,6 @@ def authenticate_student() -> Dict[str, str]:
                     print("[!] Error: This desktop agent is only for student accounts.\n")
                     continue
 
-                # Cache token locally
                 with open(TOKEN_CACHE_FILE, "w") as f:
                     json.dump(auth_data, f)
 
@@ -155,39 +199,36 @@ def start_agent():
     print("========================================================")
     print(f"  MindGuard PC Agent Active - Syncing for: {student_email} ")
     print("========================================================")
-    print("[*] Privacy Mode: ACTIVE (Aggregate usage metrics only).")
+    print("[*] Privacy Guarantee: Zero keystrokes or full screen pixels recorded.")
+    print("[*] Context Engine: Differentiates Exam Study from Circadian Fatigue.")
     print("[*] Sampling system activity every 5 seconds...")
     print("[*] Press Ctrl + C to stop the desktop agent.\n")
 
-    # In-memory accumulators for current session
     total_screen_seconds = 0
     late_night_seconds = 0
     academic_seconds = 0
     social_seconds = 0
     entertainment_seconds = 0
-    app_tally: Dict[str, int] = {}
+    has_crisis_event = False
     last_sync_time = time.time()
 
     try:
         while True:
             time.sleep(SAMPLE_INTERVAL_SECONDS)
 
-            # 1. Check user idle state (> 180s = 3 mins without input)
             idle_seconds = get_system_idle_seconds()
             if idle_seconds >= 180:
-                continue  # User is away from desk; do not accumulate screen time
+                continue
 
-            # 2. Accumulate active screen time
             total_screen_seconds += SAMPLE_INTERVAL_SECONDS
             current_hour = datetime.datetime.now().hour
 
-            # Check late night usage (12:00 AM - 5:00 AM)
             if 0 <= current_hour < 5:
                 late_night_seconds += SAMPLE_INTERVAL_SECONDS
 
-            # 3. Categorize current foreground app
-            proc_name, category = get_active_window_process_name()
-            app_tally[proc_name] = app_tally.get(proc_name, 0) + SAMPLE_INTERVAL_SECONDS
+            proc_name, title, category, is_crisis = get_active_window_details()
+            if is_crisis:
+                has_crisis_event = True
 
             if category == "ACADEMIC":
                 academic_seconds += SAMPLE_INTERVAL_SECONDS
@@ -196,7 +237,6 @@ def start_agent():
             elif category == "ENTERTAINMENT":
                 entertainment_seconds += SAMPLE_INTERVAL_SECONDS
 
-            # 4. Periodic Cloud Sync
             elapsed_since_sync = time.time() - last_sync_time
             if elapsed_since_sync >= SYNC_INTERVAL_SECONDS:
                 last_sync_time = time.time()
@@ -210,8 +250,10 @@ def start_agent():
                     "academic_usage_minutes": int(academic_seconds / 60),
                     "social_usage_minutes": int(social_seconds / 60),
                     "entertainment_usage_minutes": int(entertainment_seconds / 60),
-                    "baseline_deviation_score": 0.0
+                    "baseline_deviation_score": 0.0,
+                    "is_crisis_search_flag": has_crisis_event
                 }
+                has_crisis_event = False  # Reset flag after sync
 
                 try:
                     headers = {
@@ -232,19 +274,14 @@ def start_agent():
                         z_score = res_data.get("baseline_analysis", {}).get("deviation_z_score", 0.0)
 
                         status_color = "🟢" if risk_level == "LOW" else "🟡" if risk_level == "MEDIUM" else "🔴"
+                        display_title = (title[:35] + "..") if len(title) > 35 else (title or proc_name)
                         print(
                             f"[{datetime.datetime.now().strftime('%H:%M:%S')}] {status_color} Synced: "
                             f"{payload['total_screen_time_minutes']}m Active | "
                             f"{payload['late_night_usage_minutes']}m Late-Night | "
-                            f"App: {proc_name} ({category}) | "
-                            f"Risk: {risk_level} (Z={z_score})"
+                            f"Context: {category} ({display_title}) | "
+                            f"Risk: {risk_level}"
                         )
-
-                        if risk_level == "HIGH":
-                            print(
-                                "  [!] NOTICE: Elevated late-night fatigue detected. "
-                                "MindGuard has scheduled a priority check-in for your wellness.\n"
-                            )
                     elif res.status_code == 401:
                         print("[!] Session expired. Re-authenticating...")
                         if TOKEN_CACHE_FILE.exists():
@@ -252,7 +289,7 @@ def start_agent():
                         auth_data = authenticate_student()
                         token = auth_data["access_token"]
                 except Exception as sync_err:
-                    print(f"[{datetime.datetime.now().strftime('%H:%M:%S')}] Sync notice: Backend offline or retrying ({sync_err})")
+                    print(f"[{datetime.datetime.now().strftime('%H:%M:%S')}] Sync retry ({sync_err})")
 
     except KeyboardInterrupt:
         print("\n\n[*] MindGuard PC Agent stopped safely. Take care of your mental wellness!")

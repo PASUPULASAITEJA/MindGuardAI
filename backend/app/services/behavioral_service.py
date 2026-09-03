@@ -63,23 +63,44 @@ class BehavioralService:
         late_night_deviation_z = (payload.late_night_usage_minutes - mean_late) / std_late
         late_night_deviation_z = round(float(late_night_deviation_z), 2)
 
-        # 4. Determine Behavioral Risk Tier
+        # 4. Context-Aware Behavioral Risk Determination
         behavioral_risk_level = "LOW"
         risk_reasons = []
 
-        if payload.late_night_usage_minutes >= 180 or (late_night_deviation_z >= 3.0 and payload.late_night_usage_minutes >= 120):
-            behavioral_risk_level = "HIGH"
-            risk_reasons.append(f"Critical late-night computer usage spike ({payload.late_night_usage_minutes} mins past midnight, Z={late_night_deviation_z})")
-        elif payload.late_night_usage_minutes >= 60 or late_night_deviation_z >= 1.8:
-            behavioral_risk_level = "MEDIUM"
-            risk_reasons.append(f"Moderate circadian sleep disruption ({payload.late_night_usage_minutes} mins after midnight)")
+        total_mins = max(1, payload.total_screen_time_minutes)
+        academic_ratio = payload.academic_usage_minutes / total_mins
+        is_academic_heavy = academic_ratio >= 0.60
 
-        # App isolation factor: High social/gaming with low academic productivity
-        non_academic = payload.social_usage_minutes + payload.entertainment_usage_minutes
-        if payload.total_screen_time_minutes > 300 and payload.academic_usage_minutes < 30 and non_academic > 250:
-            if behavioral_risk_level == "LOW":
+        # Scenario A: Immediate Crisis Search Flag
+        if payload.is_crisis_search_flag:
+            behavioral_risk_level = "HIGH"
+            risk_reasons.append("Urgent distress/crisis search query detected in active browser window.")
+        
+        # Scenario B: High Academic Study & Exam/Project Focus
+        elif is_academic_heavy:
+            if payload.late_night_usage_minutes >= 240:
                 behavioral_risk_level = "MEDIUM"
-            risk_reasons.append("Elevated digital isolation and doom-scrolling pattern detected.")
+                risk_reasons.append(f"Extended late-night exam/project study ({payload.late_night_usage_minutes}m). Hydration & rest recommended.")
+            else:
+                behavioral_risk_level = "LOW"
+                if payload.late_night_usage_minutes >= 60:
+                    risk_reasons.append(f"Productive late-night academic study ({payload.academic_usage_minutes}m coding/study).")
+
+        # Scenario C: Non-Academic Circadian Disruption & Digital Isolation
+        else:
+            if payload.late_night_usage_minutes >= 180 or (late_night_deviation_z >= 3.0 and payload.late_night_usage_minutes >= 120):
+                behavioral_risk_level = "HIGH"
+                risk_reasons.append(f"Critical late-night circadian disruption ({payload.late_night_usage_minutes} mins past midnight, Z={late_night_deviation_z})")
+            elif payload.late_night_usage_minutes >= 60 or late_night_deviation_z >= 1.8:
+                behavioral_risk_level = "MEDIUM"
+                risk_reasons.append(f"Moderate circadian sleep disruption ({payload.late_night_usage_minutes} mins after midnight)")
+
+            # App isolation factor: High social/gaming with low academic productivity
+            non_academic = payload.social_usage_minutes + payload.entertainment_usage_minutes
+            if payload.total_screen_time_minutes > 300 and payload.academic_usage_minutes < 30 and non_academic > 250:
+                if behavioral_risk_level == "LOW":
+                    behavioral_risk_level = "MEDIUM"
+                risk_reasons.append("Elevated digital isolation and doom-scrolling pattern detected.")
 
         # 5. Check if entry for today already exists (Upsert)
         today_str = payload.date or datetime.now(timezone.utc).strftime("%Y-%m-%d")
