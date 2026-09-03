@@ -18,6 +18,7 @@ from app.schemas.chatbot import (
 )
 from app.services.conversation_service import conversation_service
 from app.services.chatbot_service import chatbot_service
+from app.services.behavioral_service import behavioral_service
 
 router = APIRouter(prefix="/chat", tags=["AI Wellness Chatbot"])
 
@@ -217,11 +218,36 @@ async def ingest_behavioral_features(
     db: AsyncSession = Depends(get_db)
 ):
     """
-    Consented future Android sensor data contract for privacy-preserving aggregate behavioral metrics.
+    Consented Desktop/PC & Mobile sensor telemetry ingestion.
+    Evaluates baseline deviation, circadian disruption, and auto-dispatches alerts.
     """
-    return {
-        "status": "INGESTED",
-        "student_id": str(current_user.id),
-        "date": payload.date,
-        "message": "Consented behavioral features successfully processed for baseline calibration."
-    }
+    if current_user.role != UserRole.STUDENT:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Behavioral telemetry is exclusively available for student accounts."
+        )
+
+    return await behavioral_service.ingest_and_evaluate(
+        db=db,
+        student=current_user,
+        payload=payload
+    )
+
+@router.get("/behavioral-features/summary", status_code=status.HTTP_200_OK)
+async def get_behavioral_summary(
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    Retrieves live digital phenotyping metrics, active PC screen time, and 7-day history for the student dashboard.
+    """
+    if current_user.role != UserRole.STUDENT:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Access restricted to student accounts."
+        )
+
+    return await behavioral_service.get_student_summary(
+        db=db,
+        student_id=current_user.id
+    )

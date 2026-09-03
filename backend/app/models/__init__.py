@@ -5,6 +5,7 @@ from app.models.emotion_analyses import EmotionAnalysis
 from app.models.assessments import Assessment, RiskLevel
 from app.models.alerts import Alert, AlertStatus
 from app.models.chat import Conversation, ChatMessage, SafetyEvent, ChatSender
+from app.models.behavioral import BehavioralLog
 
 __all__ = [
     "Base",
@@ -21,4 +22,5 @@ __all__ = [
     "ChatMessage",
     "SafetyEvent",
     "ChatSender",
+    "BehavioralLog",
 ]
