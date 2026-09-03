@@ -655,16 +655,28 @@ export const StudentDashboard: React.FC = () => {
     const isLive = behavioralSummary?.is_currently_active;
     const log = behavioralSummary?.latest_log;
 
-    const totalHours = log ? (log.total_screen_time_minutes / 60).toFixed(1) : "0.0";
+    const totalMins = log?.total_screen_time_minutes || 0;
     const lateNightMins = log?.late_night_usage_minutes || 0;
     const academicMins = log?.academic_usage_minutes || 0;
     const socialMins = log?.social_usage_minutes || 0;
     const entertainmentMins = log?.entertainment_usage_minutes || 0;
-    const totalMins = log?.total_screen_time_minutes || 1;
+    const safeTotal = totalMins > 0 ? totalMins : 1;
 
-    const academicPct = Math.round((academicMins / totalMins) * 100);
-    const socialPct = Math.round((socialMins / totalMins) * 100);
-    const entertainmentPct = Math.round((entertainmentMins / totalMins) * 100);
+    // Human-friendly natural time formatting (e.g., "3h 30m" / "45m")
+    const formatTimeDisplay = (minutes: number) => {
+      if (!minutes || minutes <= 0) return { main: "0m", sub: "0 mins today" };
+      const hrs = Math.floor(minutes / 60);
+      const mins = minutes % 60;
+      if (hrs === 0) return { main: `${mins}m`, sub: `${mins} mins today` };
+      if (mins === 0) return { main: `${hrs} hrs`, sub: `${hrs} hours today` };
+      return { main: `${hrs}h ${mins}m`, sub: `${(minutes / 60).toFixed(1)} hrs today` };
+    };
+
+    const screenTimeFormatted = formatTimeDisplay(totalMins);
+
+    const academicPct = Math.round((academicMins / safeTotal) * 100);
+    const socialPct = Math.round((socialMins / safeTotal) * 100);
+    const entertainmentPct = Math.round((entertainmentMins / safeTotal) * 100);
 
     const isLateNightWarning = lateNightMins >= 90;
     const riskLevel = log?.risk_level || "LOW";
@@ -712,12 +724,12 @@ export const StudentDashboard: React.FC = () => {
                 <Clock className="h-4 w-4 text-indigo-500" />
               </div>
               <div className="mt-2 flex items-baseline gap-2">
-                <span className="text-2xl font-black text-foreground">{totalHours}</span>
-                <span className="text-xs text-muted-foreground">hours today</span>
+                <span className="text-2xl font-black text-foreground">{screenTimeFormatted.main}</span>
+                <span className="text-xs text-muted-foreground">{screenTimeFormatted.sub}</span>
               </div>
               <div className="mt-2 text-[11px] text-muted-foreground flex items-center justify-between">
-                <span>Total: {log?.total_screen_time_minutes || 0} mins</span>
-                <span className="text-emerald-500 font-semibold">Non-idle active</span>
+                <span>Total: {totalMins} mins</span>
+                <span className="text-emerald-500 font-semibold">Active usage</span>
               </div>
             </div>
 
@@ -733,9 +745,9 @@ export const StudentDashboard: React.FC = () => {
               </div>
               <div className="mt-2 flex items-baseline gap-2">
                 <span className={`text-2xl font-black ${isLateNightWarning ? "text-rose-500" : "text-foreground"}`}>
-                  {lateNightMins}
+                  {lateNightMins > 60 ? `${Math.floor(lateNightMins / 60)}h ${lateNightMins % 60}m` : `${lateNightMins}m`}
                 </span>
-                <span className="text-xs text-muted-foreground">mins after midnight</span>
+                <span className="text-xs text-muted-foreground">after midnight</span>
               </div>
               <div className="mt-2 text-[11px] font-semibold">
                 {lateNightMins === 0 ? (
