@@ -45,7 +45,7 @@ class BehavioralService:
         history_logs: List[BehavioralLog] = result.scalars().all()
 
         # 2. Compute personalized baseline statistics
-        if history_logs:
+        if len(history_logs) >= 3:
             screen_times = [log.total_screen_time_minutes for log in history_logs]
             late_nights = [log.late_night_usage_minutes for log in history_logs]
             
@@ -53,26 +53,24 @@ class BehavioralService:
             mean_late = sum(late_nights) / len(late_nights)
             
             std_late = (sum((x - mean_late) ** 2 for x in late_nights) / len(late_nights)) ** 0.5
-            if std_late < 10.0:
-                std_late = 10.0  # Baseline smoothing
+            std_late = max(30.0, std_late)  # Clinically realistic minimum variance threshold
         else:
             mean_screen = 240.0  # Default 4 hours
-            mean_late = 15.0     # Default 15 mins
-            std_late = 15.0
+            mean_late = 20.0     # Default 20 mins
+            std_late = 35.0      # Population variance prior
 
         # 3. Calculate Normalized Baseline Deviation Z-Score
         late_night_deviation_z = (payload.late_night_usage_minutes - mean_late) / std_late
         late_night_deviation_z = round(float(late_night_deviation_z), 2)
 
         # 4. Determine Behavioral Risk Tier
-        # Criteria: Late night usage > 2.5 hours (150 min) OR deviation Z > 2.5
         behavioral_risk_level = "LOW"
         risk_reasons = []
 
-        if payload.late_night_usage_minutes >= 180 or late_night_deviation_z >= 3.0:
+        if payload.late_night_usage_minutes >= 180 or (late_night_deviation_z >= 3.0 and payload.late_night_usage_minutes >= 120):
             behavioral_risk_level = "HIGH"
             risk_reasons.append(f"Critical late-night computer usage spike ({payload.late_night_usage_minutes} mins past midnight, Z={late_night_deviation_z})")
-        elif payload.late_night_usage_minutes >= 90 or late_night_deviation_z >= 1.8:
+        elif payload.late_night_usage_minutes >= 60 or late_night_deviation_z >= 1.8:
             behavioral_risk_level = "MEDIUM"
             risk_reasons.append(f"Moderate circadian sleep disruption ({payload.late_night_usage_minutes} mins after midnight)")
 
@@ -210,7 +208,11 @@ class BehavioralService:
         latest = recent_logs[0]
         # Calculate time since last sync
         now = datetime.now(timezone.utc)
-        diff_mins = int((now - latest.synced_at).total_seconds() / 60)
+        synced_at = latest.synced_at
+        if synced_at.tzinfo is None:
+            synced_at = synced_at.replace(tzinfo=timezone.utc)
+
+        diff_mins = int((now - synced_at).total_seconds() / 60)
         is_live = diff_mins <= 10
 
         return {
