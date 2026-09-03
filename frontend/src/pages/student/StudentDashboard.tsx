@@ -24,9 +24,11 @@ import {
 import { 
   Mic, Square, Sparkles, BookOpen, Video, FileText, AlertCircle, HelpCircle,
   X, Play, Pause, Heart, Check, ClipboardCheck, Activity,
-  Laptop, Moon, Clock, Monitor, RefreshCw, Zap
+  Laptop, Moon, Clock, Monitor, RefreshCw, Zap, PlayCircle
 } from "lucide-react";
 import api, { chatAPI } from "@/services/api";
+import { useAuth } from "@/contexts/AuthContext";
+import { useScreenTimeTracker } from "@/hooks/useScreenTimeTracker";
 
 // Standard questions for PHQ-9 Depression survey
 const PHQ9_QUESTIONS = [
@@ -97,12 +99,74 @@ export const StudentDashboard: React.FC = () => {
   const { data: assessment, isLoading: isAssessmentLoading } = useLatestAssessment();
   const { data: recommendations, isLoading: isRecsLoading } = useCurrentRecommendations();
   const { data: moodHistory, isLoading: isHistoryLoading } = useMoodHistory(timeframe);
+  // Auto-track screen time seamlessly using logged-in student credentials
+  const { user } = useAuth();
+  useScreenTimeTracker();
+
   const { data: behavioralSummary, refetch: refetchBehavioral } = useQuery({
     queryKey: ["behavioral-summary"],
     queryFn: chatAPI.getBehavioralSummary,
     refetchInterval: 10000, // Live poll every 10s
   });
   const submitJournalMutation = useSubmitJournal();
+
+  // Quick preset telemetry simulation for instant demonstration
+  const handleSimulateTelemetry = async (type: "academic" | "late_night" | "severe") => {
+    if (!user) return;
+    const today = new Date().toISOString().split("T")[0];
+    let payload = {
+      student_id: user.id,
+      date: today,
+      total_screen_time_minutes: 270,
+      late_night_usage_minutes: 0,
+      academic_usage_minutes: 200,
+      social_usage_minutes: 35,
+      entertainment_usage_minutes: 35,
+      baseline_deviation_score: 0.0,
+    };
+
+    if (type === "late_night") {
+      payload = {
+        student_id: user.id,
+        date: today,
+        total_screen_time_minutes: 380,
+        late_night_usage_minutes: 100,
+        academic_usage_minutes: 140,
+        social_usage_minutes: 140,
+        entertainment_usage_minutes: 100,
+        baseline_deviation_score: 0.0,
+      };
+    } else if (type === "severe") {
+      payload = {
+        student_id: user.id,
+        date: today,
+        total_screen_time_minutes: 540,
+        late_night_usage_minutes: 220,
+        academic_usage_minutes: 30,
+        social_usage_minutes: 280,
+        entertainment_usage_minutes: 230,
+        baseline_deviation_score: 0.0,
+      };
+    }
+
+    try {
+      await api.post("/chat/behavioral-features", payload);
+      await refetchBehavioral();
+      queryClient.invalidateQueries({ queryKey: ["latest-assessment"] });
+      queryClient.invalidateQueries({ queryKey: ["user-notifications"] });
+      toast({
+        title: "Screen Time Ingested",
+        description: `Successfully simulated ${payload.total_screen_time_minutes}m screen time (${payload.late_night_usage_minutes}m late night).`,
+        variant: type === "severe" ? "destructive" : "success",
+      });
+    } catch (err) {
+      toast({
+        title: "Simulation Failed",
+        description: "Could not submit behavioral features.",
+        variant: "destructive",
+      });
+    }
+  };
 
   // 2. Submit Journal logic
   const handleTextSubmit = async (e: React.FormEvent) => {
@@ -675,16 +739,10 @@ export const StudentDashboard: React.FC = () => {
                 <CardTitle className="text-foreground text-sm font-extrabold">
                   PC Digital Phenotyping & Screen Activity
                 </CardTitle>
-                {isConnected ? (
-                  <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] font-bold text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
-                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                    {isLive ? "Live Syncing" : "Agent Active"}
-                  </span>
-                ) : (
-                  <span className="inline-flex items-center gap-1 rounded-full bg-slate-500/10 px-2 py-0.5 text-[10px] font-semibold text-slate-500 border border-slate-500/20">
-                    Desktop Agent Standby
-                  </span>
-                )}
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-[10px] font-bold text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                  {isConnected && isLive ? "Live Syncing" : "Auto-Tracking (Logged In)"}
+                </span>
               </div>
               <CardDescription className="text-muted-foreground text-xs">
                 Passive laptop screen time and circadian sleep disruption tracking
@@ -811,15 +869,48 @@ export const StudentDashboard: React.FC = () => {
             </div>
           </div>
 
-          {/* Agent launch instruction footer if not active */}
-          {!isConnected && (
-            <div className="rounded-xl border border-indigo-500/20 bg-indigo-500/5 p-3 flex items-center justify-between text-xs">
-              <div className="flex items-center gap-2 text-indigo-700 dark:text-indigo-300 font-medium">
-                <Monitor className="h-4 w-4 shrink-0" />
-                <span>Run <code className="bg-indigo-500/10 px-1.5 py-0.5 rounded font-mono text-[11px]">python mindguard_pc_agent.py</code> in terminal to start live background tracking.</span>
-              </div>
+          {/* Quick Simulation & Live Ingestion Controls */}
+          <div className="rounded-xl border border-border/70 bg-background/50 p-3 flex flex-wrap items-center justify-between gap-2">
+            <div className="flex items-center gap-2 text-xs font-semibold text-foreground">
+              <Sparkles className="h-4 w-4 text-primary" />
+              <span>Simulate Live Usage Profiles:</span>
             </div>
-          )}
+            <div className="flex flex-wrap items-center gap-1.5">
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => handleSimulateTelemetry("academic")}
+                className="h-7 text-[11px] font-medium border-indigo-500/30 hover:bg-indigo-500/10 hover:text-indigo-600"
+              >
+                📚 4.5h Study Focus (🟢 Low Risk)
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => handleSimulateTelemetry("late_night")}
+                className="h-7 text-[11px] font-medium border-amber-500/30 hover:bg-amber-500/10 hover:text-amber-600"
+              >
+                🌙 6.3h Late-Night Cram (🟡 Med Risk)
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => handleSimulateTelemetry("severe")}
+                className="h-7 text-[11px] font-medium border-rose-500/30 hover:bg-rose-500/10 hover:text-rose-600"
+              >
+                ⚠️ 9.0h Severe Strain (🔴 High Risk)
+              </Button>
+            </div>
+          </div>
+
+          <div className="rounded-xl border border-indigo-500/20 bg-indigo-500/5 p-3 flex items-center justify-between text-xs">
+            <div className="flex items-center gap-2 text-indigo-700 dark:text-indigo-300 font-medium">
+              <Monitor className="h-4 w-4 shrink-0" />
+              <span>
+                <strong>Automatic Web & Session Tracking Active.</strong> Screen time & activity categories are passively calculated from your authenticated session.
+              </span>
+            </div>
+          </div>
         </CardContent>
       </Card>
     );
