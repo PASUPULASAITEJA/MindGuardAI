@@ -3,6 +3,11 @@
 .env.*
 !.env.example
 
+# Agent Local Auth Tokens
+.mindguard_agent_auth.json
+*.agent_auth.json
+desktop_agent/.mindguard_agent_auth.json
+
 # Python Caches & Virtual Envs
 __pycache__/
 *.pyc
