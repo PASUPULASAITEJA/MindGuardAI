@@ -81,24 +81,43 @@ async def run_behavioral_tests():
         assert res2['risk_assessment']['risk_level'] == "MEDIUM", f"Expected MEDIUM, got {res2['risk_assessment']['risk_level']}"
         print("  --> PASS: Moderate late-night activity classified as MEDIUM risk.")
 
-        # 4. Test 3: Ingest Severe Circadian Disruption Telemetry (HIGH Risk / Counselor Alert)
-        print("\n[TEST 3] Testing Severe Late-Night Spike (HIGH Risk & Auto Counselor Escalation)...")
-        payload_high = BehavioralFeaturesPayload(
+        # 4. Test 3: Ingest Late-Night Exam & Project Study (LOW Risk / No False Alarm)
+        print("\n[TEST 3] Testing Late-Night Exam & Project Study (Context Override -> LOW Risk)...")
+        payload_exam = BehavioralFeaturesPayload(
             student_id=str(student.id),
             date="2026-09-03",
+            total_screen_time_minutes=360,
+            late_night_usage_minutes=120,  # 2 hours past midnight studying
+            academic_usage_minutes=300,    # 83% academic coding & exam prep
+            social_usage_minutes=30,
+            entertainment_usage_minutes=30,
+            baseline_deviation_score=0.0
+        )
+        res_exam = await behavioral_service.ingest_and_evaluate(db, student, payload_exam)
+        print(f"  Calculated Risk: {res_exam['risk_assessment']['risk_level']}")
+        print(f"  Counselor Escalated: {res_exam['risk_assessment']['counselor_escalated']}")
+        assert res_exam['risk_assessment']['risk_level'] == "LOW", f"Expected LOW for academic exam study, got {res_exam['risk_assessment']['risk_level']}"
+        assert not res_exam['risk_assessment']['counselor_escalated']
+        print("  --> PASS: Late-night exam/project study accurately identified as LOW risk without false alarm.")
+
+        # 5. Test 4: Ingest Severe Circadian Doom-scrolling Spike (HIGH Risk / Counselor Alert)
+        print("\n[TEST 4] Testing Severe Late-Night Doom-Scrolling & Isolation (HIGH Risk)...")
+        payload_high = BehavioralFeaturesPayload(
+            student_id=str(student.id),
+            date="2026-09-04",
             total_screen_time_minutes=540,
-            late_night_usage_minutes=210,  # 3.5 hours past midnight (severe insomnia/crisis)
-            academic_usage_minutes=20,
+            late_night_usage_minutes=210,  # 3.5 hours past midnight gaming/scrolling
+            academic_usage_minutes=20,     # Only 3% academic
             social_usage_minutes=280,
             entertainment_usage_minutes=240,
             baseline_deviation_score=0.0
         )
-        res3 = await behavioral_service.ingest_and_evaluate(db, student, payload_high)
-        print(f"  Calculated Risk: {res3['risk_assessment']['risk_level']} (Z={res3['baseline_analysis']['deviation_z_score']})")
-        print(f"  Counselor Escalated: {res3['risk_assessment']['counselor_escalated']}")
-        print(f"  Dispatched Alert ID: {res3['risk_assessment']['alert_id']}")
-        assert res3['risk_assessment']['risk_level'] == "HIGH"
-        assert res3['risk_assessment']['counselor_escalated'] is True
+        res_high = await behavioral_service.ingest_and_evaluate(db, student, payload_high)
+        print(f"  Calculated Risk: {res_high['risk_assessment']['risk_level']} (Z={res_high['baseline_analysis']['deviation_z_score']})")
+        print(f"  Counselor Escalated: {res_high['risk_assessment']['counselor_escalated']}")
+        print(f"  Dispatched Alert ID: {res_high['risk_assessment']['alert_id']}")
+        assert res_high['risk_assessment']['risk_level'] == "HIGH"
+        assert res_high['risk_assessment']['counselor_escalated'] is True
 
         # Verify DB records created: Assessment, Alert (PENDING), SafetyEvent
         alert_res = await db.execute(select(Alert).where(Alert.student_id == student.id, Alert.status == AlertStatus.PENDING))
@@ -110,10 +129,29 @@ async def run_behavioral_tests():
         safety_event = safety_res.scalar_one_or_none()
         assert safety_event is not None, "SafetyEvent was not logged!"
         print(f"  [VERIFIED] Safety Event logged in DB: ID={safety_event.id}, Severity={safety_event.severity}")
-        print("  --> PASS: Severe late-night spike automatically escalated to counselor triage queue.")
+        print("  --> PASS: Severe late-night isolation automatically escalated to counselor triage queue.")
 
-        # 5. Test 4: Verify Summary API output
-        print("\n[TEST 4] Testing Dashboard Summary Telemetry Retrieval...")
+        # 6. Test 5: Ingest Immediate Crisis Search Flag
+        print("\n[TEST 5] Testing Urgent Crisis Search Detection (Immediate HIGH Risk)...")
+        payload_crisis = BehavioralFeaturesPayload(
+            student_id=str(student.id),
+            date="2026-09-05",
+            total_screen_time_minutes=120,
+            late_night_usage_minutes=10,
+            academic_usage_minutes=20,
+            social_usage_minutes=50,
+            entertainment_usage_minutes=50,
+            baseline_deviation_score=0.0,
+            is_crisis_search_flag=True
+        )
+        res_crisis = await behavioral_service.ingest_and_evaluate(db, student, payload_crisis)
+        print(f"  Calculated Risk: {res_crisis['risk_assessment']['risk_level']}")
+        assert res_crisis['risk_assessment']['risk_level'] == "HIGH"
+        assert res_crisis['risk_assessment']['counselor_escalated'] is True
+        print("  --> PASS: Urgent crisis search immediately triggered counselor safety alert.")
+
+        # 7. Test 6: Verify Summary API output
+        print("\n[TEST 6] Testing Dashboard Summary Telemetry Retrieval...")
         summary = await behavioral_service.get_student_summary(db, student.id)
         print(f"  Agent Connected: {summary['is_agent_connected']}")
         print(f"  Live Active: {summary['is_currently_active']}")
