@@ -197,6 +197,31 @@ api.interceptors.response.use(
     getMessages: async (conversationId: string) => {
       const res = await api.get<ChatMessageItem[]>(`/chat/conversations/${conversationId}/messages`);
       return res.data;
+    },
+    getBehavioralSummary: async () => {
+      const res = await api.get<{
+        is_agent_connected: boolean;
+        is_currently_active: boolean;
+        last_synced_minutes_ago: number;
+        latest_log: {
+          date: string;
+          total_screen_time_minutes: number;
+          late_night_usage_minutes: number;
+          academic_usage_minutes: number;
+          social_usage_minutes: number;
+          entertainment_usage_minutes: number;
+          baseline_deviation_score: number;
+          risk_level: string;
+          synced_at: string;
+        } | null;
+        weekly_history: Array<{
+          date: string;
+          total_screen_time_minutes: number;
+          late_night_usage_minutes: number;
+          risk_level: string;
+        }>;
+      }>("/chat/behavioral-features/summary");
+      return res.data;
     }
   };
 

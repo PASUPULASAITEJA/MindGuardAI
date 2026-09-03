@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { useLocation, NavLink } from "react-router-dom";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQueryClient, useQuery } from "@tanstack/react-query";
 import { 
   useLatestAssessment 
 } from "@/hooks/usePredictions";
@@ -23,9 +23,10 @@ import {
 } from "recharts";
 import { 
   Mic, Square, Sparkles, BookOpen, Video, FileText, AlertCircle, HelpCircle,
-  X, Play, Pause, Heart, Check, ClipboardCheck, Activity
+  X, Play, Pause, Heart, Check, ClipboardCheck, Activity,
+  Laptop, Moon, Clock, Monitor, RefreshCw, Zap
 } from "lucide-react";
-import api from "@/services/api";
+import api, { chatAPI } from "@/services/api";
 
 // Standard questions for PHQ-9 Depression survey
 const PHQ9_QUESTIONS = [
@@ -96,6 +97,11 @@ export const StudentDashboard: React.FC = () => {
   const { data: assessment, isLoading: isAssessmentLoading } = useLatestAssessment();
   const { data: recommendations, isLoading: isRecsLoading } = useCurrentRecommendations();
   const { data: moodHistory, isLoading: isHistoryLoading } = useMoodHistory(timeframe);
+  const { data: behavioralSummary, refetch: refetchBehavioral } = useQuery({
+    queryKey: ["behavioral-summary"],
+    queryFn: chatAPI.getBehavioralSummary,
+    refetchInterval: 10000, // Live poll every 10s
+  });
   const submitJournalMutation = useSubmitJournal();
 
   // 2. Submit Journal logic
@@ -638,6 +644,187 @@ export const StudentDashboard: React.FC = () => {
     </Card>
   );
 
+  const renderDigitalPhenotypingCard = () => {
+    const isConnected = behavioralSummary?.is_agent_connected;
+    const isLive = behavioralSummary?.is_currently_active;
+    const log = behavioralSummary?.latest_log;
+
+    const totalHours = log ? (log.total_screen_time_minutes / 60).toFixed(1) : "0.0";
+    const lateNightMins = log?.late_night_usage_minutes || 0;
+    const academicMins = log?.academic_usage_minutes || 0;
+    const socialMins = log?.social_usage_minutes || 0;
+    const entertainmentMins = log?.entertainment_usage_minutes || 0;
+    const totalMins = log?.total_screen_time_minutes || 1;
+
+    const academicPct = Math.round((academicMins / totalMins) * 100);
+    const socialPct = Math.round((socialMins / totalMins) * 100);
+    const entertainmentPct = Math.round((entertainmentMins / totalMins) * 100);
+
+    const isLateNightWarning = lateNightMins >= 90;
+    const riskLevel = log?.risk_level || "LOW";
+
+    return (
+      <Card className="border-border/50 bg-card/40 backdrop-blur-md shadow-sm overflow-hidden">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+          <div className="flex items-center gap-2.5">
+            <div className="h-9 w-9 rounded-xl bg-indigo-500/10 flex items-center justify-center text-indigo-500 border border-indigo-500/20">
+              <Laptop className="h-5 w-5" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <CardTitle className="text-foreground text-sm font-extrabold">
+                  PC Digital Phenotyping & Screen Activity
+                </CardTitle>
+                {isConnected ? (
+                  <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] font-bold text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                    {isLive ? "Live Syncing" : "Agent Active"}
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1 rounded-full bg-slate-500/10 px-2 py-0.5 text-[10px] font-semibold text-slate-500 border border-slate-500/20">
+                    Desktop Agent Standby
+                  </span>
+                )}
+              </div>
+              <CardDescription className="text-muted-foreground text-xs">
+                Passive laptop screen time and circadian sleep disruption tracking
+              </CardDescription>
+            </div>
+          </div>
+
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => refetchBehavioral()}
+            className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground"
+          >
+            <RefreshCw className="h-3.5 w-3.5" />
+          </Button>
+        </CardHeader>
+
+        <CardContent className="space-y-4 pt-1">
+          {/* Grid of Key Metrics */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            {/* 1. Active Screen Time */}
+            <div className="rounded-xl border border-border/60 bg-background/40 p-3.5 flex flex-col justify-between">
+              <div className="flex items-center justify-between text-xs text-muted-foreground font-semibold">
+                <span>Active Computer Time</span>
+                <Clock className="h-4 w-4 text-indigo-500" />
+              </div>
+              <div className="mt-2 flex items-baseline gap-2">
+                <span className="text-2xl font-black text-foreground">{totalHours}</span>
+                <span className="text-xs text-muted-foreground">hours today</span>
+              </div>
+              <div className="mt-2 text-[11px] text-muted-foreground flex items-center justify-between">
+                <span>Total: {log?.total_screen_time_minutes || 0} mins</span>
+                <span className="text-emerald-500 font-semibold">Non-idle active</span>
+              </div>
+            </div>
+
+            {/* 2. Circadian / Late-Night Disruption */}
+            <div className={`rounded-xl border p-3.5 flex flex-col justify-between ${
+              isLateNightWarning 
+                ? "border-rose-500/30 bg-rose-500/5" 
+                : "border-border/60 bg-background/40"
+            }`}>
+              <div className="flex items-center justify-between text-xs text-muted-foreground font-semibold">
+                <span>Late-Night Activity (12AM-5AM)</span>
+                <Moon className={`h-4 w-4 ${isLateNightWarning ? "text-rose-500" : "text-amber-500"}`} />
+              </div>
+              <div className="mt-2 flex items-baseline gap-2">
+                <span className={`text-2xl font-black ${isLateNightWarning ? "text-rose-500" : "text-foreground"}`}>
+                  {lateNightMins}
+                </span>
+                <span className="text-xs text-muted-foreground">mins after midnight</span>
+              </div>
+              <div className="mt-2 text-[11px] font-semibold">
+                {lateNightMins === 0 ? (
+                  <span className="text-emerald-500">Optimal Circadian Rhythm 🟢</span>
+                ) : isLateNightWarning ? (
+                  <span className="text-rose-500">Circadian Disruption Alert 🔴</span>
+                ) : (
+                  <span className="text-amber-500">Mild Late-Night Activity 🟡</span>
+                )}
+              </div>
+            </div>
+
+            {/* 3. Behavioral Risk Tier */}
+            <div className="rounded-xl border border-border/60 bg-background/40 p-3.5 flex flex-col justify-between">
+              <div className="flex items-center justify-between text-xs text-muted-foreground font-semibold">
+                <span>Digital Phenotype Risk</span>
+                <Zap className="h-4 w-4 text-violet-500" />
+              </div>
+              <div className="mt-2 flex items-baseline gap-2">
+                <span className={`text-2xl font-black ${
+                  riskLevel === "HIGH" ? "text-rose-500" : riskLevel === "MEDIUM" ? "text-amber-500" : "text-emerald-500"
+                }`}>
+                  {riskLevel}
+                </span>
+                <span className="text-xs text-muted-foreground">Risk Tier</span>
+              </div>
+              <div className="mt-2 text-[11px] text-muted-foreground">
+                Z-Score: {log?.baseline_deviation_score || 0.0}σ vs 14d baseline
+              </div>
+            </div>
+          </div>
+
+          {/* App Category Breakdown Bar */}
+          <div className="rounded-xl border border-border/60 bg-background/40 p-3.5 space-y-2">
+            <div className="flex items-center justify-between text-xs font-bold text-foreground">
+              <span>Application Usage Distribution</span>
+              <span className="text-muted-foreground font-normal text-[11px]">
+                Academic: {academicMins}m | Entertainment: {entertainmentMins}m | Social: {socialMins}m
+              </span>
+            </div>
+
+            <div className="h-2.5 w-full rounded-full bg-slate-200 dark:bg-slate-800 overflow-hidden flex">
+              <div 
+                className="bg-indigo-500 h-full transition-all duration-500" 
+                style={{ width: `${Math.max(5, academicPct)}%` }} 
+                title={`Academic/Coding: ${academicPct}%`} 
+              />
+              <div 
+                className="bg-purple-500 h-full transition-all duration-500" 
+                style={{ width: `${Math.max(5, entertainmentPct)}%` }} 
+                title={`Entertainment: ${entertainmentPct}%`} 
+              />
+              <div 
+                className="bg-emerald-500 h-full transition-all duration-500" 
+                style={{ width: `${Math.max(5, socialPct)}%` }} 
+                title={`Social/Messaging: ${socialPct}%`} 
+              />
+            </div>
+
+            <div className="flex items-center justify-between text-[11px] text-muted-foreground pt-1">
+              <div className="flex items-center gap-1.5">
+                <span className="h-2 w-2 rounded-full bg-indigo-500" />
+                <span>Academic & Coding ({academicPct || 0}%)</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className="h-2 w-2 rounded-full bg-purple-500" />
+                <span>Entertainment & Media ({entertainmentPct || 0}%)</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className="h-2 w-2 rounded-full bg-emerald-500" />
+                <span>Social & Chat ({socialPct || 0}%)</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Agent launch instruction footer if not active */}
+          {!isConnected && (
+            <div className="rounded-xl border border-indigo-500/20 bg-indigo-500/5 p-3 flex items-center justify-between text-xs">
+              <div className="flex items-center gap-2 text-indigo-700 dark:text-indigo-300 font-medium">
+                <Monitor className="h-4 w-4 shrink-0" />
+                <span>Run <code className="bg-indigo-500/10 px-1.5 py-0.5 rounded font-mono text-[11px]">python mindguard_pc_agent.py</code> in terminal to start live background tracking.</span>
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    );
+  };
+
   const renderVolatilityChart = () => (
     <Card className="border-border/50 bg-card/40 backdrop-blur-md shadow-sm">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
@@ -836,6 +1023,9 @@ export const StudentDashboard: React.FC = () => {
               </div>
             </Card>
           </div>
+
+          {/* PC Digital Phenotyping & Screen Time Activity */}
+          {renderDigitalPhenotypingCard()}
           
           {/* Volatility Line Chart */}
           {renderVolatilityChart()}
