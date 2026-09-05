@@ -378,7 +378,7 @@ If you are developing and want live hot-reloading outside containers, run the se
 #### 3. Optional: Run Non-Invasive Behavioral PC Agent
 To monitor desktop digital biomarkers (screen time, late-night usage, and distress queries):
 ```bash
-python mindguard_pc_agent.py
+python desktop_agent/mindguard_pc_agent.py
 ```
 
 ---
@@ -517,7 +517,8 @@ mindguard-student-wellness-platform/
 │   ├── test_chatbot.py     # Companion chatbot & crisis triage test suite
 │   ├── test_behavioral_agent.py # Behavioral telemetry test suite
 │   └── train_daicwoz.py    # DAIC-WOZ multimodal depression pipeline
-├── mindguard_pc_agent.py   # Non-invasive behavioral desktop telemetry agent
+├── desktop_agent/          # Non-invasive behavioral desktop telemetry agent
+│   └── mindguard_pc_agent.py
 ├── docker-compose.yml      # Service orchestration config
 └── README.md               # Main project overview and run book
 ```
