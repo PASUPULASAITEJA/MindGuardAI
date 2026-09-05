@@ -70,11 +70,15 @@ To create a proactive and preventive mental wellness ecosystem that provides con
 
 ## 9. Product Features
 
-* **Mood Tracking:** Allows students to log emotions, daily experiences, and stress levels through simple, routine check-ins.
-* **Emotional Assessment:** Analyzes behavioral patterns using AI to identify early signs of stress, burnout, or anxiety.
-* **Wellness Assistant:** A personalized module that delivers mindfulness activities, self-help resources, and tailored wellness tips.
-* **Early Warning System:** Proactively identifies students requiring professional attention and alerts counselors to facilitate timely intervention.
-* **Role-Based Dashboards:** Dedicated interfaces for Students (mood history, suggestions), Counselors (records, alerts), and Institutions (reports).
+* **Mood Tracking:** Allows students to log emotions, daily experiences, and stress levels through simple, routine text or voice check-ins.
+* **Standardized Clinical Assessments:** Validated PHQ-9 (depression) and GAD-7 (anxiety) questionnaire workflows with automatic scoring and risk tiering.
+* **In-Chat Interactive CBT Micro-Modules:**
+  - **Dual Breathing Pacer:** Box Breathing (4-4-4-4) and 4-7-8 Relaxing Breath with real-time animated countdown ring for autonomic nervous system regulation.
+  - **5-4-3-2-1 Sensory Grounding:** Step-by-step interactive tactile checklist across 5 physical senses to anchor students experiencing acute anxiety or panic.
+  - **Cognitive Thought Distortion Reframer:** Structured tool identifying 5 cognitive distortions (*Catastrophizing*, *All-or-Nothing*, *Mind Reading*, *Emotional Reasoning*, *Overgeneralization*) with Automatic Negative Thought restructuring and reflection sharing.
+* **Emergency Crisis SOS Gateway:** Omnipresent 1-tap direct counselor alert escalation with `CRITICAL PRIORITY` status and direct-dial 24/7 national/campus crisis helplines (Tele-MANAS 14416, KIRAN 1800-599-0019, Campus Health Clinic).
+* **Behavioral Telemetry PC Agent (`mindguard_pc_agent.py`):** Non-invasive local background telemetry monitoring active window categories, screen time, late-night circadian disruption, and urgent distress search query detection.
+* **Role-Based Portals:** Dedicated interfaces for Students (dashboard, CBT tools, companion chatbot), Counselors (triage queue, student risk files, SOS alerts), and Institutions (macro-trends).
 
 ---
 
@@ -82,12 +86,15 @@ To create a proactive and preventive mental wellness ecosystem that provides con
 
 | Ref | Feature | Requirement Description |
 | --- | --- | --- |
-| **FR1** | Authentication | The system shall provide secure JWT authentication for Students, Counselors, and Admins. |
-| **FR2** | Mood Input Methods | The system shall accept mood data via text input, voice input, and mood surveys. |
-| **FR3** | Emotion Analysis | The Processing Layer shall utilize NLP to analyze input and detect emotions and sentiment. |
-| **FR4** | Score Calculation | The system shall calculate a quantifiable Mental Wellness Score based on emotional indicators. |
-| **FR5** | Automated Alerts | The Notification Service shall automatically dispatch counselor alerts for high-risk assessment scores. |
-| **FR6** | Analytics Dashboard | The application must aggregate student wellness data to display trends on the Institution Dashboard. |
+| **FR1** | Authentication | The system shall provide secure JWT authentication and RBAC for Students, Counselors, and Admins. |
+| **FR2** | Mood Input Methods | The system shall accept mood data via text input, voice input, and standardized clinical surveys (PHQ-9/GAD-7). |
+| **FR3** | Emotion Analysis | The Processing Layer shall utilize DistilBERT to analyze input and detect fine-grained emotion vectors. |
+| **FR4** | Score Calculation | The system shall calculate a quantifiable Mental Wellness Score (0-100) using Random Forest & XGBoost classifiers. |
+| **FR5** | Automated Alerts | The Notification Service shall automatically dispatch counselor alerts for high-risk assessment scores and distress triggers. |
+| **FR6** | Analytics Dashboard | The application must aggregate student wellness data to display macro-trends on the Institution Dashboard. |
+| **FR7** | In-Chat CBT Micro-Tools | The chatbot shall provide interactive dual breathing pacers (Box 4-4-4-4, Relax 4-7-8), 5-4-3-2-1 grounding, and cognitive reframing. |
+| **FR8** | Emergency SOS Gateway | The system shall provide 1-tap emergency counselor triage escalation and direct 24/7 tele-health helpline access. |
+| **FR9** | Behavioral Telemetry | The PC agent shall capture non-invasive digital biomarkers (screen time, late-night usage) and flag urgent crisis queries. |
 
 ---
 
