@@ -192,6 +192,83 @@ Facilitates the Early Warning System, tracking high-risk assessments routed to c
 | `created_at` | TIMESTAMP |  | DEFAULT NOW() | Time the alert was generated. |
 | `resolved_at` | TIMESTAMP |  | NULLABLE | Time the counselor closed the alert. |
 
+### 3.6 CONVERSATIONS
+
+Stores chat sessions between students and the MindGuard companion.
+
+| Column Name | Data Type | Key | Constraints | Description |
+| --- | --- | --- | --- | --- |
+| `id` | UUID | PK | NOT NULL | Unique conversation ID. |
+| `student_id` | UUID | FK | NOT NULL | References `USERS(id)` on delete CASCADE. |
+| `title` | VARCHAR(255) |  | NOT NULL | Session topic title. |
+| `summary` | TEXT |  | NULLABLE | Automated clinical summarization. |
+| `current_risk_level` | VARCHAR(20) |  | NOT NULL | Latest risk tier (`GREEN`, `YELLOW`, `RED`). |
+| `created_at` | TIMESTAMP |  | DEFAULT NOW() | Session start timestamp. |
+| `updated_at` | TIMESTAMP |  | DEFAULT NOW() | Last message activity timestamp. |
+
+### 3.7 CHAT_MESSAGES
+
+Stores individual turn messages within a conversation.
+
+| Column Name | Data Type | Key | Constraints | Description |
+| --- | --- | --- | --- | --- |
+| `id` | UUID | PK | NOT NULL | Message UUID. |
+| `conversation_id` | UUID | FK | NOT NULL | References `CONVERSATIONS(id)` on delete CASCADE. |
+| `student_id` | UUID | FK | NOT NULL | References `USERS(id)` on delete CASCADE. |
+| `sender` | ENUM |  | NOT NULL | `'STUDENT'`, `'ASSISTANT'`, `'SYSTEM'`. |
+| `message` | TEXT |  | NOT NULL | Raw message text. |
+| `intent` | VARCHAR(100) |  | NULLABLE | Inferred intent classification. |
+| `primary_emotion` | VARCHAR(50) |  | NULLABLE | Extracted dominant emotion. |
+| `sentiment_score` | FLOAT |  | NULLABLE | Polarity score (-1.0 to 1.0). |
+| `risk_level` | VARCHAR(20) |  | DEFAULT 'GREEN' | Turn risk tier (`GREEN`, `YELLOW`, `RED`). |
+| `is_crisis_flag` | BOOLEAN |  | DEFAULT FALSE | Flag indicating acute distress / ideation. |
+| `created_at` | TIMESTAMP |  | DEFAULT NOW() | Message timestamp. |
+
+### 3.8 SAFETY_EVENTS
+
+Audit log for emergency safety events and high-risk triggers.
+
+| Column Name | Data Type | Key | Constraints | Description |
+| --- | --- | --- | --- | --- |
+| `id` | UUID | PK | NOT NULL | Safety event UUID. |
+| `student_id` | UUID | FK | NOT NULL | References `USERS(id)`. |
+| `conversation_id` | UUID | FK | NULLABLE | Associated conversation. |
+| `severity` | VARCHAR(20) |  | DEFAULT 'RED' | `'YELLOW'`, `'RED'`. |
+| `trigger_type` | VARCHAR(100) |  | NOT NULL | Trigger category (e.g., `EXPLICIT_SUICIDAL_IDEATION`, `EMERGENCY_SOS_BUTTON`). |
+| `status` | VARCHAR(50) |  | DEFAULT 'OPEN' | `'OPEN'`, `'ESCALATED'`, `'RESOLVED'`. |
+| `details` | TEXT |  | NULLABLE | Event diagnostic information. |
+| `created_at` | TIMESTAMP |  | DEFAULT NOW() | Incident logging timestamp. |
+
+### 3.9 BEHAVIORAL_LOGS
+
+Stores daily digital biomarker telemetry from the non-invasive PC agent.
+
+| Column Name | Data Type | Key | Constraints | Description |
+| --- | --- | --- | --- | --- |
+| `id` | UUID | PK | NOT NULL | Telemetry record UUID. |
+| `student_id` | UUID | FK | NOT NULL | References `USERS(id)`. |
+| `date` | VARCHAR(20) |  | NOT NULL | YYYY-MM-DD date string. |
+| `total_screen_time_minutes` | INTEGER |  | DEFAULT 0 | Active computer minutes. |
+| `late_night_usage_minutes` | INTEGER |  | DEFAULT 0 | Usage between 12:00 AM and 5:00 AM. |
+| `continuous_screen_minutes` | INTEGER |  | DEFAULT 0 | Longest unbroken screen interval. |
+| `is_crisis_detected` | BOOLEAN |  | DEFAULT FALSE | Flag for urgent distress search query. |
+| `baseline_deviation_score` | FLOAT |  | NULLABLE | Circadian anomaly Z-score. |
+| `synced_at` | TIMESTAMP |  | DEFAULT NOW() | Sync timestamp. |
+
+### 3.10 APPOINTMENTS
+
+Manages clinical appointments between students and university counselors.
+
+| Column Name | Data Type | Key | Constraints | Description |
+| --- | --- | --- | --- | --- |
+| `id` | UUID | PK | NOT NULL | Appointment UUID. |
+| `student_id` | UUID | FK | NOT NULL | References `USERS(id)`. |
+| `counselor_id` | UUID | FK | NULLABLE | References `USERS(id)` (Counselor). |
+| `appointment_type` | ENUM |  | NOT NULL | `'VIRTUAL'`, `'IN_PERSON'`. |
+| `scheduled_time` | TIMESTAMP |  | NOT NULL | Planned session date and time. |
+| `status` | ENUM |  | NOT NULL | `'PENDING'`, `'CONFIRMED'`, `'COMPLETED'`, `'CANCELLED'`. |
+| `reason` | VARCHAR(255) |  | NULLABLE | Student consultation reason. |
+
 ---
 
 ## 4. Relationships and Cascading Rules
