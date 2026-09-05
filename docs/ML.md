@@ -17,6 +17,7 @@ The training and validation phases utilize a combination of open-source NLP data
 | **Student Depression Dataset** | Training the Risk Assessment Engine. | Features specific to the academic demographic (e.g., study hours, financial stress, sleep patterns) to correlate behavioral markers with depression risk. |
 | **PHQ-9 Data** | Clinical threshold mapping for depressive symptoms. | Gold standard Patient Health Questionnaire data used to label the output tiers (Low/Medium/High Risk) based on severity indices. |
 | **GAD-7 Data** | Clinical threshold mapping for anxiety symptoms. | Gold standard Generalized Anxiety Disorder data used to calibrate the early warning system for anxiety-specific interventions. |
+| **DAIC-WOZ Dataset** | Multimodal clinical depression interview validation. | Clinical interview transcripts and audio features (`scripts/train_daicwoz.py`) correlating verbal markers with PHQ-8 clinical depression severity. |
 
 ---
 
@@ -31,6 +32,8 @@ The training and validation phases utilize a combination of open-source NLP data
 ### Feature Engineering
 
 * **Temporal Features:** Extracting contextual features such as `time_of_day`, `day_of_week`, and `proximity_to_exams` (derived from the institutional calendar) to weight academic stress.
+* **Behavioral Digital Biomarkers:** Real-time metrics from `mindguard_pc_agent.py` including `late_night_usage_minutes` (circadian disruption), continuous screen usage, and window category shifts (academic vs. gaming/entertainment).
+* **Circadian Anomaly Z-Score:** Calculating deviations from individual 14-day late-night usage baselines: $Z = \frac{x - \mu}{\sigma}$. Z-scores $> 2.0$ trigger automated counselor triage alerts.
 * **Historical Aggregates:** Calculating rolling averages of the student's `self_reported_score` and `sentiment_score` over 7-day and 30-day windows.
 * **Volatility Index:** Measuring the standard deviation of a student's mood over time to detect rapid emotional cycling, a strong indicator of mental distress.
 
