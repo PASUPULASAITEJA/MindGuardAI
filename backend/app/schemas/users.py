@@ -13,18 +13,10 @@ class UserCreate(UserBase):
 
     @model_validator(mode="after")
     def validate_institutional_email(self):
-        from app.core.whitelist import is_email_whitelisted
+        from app.core.whitelist import is_valid_institutional_domain
         email_str = str(self.email).lower().strip()
-        if is_email_whitelisted(email_str):
-            return self
-
-        if self.role == UserRole.STUDENT:
-            if not (email_str.endswith("@nmims.in") or email_str.endswith("@nmims.edu.in")):
-                raise ValueError("Student registration requires a valid university email ending with @nmims.in or @nmims.edu.in.")
-        elif self.role in (UserRole.COUNSELOR, UserRole.ADMIN):
-            if not email_str.endswith("@nmims.edu"):
-                role_label = "Counselor" if self.role == UserRole.COUNSELOR else "Admin"
-                raise ValueError(f"{role_label} registration requires an institutional staff email ending with @nmims.edu.")
+        if not is_valid_institutional_domain(email_str):
+            raise ValueError("Registration is restricted to authorized institutional email domains: @nmims.in, @nmims.edu.in, or @nmims.edu.")
         return self
 
 class UserUpdate(BaseModel):
