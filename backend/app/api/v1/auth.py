@@ -14,16 +14,23 @@ router = APIRouter()
     status_code=status.HTTP_200_OK,
     summary="Check institutional whitelist roster status for an email"
 )
-async def check_roster_info(email: str):
+async def check_roster_info(email: str, role: Optional[str] = None):
     """
     Checks if an email is present on the institutional whitelist and returns its assigned role.
     """
     from app.core.whitelist import get_authorized_role
-    role = get_authorized_role(email)
+    from app.models.users import UserRole
+    req_role = None
+    if role:
+        try:
+            req_role = UserRole(role.upper())
+        except ValueError:
+            pass
+    authorized_role = get_authorized_role(email, requested_role=req_role)
     return {
         "email": email.lower().strip(),
-        "is_authorized": role is not None,
-        "assigned_role": role.value if role else None
+        "is_authorized": authorized_role is not None,
+        "assigned_role": authorized_role.value if authorized_role else None
     }
 
 @router.post(
