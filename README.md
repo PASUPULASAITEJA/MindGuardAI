@@ -389,9 +389,12 @@ After running [scripts/seed_database.py](scripts/seed_database.py), the database
 
 | Email Address | Role | Password | Description |
 | --- | --- | --- | --- |
-| `student@rit.edu` | Student | `password123` | Log in to check journals, see mood graphs, take PHQ-9, use CBT micro-tools, and chat. |
-| `counselor@rit.edu` | Counselor | `password123` | Log in to manage triage lists, view alerts, and track outreach status. |
-| `admin@rit.edu` | Admin | `password123` | Log in to view aggregated school analytics and institutional macro reports. |
+| `student@nmims.in` | Student | `password123` | Log in to check journals, see mood graphs, take PHQ-9, use CBT micro-tools, and chat. |
+| `counselor@nmims.edu` | Counselor | `password123` | Log in to manage triage lists, view alerts, and track outreach status. |
+| `admin@nmims.edu` | Admin | `password123` | Log in to view aggregated school analytics and institutional macro reports. |
+
+> [!NOTE]
+> Self-service account registration is strictly restricted to authorized institutional email domains: `@nmims.in`, `@nmims.edu.in`, and `@nmims.edu`. Any external emails (e.g. `@gmail.com`) are rejected with `403 Forbidden`.
 
 ---
 
