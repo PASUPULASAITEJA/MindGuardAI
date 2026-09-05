@@ -31,14 +31,14 @@ class UserService:
 
         normalized_email = user_in.email.lower().strip()
 
-        # 1. Validate that the email is on the institutional roster
-        whitelisted_role = get_authorized_role(normalized_email)
+        # 1. Validate that the email is authorized under NMIMS domains
+        whitelisted_role = get_authorized_role(normalized_email, requested_role=user_in.role)
         if not whitelisted_role:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail={
                     "error_code": "NOT_ON_ROSTER",
-                    "message": "This email address is not on the active institutional roster. Please contact your institution administrator.",
+                    "message": "Only institutional emails ending with @nmims.in, @nmims.edu.in, or @nmims.edu are authorized to register.",
                     "details": {"email": user_in.email}
                 }
             )
