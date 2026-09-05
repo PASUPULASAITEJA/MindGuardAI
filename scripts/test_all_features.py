@@ -76,6 +76,38 @@ async def run_all_tests():
             f"Authorized: {res.json().get('is_authorized')}"
         )
 
+        # Domain fallback check: @nmims.edu.in
+        res = await client.get("/api/v1/auth/roster-info?email=student2026@nmims.edu.in")
+        record_test(
+            "Domain Auth: @nmims.edu.in Student",
+            res.status_code == 200 and res.json().get("is_authorized") is True and res.json().get("assigned_role") == "STUDENT",
+            f"Authorized: {res.json().get('is_authorized')}, Role: {res.json().get('assigned_role')}"
+        )
+
+        # Domain fallback check: @nmims.edu Counselor
+        res = await client.get("/api/v1/auth/roster-info?email=counselor2026@nmims.edu&role=COUNSELOR")
+        record_test(
+            "Domain Auth: @nmims.edu Counselor",
+            res.status_code == 200 and res.json().get("is_authorized") is True and res.json().get("assigned_role") == "COUNSELOR",
+            f"Authorized: {res.json().get('is_authorized')}, Role: {res.json().get('assigned_role')}"
+        )
+
+        # Registration Block: External non-NMIMS email (@gmail.com)
+        res_blocked = await client.post(
+            "/api/v1/auth/register",
+            json={
+                "email": "intruder@gmail.com",
+                "password": "Password123!",
+                "full_name": "Intruder User",
+                "role": "STUDENT"
+            }
+        )
+        record_test(
+            "Registration Block: Non-NMIMS Domain (intruder@gmail.com)",
+            res_blocked.status_code in (403, 422),
+            f"Status: {res_blocked.status_code}"
+        )
+
         # -------------------------------------------------------------
         # 2. Authentication & JWT Tokens (Student, Counselor, Admin)
         # -------------------------------------------------------------
@@ -334,7 +366,7 @@ async def run_all_tests():
     print(f"{BOLD}{CYAN}======================================================={RESET}\n")
     
     if failed == 0:
-        print(f"\n{BOLD}{GREEN}*** ALL 23 CORE SYSTEM CAPABILITIES PASSED 100% SUCCESSFULLY! ***{RESET}\n")
+        print(f"\n{BOLD}{GREEN}*** ALL {total} CORE SYSTEM CAPABILITIES PASSED 100% SUCCESSFULLY! ***{RESET}\n")
     else:
         print(f"\n{BOLD}{RED}*** WARNING: Some tests failed. Please review the output above. ***{RESET}\n")
 
