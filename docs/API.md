@@ -454,3 +454,191 @@
 
 
 * **Error Codes:** `401 UNAUTHORIZED`, `404 NOT_FOUND`.
+
+---
+
+## 13. Emergency Crisis SOS API
+
+### 13.1 Trigger High-Priority Emergency SOS Alert
+
+* **URL:** `/alerts/sos` (also available via `/counselors/sos`)
+* **Method:** `POST`
+* **Authentication:** Required (Role: `STUDENT`)
+* **Validation:** Logs emergency alert in counselor triage board with status `PENDING` and severity `RED`.
+* **Request:**
+```json
+{
+  "context": "Student opened Emergency Crisis Gateway from chat toolbar."
+}
+```
+* **Response (201 Created):**
+```json
+{
+  "status": "dispatched",
+  "alert_id": "a-9999-8888-7777",
+  "severity": "CRITICAL",
+  "helplines": [
+    {
+      "name": "Tele-MANAS (Govt of India)",
+      "number": "14416",
+      "badge": "24/7 Toll-Free",
+      "description": "National comprehensive tele-mental health services programme of India"
+    },
+    {
+      "name": "KIRAN National Helpline",
+      "number": "1800-599-0019",
+      "badge": "24/7 Toll-Free",
+      "description": "Official 24/7 mental health rehabilitation helpline"
+    },
+    {
+      "name": "NMIMS Campus Health Clinic",
+      "number": "+91 22 4235 5555",
+      "badge": "Campus Medical Desk",
+      "description": "On-campus emergency medical response and psychologist on duty"
+    }
+  ],
+  "dispatched_at": "2026-09-06T01:00:00Z"
+}
+```
+* **Error Codes:** `401 UNAUTHORIZED`.
+
+---
+
+## 14. Conversational Chat & SSE Streaming API
+
+### 14.1 List Student Conversations
+
+* **URL:** `/chat/conversations`
+* **Method:** `GET`
+* **Authentication:** Required (Role: `STUDENT`)
+* **Response (200 OK):**
+```json
+[
+  {
+    "id": "c-1111",
+    "title": "Wellness Chat - Exam Stress",
+    "current_risk_level": "GREEN",
+    "message_count": 6,
+    "created_at": "2026-09-05T20:00:00Z",
+    "updated_at": "2026-09-05T20:15:00Z"
+  }
+]
+```
+
+### 14.2 Create New Conversation
+
+* **URL:** `/chat/conversations`
+* **Method:** `POST`
+* **Authentication:** Required (Role: `STUDENT`)
+* **Request:**
+```json
+{
+  "title": "New Wellness Conversation"
+}
+```
+* **Response (201 Created):** Returns created conversation object.
+
+### 14.3 Send Chat Message (Synchronous)
+
+* **URL:** `/chat/conversations/{id}/messages`
+* **Method:** `POST`
+* **Authentication:** Required (Role: `STUDENT`)
+* **Request:**
+```json
+{
+  "message": "I'm feeling really overwhelmed with exams."
+}
+```
+* **Response (200 OK):**
+```json
+{
+  "reply": "It's completely normal to feel exam anxiety...",
+  "primary_emotion": "anxiety",
+  "intent": "exam_anxiety",
+  "risk": {
+    "level": "GREEN",
+    "is_crisis": false
+  }
+}
+```
+
+### 14.4 Send Chat Message (Real-Time SSE Token Stream)
+
+* **URL:** `/chat/conversations/{id}/messages/stream`
+* **Method:** `POST`
+* **Authentication:** Required (Role: `STUDENT`)
+* **Content-Type:** `text/event-stream`
+* **Stream Events:**
+```text
+data: {"type": "token", "content": "I "}
+data: {"type": "token", "content": "hear "}
+data: {"type": "token", "content": "you. "}
+data: {"type": "done", "risk_level": "GREEN", "is_crisis": false}
+```
+
+---
+
+## 15. Behavioral Telemetry API (PC Agent)
+
+### 15.1 Sync Daily Behavioral Telemetry
+
+* **URL:** `/behavioral/sync`
+* **Method:** `POST`
+* **Authentication:** Required (Role: `STUDENT`)
+* **Request:**
+```json
+{
+  "date": "2026-09-05",
+  "total_screen_time_minutes": 420,
+  "late_night_usage_minutes": 90,
+  "academic_usage_minutes": 240,
+  "social_usage_minutes": 60,
+  "entertainment_usage_minutes": 120,
+  "continuous_screen_minutes": 180,
+  "is_crisis_detected": false
+}
+```
+* **Response (200 OK):**
+```json
+{
+  "status": "success",
+  "risk_level": "MEDIUM",
+  "baseline_deviation_score": 1.2
+}
+```
+
+### 15.2 Get Behavioral Telemetry Dashboard Summary
+
+* **URL:** `/behavioral/summary`
+* **Method:** `GET`
+* **Authentication:** Required (Role: `STUDENT`)
+* **Response (200 OK):**
+```json
+{
+  "agent_connected": true,
+  "live_active": true,
+  "today_total_screen_time": 420,
+  "today_late_night_minutes": 90,
+  "weekly_history": []
+}
+```
+
+---
+
+## 16. Counseling Appointments API
+
+### 16.1 Book Counseling Appointment
+
+* **URL:** `/appointments`
+* **Method:** `POST`
+* **Authentication:** Required (Role: `STUDENT`)
+* **Request:**
+```json
+{
+  "counselor_id": "u-counselor-uuid",
+  "appointment_type": "VIRTUAL",
+  "scheduled_time": "2026-09-10T10:00:00Z",
+  "reason": "Follow-up discussion on anxiety management and sleep schedule."
+}
+```
+* **Response (201 Created):** Returns appointment booking object.
