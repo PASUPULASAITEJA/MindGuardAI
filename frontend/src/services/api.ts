@@ -287,6 +287,27 @@ api.interceptors.response.use(
     }
   };
 
+  export interface SOSHelpline {
+    name: string;
+    number: string;
+    badge: string;
+    description: string;
+  }
+
+  export interface SOSResponse {
+    status: string;
+    message: string;
+    alert_id: string;
+    helplines: SOSHelpline[];
+  }
+
+  export const sosAPI = {
+    triggerSOS: async () => {
+      const res = await api.post<SOSResponse>("/alerts/sos");
+      return res.data;
+    }
+  };
+
   export default api;
 
 
