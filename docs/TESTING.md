@@ -204,8 +204,8 @@ MindGuardAI provides comprehensive executable test scripts to validate all syste
 
 ### 6.1 Full System Integration Suite (`scripts/test_all_features.py`)
 
-Executes 23 automated tests against the running API:
-* **Institutional Domain Whitelist:** Verifies that registrations are strictly filtered by accredited university domains (e.g., `@rit.edu`).
+Executes automated integration tests against the running API:
+* **Institutional Domain Whitelist:** Verifies that registrations are strictly filtered by accredited university domains (e.g., `@nmims.in`, `@nmims.edu.in`, `@nmims.edu`).
 * **Authentication & RBAC:** Tests Student, Counselor, and Admin registration, JWT token generation, and role boundary protection.
 * **Standardized Clinical Surveys:** Validates PHQ-9 (9 items) and GAD-7 (7 items) submissions, scoring, and automated risk tiering.
 * **Counselor Alerts & Triage Queue:** Tests alert generation, queue retrieval, and counselor assignment workflows.
