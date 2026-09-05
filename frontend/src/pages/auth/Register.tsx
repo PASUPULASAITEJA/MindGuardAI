@@ -24,22 +24,13 @@ const registerSchema = z
   })
   .superRefine((data, ctx) => {
     const email = data.email.toLowerCase().trim();
-    if (data.role === "STUDENT") {
-      if (!email.endsWith("@nmims.in") && !email.endsWith("@nmims.edu.in")) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          path: ["email"],
-          message: "Student accounts must use a valid university email ending with @nmims.in or @nmims.edu.in",
-        });
-      }
-    } else if (data.role === "COUNSELOR" || data.role === "ADMIN") {
-      if (!email.endsWith("@nmims.edu")) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          path: ["email"],
-          message: `${data.role === "COUNSELOR" ? "Counselor" : "Admin"} accounts must use an institutional email ending with @nmims.edu`,
-        });
-      }
+    const isNMIMS = email.endsWith("@nmims.in") || email.endsWith("@nmims.edu.in") || email.endsWith("@nmims.edu");
+    if (!isNMIMS) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["email"],
+        message: "Email must be an authorized NMIMS institutional address ending with @nmims.in, @nmims.edu.in, or @nmims.edu",
+      });
     }
   });
 
