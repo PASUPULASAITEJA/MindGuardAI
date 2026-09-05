@@ -75,9 +75,12 @@ The platform enforces three distinct user roles: `STUDENT`, `COUNSELOR`, and `AD
 | `/api/v1/students/me` | `STUDENT` | Access own profile and registration parameters. |
 | `/api/v1/mood/check-in` | `STUDENT` | Submit daily journal texts or survey responses. |
 | `/api/v1/mood/history` | `STUDENT` | View personal historical mood trajectories. |
+| `/api/v1/chat/conversations` | `STUDENT` | Confidential peer-wellness chatbot with CBT tools. |
+| `/api/v1/alerts/sos` | `STUDENT` | Trigger emergency counselor triage escalation. |
+| `/api/v1/behavioral/sync` | `STUDENT` | Securely synchronize non-invasive PC telemetry. |
 | `/api/v1/counselor/alerts` | `COUNSELOR` | View active high-risk student warnings. |
 | `/api/v1/counselor/students/{id}` | `COUNSELOR` | View specific student details assigned to them. |
-| `/api/v1/admin/analytics` | `ADMIN` | Access anonymized institutional stress metrics. |
+| `/api/v1/analytics/institution/reports` | `ADMIN` | Access anonymized institutional stress metrics. |
 
 ### 3.2 Backend Code Implementation Example
 FastAPI route protection is implemented via reusable dependencies:
