@@ -32,20 +32,23 @@ graph TD
     
     %% Student Flow
     AuthCheck -->|STUDENT| SDash[Student Dashboard]
-    SDash --> SCheckIn[Mood Check-in]
-    SDash --> SHistory[Mood History]
+    AuthCheck -->|STUDENT| SChat[Companion Chat & CBT Micro-Tools]
+    AuthCheck -->|STUDENT| SSOS[Emergency SOS Gateway]
+    SDash --> SCheckIn[Mood Check-in & Surveys]
+    SDash --> SHistory[Mood History & Behavioral Telemetry]
     SDash --> SResources[Wellness Resources]
-    SCheckIn -->|Text/Voice/Survey| SSubmit(Submit to API)
+    SChat --> CBreathe[Dual Breathing Pacer]
+    SChat --> CGround[5-4-3-2-1 Grounding]
+    SChat --> CReframe[Cognitive Reframer]
     
     %% Counselor Flow
     AuthCheck -->|COUNSELOR| CDash[Counselor Dashboard]
-    CDash --> CAlerts[Active Alerts Queue]
-    CDash --> CStudent[Student Profile Detail]
+    CDash --> CAlerts[Active Alerts & Triage Queue]
+    CDash --> CStudent[Student Profile & Risk Detail]
     
     %% Admin Flow
     AuthCheck -->|ADMIN| ADash[Institution Dashboard]
-    ADash --> AReports[Aggregate Reports]
-
+    ADash --> AReports[Aggregate Macro Reports]
 ```
 
 ---
@@ -63,20 +66,26 @@ src/
         ├── PublicLayout
         │   ├── LoginForm
         │   └── RegisterForm
-        └── DashboardLayout (Sidebar, TopNav, MobileMenu)
-            ├── StudentView
+        └── DashboardLayout (Sidebar, TopNav with Emergency SOS Trigger, MobileMenu)
+            ├── StudentChatbot (/student/chat)
+            │   ├── DualBreathingPacer (Box 4-4-4-4 & Relax 4-7-8)
+            │   ├── SensoryGroundingWidget (5-4-3-2-1 Checklist)
+            │   ├── ThoughtReframerModal (CBT Distortion Challenger)
+            │   └── SSE Streaming Message Stream
+            ├── StudentDashboard (/student/dashboard)
             │   ├── WellnessScoreWidget (Radial Chart)
             │   ├── MoodCheckInPanel (Tabs: Text, Voice, Survey)
             │   ├── MoodHistoryChart (Recharts Line)
+            │   ├── BehavioralTelemetryWidget (Screen time & circadian metrics)
             │   └── RecommendationList (Cards)
-            ├── CounselorView
-            │   ├── AlertsDataTable (shadcn Table)
+            ├── EmergencySOSModal (Global Crisis Helplines & Counselor Dispatch)
+            ├── CounselorView (/counselor/dashboard)
+            │   ├── AlertsDataTable (Triage Queue with CRITICAL priority)
             │   │   └── AlertStatusDropdown (Action Form)
             │   └── StudentDetailModal
-            └── AdminView
+            └── AdminView (/admin/dashboard)
                 ├── MetricCards (Total Students, Avg Score)
                 └── RiskDistributionChart (Recharts Pie)
-
 ```
 
 ---
@@ -88,16 +97,31 @@ src/
 * **Components:** `AuthLayout`, `Card`, `Input`, `Button`, `Label`.
 * **Forms:** `LoginForm` (email, password), `RegisterForm` (email, password, role select). Validated strictly with Zod schema.
 * **API Integration:** `POST /auth/login`, `POST /auth/register`.
-* **Loading State:** Button transitions to a disabled state with a spinning loader icon during submission.
-* **Error State:** Inline red validation text for invalid emails/passwords; Toast notification for `401` or `409` server responses.
 
 ### 4.2 Student Dashboard (`/student/dashboard`)
 
 The central hub for primary users to track and manage their mental well-being.
 
 * **Components & Widgets:**
-* **Wellness Score Widget:** A radial gauge (`Recharts RadialBarChart`) displaying the latest Mental Wellness Score (0-100). Color-coded based on risk (Green for Low, Yellow for Medium, Red for High).
-* **Mood Check-In Panel:** A tabbed interface.
+  * **Wellness Score Widget:** A radial gauge (`Recharts RadialBarChart`) displaying the latest Mental Wellness Score (0-100). Color-coded based on risk (Green for Low, Yellow for Medium, Red for High).
+  * **Mood Check-In Panel:** Tabbed interface for structured text, simulated voice transcript, and standardized PHQ-9/GAD-7 surveys.
+  * **Behavioral Telemetry Widget:** Real-time PC screen time, late-night usage indicators, and agent connection status.
+
+### 4.3 Student Companion Chat & CBT Micro-Modules (`/student/chat`)
+
+* **Components:** `StudentChatbot`, `DualBreathingPacer`, `SensoryGroundingWidget`, `ThoughtReframerModal`, `EmergencySOSModal`.
+* **Features:**
+  * Real-time Server-Sent Events (SSE) word-by-word streaming.
+  * In-chat Box Breathing (4-4-4-4) and Relaxing Breath (4-7-8) countdown timers.
+  * Interactive 5-4-3-2-1 Sensory Grounding step completion.
+  * Cognitive Reframer for identifying and restructuring Automatic Negative Thoughts (ANT).
+
+### 4.4 Emergency Crisis SOS Gateway Modal
+
+* **Components:** `EmergencySOSModal`.
+* **Features:**
+  * One-tap dispatch to campus counselor triage queue with `CRITICAL PRIORITY`.
+  * Direct telephone links to **Tele-MANAS** (`14416`), **KIRAN** (`1800-599-0019`), and **Campus Health Clinic** (`+91 22 4235 5555`).
 * *Text Tab:* A `<textarea>` form for journaling.
 * *Voice Tab:* A microphone toggle button utilizing the browser's MediaRecorder API to capture audio, with a pulsing CSS animation while recording.
 * *Survey Tab:* Buttons launching the PHQ-9 or GAD-7 wizard modals.
