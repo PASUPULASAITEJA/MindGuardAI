@@ -38,10 +38,15 @@ backend/
 ├── app/
 │   ├── api/                # API Routers (endpoints separated by domain)
 │   │   ├── v1/
-│   │   │   ├── auth.py
-│   │   │   ├── mood.py
-│   │   │   └── ...
-│   │   └── dependencies.py # Shared API dependencies (Auth, DB)
+│   │   │   ├── auth.py         # Registration, JWT login, refresh tokens
+│   │   │   ├── mood.py         # Daily journaling & mood submissions
+│   │   │   ├── assessments.py  # PHQ-9 & GAD-7 clinical surveys
+│   │   │   ├── alerts.py       # Counselor triage & Emergency SOS dispatch
+│   │   │   ├── chat.py         # Companion chatbot & real-time SSE streaming
+│   │   │   ├── behavioral.py   # Desktop PC telemetry & circadian analytics
+│   │   │   ├── appointments.py # Clinical counseling appointments
+│   │   │   └── analytics.py    # Institutional macro wellness reports
+│   │   └── dependencies.py # Shared API dependencies (Auth, DB, RBAC)
 │   ├── core/               # Application-wide settings and configs
 │   │   ├── config.py       # Pydantic BaseSettings
 │   │   ├── exceptions.py   # Custom HTTP exceptions
@@ -53,16 +58,13 @@ backend/
 │   │   ├── models/         # Serialized models (.joblib, pt)
 │   │   └── pipeline.py     # Inference wrappers
 │   ├── models/             # SQLAlchemy ORM models
-│   ├── repositories/       # Data Access Layer
 │   ├── schemas/            # Pydantic models (Request/Response validation)
-│   ├── services/           # Business logic
-│   ├── tasks/              # Background tasks / Celery workers
+│   ├── services/           # Business logic & clinical safety engine
 │   └── main.py             # FastAPI application entry point
 ├── tests/                  # Pytest suite
 ├── pyproject.toml
 └── requirements.txt
-
-```
+````
 
 ---
 
@@ -170,3 +172,21 @@ To maintain high responsiveness (especially for the daily mood check-in), I/O bo
 * **Auth:** Blacklisting compromised JWTs.
 * **Rate Limiting:** Tracking endpoint hits per user.
 * **Data Caching:** Caching highly accessed, semi-static data like macro-level institutional reports (invalidated daily) or wellness activity recommendations.
+
+---
+
+## 14. Emergency SOS & Clinical Triage Service
+
+* **Endpoints:** `POST /api/v1/alerts/sos` and `POST /api/v1/counselors/sos`.
+* **Behavior:** When triggered (either explicitly by a student via the SOS modal or automatically via conversational crisis detection), the service:
+  1. Instantiates a `SafetyEvent` record with severity `RED` and trigger type `EXPLICIT_SUICIDAL_IDEATION` or `EMERGENCY_SOS_BUTTON`.
+  2. Generates a clinical `Alert` record assigned to the institutional counselor triage queue with `status = PENDING`.
+  3. Returns immediate verified 24/7 tele-health helpline contact vectors (Tele-MANAS `14416`, KIRAN `1800-599-0019`, and Campus Health Clinic `+91 22 4235 5555`).
+
+---
+
+## 15. Real-Time Streaming Architecture (Server-Sent Events)
+
+* **Endpoint:** `POST /api/v1/chat/conversations/{id}/messages/stream`.
+* **Mechanism:** Fast, non-blocking asynchronous generator yielding `text/event-stream` chunks.
+* **Format:** Chunks follow standard SSE format (`data: {"type": "token", "content": "..."}\n\n`), terminating with a final `{"type": "done", "risk_level": "..."}` payload to signal stream closure and trigger React Query cache invalidation.
