@@ -195,3 +195,54 @@ jobs:
       - name: Run Jest Tests
         run: npm test --prefix frontend
 ```
+
+---
+
+## 6. End-to-End Automated Test Suites (`scripts/`)
+
+MindGuardAI provides comprehensive executable test scripts to validate all system features in production-parity environments.
+
+### 6.1 Full System Integration Suite (`scripts/test_all_features.py`)
+
+Executes 23 automated tests against the running API:
+* **Institutional Domain Whitelist:** Verifies that registrations are strictly filtered by accredited university domains (e.g., `@rit.edu`).
+* **Authentication & RBAC:** Tests Student, Counselor, and Admin registration, JWT token generation, and role boundary protection.
+* **Standardized Clinical Surveys:** Validates PHQ-9 (9 items) and GAD-7 (7 items) submissions, scoring, and automated risk tiering.
+* **Counselor Alerts & Triage Queue:** Tests alert generation, queue retrieval, and counselor assignment workflows.
+* **Macro Wellness Analytics:** Tests institutional macro-reports for dominant campus emotions and risk distributions.
+
+```bash
+python scripts/test_all_features.py
+```
+
+### 6.2 Companion Chatbot & Safety Suite (`scripts/test_chatbot.py`)
+
+Validates the conversational AI companion and clinical safety triggers:
+* Multi-turn conversational persistence across student sessions.
+* Fine-grained emotion probability vector extraction.
+* Real-time Server-Sent Events (SSE) streaming verification.
+* Emergency safety events: Verifies that explicit suicidal ideation triggers immediate `RED` safety alerts in the counselor triage queue and presents 24/7 crisis helplines.
+
+```bash
+python scripts/test_chatbot.py
+```
+
+### 6.3 Behavioral Agent Telemetry Suite (`scripts/test_behavioral_agent.py`)
+
+Validates the desktop behavioral monitoring pipeline:
+* Daily telemetry synchronization (`total_screen_time`, `late_night_usage`, `active_window_categories`).
+* Circadian disruption anomaly detection ($Z$-score calculation against 14-day student baselines).
+* Real-time urgent distress search query interception.
+* Dashboard telemetry summary retrieval.
+
+```bash
+python scripts/test_behavioral_agent.py
+```
+
+### 6.4 Frontend Type-Check & Production Build Validation
+
+Validates frontend code health, TypeScript definitions, and asset compilation:
+
+```bash
+cd frontend && npm run build
+```
