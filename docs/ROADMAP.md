@@ -38,17 +38,18 @@ gantt
 * **API Endpoints:** Deliver FastAPI routes for student check-ins and counselor workspace metrics.
 * **Testing:** Configure Pytest overrides, mocking databases and external notifications to run on GitHub Actions.
 
-### 2.3 Phase 3: Frontend & Dashboards
-* **Goal:** Provide responsive interfaces for students, counselors, and administrators.
-* **Student View:** Build the mood check-in wizard and radial score visualizers.
-* **Staff Views:** Deploy the active counselor alerts table utilizing `shadcn/ui` data table components. Deploy institutional risk-distribution charts utilizing Recharts.
-* **State Management:** Complete React Query integration, implementing optimistic updates and cache invalidation policies.
+### 2.3 Phase 3: Frontend, CBT Micro-Modules & Triage
+* **Goal:** Provide responsive, clinically-grounded interfaces for students and counselors.
+* **In-Chat CBT Micro-Tools:** Interactive Box Breathing (4-4-4-4) and 4-7-8 Relaxing Breath pacers, 5-4-3-2-1 sensory grounding checklist, and cognitive distortion reframing challenger.
+* **Emergency Crisis SOS Gateway:** Real-time counselor triage escalation (`POST /api/v1/alerts/sos`) with immediate access to 24/7 tele-health helplines (Tele-MANAS, KIRAN).
+* **Staff Views:** Deploy the active counselor alerts table with high-priority flagging and institutional risk-distribution charts utilizing Recharts.
+* **State Management:** Complete React Query integration with optimistic updates, SSE conversational streaming, and cache invalidation policies.
 
-### 2.4 Phase 4: Beta & Launch
-* **Goal:** Audit and deploy the platform within a partner university.
-* **Audits:** Complete compliance reviews assessing PII data scrubbing and database access permissions.
-* **Pilot:** Deploy to staging on AWS, utilizing a load balancer and secure RDS PostgreSQL databases.
-* **Rollout:** Initiate a 500-student pilot scheme to evaluate prediction accuracy and feedback mechanisms.
+### 2.4 Phase 4: Behavioral Telemetry, DAIC-WOZ & Beta Validation
+* **Goal:** Expand digital biomarker monitoring and multimodal clinical validation.
+* **Behavioral PC Agent:** Local privacy-first telemetry for active window categorization, continuous screen usage, and circadian disruption detection ($Z$-score anomaly tracking).
+* **Multimodal Validation:** DAIC-WOZ clinical depression pipeline (`scripts/train_daicwoz.py`) correlating verbal markers with PHQ-8 clinical severity.
+* **Verification Suite:** 23-test system integration suite (`scripts/test_all_features.py`), companion chatbot test suite (`scripts/test_chatbot.py`), and behavioral agent test suite (`scripts/test_behavioral_agent.py`).
 
 ---
 
