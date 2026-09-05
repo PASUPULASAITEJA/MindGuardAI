@@ -13,7 +13,7 @@ interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  login: (email: string, password: string) => Promise<User>;
+  login: (email: string, password: string, rememberMe?: boolean) => Promise<User>;
   register: (email: string, password: string, role: UserRole) => Promise<void>;
   logout: () => Promise<void>;
 }
@@ -48,23 +48,37 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setIsLoading(false);
   };
 
-  // Perform silent refresh on page load to restore session from HttpOnly cookie
+  // Perform silent refresh on page load to restore session from HttpOnly cookie or persistent local token
   const initSession = async () => {
     try {
       const response = await api.post("/auth/refresh");
       const { access_token } = response.data;
-      setAccessToken(access_token);
+      const rememberMe = typeof window !== "undefined" && localStorage.getItem("mindguard_remember_me") === "true";
+      setAccessToken(access_token, rememberMe);
       
       const payload = decodeTokenPayload(access_token);
       if (payload && payload.sub) {
         setUser({
           id: payload.sub,
-          email: payload.email || "", // Fallback or we can query profiles if needed
+          email: payload.email || "",
           role: payload.role as UserRole
         });
       }
     } catch (e) {
-      // Session cookie is invalid or not set; ignore and prompt login
+      // If cookie refresh fails, check if we have a valid persistent Remember-Me access token
+      const existingToken = getAccessToken();
+      if (existingToken) {
+        const payload = decodeTokenPayload(existingToken);
+        if (payload && payload.sub && payload.exp && payload.exp * 1000 > Date.now()) {
+          setUser({
+            id: payload.sub,
+            email: payload.email || "",
+            role: payload.role as UserRole
+          });
+          setIsLoading(false);
+          return;
+        }
+      }
       setAccessToken(null);
       setUser(null);
     } finally {
@@ -82,12 +96,12 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     };
   }, []);
 
-  const login = async (email: string, password: string): Promise<User> => {
+  const login = async (email: string, password: string, rememberMe: boolean = false): Promise<User> => {
     setIsLoading(true);
     try {
       const response = await api.post("/auth/login", { email, password });
       const { access_token } = response.data;
-      setAccessToken(access_token);
+      setAccessToken(access_token, rememberMe);
 
       const payload = decodeTokenPayload(access_token);
       if (payload) {
@@ -108,6 +122,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       setIsLoading(false);
     }
   };
+
 
   const register = async (email: string, password: string, role: UserRole) => {
     try {

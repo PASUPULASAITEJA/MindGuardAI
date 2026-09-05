@@ -56,10 +56,30 @@ class UserRegisterResponse(BaseModel):
 class UserProfileResponse(BaseModel):
     id: UUID
     email: EmailStr
+    role: UserRole
+    full_name: Optional[str] = None
+    phone_number: Optional[str] = None
+    emergency_contact_name: Optional[str] = None
+    emergency_contact_phone: Optional[str] = None
+    academic_department: Optional[str] = None
+    consent_counselor_sharing: bool = True
     created_at: datetime
 
     class Config:
         from_attributes = True
+
+class UserProfileUpdateRequest(BaseModel):
+    full_name: Optional[str] = Field(None, max_length=255)
+    phone_number: Optional[str] = Field(None, max_length=50)
+    emergency_contact_name: Optional[str] = Field(None, max_length=255)
+    emergency_contact_phone: Optional[str] = Field(None, max_length=50)
+    academic_department: Optional[str] = Field(None, max_length=100)
+    consent_counselor_sharing: Optional[bool] = None
+
+class UserListResponse(BaseModel):
+    items: list[UserResponse]
+    total_pages: int
+    current_page: int
 
 class AdminUserResponse(BaseModel):
     id: UUID

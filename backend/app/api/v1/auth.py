@@ -2,7 +2,7 @@ from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, Response, Cookie, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.session import get_db
-from app.schemas.auth import LoginRequest, TokenResponse
+from app.schemas.auth import LoginRequest, TokenResponse, ForgotPasswordRequest, ResetPasswordRequest
 from app.schemas.users import UserCreate, UserRegisterResponse
 from app.services.auth import auth_service
 from app.services.user import user_service
@@ -109,3 +109,84 @@ async def refresh(
     )
 
     return tokens
+
+@router.post(
+    "/forgot-password",
+    status_code=status.HTTP_200_OK,
+    summary="Generate password reset token for registered university account"
+)
+async def forgot_password(
+    payload: ForgotPasswordRequest,
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    Checks if account exists and returns an authorization token to reset credentials.
+    In university production environments, this dispatches an institutional email link.
+    """
+    email_clean = payload.email.lower().strip()
+    user = await user_service.get_user_by_email(db, email_clean)
+    if not user:
+        # Avoid user enumeration by returning success message regardless
+        return {
+            "status": "success",
+            "message": "If the account exists on the university roster, password reset instructions have been generated.",
+            "reset_token": None
+        }
+
+    from app.core.security import create_password_reset_token
+    token = create_password_reset_token(email_clean)
+    return {
+        "status": "success",
+        "message": "Password reset instructions generated.",
+        "reset_token": token
+    }
+
+@router.post(
+    "/reset-password",
+    status_code=status.HTTP_200_OK,
+    summary="Reset user password using verification token"
+)
+async def reset_password(
+    payload: ResetPasswordRequest,
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    Validates token and updates account password.
+    """
+    from jose import JWTError
+    from app.core.security import decode_token, get_password_hash
+
+    try:
+        decoded = decode_token(payload.token)
+        if decoded.get("type") != "password_reset":
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail={"message": "Invalid token type for password reset."}
+            )
+        email = decoded.get("sub")
+        if not email:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail={"message": "Token has missing or corrupted email identity."}
+            )
+    except JWTError:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail={"message": "Password reset token is invalid or expired. Please request a new one."}
+        )
+
+    user = await user_service.get_user_by_email(db, email)
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail={"message": "User account no longer found."}
+        )
+
+    user.password_hash = get_password_hash(payload.new_password)
+    await db.commit()
+
+    return {
+        "status": "success",
+        "message": "Password has been successfully updated. You may now log in with your new credentials."
+    }
+

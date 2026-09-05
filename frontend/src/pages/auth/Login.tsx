@@ -25,6 +25,7 @@ export const Login: React.FC = () => {
   const navigate = useNavigate();
 
   const [showPassword, setShowPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const {
@@ -43,7 +44,8 @@ export const Login: React.FC = () => {
   const onSubmit = async (data: LoginFormValues) => {
     setIsSubmitting(true);
     try {
-      const loggedUser = await login(data.email, data.password);
+      const loggedUser = await login(data.email, data.password, rememberMe);
+
       toast({
         title: "Welcome back!",
         description: "Successfully authenticated to MindGuard.",
@@ -140,6 +142,25 @@ export const Login: React.FC = () => {
                   <p className="text-xs text-destructive font-medium mt-1">{errors.password.message}</p>
                 )}
               </FormItem>
+
+              {/* Remember Me & Forgot Password Row */}
+              <div className="flex items-center justify-between text-xs pt-1">
+                <label className="flex items-center gap-2 cursor-pointer text-slate-400 hover:text-slate-200 select-none">
+                  <input
+                    type="checkbox"
+                    checked={rememberMe}
+                    onChange={(e) => setRememberMe(e.target.checked)}
+                    className="rounded border-slate-700 bg-slate-900 text-violet-600 focus:ring-violet-500 h-4 w-4"
+                  />
+                  <span>Remember me</span>
+                </label>
+                <Link
+                  to="/forgot-password"
+                  className="text-violet-400 hover:text-violet-300 font-medium transition-colors"
+                >
+                  Forgot password?
+                </Link>
+              </div>
             </CardContent>
 
             <CardFooter className="flex flex-col gap-3">

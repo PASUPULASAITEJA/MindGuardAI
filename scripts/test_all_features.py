@@ -81,6 +81,36 @@ async def run_all_tests():
         # -------------------------------------------------------------
         print(f"\n{BOLD}2. Testing Authentication & Session Handshake{RESET}")
         
+        # Ensure test accounts exist with test passwords
+        from app.db.session import AsyncSessionLocal
+        from app.models.users import User, UserRole
+        from app.core.security import get_password_hash
+        from sqlalchemy import select
+        import uuid
+
+        async with AsyncSessionLocal() as session:
+            test_users = [
+                ("student@nmims.in", UserRole.STUDENT),
+                ("counselor@nmims.edu", UserRole.COUNSELOR),
+                ("admin@nmims.edu", UserRole.ADMIN),
+            ]
+            for email, role in test_users:
+                res = await session.execute(select(User).where(User.email == email))
+                u = res.scalars().first()
+                if not u:
+                    u = User(
+                        id=uuid.uuid4(),
+                        email=email,
+                        role=role,
+                        password_hash=get_password_hash("password123"),
+                        is_active=True
+                    )
+                    session.add(u)
+                else:
+                    u.password_hash = get_password_hash("password123")
+                    u.is_active = True
+            await session.commit()
+
         # Student Login
         res_student_login = await client.post(
             "/api/v1/auth/login",

@@ -6,6 +6,7 @@ from app.models.assessments import Assessment, RiskLevel
 from app.models.alerts import Alert, AlertStatus
 from app.models.chat import Conversation, ChatMessage, SafetyEvent, ChatSender
 from app.models.behavioral import BehavioralLog
+from app.models.appointments import Appointment, AppointmentStatus, AppointmentType
 
 __all__ = [
     "Base",
@@ -23,4 +24,8 @@ __all__ = [
     "SafetyEvent",
     "ChatSender",
     "BehavioralLog",
+    "Appointment",
+    "AppointmentStatus",
+    "AppointmentType",
 ]
+

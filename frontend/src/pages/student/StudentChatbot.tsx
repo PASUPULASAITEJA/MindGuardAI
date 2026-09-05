@@ -17,6 +17,12 @@ import {
   Meh,
   Activity,
   Zap,
+  Wind,
+  Compass,
+  CheckCircle2,
+  X,
+  Play,
+  Pause,
 } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { chatAPI, ConversationSummary, ChatMessageItem, ChatResponsePayload } from "@/services/api";
@@ -45,7 +51,32 @@ export const StudentChatbot: React.FC = () => {
   const [activeConvId, setActiveConvId] = useState<string | null>(null);
   const [inputMessage, setInputMessage] = useState("");
   const [isSending, setIsSending] = useState(false);
+  const [streamingText, setStreamingText] = useState("");
+  const [activeExercise, setActiveExercise] = useState<"breathing" | "grounding" | null>(null);
+  const [breathingPhase, setBreathingPhase] = useState<"Inhale" | "Hold" | "Exhale" | "Pause">("Inhale");
+  const [breathingCount, setBreathingCount] = useState<number>(4);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
+
+  // Box breathing timer effect
+  useEffect(() => {
+    if (activeExercise !== "breathing") return;
+    const phases: Array<"Inhale" | "Hold" | "Exhale" | "Pause"> = ["Inhale", "Hold", "Exhale", "Pause"];
+    let phaseIndex = 0;
+    let count = 4;
+
+    const interval = setInterval(() => {
+      count -= 1;
+      if (count <= 0) {
+        phaseIndex = (phaseIndex + 1) % phases.length;
+        setBreathingPhase(phases[phaseIndex]);
+        count = 4;
+      }
+      setBreathingCount(count);
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [activeExercise]);
+
 
   // 1. Fetch Student Conversations
   const {
@@ -156,10 +187,74 @@ export const StudentChatbot: React.FC = () => {
 
     setInputMessage("");
     setIsSending(true);
+    setStreamingText("");
 
-    // Optimistically update query data or send directly
-    sendMessageMutation.mutate({ convId: targetConvId, text });
+    // Detect if user is asking for grounding or breathing exercise
+    const lowerText = text.toLowerCase();
+    if (lowerText.includes("breath") || lowerText.includes("calm down") || lowerText.includes("anxious") || lowerText.includes("panic")) {
+      setActiveExercise("breathing");
+    }
+
+    // Use SSE Streaming endpoint for word-by-word real-time stream
+    try {
+      const response = await fetch(`/api/v1/chat/conversations/${targetConvId}/messages/stream`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({ message: text }),
+      });
+
+      if (!response.ok) {
+        // Fallback to standard mutation
+        sendMessageMutation.mutate({ convId: targetConvId, text });
+        return;
+      }
+
+      const reader = response.body?.getReader();
+      const decoder = new TextDecoder("utf-8");
+      let accumulated = "";
+
+      if (reader) {
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          const chunkStr = decoder.decode(value, { stream: true });
+          const lines = chunkStr.split("\n");
+
+          for (const line of lines) {
+            if (line.startsWith("data: ")) {
+              try {
+                const parsed = JSON.parse(line.substring(6));
+                if (parsed.type === "token") {
+                  accumulated += parsed.content;
+                  setStreamingText(accumulated);
+                } else if (parsed.type === "done") {
+                  queryClient.invalidateQueries({ queryKey: ["conversation", targetConvId] });
+                  queryClient.invalidateQueries({ queryKey: ["conversations"] });
+                  setIsSending(false);
+                  setStreamingText("");
+                  return;
+                }
+              } catch (parseErr) {
+                // Ignore chunk parse edges
+              }
+            }
+          }
+        }
+      }
+
+      queryClient.invalidateQueries({ queryKey: ["conversation", targetConvId] });
+      queryClient.invalidateQueries({ queryKey: ["conversations"] });
+      setIsSending(false);
+      setStreamingText("");
+    } catch (streamErr) {
+      // Fallback
+      sendMessageMutation.mutate({ convId: targetConvId, text });
+    }
   };
+
 
   const handleKeyPress = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -391,8 +486,23 @@ export const StudentChatbot: React.FC = () => {
             })
           )}
 
-          {/* Typing Indicator */}
-          {isSending && (
+          {/* Live Streaming Response Bubble */}
+          {isSending && streamingText && (
+            <div className="flex w-full gap-3 justify-start">
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-indigo-600 text-white shadow-sm shadow-indigo-500/20">
+                <Bot className="h-4 w-4" />
+              </div>
+              <div className="max-w-xl space-y-2">
+                <div className="rounded-2xl rounded-tl-none border border-slate-200/80 bg-white px-4 py-3 text-xs leading-relaxed shadow-sm dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100">
+                  <div className="whitespace-pre-wrap">{streamingText}</div>
+                  <span className="inline-block h-3 w-1.5 ml-1 bg-indigo-600 animate-pulse" />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Typing Indicator (shown before first token arrives) */}
+          {isSending && !streamingText && (
             <div className="flex items-center gap-3">
               <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-indigo-600 text-white">
                 <Bot className="h-4 w-4 animate-spin" />
@@ -407,11 +517,69 @@ export const StudentChatbot: React.FC = () => {
             </div>
           )}
 
+
           <div ref={messagesEndRef} />
+        </div>
+
+        {/* In-Chat Coping Tools Widget */}
+        {activeExercise === "breathing" && (
+          <div className="mx-4 mb-2 p-4 rounded-xl border border-indigo-200/80 bg-gradient-to-r from-indigo-50/90 to-violet-50/90 dark:border-indigo-900/60 dark:bg-slate-900/90 flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="relative flex h-14 w-14 items-center justify-center rounded-full bg-indigo-600/10 border-2 border-indigo-500 text-indigo-600 dark:text-indigo-400">
+                <span className="text-sm font-black">{breathingCount}s</span>
+              </div>
+              <div>
+                <div className="flex items-center gap-1.5">
+                  <Wind className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
+                  <h4 className="text-xs font-bold text-slate-800 dark:text-slate-100">
+                    Box Breathing: <span className="text-indigo-600 dark:text-indigo-400 uppercase">{breathingPhase}</span>
+                  </h4>
+                </div>
+                <p className="text-[11px] text-slate-500 mt-0.5">
+                  Inhale for 4s, hold for 4s, exhale for 4s, hold for 4s to regulate autonomic nervous system.
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={() => setActiveExercise(null)}
+              className="rounded-lg p-1 text-slate-400 hover:bg-slate-200/60 hover:text-slate-700 dark:hover:bg-slate-800"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+        )}
+
+        {/* Quick Coping Exercises Action Bar */}
+        <div className="px-4 py-1.5 flex items-center gap-2 border-t border-slate-200/40 dark:border-slate-800/60 bg-slate-50/50 dark:bg-slate-950/40 overflow-x-auto">
+          <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider shrink-0">
+            Coping Tools:
+          </span>
+          <button
+            onClick={() => setActiveExercise(activeExercise === "breathing" ? null : "breathing")}
+            className={cn(
+              "flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium border transition-all shrink-0",
+              activeExercise === "breathing"
+                ? "bg-indigo-600 border-indigo-600 text-white"
+                : "border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 hover:border-indigo-400"
+            )}
+          >
+            <Wind className="h-3.5 w-3.5 text-indigo-500" />
+            <span>Box Breathing (4-4-4-4)</span>
+          </button>
+          <button
+            onClick={() => {
+              handleSendMessage("Can you guide me through the 5-4-3-2-1 sensory grounding technique?");
+            }}
+            className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 hover:border-indigo-400 shrink-0 transition-all"
+          >
+            <Compass className="h-3.5 w-3.5 text-indigo-500" />
+            <span>5-4-3-2-1 Grounding</span>
+          </button>
         </div>
 
         {/* Input Box */}
         <div className="border-t border-slate-200/60 p-3 sm:p-4 dark:border-slate-800">
+
           <div className="relative flex items-end gap-2 rounded-xl border border-slate-200 bg-white p-2 shadow-inner focus-within:border-indigo-500 focus-within:ring-2 focus-within:ring-indigo-500/20 dark:border-slate-800 dark:bg-slate-900">
             <textarea
               rows={2}

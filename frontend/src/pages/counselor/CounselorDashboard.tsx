@@ -11,8 +11,9 @@ import {
   LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer 
 } from "recharts";
 import { 
-  AlertCircle, CheckCircle2, Clock, X, ChevronRight, User as UserIcon, Loader2, Users 
+  AlertCircle, CheckCircle2, Clock, X, ChevronRight, User as UserIcon, Loader2, Users, Calendar 
 } from "lucide-react";
+import { appointmentsAPI, AppointmentItem } from "@/services/api";
 
 export const CounselorDashboard: React.FC = () => {
   const { toast } = useToast();
@@ -24,10 +25,48 @@ export const CounselorDashboard: React.FC = () => {
   const [selectedStudentId, setSelectedStudentId] = useState<string | null>(null);
   const [studentSearchQuery, setStudentSearchQuery] = useState("");
 
-  // 1. Fetching Alerts Queue
+  // 1. Fetching Alerts Queue & Booked Appointments
   const { data: alertsData, isLoading: isAlertsLoading } = useCounselorAlerts(statusFilter);
   const { data: allAlertsData } = useCounselorAlerts("");
   const updateStatusMutation = useUpdateAlertStatus(statusFilter);
+
+  const [appointmentsList, setAppointmentsList] = useState<AppointmentItem[]>([]);
+  const [isAppointmentsLoading, setIsAppointmentsLoading] = useState(false);
+
+  const fetchAppointments = React.useCallback(async () => {
+    setIsAppointmentsLoading(true);
+    try {
+      const data = await appointmentsAPI.getMyAppointments();
+      setAppointmentsList(data.appointments || []);
+    } catch (e) {
+      // Ignored
+    } finally {
+      setIsAppointmentsLoading(false);
+    }
+  }, []);
+
+  React.useEffect(() => {
+    fetchAppointments();
+  }, [fetchAppointments]);
+
+  const handleUpdateAppointment = async (appId: string, status: string) => {
+    try {
+      await appointmentsAPI.updateStatus(appId, status);
+      toast({
+        title: "Appointment Status Updated",
+        description: `Session marked as ${status}.`,
+        variant: "success",
+      });
+      fetchAppointments();
+    } catch (e) {
+      toast({
+        title: "Update Failed",
+        description: "Could not update session status.",
+        variant: "destructive",
+      });
+    }
+  };
+
 
   // Parse unique student list
   const uniqueStudents = React.useMemo(() => {
@@ -189,8 +228,110 @@ export const CounselorDashboard: React.FC = () => {
               )}
             </CardContent>
           </Card>
+
+          {/* Booked Appointments Table */}
+          <div className="pt-4">
+            <div className="flex justify-between items-center border-b border-border/50 pb-3 mb-3">
+              <div>
+                <h3 className="text-foreground text-sm md:text-base font-extrabold flex items-center gap-2">
+                  <Calendar className="h-4.5 w-4.5 text-primary" />
+                  Scheduled Student Appointments
+                </h3>
+                <p className="text-muted-foreground text-xs md:text-sm mt-0.5">1-on-1 virtual consultations and in-person intake requests</p>
+              </div>
+              <span className="text-xs font-bold text-primary px-2.5 py-1 rounded-full bg-primary/10 border border-primary/20">
+                {appointmentsList.length} Sessions
+              </span>
+            </div>
+
+
+            <Card className="border-border/50 bg-card/40 backdrop-blur-md overflow-hidden">
+              <CardContent className="p-0">
+                {isAppointmentsLoading ? (
+                  <div className="p-6 text-center text-xs text-muted-foreground">Loading appointment queue...</div>
+                ) : appointmentsList.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center text-center p-8">
+                    <Calendar className="h-8 w-8 text-muted-foreground/40 mb-2" />
+                    <p className="text-xs text-muted-foreground font-medium">No student sessions currently scheduled.</p>
+                  </div>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left border-collapse text-xs md:text-sm">
+                      <thead>
+                        <tr className="border-b border-border/50 text-muted-foreground font-bold bg-background/30">
+                          <th className="p-3.5 uppercase tracking-wider">Scheduled Date</th>
+                          <th className="p-3.5 uppercase tracking-wider">Student ID</th>
+                          <th className="p-3.5 uppercase tracking-wider">Format</th>
+                          <th className="p-3.5 uppercase tracking-wider">Concern / Reason</th>
+                          <th className="p-3.5 uppercase tracking-wider">Status</th>
+                          <th className="p-3.5 uppercase tracking-wider text-right">Action</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-border/40">
+                        {appointmentsList.map((app) => (
+                          <tr key={app.id} className="hover:bg-accent/20 transition-colors">
+                            <td className="p-3.5 text-foreground font-medium">
+                              {new Date(app.scheduled_time).toLocaleString([], {
+                                month: "short",
+                                day: "numeric",
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              })}
+                            </td>
+                            <td className="p-3.5 font-mono text-xs text-primary">
+                              {app.student_id.substring(0, 8)}...
+                            </td>
+                            <td className="p-3.5">
+                              <span className="text-xs font-medium px-2 py-0.5 rounded bg-accent/40 border border-border">
+                                {app.appointment_type}
+                              </span>
+                            </td>
+                            <td className="p-3.5 text-xs text-foreground/80 max-w-xs truncate">
+                              {app.reason || "General Wellness"}
+                            </td>
+                            <td className="p-3.5">
+                              <span className={`inline-block px-2 py-0.5 rounded font-bold text-[11px] ${
+                                app.status === "CONFIRMED"
+                                  ? "bg-emerald-500/10 text-emerald-500 border border-emerald-500/20"
+                                  : app.status === "PENDING"
+                                  ? "bg-amber-500/10 text-amber-500 border border-amber-500/20"
+                                  : "bg-muted text-muted-foreground"
+                              }`}>
+                                {app.status}
+                              </span>
+                            </td>
+                            <td className="p-3.5 text-right space-x-2">
+                              {app.status === "PENDING" && (
+                                <Button
+                                  size="sm"
+                                  onClick={() => handleUpdateAppointment(app.id, "CONFIRMED")}
+                                  className="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs h-7 px-2.5 rounded-lg"
+                                >
+                                  Confirm
+                                </Button>
+                              )}
+                              {app.status === "CONFIRMED" && (
+                                <Button
+                                  size="sm"
+                                  onClick={() => handleUpdateAppointment(app.id, "COMPLETED")}
+                                  className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold text-xs h-7 px-2.5 rounded-lg"
+                                >
+                                  Mark Done
+                                </Button>
+                              )}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
         </div>
       )}
+
 
       {/* 2. ALERTS DIRECTORY VIEW */}
       {isAlertsPage && (

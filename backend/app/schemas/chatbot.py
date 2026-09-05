@@ -81,7 +81,10 @@ class BehavioralFeaturesPayload(BaseModel):
     academic_usage_minutes: int = Field(default=0, ge=0)
     social_usage_minutes: int = Field(default=0, ge=0)
     entertainment_usage_minutes: int = Field(default=0, ge=0)
+    adult_usage_minutes: int = Field(default=0, ge=0, description="Minutes detected on sensitive or adult content")
+    continuous_screen_minutes: int = Field(default=0, ge=0, description="Current unbroken active screen time in minutes")
     baseline_deviation_score: float = Field(default=0.0, ge=0.0, le=10.0)
     detected_intent_summary: Optional[str] = Field(default=None, description="Semantic summary of active apps/searches (e.g., Exam Prep, Project Coding)")
     is_crisis_search_flag: bool = Field(default=False, description="Flagged if active search queries match distress/self-harm keywords")
+
 

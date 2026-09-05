@@ -167,6 +167,54 @@ async def send_message(
         raw_message=payload.message
     )
 
+@router.post("/conversations/{conversation_id}/messages/stream")
+async def send_message_stream(
+    conversation_id: UUID,
+    payload: SendMessageRequest,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    Server-Sent Events (SSE) streaming endpoint for AI wellness chatbot.
+    Streams token chunks word-by-word with real-time metadata.
+    """
+    import asyncio
+    from fastapi.responses import StreamingResponse
+
+    if current_user.role != UserRole.STUDENT:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only students can interact with the Wellness Assistant."
+        )
+
+    # Process and retrieve authoritative response and records
+    chat_result = await chatbot_service.process_student_message(
+        db,
+        student=current_user,
+        conversation_id=conversation_id,
+        raw_message=payload.message
+    )
+
+    async def event_generator():
+        words = chat_result.response.split(" ")
+        for i, word in enumerate(words):
+            chunk = {
+                "type": "token",
+                "content": word + (" " if i < len(words) - 1 else "")
+            }
+            yield f"data: {json.dumps(chunk)}\n\n"
+            await asyncio.sleep(0.02) # Low latency streaming feel
+
+        # Send completion payload with emotion and metadata
+        final_payload = {
+            "type": "done",
+            "data": chat_result.model_dump(mode="json")
+        }
+        yield f"data: {json.dumps(final_payload)}\n\n"
+
+    return StreamingResponse(event_generator(), media_type="text/event-stream")
+
+
 @router.get("/conversations/{conversation_id}/messages", response_model=List[ChatMessageItem])
 async def get_messages(
     conversation_id: UUID,

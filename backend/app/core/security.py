@@ -63,9 +63,26 @@ def create_refresh_token(
     }
     return jwt.encode(to_encode, settings.JWT_SECRET_KEY, algorithm=ALGORITHM)
 
+def create_password_reset_token(email: str, expires_delta: Optional[timedelta] = None) -> str:
+    """
+    Generate a signed JWT specifically for password resets with 15-minute validity.
+    """
+    if expires_delta:
+        expire = datetime.now(timezone.utc) + expires_delta
+    else:
+        expire = datetime.now(timezone.utc) + timedelta(minutes=15)
+    
+    to_encode = {
+        "exp": expire,
+        "sub": email.lower().strip(),
+        "type": "password_reset"
+    }
+    return jwt.encode(to_encode, settings.JWT_SECRET_KEY, algorithm=ALGORITHM)
+
 def decode_token(token: str) -> Dict[str, Any]:
     """
     Decode and validate a JWT. Raises JWTError if invalid or expired.
     """
     payload = jwt.decode(token, settings.JWT_SECRET_KEY, algorithms=[ALGORITHM])
     return payload
+

@@ -24,9 +24,9 @@ import {
 import { 
   Mic, Square, Sparkles, BookOpen, Video, FileText, AlertCircle, HelpCircle,
   X, Play, Pause, Heart, Check, ClipboardCheck, Activity,
-  Laptop, Moon, Clock, Monitor, RefreshCw, Zap, PlayCircle
+  Laptop, Moon, Clock, Monitor, RefreshCw, Zap, PlayCircle, Calendar, UserPlus, FileDown
 } from "lucide-react";
-import api, { chatAPI } from "@/services/api";
+import api, { chatAPI, appointmentsAPI, AppointmentItem } from "@/services/api";
 import { useAuth } from "@/contexts/AuthContext";
 import { useScreenTimeTracker } from "@/hooks/useScreenTimeTracker";
 
@@ -94,6 +94,14 @@ export const StudentDashboard: React.FC = () => {
 
   // Active wellness pathway modal state
   const [activePathway, setActivePathway] = useState<any | null>(null);
+
+  // Counselor appointment booking modal state
+  const [isBookingOpen, setIsBookingOpen] = useState(false);
+  const [bookingType, setBookingType] = useState<"VIRTUAL" | "IN_PERSON">("VIRTUAL");
+  const [bookingDate, setBookingDate] = useState("");
+  const [bookingReason, setBookingReason] = useState("");
+  const [isSubmittingBooking, setIsSubmittingBooking] = useState(false);
+
 
   // 1. Data Fetching via React Query hooks (strictly no useEffect for fetches)
   const { data: assessment, isLoading: isAssessmentLoading } = useLatestAssessment();
@@ -435,6 +443,29 @@ export const StudentDashboard: React.FC = () => {
           {hasAssessment && assessment?.risk_level === "LOW" && (
             <p className="text-xs text-emerald-500 font-medium">Wellness parameters are stable. Keep it up!</p>
           )}
+
+          {/* 1-on-1 Counselor Booking Trigger when risk is Elevated or High */}
+          <div className="mt-4 pt-3 border-t border-border/60 flex flex-col gap-2 w-full">
+            <Button
+              type="button"
+              onClick={() => setIsBookingOpen(true)}
+              size="sm"
+              className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-xs h-8 rounded-lg shadow-sm flex items-center justify-center gap-1.5"
+            >
+              <Calendar className="h-3.5 w-3.5" />
+              Schedule Counselor Session
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => window.print()}
+              size="sm"
+              className="w-full border-border/70 hover:bg-accent/40 text-foreground font-medium text-xs h-8 rounded-lg flex items-center justify-center gap-1.5"
+            >
+              <FileDown className="h-3.5 w-3.5 text-primary" />
+              Print / Export Wellness PDF
+            </Button>
+          </div>
         </div>
       </CardContent>
     </Card>
@@ -660,6 +691,12 @@ export const StudentDashboard: React.FC = () => {
     const academicMins = log?.academic_usage_minutes || 0;
     const socialMins = log?.social_usage_minutes || 0;
     const entertainmentMins = log?.entertainment_usage_minutes || 0;
+    const adultMins = (log as any)?.adult_usage_minutes || 0;
+    const continuousMins = (log as any)?.continuous_screen_minutes || 0;
+    const isCrisisDetected = Boolean((log as any)?.is_crisis_detected);
+
+    const isExcessiveScreenTime = totalMins >= 360 || continuousMins >= 300;
+    const isAdultContentWarning = adultMins >= 10;
     const safeTotal = totalMins > 0 ? totalMins : 1;
 
     // Human-friendly natural time formatting (e.g., "3h 30m" / "45m")
@@ -677,6 +714,7 @@ export const StudentDashboard: React.FC = () => {
     const academicPct = Math.round((academicMins / safeTotal) * 100);
     const socialPct = Math.round((socialMins / safeTotal) * 100);
     const entertainmentPct = Math.round((entertainmentMins / safeTotal) * 100);
+    const adultPct = Math.round((adultMins / safeTotal) * 100);
 
     const isLateNightWarning = lateNightMins >= 90;
     const riskLevel = log?.risk_level || "LOW";
@@ -699,7 +737,7 @@ export const StudentDashboard: React.FC = () => {
                 </span>
               </div>
               <CardDescription className="text-muted-foreground text-xs">
-                Passive laptop screen time and circadian sleep disruption tracking
+                Passive laptop screen time, adult content boundary checks, and circadian sleep disruption tracking
               </CardDescription>
             </div>
           </div>
@@ -714,9 +752,53 @@ export const StudentDashboard: React.FC = () => {
           </Button>
         </CardHeader>
 
+
         <CardContent className="space-y-4 pt-1">
+          {/* Active Behavioral Health Alerts Banner */}
+          {(isCrisisDetected || isExcessiveScreenTime || isAdultContentWarning || isLateNightWarning) && (
+            <div className={`rounded-xl border p-3.5 flex flex-col gap-2 ${
+              isCrisisDetected || isAdultContentWarning
+                ? "border-rose-500/30 bg-rose-500/10 text-rose-300"
+                : isExcessiveScreenTime
+                ? "border-amber-500/30 bg-amber-500/10 text-amber-300"
+                : "border-indigo-500/30 bg-indigo-500/10 text-indigo-300"
+            }`}>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <AlertCircle className="h-4.5 w-4.5 shrink-0 text-rose-500" />
+                  <span className="text-xs font-extrabold tracking-wide uppercase">
+                    {isCrisisDetected
+                      ? "High-Priority Crisis Distress Triggered"
+                      : isAdultContentWarning
+                      ? "Compulsive / Adult Browsing Spike"
+                      : isExcessiveScreenTime
+                      ? "Excessive Continuous Screen Strain (6h+)"
+                      : "Circadian Sleep Disruption"}
+                  </span>
+                </div>
+                <Button
+                  size="sm"
+                  onClick={() => setIsBookingOpen(true)}
+                  className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-[11px] h-7 px-3 rounded-lg"
+                >
+                  Speak with Counselor
+                </Button>
+              </div>
+
+              <p className="text-xs text-foreground/80 leading-relaxed">
+                {isCrisisDetected
+                  ? "Urgent emotional distress query was detected in your active browser window. University wellness counselors are available 24/7."
+                  : isAdultContentWarning
+                  ? `Sensitive / adult browsing detected (${adultMins} mins). Compulsive avoidance coping can intensify isolation and anxiety. Take a mindful pause.`
+                  : isExcessiveScreenTime
+                  ? `You have spent over ${Math.floor(totalMins / 60)} hours actively on your screen today without sufficient breaks. Cognitive fatigue impairs learning efficiency.`
+                  : "Frequent computer usage after midnight disrupts melatonin production and worsens academic burnout."}
+              </p>
+            </div>
+          )}
+
           {/* Grid of Key Metrics */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
             {/* 1. Active Screen Time */}
             <div className="rounded-xl border border-border/60 bg-background/40 p-3.5 flex flex-col justify-between">
               <div className="flex items-center justify-between text-xs text-muted-foreground font-semibold">
@@ -729,7 +811,9 @@ export const StudentDashboard: React.FC = () => {
               </div>
               <div className="mt-2 text-[11px] text-muted-foreground flex items-center justify-between">
                 <span>Total: {totalMins} mins</span>
-                <span className="text-emerald-500 font-semibold">Active usage</span>
+                <span className={isExcessiveScreenTime ? "text-rose-500 font-semibold" : "text-emerald-500 font-semibold"}>
+                  {isExcessiveScreenTime ? "Excessive Strain" : "Active usage"}
+                </span>
               </div>
             </div>
 
@@ -740,7 +824,7 @@ export const StudentDashboard: React.FC = () => {
                 : "border-border/60 bg-background/40"
             }`}>
               <div className="flex items-center justify-between text-xs text-muted-foreground font-semibold">
-                <span>Late-Night Activity (12AM-5AM)</span>
+                <span>Late-Night (12AM-5AM)</span>
                 <Moon className={`h-4 w-4 ${isLateNightWarning ? "text-rose-500" : "text-amber-500"}`} />
               </div>
               <div className="mt-2 flex items-baseline gap-2">
@@ -760,7 +844,32 @@ export const StudentDashboard: React.FC = () => {
               </div>
             </div>
 
-            {/* 3. Behavioral Risk Tier */}
+            {/* 3. Sensitive / Adult Content Detection */}
+            <div className={`rounded-xl border p-3.5 flex flex-col justify-between ${
+              isAdultContentWarning 
+                ? "border-rose-500/30 bg-rose-500/5" 
+                : "border-border/60 bg-background/40"
+            }`}>
+              <div className="flex items-center justify-between text-xs text-muted-foreground font-semibold">
+                <span>Sensitive / Adult Habits</span>
+                <Activity className={`h-4 w-4 ${isAdultContentWarning ? "text-rose-500" : "text-emerald-500"}`} />
+              </div>
+              <div className="mt-2 flex items-baseline gap-2">
+                <span className={`text-2xl font-black ${isAdultContentWarning ? "text-rose-500" : "text-foreground"}`}>
+                  {adultMins}m
+                </span>
+                <span className="text-xs text-muted-foreground">detected today</span>
+              </div>
+              <div className="mt-2 text-[11px] font-semibold">
+                {adultMins === 0 ? (
+                  <span className="text-emerald-500">Healthy Habits 🟢</span>
+                ) : (
+                  <span className="text-rose-500">Compulsive Habit Warning 🔴</span>
+                )}
+              </div>
+            </div>
+
+            {/* 4. Behavioral Risk Tier */}
             <div className="rounded-xl border border-border/60 bg-background/40 p-3.5 flex flex-col justify-between">
               <div className="flex items-center justify-between text-xs text-muted-foreground font-semibold">
                 <span>Digital Phenotype Risk</span>
@@ -783,9 +892,9 @@ export const StudentDashboard: React.FC = () => {
           {/* App Category Breakdown Bar */}
           <div className="rounded-xl border border-border/60 bg-background/40 p-3.5 space-y-2">
             <div className="flex items-center justify-between text-xs font-bold text-foreground">
-              <span>Application Usage Distribution</span>
+              <span>Application & Content Usage Distribution</span>
               <span className="text-muted-foreground font-normal text-[11px]">
-                Academic: {academicMins}m | Entertainment: {entertainmentMins}m | Social: {socialMins}m
+                Academic: {academicMins}m | Entertainment: {entertainmentMins}m | Social: {socialMins}m | Sensitive: {adultMins}m
               </span>
             </div>
 
@@ -797,17 +906,24 @@ export const StudentDashboard: React.FC = () => {
               />
               <div 
                 className="bg-purple-500 h-full transition-all duration-500" 
-                style={{ width: `${Math.max(5, entertainmentPct)}%` }} 
+                style={{ width: `${Math.max(3, entertainmentPct)}%` }} 
                 title={`Entertainment: ${entertainmentPct}%`} 
               />
               <div 
                 className="bg-emerald-500 h-full transition-all duration-500" 
-                style={{ width: `${Math.max(5, socialPct)}%` }} 
+                style={{ width: `${Math.max(3, socialPct)}%` }} 
                 title={`Social/Messaging: ${socialPct}%`} 
               />
+              {adultMins > 0 && (
+                <div 
+                  className="bg-rose-500 h-full transition-all duration-500" 
+                  style={{ width: `${Math.max(5, adultPct)}%` }} 
+                  title={`Sensitive/Adult: ${adultPct}%`} 
+                />
+              )}
             </div>
 
-            <div className="flex items-center justify-between text-[11px] text-muted-foreground pt-1">
+            <div className="flex flex-wrap items-center justify-between text-[11px] text-muted-foreground pt-1 gap-2">
               <div className="flex items-center gap-1.5">
                 <span className="h-2 w-2 rounded-full bg-indigo-500" />
                 <span>Academic & Coding ({academicPct || 0}%)</span>
@@ -820,6 +936,12 @@ export const StudentDashboard: React.FC = () => {
                 <span className="h-2 w-2 rounded-full bg-emerald-500" />
                 <span>Social & Chat ({socialPct || 0}%)</span>
               </div>
+              {adultMins > 0 && (
+                <div className="flex items-center gap-1.5">
+                  <span className="h-2 w-2 rounded-full bg-rose-500" />
+                  <span className="text-rose-500 font-semibold">Sensitive / Adult ({adultPct || 0}%)</span>
+                </div>
+              )}
             </div>
           </div>
 
@@ -827,7 +949,7 @@ export const StudentDashboard: React.FC = () => {
             <div className="flex items-center gap-2 text-indigo-700 dark:text-indigo-300 font-medium">
               <Monitor className="h-4 w-4 shrink-0" />
               <span>
-                <strong>Automatic Web & Session Tracking Active.</strong> Screen time & activity categories are passively calculated from your authenticated session.
+                <strong>Automatic Web & Session Tracking Active.</strong> Screen time, adult boundaries, and activity categories are passively calculated from your authenticated session.
               </span>
             </div>
           </div>
@@ -1113,9 +1235,143 @@ export const StudentDashboard: React.FC = () => {
           onClose={() => setActivePathway(null)} 
         />
       )}
+
+      {/* Counselor Appointment Booking Modal */}
+      {isBookingOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="relative w-full max-w-lg rounded-2xl border border-border bg-card p-6 shadow-2xl space-y-4">
+            <div className="flex items-center justify-between border-b border-border/70 pb-3">
+              <div className="flex items-center gap-2.5">
+                <div className="h-9 w-9 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary">
+                  <Calendar className="h-5 w-5" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-foreground">Book 1-on-1 Counseling Session</h3>
+                  <p className="text-xs text-muted-foreground">Confidential psychological wellness consult</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setIsBookingOpen(false)}
+                className="rounded-lg p-1 text-muted-foreground hover:bg-accent/40 hover:text-foreground"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            <form
+              onSubmit={async (e) => {
+                e.preventDefault();
+                if (!bookingDate) {
+                  toast({
+                    title: "Select Date",
+                    description: "Please specify your preferred consultation date.",
+                    variant: "destructive"
+                  });
+                  return;
+                }
+                setIsSubmittingBooking(true);
+                try {
+                  await appointmentsAPI.bookAppointment({
+                    scheduled_time: new Date(bookingDate).toISOString(),
+                    appointment_type: bookingType,
+                    reason: bookingReason || "Wellness check-in"
+                  });
+                  toast({
+                    title: "Appointment Requested!",
+                    description: "Your counselor will confirm this slot shortly.",
+                    variant: "success"
+                  });
+                  setIsBookingOpen(false);
+                  setBookingReason("");
+                } catch (err) {
+                  toast({
+                    title: "Booking Failed",
+                    description: "Could not schedule appointment. Please try again.",
+                    variant: "destructive"
+                  });
+                } finally {
+                  setIsSubmittingBooking(false);
+                }
+              }}
+              className="space-y-4"
+            >
+              <div>
+                <Label className="text-xs font-semibold text-foreground">Session Format</Label>
+                <div className="grid grid-cols-2 gap-2 mt-1.5">
+                  <button
+                    type="button"
+                    onClick={() => setBookingType("VIRTUAL")}
+                    className={`p-3 rounded-xl border text-xs font-bold transition-all ${
+                      bookingType === "VIRTUAL"
+                        ? "border-primary bg-primary/10 text-primary"
+                        : "border-border/70 text-muted-foreground hover:bg-accent/40"
+                    }`}
+                  >
+                    Virtual Video Call
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setBookingType("IN_PERSON")}
+                    className={`p-3 rounded-xl border text-xs font-bold transition-all ${
+                      bookingType === "IN_PERSON"
+                        ? "border-primary bg-primary/10 text-primary"
+                        : "border-border/70 text-muted-foreground hover:bg-accent/40"
+                    }`}
+                  >
+                    In-Person Campus Office
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <Label className="text-xs font-semibold text-foreground">Preferred Date & Time</Label>
+                <input
+                  type="datetime-local"
+                  value={bookingDate}
+                  onChange={(e) => setBookingDate(e.target.value)}
+                  className="w-full mt-1.5 rounded-xl border border-border/70 bg-background/50 p-2.5 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+                  required
+                />
+              </div>
+
+              <div>
+                <Label className="text-xs font-semibold text-foreground">Primary Concern / Stressor (Optional)</Label>
+                <textarea
+                  rows={3}
+                  value={bookingReason}
+                  onChange={(e) => setBookingReason(e.target.value)}
+                  placeholder="e.g. Exam anxiety, sleep disturbance, academic overload..."
+                  className="w-full mt-1.5 rounded-xl border border-border/70 bg-background/50 p-2.5 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-primary resize-none placeholder:text-muted-foreground/60"
+                />
+              </div>
+
+              <div className="flex justify-end gap-2 pt-2 border-t border-border/60">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setIsBookingOpen(false)}
+                  className="text-xs"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={isSubmittingBooking}
+                  size="sm"
+                  className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-xs"
+                >
+                  {isSubmittingBooking ? "Booking..." : "Confirm Booking"}
+                </Button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
+
 
 // Interactive Wellness Pathway Modal Detail Component
 interface PathwayModalProps {

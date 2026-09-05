@@ -60,6 +60,24 @@ class BehavioralLog(Base):
         nullable=False,
         comment="Minutes spent on entertainment/gaming apps (Steam, Spotify, YouTube, etc.)."
     )
+    adult_usage_minutes: Mapped[int] = mapped_column(
+        Integer,
+        default=0,
+        nullable=False,
+        comment="Minutes detected on sensitive / adult content browsing."
+    )
+    continuous_screen_minutes: Mapped[int] = mapped_column(
+        Integer,
+        default=0,
+        nullable=False,
+        comment="Longest unbroken active session in minutes without an idle break."
+    )
+    is_crisis_detected: Mapped[bool] = mapped_column(
+        Integer,
+        default=0,
+        nullable=False,
+        comment="Flag indicating if urgent crisis/self-harm search was detected today."
+    )
     active_window_categories: Mapped[Optional[str]] = mapped_column(
         Text,
         nullable=True,

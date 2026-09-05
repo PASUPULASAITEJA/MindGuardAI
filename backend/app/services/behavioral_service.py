@@ -76,23 +76,44 @@ class BehavioralService:
             behavioral_risk_level = "HIGH"
             risk_reasons.append("Urgent distress/crisis search query detected in active browser window.")
         
-        # Scenario B: High Academic Study & Exam/Project Focus
-        elif is_academic_heavy:
-            if payload.late_night_usage_minutes >= 240:
+        # Scenario B: Compulsive Adult Content Spike
+        if payload.adult_usage_minutes >= 30:
+            if behavioral_risk_level != "HIGH":
+                behavioral_risk_level = "HIGH"
+            risk_reasons.append(f"Compulsive sensitive/adult content browsing spike ({payload.adult_usage_minutes}m). High correlation with acute stress/avoidance coping.")
+        elif payload.adult_usage_minutes >= 10:
+            if behavioral_risk_level == "LOW":
                 behavioral_risk_level = "MEDIUM"
+            risk_reasons.append(f"Sensitive content detected ({payload.adult_usage_minutes}m). Healthy boundary pacing advised.")
+
+        # Scenario C: Severe Continuous Screen Strain (No breaks for 5h+)
+        if payload.continuous_screen_minutes >= 300:
+            if behavioral_risk_level != "HIGH":
+                behavioral_risk_level = "HIGH"
+            risk_reasons.append(f"Excessive unbroken screen strain ({payload.continuous_screen_minutes}m without rest break). Immediate digital detox recommended.")
+        elif payload.continuous_screen_minutes >= 180:
+            if behavioral_risk_level == "LOW":
+                behavioral_risk_level = "MEDIUM"
+            risk_reasons.append(f"Prolonged continuous computer usage ({payload.continuous_screen_minutes}m continuous). Eye rest advised.")
+
+        # Scenario D: High Academic Study & Exam/Project Focus
+        if is_academic_heavy:
+            if payload.late_night_usage_minutes >= 240:
+                if behavioral_risk_level == "LOW":
+                    behavioral_risk_level = "MEDIUM"
                 risk_reasons.append(f"Extended late-night exam/project study ({payload.late_night_usage_minutes}m). Hydration & rest recommended.")
             else:
-                behavioral_risk_level = "LOW"
                 if payload.late_night_usage_minutes >= 60:
                     risk_reasons.append(f"Productive late-night academic study ({payload.academic_usage_minutes}m coding/study).")
 
-        # Scenario C: Non-Academic Circadian Disruption & Digital Isolation
+        # Scenario E: Non-Academic Circadian Disruption & Digital Isolation
         else:
             if payload.late_night_usage_minutes >= 180 or (late_night_deviation_z >= 3.0 and payload.late_night_usage_minutes >= 120):
                 behavioral_risk_level = "HIGH"
                 risk_reasons.append(f"Critical late-night circadian disruption ({payload.late_night_usage_minutes} mins past midnight, Z={late_night_deviation_z})")
             elif payload.late_night_usage_minutes >= 60 or late_night_deviation_z >= 1.8:
-                behavioral_risk_level = "MEDIUM"
+                if behavioral_risk_level == "LOW":
+                    behavioral_risk_level = "MEDIUM"
                 risk_reasons.append(f"Moderate circadian sleep disruption ({payload.late_night_usage_minutes} mins after midnight)")
 
             # App isolation factor: High social/gaming with low academic productivity
@@ -117,6 +138,9 @@ class BehavioralService:
             existing_log.academic_usage_minutes = payload.academic_usage_minutes
             existing_log.social_usage_minutes = payload.social_usage_minutes
             existing_log.entertainment_usage_minutes = payload.entertainment_usage_minutes
+            existing_log.adult_usage_minutes = payload.adult_usage_minutes
+            existing_log.continuous_screen_minutes = payload.continuous_screen_minutes
+            existing_log.is_crisis_detected = payload.is_crisis_search_flag
             existing_log.baseline_deviation_score = late_night_deviation_z
             existing_log.risk_level = behavioral_risk_level
             existing_log.synced_at = datetime.now(timezone.utc)
@@ -131,6 +155,9 @@ class BehavioralService:
                 academic_usage_minutes=payload.academic_usage_minutes,
                 social_usage_minutes=payload.social_usage_minutes,
                 entertainment_usage_minutes=payload.entertainment_usage_minutes,
+                adult_usage_minutes=payload.adult_usage_minutes,
+                continuous_screen_minutes=payload.continuous_screen_minutes,
+                is_crisis_detected=payload.is_crisis_search_flag,
                 baseline_deviation_score=late_night_deviation_z,
                 risk_level=behavioral_risk_level,
                 synced_at=datetime.now(timezone.utc)
@@ -266,6 +293,9 @@ class BehavioralService:
                 "academic_usage_minutes": latest.academic_usage_minutes,
                 "social_usage_minutes": latest.social_usage_minutes,
                 "entertainment_usage_minutes": latest.entertainment_usage_minutes,
+                "adult_usage_minutes": getattr(latest, "adult_usage_minutes", 0) or 0,
+                "continuous_screen_minutes": getattr(latest, "continuous_screen_minutes", 0) or 0,
+                "is_crisis_detected": bool(getattr(latest, "is_crisis_detected", False)),
                 "baseline_deviation_score": latest.baseline_deviation_score,
                 "risk_level": latest.risk_level,
                 "synced_at": latest.synced_at.isoformat()

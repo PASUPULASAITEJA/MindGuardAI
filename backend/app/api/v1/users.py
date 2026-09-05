@@ -12,6 +12,8 @@ from app.services.user import user_service
 students_router = APIRouter()
 admin_router = APIRouter()
 
+from app.schemas.users import UserProfileResponse, UserProfileUpdateRequest, UserDirectoryResponse
+
 @students_router.get(
     "/me",
     response_model=UserProfileResponse,
@@ -25,6 +27,38 @@ async def get_student_profile(
     Retrieves the profile information for the authenticated student.
     """
     return current_user
+
+@students_router.put(
+    "/me",
+    response_model=UserProfileResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Update current student profile and preferences"
+)
+async def update_student_profile(
+    payload: UserProfileUpdateRequest,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_role([UserRole.STUDENT]))
+):
+    """
+    Updates emergency contacts, academic details, and counselor sharing consent.
+    """
+    if payload.full_name is not None:
+        current_user.full_name = payload.full_name.strip()
+    if payload.phone_number is not None:
+        current_user.phone_number = payload.phone_number.strip()
+    if payload.emergency_contact_name is not None:
+        current_user.emergency_contact_name = payload.emergency_contact_name.strip()
+    if payload.emergency_contact_phone is not None:
+        current_user.emergency_contact_phone = payload.emergency_contact_phone.strip()
+    if payload.academic_department is not None:
+        current_user.academic_department = payload.academic_department.strip()
+    if payload.consent_counselor_sharing is not None:
+        current_user.consent_counselor_sharing = payload.consent_counselor_sharing
+
+    await db.commit()
+    await db.refresh(current_user)
+    return current_user
+
 
 @admin_router.get(
     "/users",

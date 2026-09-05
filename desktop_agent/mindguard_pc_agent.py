@@ -18,11 +18,32 @@ import json
 import ctypes
 import getpass
 import datetime
+import threading
+import webbrowser
 from pathlib import Path
 from typing import Dict, Optional, Tuple
 
 import requests
 import psutil
+
+def notify_break_reminder(title: str, message: str):
+    """
+    Triggers non-intrusive desktop notification reminder using Windows API or ctypes.
+    """
+    try:
+        # Try win10toast or native Windows balloon notification
+        if sys.platform == "win32":
+            # Windows native notification message box in background thread without blocking
+            def _popup():
+                try:
+                    ctypes.windll.user32.MessageBoxW(0, message, title, 0x00001040 | 0x00040000)
+                except Exception:
+                    pass
+            t = threading.Thread(target=_popup, daemon=True)
+            t.start()
+    except Exception:
+        print(f"\n[!] Reminder: {title} - {message}\n")
+
 
 # API & Gateway Configuration
 API_BASE_URL = os.environ.get("MINDGUARD_API_URL", "http://127.0.0.1:8000/api/v1")
@@ -75,6 +96,12 @@ CRISIS_KEYWORDS = [
     "worthless", "how to overdose", "no reason to live"
 ]
 
+ADULT_KEYWORDS = [
+    "porn", "xxx", "xvideos", "pornhub", "onlyfans", "nsfw", "erotic", 
+    "adult content", "camgirl", "chaturbate", "xhamster", "redtube", "brazzers"
+]
+
+
 # Windows API Struct for Idle Detection
 class LASTINPUTINFO(ctypes.Structure):
     _fields_ = [("cbSize", ctypes.c_uint), ("dwTime", ctypes.c_uint)]
@@ -124,7 +151,11 @@ def get_active_window_details() -> Tuple[str, str, str, bool]:
     if any(keyword in window_title for keyword in CRISIS_KEYWORDS):
         return proc_name, window_title, "CRISIS", True
 
-    # 2. Window Title / Search Intent Semantic Categorization (especially for Chrome, Edge, Firefox)
+    # 2. Sensitive / Compulsive Adult Content Detection
+    if any(keyword in window_title for keyword in ADULT_KEYWORDS):
+        return proc_name, window_title, "ADULT", False
+
+    # 3. Window Title / Search Intent Semantic Categorization (especially for Chrome, Edge, Firefox)
     if any(keyword in window_title for keyword in ACADEMIC_KEYWORDS):
         return proc_name, window_title, "ACADEMIC", False
 
@@ -205,13 +236,16 @@ def start_agent():
     print("[*] Sampling system activity every 5 seconds...")
     print("[*] Press Ctrl + C to stop the desktop agent.\n")
 
+    continuous_active_seconds = 0
     total_screen_seconds = 0
     late_night_seconds = 0
     academic_seconds = 0
     social_seconds = 0
     entertainment_seconds = 0
+    adult_seconds = 0
     has_crisis_event = False
     last_sync_time = time.time()
+    last_break_prompt = time.time()
 
     try:
         while True:
@@ -219,10 +253,26 @@ def start_agent():
 
             idle_seconds = get_system_idle_seconds()
             if idle_seconds >= 180:
+                continuous_active_seconds = 0
                 continue
 
+            continuous_active_seconds += SAMPLE_INTERVAL_SECONDS
             total_screen_seconds += SAMPLE_INTERVAL_SECONDS
             current_hour = datetime.datetime.now().hour
+
+            # Excessive Unbroken Screen Strain Reminders (at 2h, 4h, 6h+)
+            if continuous_active_seconds >= 21600 and (time.time() - last_break_prompt) >= 3600:
+                last_break_prompt = time.time()
+                notify_break_reminder(
+                    "MindGuard Alert - Severe Screen Strain (6h+ Active)",
+                    "You have been active on your laptop for over 6 hours continuously without an idle break. Eye strain and mental fatigue are at peak levels. Please take a 30-minute off-screen break."
+                )
+            elif continuous_active_seconds >= 3000 and (time.time() - last_break_prompt) >= 1800:
+                last_break_prompt = time.time()
+                notify_break_reminder(
+                    "MindGuard Wellness - 20-20-20 Rule",
+                    "You have been working on your screen for 50+ minutes continuously. Take 20 seconds to look at an object 20 feet away to relax your eyes and reset your posture."
+                )
 
             if 0 <= current_hour < 5:
                 late_night_seconds += SAMPLE_INTERVAL_SECONDS
@@ -237,6 +287,8 @@ def start_agent():
                 social_seconds += SAMPLE_INTERVAL_SECONDS
             elif category == "ENTERTAINMENT":
                 entertainment_seconds += SAMPLE_INTERVAL_SECONDS
+            elif category == "ADULT":
+                adult_seconds += SAMPLE_INTERVAL_SECONDS
 
             elapsed_since_sync = time.time() - last_sync_time
             if elapsed_since_sync >= SYNC_INTERVAL_SECONDS:
@@ -251,6 +303,8 @@ def start_agent():
                     "academic_usage_minutes": int(academic_seconds / 60),
                     "social_usage_minutes": int(social_seconds / 60),
                     "entertainment_usage_minutes": int(entertainment_seconds / 60),
+                    "adult_usage_minutes": int(adult_seconds / 60),
+                    "continuous_screen_minutes": int(continuous_active_seconds / 60),
                     "baseline_deviation_score": 0.0,
                     "is_crisis_search_flag": has_crisis_event
                 }
@@ -295,5 +349,52 @@ def start_agent():
     except KeyboardInterrupt:
         print("\n\n[*] MindGuard PC Agent stopped safely. Take care of your mental wellness!")
 
+def run_tray_agent():
+    """
+    Runs the agent with an optional pystray taskbar tray icon if available, or falls back to direct execution.
+    """
+    try:
+        import pystray
+        from PIL import Image, ImageDraw
+
+        # Generate lightweight status indicator icon in memory
+        def create_tray_icon_image(color="green"):
+            img = Image.new("RGB", (64, 64), color=(30, 30, 30))
+            draw = ImageDraw.Draw(img)
+            fill_color = (16, 185, 129) if color == "green" else (245, 158, 11)
+            draw.ellipse((12, 12, 52, 52), fill=fill_color)
+            return img
+
+        # Launch background agent monitoring thread
+        agent_thread = threading.Thread(target=start_agent, daemon=True)
+        agent_thread.start()
+
+        def on_open_dashboard(icon, item):
+            webbrowser.open("http://localhost:5173/student/dashboard")
+
+        def on_exit(icon, item):
+            icon.stop()
+            os._exit(0)
+
+        icon = pystray.Icon(
+            "MindGuard PC Agent",
+            create_tray_icon_image("green"),
+            "MindGuard Behavioral Phenotyping (Active)",
+            menu=pystray.Menu(
+                pystray.MenuItem("Open Student Wellness Hub", on_open_dashboard),
+                pystray.MenuItem("Status: Active & Protected", lambda: None, enabled=False),
+                pystray.MenuItem("Exit Agent", on_exit)
+            )
+        )
+        print("[*] MindGuard PC Agent system tray icon initialized.")
+        icon.run()
+    except ImportError:
+        # Pystray or PIL not installed; run directly in terminal
+        start_agent()
+
 if __name__ == "__main__":
-    start_agent()
+    if "--tray" in sys.argv or os.environ.get("MINDGUARD_TRAY") == "1":
+        run_tray_agent()
+    else:
+        start_agent()
+

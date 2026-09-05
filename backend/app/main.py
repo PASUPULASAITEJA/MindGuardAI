@@ -19,6 +19,7 @@ from app.api.v1.alerts import router as alerts_router
 from app.api.v1.notifications import router as notifications_router
 from app.api.v1.analytics import router as analytics_router
 from app.api.v1.chatbot import router as chatbot_router
+from app.api.v1.appointments import router as appointments_router
 
 from contextlib import asynccontextmanager
 from app.ml.inference import ml_service
@@ -168,3 +169,5 @@ app.include_router(alerts_router, prefix="/api/v1/counselors", tags=["Counselor 
 app.include_router(notifications_router, prefix="/api/v1/notifications", tags=["User Notifications"])
 app.include_router(analytics_router, prefix="/api/v1/analytics", tags=["Campus Analytics"])
 app.include_router(chatbot_router, prefix="/api/v1", tags=["AI Wellness Chatbot"])
+app.include_router(appointments_router, prefix="/api/v1/appointments", tags=["Counselor Appointments"])
+

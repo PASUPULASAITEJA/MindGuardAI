@@ -11,16 +11,31 @@ export const api = axios.create({
   },
 });
 
-// In-memory access token storage to prevent XSS extraction
-let inMemoryToken: string | null = null;
+// In-memory access token storage to prevent XSS extraction, with localStorage fallback for Remember Me
+const LOCAL_STORAGE_TOKEN_KEY = "mindguard_auth_token";
+const REMEMBER_ME_KEY = "mindguard_remember_me";
 
-export const setAccessToken = (token: string | null) => {
+let inMemoryToken: string | null = (typeof window !== "undefined" && localStorage.getItem(REMEMBER_ME_KEY) === "true")
+  ? localStorage.getItem(LOCAL_STORAGE_TOKEN_KEY)
+  : null;
+
+export const setAccessToken = (token: string | null, rememberMe: boolean = false) => {
   inMemoryToken = token;
+  if (typeof window !== "undefined") {
+    if (token && rememberMe) {
+      localStorage.setItem(LOCAL_STORAGE_TOKEN_KEY, token);
+      localStorage.setItem(REMEMBER_ME_KEY, "true");
+    } else if (!token) {
+      localStorage.removeItem(LOCAL_STORAGE_TOKEN_KEY);
+      localStorage.removeItem(REMEMBER_ME_KEY);
+    }
+  }
 };
 
 export const getAccessToken = () => {
   return inMemoryToken;
 };
+
 
 // 1. Request interceptor to append Bearer JWT automatically
 api.interceptors.request.use(
@@ -225,5 +240,53 @@ api.interceptors.response.use(
     }
   };
 
+  export interface AppointmentItem {
+    id: string;
+    student_id: string;
+    counselor_id?: string | null;
+    appointment_type: "VIRTUAL" | "IN_PERSON";
+    scheduled_time: string;
+    status: "PENDING" | "CONFIRMED" | "COMPLETED" | "CANCELLED";
+    reason?: string | null;
+    notes?: string | null;
+    created_at: string;
+    updated_at: string;
+  }
+
+  export const appointmentsAPI = {
+    bookAppointment: async (data: {
+      scheduled_time: string;
+      appointment_type: "VIRTUAL" | "IN_PERSON";
+      reason?: string;
+    }) => {
+      const res = await api.post<AppointmentItem>("/appointments", data);
+      return res.data;
+    },
+    getMyAppointments: async (statusFilter?: string) => {
+      const url = statusFilter ? `/appointments/my?status_filter=${statusFilter}` : "/appointments/my";
+      const res = await api.get<{ appointments: AppointmentItem[]; total: number }>(url);
+      return res.data;
+    },
+    updateStatus: async (appointmentId: string, status: string, notes?: string) => {
+      const res = await api.patch<AppointmentItem>(`/appointments/${appointmentId}/status`, {
+        status,
+        notes
+      });
+      return res.data;
+    }
+  };
+
+  export const profileAPI = {
+    getStudentProfile: async () => {
+      const res = await api.get("/students/me");
+      return res.data;
+    },
+    updateStudentProfile: async (data: any) => {
+      const res = await api.put("/students/me", data);
+      return res.data;
+    }
+  };
+
   export default api;
+
 

@@ -7,13 +7,39 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { 
-  User as UserIcon, Shield, Bell, Moon, Sun, Lock, CheckCircle
+  User as UserIcon, Shield, Bell, Moon, Sun, Lock, CheckCircle, FileDown
 } from "lucide-react";
+import { profileAPI } from "@/services/api";
 
 export const Settings: React.FC = () => {
   const { user } = useAuth();
   const { theme, setTheme } = useTheme();
   const { toast } = useToast();
+
+  // Profile fields state
+  const [fullName, setFullName] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [department, setDepartment] = useState("");
+  const [emergencyName, setEmergencyName] = useState("");
+  const [emergencyPhone, setEmergencyPhone] = useState("");
+  const [counselorConsent, setCounselorConsent] = useState(true);
+  const [isUpdatingProfile, setIsUpdatingProfile] = useState(false);
+
+  // Load existing profile on mount
+  React.useEffect(() => {
+    if (user?.role === "STUDENT") {
+      profileAPI.getStudentProfile().then((data) => {
+        if (data) {
+          setFullName(data.full_name || "");
+          setPhoneNumber(data.phone_number || "");
+          setDepartment(data.academic_department || "");
+          setEmergencyName(data.emergency_contact_name || "");
+          setEmergencyPhone(data.emergency_contact_phone || "");
+          setCounselorConsent(data.consent_counselor_sharing ?? true);
+        }
+      }).catch(() => {});
+    }
+  }, [user]);
 
   // Password fields state
   const [currentPassword, setCurrentPassword] = useState("");
@@ -25,6 +51,39 @@ export const Settings: React.FC = () => {
   const [emailAlerts, setEmailAlerts] = useState(true);
   const [pushAlerts, setPushAlerts] = useState(true);
   const [weeklyDigest, setWeeklyDigest] = useState(false);
+
+  const handleProfileSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsUpdatingProfile(true);
+    try {
+      await profileAPI.updateStudentProfile({
+        full_name: fullName,
+        phone_number: phoneNumber,
+        academic_department: department,
+        emergency_contact_name: emergencyName,
+        emergency_contact_phone: emergencyPhone,
+        consent_counselor_sharing: counselorConsent,
+      });
+      toast({
+        title: "Profile Updated",
+        description: "Your contact information and preferences were saved.",
+        variant: "success",
+      });
+    } catch (err) {
+      toast({
+        title: "Update Failed",
+        description: "Could not save your profile details.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsUpdatingProfile(false);
+    }
+  };
+
+  const handleExportSummary = () => {
+    window.print();
+  };
+
 
   if (!user) {
     return (
@@ -166,7 +225,117 @@ export const Settings: React.FC = () => {
 
         {/* Right Column: Forms */}
         <div className="space-y-6 md:col-span-2">
-          
+
+          {/* Student Profile & Counselor Sharing Preferences */}
+          {user.role === "STUDENT" && (
+            <Card className="border-border/70 bg-card/50 backdrop-blur-md">
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle className="text-foreground text-sm md:text-base font-bold flex items-center gap-2">
+                      <UserIcon className="h-4.5 w-4.5 text-primary" />
+                      Student Profile & Wellness Sharing
+                    </CardTitle>
+                    <CardDescription className="text-xs md:text-sm">
+                      Configure your contact details and counselor privacy preferences
+                    </CardDescription>
+                  </div>
+                  <Button
+                    type="button"
+                    onClick={handleExportSummary}
+                    variant="outline"
+                    size="sm"
+                    className="border-primary/40 text-primary hover:bg-primary/10 text-xs font-semibold flex items-center gap-1.5"
+                  >
+                    <FileDown className="h-4 w-4" />
+                    Export PDF Summary
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={handleProfileSubmit} className="space-y-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="space-y-1.5">
+                      <Label htmlFor="full-name">Full Name</Label>
+                      <Input
+                        id="full-name"
+                        value={fullName}
+                        onChange={(e) => setFullName(e.target.value)}
+                        placeholder="e.g. Alex Sharma"
+                        className="h-10 text-xs md:text-sm bg-background/50 border-border/70"
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label htmlFor="phone-number">Phone Number</Label>
+                      <Input
+                        id="phone-number"
+                        value={phoneNumber}
+                        onChange={(e) => setPhoneNumber(e.target.value)}
+                        placeholder="+91 98765 43210"
+                        className="h-10 text-xs md:text-sm bg-background/50 border-border/70"
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label htmlFor="dept">Academic Department / Major</Label>
+                      <Input
+                        id="dept"
+                        value={department}
+                        onChange={(e) => setDepartment(e.target.value)}
+                        placeholder="e.g. Computer Science, 3rd Year"
+                        className="h-10 text-xs md:text-sm bg-background/50 border-border/70"
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label htmlFor="emergency-name">Emergency Contact Name</Label>
+                      <Input
+                        id="emergency-name"
+                        value={emergencyName}
+                        onChange={(e) => setEmergencyName(e.target.value)}
+                        placeholder="Parent / Guardian / Hosteller"
+                        className="h-10 text-xs md:text-sm bg-background/50 border-border/70"
+                      />
+                    </div>
+                    <div className="space-y-1.5 sm:col-span-2">
+                      <Label htmlFor="emergency-phone">Emergency Contact Phone</Label>
+                      <Input
+                        id="emergency-phone"
+                        value={emergencyPhone}
+                        onChange={(e) => setEmergencyPhone(e.target.value)}
+                        placeholder="Emergency contact telephone number"
+                        className="h-10 text-xs md:text-sm bg-background/50 border-border/70"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Privacy & Sharing Checkbox */}
+                  <div className="p-3.5 rounded-xl border border-border/70 bg-accent/20 flex items-start gap-3 mt-2">
+                    <input
+                      type="checkbox"
+                      id="counselor-sharing"
+                      checked={counselorConsent}
+                      onChange={(e) => setCounselorConsent(e.target.checked)}
+                      className="mt-1 h-4 w-4 rounded border-border text-primary focus:ring-primary accent-primary"
+                    />
+                    <label htmlFor="counselor-sharing" className="text-xs leading-relaxed text-foreground cursor-pointer select-none">
+                      <span className="font-bold block">Share Behavioral Indicators With Campus Counselor</span>
+                      Allow your designated university clinical counselor to review automated screen time and sleep disruption markers if high-stress anomalies are detected.
+                    </label>
+                  </div>
+
+                  <div className="flex justify-end pt-2">
+                    <Button
+                      type="submit"
+                      disabled={isUpdatingProfile}
+                      className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-xs md:text-sm h-10 px-5 rounded-xl transition-all"
+                    >
+                      {isUpdatingProfile ? "Saving Profile..." : "Save Profile Details"}
+                    </Button>
+                  </div>
+                </form>
+              </CardContent>
+            </Card>
+          )}
+
           {/* Change Password Card */}
           <Card className="border-border/70 bg-card/50 backdrop-blur-md">
             <CardHeader>
@@ -178,6 +347,7 @@ export const Settings: React.FC = () => {
             </CardHeader>
             <CardContent>
               <form onSubmit={handlePasswordSubmit} className="space-y-4">
+
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <div className="space-y-1.5">
                     <Label htmlFor="current-password">Current Password</Label>
