@@ -269,9 +269,8 @@
 * **Request:**
 ```json
 {
-  [cite_start]"responses": [1, 1, 1, 2, 2, 3]
+  "responses": [1, 1, 1, 2, 2, 3, 0, 1, 2]
 }
-
 ```
 
 
@@ -283,7 +282,6 @@
   "severity": "Moderate Depression",
   "logged_at": "2026-06-26T15:00:00Z"
 }
-
 ```
 
 
@@ -298,9 +296,8 @@
 * **Request:**
 ```json
 {
-  [cite_start]"responses": [1, 1, 2, 2, 2, 3]
+  "responses": [1, 1, 2, 2, 2, 1, 0]
 }
-
 ```
 
 
