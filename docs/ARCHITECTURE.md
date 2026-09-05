@@ -135,23 +135,22 @@ sequenceDiagram
     participant DB as PostgreSQL
     participant Counselor as Counselor Dashboard
 
-    [cite_start]Student->>API: Submit Text/Voice Entry [cite: 97]
+    Student->>API: Submit Text/Voice Entry
     API->>DB: Save Raw Input (Pending Analysis)
-    [cite_start]API->>ML: Trigger Emotion Analysis Task [cite: 98]
-    [cite_start]ML->>ML: Run NLP & Sentiment Analysis [cite: 60]
-    [cite_start]ML->>ML: Calculate Mental Wellness Score [cite: 102]
+    API->>ML: Trigger Emotion Analysis Task
+    ML->>ML: Run NLP & Sentiment Analysis
+    ML->>ML: Calculate Mental Wellness Score
     ML->>DB: Update DB with Score & Categorization
     
-    [cite_start]alt is Low Risk [cite: 101]
-        [cite_start]API-->>Student: Return Self-Help Resources [cite: 99]
-    [cite_start]else is Medium Risk [cite: 103]
-        [cite_start]API-->>Student: Return Guided Wellness Activities [cite: 105]
-    [cite_start]else is High Risk [cite: 106]
-        API->>API: Trigger Notification Service
-        [cite_start]API-->>Counselor: Dispatch Alert + Counselor Referral [cite: 107]
+    alt is Low Risk
+        API-->>Student: Return Self-Help Resources
+    else is Medium Risk
+        API-->>Student: Return Guided Wellness Activities & CBT Tools
+    else is High Risk
+        API->>API: Trigger Notification Service & SOS Gateway
+        API-->>Counselor: Dispatch Priority Alert to Triage Queue
         API-->>Student: Acknowledge & Recommend Immediate Support
     end
-
 ```
 
 ---
@@ -240,28 +239,28 @@ The repository is structured as a monorepo to streamline full-stack AI developme
 mindguard-monorepo/
 ├── .github/
 │   └── workflows/          # CI/CD pipelines
-[cite_start]├── frontend/               # React.js SPA [cite: 111]
+├── frontend/               # React.js SPA (Vite + TypeScript)
 │   ├── public/
 │   ├── src/
-│   │   ├── components/     # Reusable UI elements (shadcn/ui)
+│   │   ├── components/     # Reusable UI elements (EmergencySOSModal, shadcn/ui)
 │   │   ├── hooks/          # React Query API wrappers
-│   │   ├── pages/          # Dashboard views (Student, Counselor, Admin)
+│   │   ├── pages/          # Dashboard views (StudentChatbot, StudentDashboard, Counselor, Admin)
 │   │   ├── services/       # Axios API client configurations
 │   │   └── utils/          # Frontend helpers (formatting, validation)
 │   ├── package.json
-[cite_start]│   └── tailwind.config.js  # Tailwind CSS configuration [cite: 113]
-[cite_start]├── backend/                # FastAPI Application [cite: 117]
+│   └── tailwind.config.js  # Tailwind CSS configuration
+├── backend/                # FastAPI Application
 │   ├── alembic/            # Database migration scripts
 │   ├── app/
-[cite_start]│   │   ├── api/            # API Gateway routes / REST endpoints [cite: 118]
-[cite_start]│   │   ├── core/           # Configs, JWT security logic [cite: 119]
+│   │   ├── api/            # API Gateway routes / REST endpoints (alerts, auth, chat, mood)
+│   │   ├── core/           # Configs, JWT security logic
 │   │   ├── db/             # SQLAlchemy models and session management
-[cite_start]│   │   ├── ml/             # NLP Processing and Recommendation Engines [cite: 122, 123]
+│   │   ├── ml/             # NLP Processing and Recommendation Engines
 │   │   ├── schemas/        # Pydantic validation models
-│   │   └── services/       # Core business logic (Mood, Auth, Alerts)
-│   ├── requirements.txt
-│   └── main.py             # Uvicorn entry point
-[cite_start]├── docker-compose.yml      # Local orchestration [cite: 128]
+│   │   └── services/       # Core business logic (Mood, Auth, Alerts, Chatbot)
+│   └── requirements.txt
+├── scripts/                # Automated test and training scripts
+├── mindguard_pc_agent.py   # Desktop behavioral telemetry agent
+├── docker-compose.yml      # Local orchestration
 └── README.md
-
 ```
