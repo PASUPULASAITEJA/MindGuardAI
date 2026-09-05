@@ -18,11 +18,16 @@ erDiagram
     USERS ||--o{ ASSESSMENTS : "undergoes"
     USERS ||--o{ ALERTS : "assigned_to (Counselor)"
     USERS ||--o{ ALERTS : "triggers (Student)"
+    USERS ||--o{ APPOINTMENTS : "books / counsels"
+    USERS ||--o{ CONVERSATIONS : "engages_in"
+    USERS ||--o{ BEHAVIORAL_LOGS : "generates_telemetry"
     
     MOOD_LOGS ||--|| EMOTION_ANALYSES : "generates"
+    ASSESSMENTS ||--o| ALERTS : "results_in"
     
-    ASSESSMENTS ||--|| ALERTS : "results_in"
-    
+    CONVERSATIONS ||--o{ CHAT_MESSAGES : "contains"
+    CONVERSATIONS ||--o{ SAFETY_EVENTS : "triggers"
+
     USERS {
         uuid id PK
         string email UK
@@ -68,6 +73,54 @@ erDiagram
         timestamp resolved_at
     }
 
+    APPOINTMENTS {
+        uuid id PK
+        uuid student_id FK
+        uuid counselor_id FK
+        string appointment_type
+        timestamp scheduled_time
+        string status
+    }
+
+    CONVERSATIONS {
+        uuid id PK
+        uuid student_id FK
+        string title
+        string current_risk_level
+        timestamp created_at
+    }
+
+    CHAT_MESSAGES {
+        uuid id PK
+        uuid conversation_id FK
+        uuid student_id FK
+        string sender
+        text message
+        string primary_emotion
+        string risk_level
+        boolean is_crisis_flag
+        timestamp created_at
+    }
+
+    SAFETY_EVENTS {
+        uuid id PK
+        uuid student_id FK
+        uuid conversation_id FK
+        string severity
+        string trigger_type
+        string status
+        timestamp created_at
+    }
+
+    BEHAVIORAL_LOGS {
+        uuid id PK
+        uuid student_id FK
+        string date
+        int total_screen_time_minutes
+        int late_night_usage_minutes
+        boolean is_crisis_detected
+        timestamp synced_at
+    }
 ```
 
 ---
