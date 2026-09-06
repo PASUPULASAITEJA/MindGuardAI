@@ -161,7 +161,7 @@ backend/app/ml/
 │   └── risk_rf_v2.joblib
 ├── pipelines/             # Training scripts and evaluation logic
 │   ├── train_emotion.py
-│   └── train_risk.py
+│   └── train_depression.py
 ├── recommend/             # Recommendation engine rule matrix
 ├── evaluate.py            # Script for generating validation reports
 └── inference.py           # Singleton classes for loading models and exposing predict()
