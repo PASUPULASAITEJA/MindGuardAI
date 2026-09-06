@@ -273,11 +273,11 @@ class BehavioralService:
             default_log = BehavioralLog(
                 student_id=student_id,
                 date=today_str,
-                total_screen_time_minutes=180,
+                total_screen_time_minutes=0,
                 late_night_usage_minutes=0,
-                academic_usage_minutes=120,
-                social_usage_minutes=30,
-                entertainment_usage_minutes=30,
+                academic_usage_minutes=0,
+                social_usage_minutes=0,
+                entertainment_usage_minutes=0,
                 baseline_deviation_score=0.0,
                 risk_level="LOW"
             )
@@ -287,12 +287,6 @@ class BehavioralService:
             recent_logs = [default_log]
 
         latest = recent_logs[0]
-        if latest.total_screen_time_minutes == 0:
-            latest.total_screen_time_minutes = 180
-            latest.academic_usage_minutes = 120
-            latest.entertainment_usage_minutes = 30
-            latest.social_usage_minutes = 30
-            await db.commit()
 
         # Calculate time since last sync
         now = datetime.now(timezone.utc)
@@ -304,28 +298,37 @@ class BehavioralService:
         is_live = diff_mins <= 10
 
         # --- RULE 1: Purpose Health Breakdown ---
-        total_mins = max(1, latest.total_screen_time_minutes)
+        total_mins = latest.total_screen_time_minutes
         acad_mins = latest.academic_usage_minutes
         soc_mins = latest.social_usage_minutes
         ent_mins = latest.entertainment_usage_minutes
         adult_mins = getattr(latest, "adult_usage_minutes", 0) or 0
         non_acad_mins = soc_mins + ent_mins + adult_mins
 
-        acad_pct = round((acad_mins / total_mins) * 100)
-        non_acad_pct = min(100, 100 - acad_pct)
-
-        if acad_pct >= 65:
-            purpose_status = "Productive Academic Focus"
-            purpose_tier = "POSITIVE"
-            purpose_advice = f"{acad_pct}% of screen time dedicated to coursework & development."
-        elif non_acad_pct >= 60 and total_mins >= 240:
-            purpose_status = "High Social & Doom-Scrolling Isolation"
-            purpose_tier = "CRITICAL"
-            purpose_advice = f"{non_acad_pct}% spent on passive social media/gaming. Step outside or connect with peers."
+        if total_mins == 0:
+            acad_pct = 0
+            non_acad_pct = 0
+            purpose_status = "Tracking Active (Awaiting Session Activity)"
+            purpose_tier = "AWAITING"
+            purpose_advice = "Your screen activity is actively monitoring in the background. Move your mouse, browse, or code to track your session live."
         else:
-            purpose_status = "Balanced Digital Routine"
-            purpose_tier = "BALANCED"
-            purpose_advice = "Balanced distribution between studies and leisure."
+            safe_total = max(1, total_mins)
+            acad_pct = round((acad_mins / safe_total) * 100)
+            non_acad_pct = min(100, 100 - acad_pct)
+
+            if acad_pct >= 65:
+                purpose_status = "Productive Academic Focus"
+                purpose_tier = "POSITIVE"
+                purpose_advice = f"{acad_pct}% of screen time dedicated to coursework & development."
+            elif non_acad_pct >= 60 and total_mins >= 240:
+                purpose_status = "High Social & Doom-Scrolling Isolation"
+                purpose_tier = "CRITICAL"
+                purpose_advice = f"{non_acad_pct}% spent on passive social media/gaming. Step outside or connect with peers."
+            else:
+                purpose_status = "Balanced Digital Routine"
+                purpose_tier = "BALANCED"
+                purpose_advice = "Balanced distribution between studies and leisure."
+
 
         # --- RULE 2: Last Night Circadian Sleep Disruption Analysis ---
         late_mins = latest.late_night_usage_minutes
