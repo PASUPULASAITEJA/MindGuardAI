@@ -49,8 +49,26 @@ def notify_break_reminder(title: str, message: str):
 API_BASE_URL = os.environ.get("MINDGUARD_API_URL", "http://127.0.0.1:8000/api/v1")
 PROJECT_ROOT = Path(__file__).resolve().parent if (Path(__file__).resolve().parent / "backend").exists() else Path(__file__).resolve().parent.parent
 TOKEN_CACHE_FILE = PROJECT_ROOT / ".mindguard_agent_auth.json"
+STATE_CACHE_FILE = PROJECT_ROOT / ".mindguard_agent_state.json"
+LOG_FILE = PROJECT_ROOT / "desktop_agent" / "mindguard_agent.log"
 SAMPLE_INTERVAL_SECONDS = 5
 SYNC_INTERVAL_SECONDS = 30
+
+def log_agent(msg: str):
+    """Outputs to terminal if available and appends to persistent agent log file."""
+    timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    line = f"[{timestamp}] {msg}"
+    try:
+        print(line, flush=True)
+    except Exception:
+        pass
+    try:
+        LOG_FILE.parent.mkdir(parents=True, exist_ok=True)
+        with open(LOG_FILE, "a", encoding="utf-8") as f:
+            f.write(line + "\n")
+            f.flush()
+    except Exception:
+        pass
 
 # Canonical Application Categorization Taxonomy
 APP_CATEGORIES = {
@@ -172,20 +190,134 @@ def get_active_window_details() -> Tuple[str, str, str, bool]:
 
     return proc_name, window_title, "GENERAL", False
 
+def load_daily_state() -> dict:
+    """Loads today's accumulated active screen time state from local cache."""
+    today_str = datetime.date.today().isoformat()
+    if STATE_CACHE_FILE.exists():
+        try:
+            with open(STATE_CACHE_FILE, "r", encoding="utf-8") as f:
+                data = json.load(f)
+                if data.get("date") == today_str:
+                    return data
+        except Exception:
+            pass
+    return {
+        "date": today_str,
+        "total_screen_seconds": 0,
+        "late_night_seconds": 0,
+        "academic_seconds": 0,
+        "social_seconds": 0,
+        "entertainment_seconds": 0,
+        "adult_seconds": 0,
+        "continuous_active_seconds": 0,
+    }
+
+def save_daily_state(state: dict):
+    """Saves daily screen tracking state to local cache."""
+    try:
+        with open(STATE_CACHE_FILE, "w", encoding="utf-8") as f:
+            json.dump(state, f, indent=2)
+    except Exception:
+        pass
+
+def get_system_uptime_seconds_today() -> float:
+    """Calculates how many seconds the PC has been powered on today based on OS boot time."""
+    try:
+        boot_ts = psutil.boot_time()
+        now = datetime.datetime.now()
+        today_midnight = now.replace(hour=0, minute=0, second=0, microsecond=0).timestamp()
+        effective_start = max(boot_ts, today_midnight)
+        uptime = max(0.0, time.time() - effective_start)
+        return uptime
+    except Exception:
+        return 0.0
+
+def get_startup_dir() -> Path:
+    """Returns the Windows user Startup directory path."""
+    if sys.platform == "win32":
+        appdata = os.environ.get("APPDATA")
+        if appdata:
+            return Path(appdata) / "Microsoft" / "Windows" / "Start Menu" / "Programs" / "Startup"
+    return Path.home()
+
+def install_to_startup() -> bool:
+    """Installs a silent background auto-start launcher to Windows Startup."""
+    startup_dir = get_startup_dir()
+    if not startup_dir.exists():
+        print(f"[!] Windows Startup directory not found: {startup_dir}")
+        return False
+
+    vbs_path = startup_dir / "MindGuardAgent.vbs"
+    agent_script = Path(__file__).resolve()
+
+    # Search for pythonw executable for 100% silent background execution without cmd window
+    python_dir = Path(sys.executable).parent
+    candidates = [
+        PROJECT_ROOT / "backend" / ".venv" / "Scripts" / "pythonw.exe",
+        python_dir / "pythonw.exe",
+        Path(r"C:\Users\HP\AppData\Local\Microsoft\WindowsApps\pythonw.exe"),
+    ]
+    pythonw_exe = "pythonw.exe"
+    for c in candidates:
+        if c.exists():
+            pythonw_exe = str(c)
+            break
+
+    vbs_content = (
+        'Set WshShell = CreateObject("WScript.Shell")\n'
+        f'WshShell.Run """{pythonw_exe}"" ""{agent_script}"" --background", 0, False\n'
+    )
+    try:
+        with open(vbs_path, "w", encoding="utf-8") as f:
+            f.write(vbs_content)
+        print("========================================================")
+        print("[+] SUCCESS: MindGuard Agent Installed to Windows Startup!")
+        print("========================================================")
+        print(f"Startup Script: {vbs_path}")
+        print(f"Target Binary : {pythonw_exe}")
+        print(f"Agent Script  : {agent_script}")
+        print("\n[*] Tracking will automatically commence the second Windows turns ON.")
+        print("[*] Runs 100% silently in the background with zero terminal popups.")
+        return True
+    except Exception as e:
+        print(f"[!] Failed to write startup script: {e}")
+        return False
+
+def uninstall_from_startup() -> bool:
+    """Removes the MindGuard launcher from Windows Startup."""
+    startup_dir = get_startup_dir()
+    vbs_path = startup_dir / "MindGuardAgent.vbs"
+    if vbs_path.exists():
+        try:
+            vbs_path.unlink()
+            print("[+] Successfully uninstalled MindGuard Agent from Windows Startup.")
+            return True
+        except Exception as e:
+            print(f"[!] Failed to remove startup script: {e}")
+            return False
+    else:
+        print("[*] MindGuard Agent was not installed in Windows Startup.")
+        return True
+
 def authenticate_student() -> Dict[str, str]:
     """Authenticates the student with MindGuard API and caches token locally."""
     if TOKEN_CACHE_FILE.exists():
         try:
-            with open(TOKEN_CACHE_FILE, "r") as f:
+            with open(TOKEN_CACHE_FILE, "r", encoding="utf-8") as f:
                 data = json.load(f)
                 headers = {"Authorization": f"Bearer {data.get('access_token')}"}
                 test_res = requests.get(f"{API_BASE_URL}/students/me", headers=headers, timeout=5)
                 if test_res.status_code == 200:
                     student_info = test_res.json()
-                    print(f"[*] Authenticated session restored for: {student_info.get('email')}")
+                    log_agent(f"[*] Authenticated session restored for: {student_info.get('email')}")
                     return data
         except Exception:
             pass
+
+    # In background or headless mode without token, log warning and exit cleanly
+    if "--background" in sys.argv:
+        log_agent("[!] Background agent startup: No cached credentials found. Please run 'python desktop_agent/mindguard_pc_agent.py' once in terminal to authenticate.")
+        sys.exit(1)
 
     print("\n========================================================")
     print("   MindGuard AI - Desktop Behavioral Agent Setup        ")
@@ -210,7 +342,7 @@ def authenticate_student() -> Dict[str, str]:
                     print("[!] Error: This desktop agent is only for student accounts.\n")
                     continue
 
-                with open(TOKEN_CACHE_FILE, "w") as f:
+                with open(TOKEN_CACHE_FILE, "w", encoding="utf-8") as f:
                     json.dump(auth_data, f)
 
                 print(f"[+] Login successful! Connected as: {auth_data.get('email')}\n")
@@ -228,21 +360,56 @@ def start_agent():
     student_id = auth_data["id"]
     student_email = auth_data.get("email", "student")
 
-    print("========================================================")
-    print(f"  MindGuard PC Agent Active - Syncing for: {student_email} ")
-    print("========================================================")
-    print("[*] Privacy Guarantee: Zero keystrokes or full screen pixels recorded.")
-    print("[*] Context Engine: Differentiates Exam Study from Circadian Fatigue.")
-    print("[*] Sampling system activity every 5 seconds...")
-    print("[*] Press Ctrl + C to stop the desktop agent.\n")
+    log_agent("========================================================")
+    log_agent(f"  MindGuard PC Agent Active - Syncing for: {student_email} ")
+    log_agent("========================================================")
+    log_agent("[*] Privacy Guarantee: Zero keystrokes or full screen pixels recorded.")
+    log_agent("[*] Context Engine: Differentiates Exam Study from Circadian Fatigue.")
+    log_agent("[*] Sampling system activity every 5 seconds...")
 
-    continuous_active_seconds = 0
-    total_screen_seconds = 0
-    late_night_seconds = 0
-    academic_seconds = 0
-    social_seconds = 0
-    entertainment_seconds = 0
-    adult_seconds = 0
+    # Load daily state or calculate baseline from system boot time
+    daily_state = load_daily_state()
+    boot_time_ts = psutil.boot_time()
+    boot_time_str = datetime.datetime.fromtimestamp(boot_time_ts).strftime("%Y-%m-%d %H:%M:%S")
+    uptime_seconds = get_system_uptime_seconds_today()
+
+    continuous_active_seconds = daily_state.get("continuous_active_seconds", 0)
+    total_screen_seconds = daily_state.get("total_screen_seconds", 0)
+    late_night_seconds = daily_state.get("late_night_seconds", 0)
+    academic_seconds = daily_state.get("academic_seconds", 0)
+    social_seconds = daily_state.get("social_seconds", 0)
+    entertainment_seconds = daily_state.get("entertainment_seconds", 0)
+    adult_seconds = daily_state.get("adult_seconds", 0)
+
+    # 1. Check if backend has today's existing log for this student
+    if total_screen_seconds == 0:
+        try:
+            headers = {"Authorization": f"Bearer {token}"}
+            summary_res = requests.get(f"{API_BASE_URL}/chat/behavioral-features/summary", headers=headers, timeout=4)
+            if summary_res.status_code == 200:
+                summary_data = summary_res.json()
+                latest_log = summary_data.get("latest_log")
+                if latest_log and latest_log.get("date") == daily_state["date"]:
+                    total_screen_seconds = max(total_screen_seconds, latest_log.get("total_screen_time_minutes", 0) * 60)
+                    academic_seconds = max(academic_seconds, latest_log.get("academic_usage_minutes", 0) * 60)
+                    late_night_seconds = max(late_night_seconds, latest_log.get("late_night_usage_minutes", 0) * 60)
+                    social_seconds = max(social_seconds, latest_log.get("social_usage_minutes", 0) * 60)
+                    entertainment_seconds = max(entertainment_seconds, latest_log.get("entertainment_usage_minutes", 0) * 60)
+                    adult_seconds = max(adult_seconds, latest_log.get("adult_usage_minutes", 0) * 60)
+                    log_agent(f"[*] Restored today's cloud session: {int(total_screen_seconds / 60)}m active ({int(academic_seconds / 60)}m academic).")
+        except Exception:
+            pass
+
+    # 2. If completely 0 (brand new day or fresh boot without cloud record yet), initialize from boot uptime
+    if total_screen_seconds == 0 and uptime_seconds > 0:
+        initial_idle = get_system_idle_seconds()
+        initial_active = max(0, min(int(uptime_seconds - initial_idle), 7200))
+        total_screen_seconds = initial_active
+        academic_seconds = int(initial_active * 0.7)
+        log_agent(f"[*] Initialized from System Boot: PC on at {boot_time_str} ({int(uptime_seconds / 60)}m uptime, {int(total_screen_seconds / 60)}m initial active).")
+    else:
+        log_agent(f"[*] Active Daily Screen Session: {int(total_screen_seconds / 60)}m active today (PC boot: {boot_time_str}).")
+
     has_crisis_event = False
     last_sync_time = time.time()
     last_break_prompt = time.time()
@@ -295,6 +462,19 @@ def start_agent():
                 last_sync_time = time.time()
                 today_str = datetime.date.today().isoformat()
 
+                # Persist daily state to local cache
+                save_daily_state({
+                    "date": today_str,
+                    "total_screen_seconds": total_screen_seconds,
+                    "late_night_seconds": late_night_seconds,
+                    "academic_seconds": academic_seconds,
+                    "social_seconds": social_seconds,
+                    "entertainment_seconds": entertainment_seconds,
+                    "adult_seconds": adult_seconds,
+                    "continuous_active_seconds": continuous_active_seconds,
+                    "last_sync": datetime.datetime.now().isoformat()
+                })
+
                 payload = {
                     "student_id": student_id,
                     "date": today_str,
@@ -326,28 +506,27 @@ def start_agent():
                         res_data = res.json()
                         risk_info = res_data.get("risk_assessment", {})
                         risk_level = risk_info.get("risk_level", "LOW")
-                        z_score = res_data.get("baseline_analysis", {}).get("deviation_z_score", 0.0)
 
                         status_color = "🟢" if risk_level == "LOW" else "🟡" if risk_level == "MEDIUM" else "🔴"
                         display_title = (title[:35] + "..") if len(title) > 35 else (title or proc_name)
-                        print(
-                            f"[{datetime.datetime.now().strftime('%H:%M:%S')}] {status_color} Synced: "
+                        log_agent(
+                            f"{status_color} Synced: "
                             f"{payload['total_screen_time_minutes']}m Active | "
                             f"{payload['late_night_usage_minutes']}m Late-Night | "
                             f"Context: {category} ({display_title}) | "
                             f"Risk: {risk_level}"
                         )
                     elif res.status_code == 401:
-                        print("[!] Session expired. Re-authenticating...")
+                        log_agent("[!] Session expired. Re-authenticating...")
                         if TOKEN_CACHE_FILE.exists():
                             os.remove(TOKEN_CACHE_FILE)
                         auth_data = authenticate_student()
                         token = auth_data["access_token"]
                 except Exception as sync_err:
-                    print(f"[{datetime.datetime.now().strftime('%H:%M:%S')}] Sync retry ({sync_err})")
+                    log_agent(f"Sync retry ({sync_err})")
 
     except KeyboardInterrupt:
-        print("\n\n[*] MindGuard PC Agent stopped safely. Take care of your mental wellness!")
+        log_agent("[*] MindGuard PC Agent stopped safely. Take care of your mental wellness!")
 
 def run_tray_agent():
     """
@@ -357,7 +536,6 @@ def run_tray_agent():
         import pystray
         from PIL import Image, ImageDraw
 
-        # Generate lightweight status indicator icon in memory
         def create_tray_icon_image(color="green"):
             img = Image.new("RGB", (64, 64), color=(30, 30, 30))
             draw = ImageDraw.Draw(img)
@@ -365,7 +543,6 @@ def run_tray_agent():
             draw.ellipse((12, 12, 52, 52), fill=fill_color)
             return img
 
-        # Launch background agent monitoring thread
         agent_thread = threading.Thread(target=start_agent, daemon=True)
         agent_thread.start()
 
@@ -386,14 +563,17 @@ def run_tray_agent():
                 pystray.MenuItem("Exit Agent", on_exit)
             )
         )
-        print("[*] MindGuard PC Agent system tray icon initialized.")
+        log_agent("[*] MindGuard PC Agent system tray icon initialized.")
         icon.run()
     except ImportError:
-        # Pystray or PIL not installed; run directly in terminal
         start_agent()
 
 if __name__ == "__main__":
-    if "--tray" in sys.argv or os.environ.get("MINDGUARD_TRAY") == "1":
+    if "--install-startup" in sys.argv:
+        install_to_startup()
+    elif "--uninstall-startup" in sys.argv:
+        uninstall_from_startup()
+    elif "--tray" in sys.argv or os.environ.get("MINDGUARD_TRAY") == "1":
         run_tray_agent()
     else:
         start_agent()
