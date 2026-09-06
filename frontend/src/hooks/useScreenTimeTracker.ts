@@ -38,15 +38,17 @@ export const useScreenTimeTracker = () => {
         socialSecondsRef.current = parsed.socialSeconds || 0;
         entertainmentSecondsRef.current = parsed.entertainmentSeconds || 0;
       } else {
-        // First session of the day: seed with minimum active starting time (e.g. 45 mins)
-        activeSecondsRef.current = 45 * 60;
-        academicSecondsRef.current = 35 * 60;
-        entertainmentSecondsRef.current = 5 * 60;
-        socialSecondsRef.current = 5 * 60;
+        // Start fresh from real active usage
+        activeSecondsRef.current = 0;
+        lateNightSecondsRef.current = 0;
+        academicSecondsRef.current = 0;
+        socialSecondsRef.current = 0;
+        entertainmentSecondsRef.current = 0;
       }
     } catch (e) {
-      activeSecondsRef.current = 45 * 60;
+      activeSecondsRef.current = 0;
     }
+
 
     // 2. User interaction listeners
     const handleUserActivity = () => {
