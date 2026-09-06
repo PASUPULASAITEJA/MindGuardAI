@@ -945,11 +945,74 @@ export const StudentDashboard: React.FC = () => {
             </div>
           </div>
 
+          {/* Contextual Purpose Health & Last Night Circadian Insights (Rule 1 & Rule 2) */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            {/* Rule 1: Purpose Health Analysis */}
+            <div className="rounded-xl border border-border/60 bg-background/50 p-3.5 flex flex-col justify-between space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-foreground flex items-center gap-1.5">
+                  <Activity className="h-3.5 w-3.5 text-indigo-500" />
+                  Rule 1: Purpose Health Analysis
+                </span>
+                <span className={`text-[10px] font-extrabold px-2 py-0.5 rounded-full border ${
+                  academicPct >= 65
+                    ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20"
+                    : (socialPct + entertainmentPct) >= 60 && totalMins >= 240
+                    ? "bg-rose-500/10 text-rose-500 border-rose-500/20"
+                    : "bg-indigo-500/10 text-indigo-500 border-indigo-500/20"
+                }`}>
+                  {academicPct >= 65
+                    ? "Productive Academic Focus 🟢"
+                    : (socialPct + entertainmentPct) >= 60 && totalMins >= 240
+                    ? "High Digital Escapism 🔴"
+                    : "Balanced Digital Routine 🔵"}
+                </span>
+              </div>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                {academicPct >= 65
+                  ? `Strong academic focus today (${academicPct}% coursework & coding). High screen hours for learning are healthy; remember to take 20-20-20 eye rests.`
+                  : (socialPct + entertainmentPct) >= 60 && totalMins >= 240
+                  ? `Passive social media & gaming represents ${socialPct + entertainmentPct}% of your screen time today. High continuous recreational screen time is correlated with avoidance and fatigue.`
+                  : `Your computer activity is currently well-balanced across academic assignments (${academicPct}%) and recreational use.`}
+              </p>
+            </div>
+
+            {/* Rule 2: Last Night Circadian Disruption & Sleep Window */}
+            <div className="rounded-xl border border-border/60 bg-background/50 p-3.5 flex flex-col justify-between space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-foreground flex items-center gap-1.5">
+                  <Moon className="h-3.5 w-3.5 text-amber-500" />
+                  Rule 2: Last Night Circadian Impact
+                </span>
+                <span className={`text-[10px] font-extrabold px-2 py-0.5 rounded-full border ${
+                  lateNightMins >= 120
+                    ? "bg-rose-500/10 text-rose-500 border-rose-500/20"
+                    : lateNightMins >= 45
+                    ? "bg-amber-500/10 text-amber-500 border-amber-500/20"
+                    : "bg-emerald-500/10 text-emerald-500 border-emerald-500/20"
+                }`}>
+                  {lateNightMins >= 120
+                    ? "Severe Sleep Delay 🔴"
+                    : lateNightMins >= 45
+                    ? "Moderate Late Screen 🟡"
+                    : "Optimal Circadian Rhythm 🟢"}
+                </span>
+              </div>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                {lateNightMins >= 120
+                  ? `Active for ${Math.floor(lateNightMins / 60)}h ${lateNightMins % 60}m past midnight last night. Blue light delayed melatonin synthesis. ☀️ Tip: Get 10–15 min direct morning sunlight before 10 AM to reset cortisol.`
+                  : lateNightMins >= 45
+                  ? `Mild activity after midnight detected (${lateNightMins}m). Dim laptop screen and enable Windows Night Light 30 mins before bed tonight.`
+                  : "Great sleep habits! Screen was shut off before midnight last night, preserving deep REM and slow-wave sleep architecture."}
+              </p>
+            </div>
+          </div>
+
           <div className="rounded-xl border border-indigo-500/20 bg-indigo-500/5 p-3 flex items-center justify-between text-xs">
             <div className="flex items-center gap-2 text-indigo-700 dark:text-indigo-300 font-medium">
               <Monitor className="h-4 w-4 shrink-0" />
               <span>
-                <strong>Automatic Web & Session Tracking Active.</strong> Screen time, adult boundaries, and activity categories are passively calculated from your authenticated session.
+                <strong>Context-Aware Screen Time Active.</strong> MindGuard analyzes *what* you use your screen for (Academic vs Social) and *when* (Day vs Last Night) to protect wellness without false alarms.
               </span>
             </div>
           </div>
