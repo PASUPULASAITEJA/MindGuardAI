@@ -719,6 +719,70 @@ export const StudentDashboard: React.FC = () => {
     const isLateNightWarning = lateNightMins >= 90;
     const riskLevel = log?.risk_level || "LOW";
 
+    const handleSimulateBehavioral = async (mode: 'zero' | 'academic' | 'doomscroll') => {
+      if (!user) return;
+      const todayStr = new Date().toISOString().split("T")[0];
+      const storageKey = `mindguard_screen_data_${user.id}_${todayStr}`;
+
+      let payload: any = {
+        student_id: user.id,
+        date: todayStr,
+        total_screen_time_minutes: 0,
+        late_night_usage_minutes: 0,
+        academic_usage_minutes: 0,
+        social_usage_minutes: 0,
+        entertainment_usage_minutes: 0,
+        baseline_deviation_score: 0.0,
+      };
+
+      if (mode === 'zero') {
+        localStorage.removeItem(storageKey);
+      } else if (mode === 'academic') {
+        payload = {
+          student_id: user.id,
+          date: todayStr,
+          total_screen_time_minutes: 360,
+          late_night_usage_minutes: 0,
+          academic_usage_minutes: 300,
+          social_usage_minutes: 30,
+          entertainment_usage_minutes: 30,
+          baseline_deviation_score: -0.4,
+        };
+        localStorage.setItem(storageKey, JSON.stringify({
+          activeSeconds: 360 * 60,
+          lateNightSeconds: 0,
+          academicSeconds: 300 * 60,
+          socialSeconds: 30 * 60,
+          entertainmentSeconds: 30 * 60,
+        }));
+      } else if (mode === 'doomscroll') {
+        payload = {
+          student_id: user.id,
+          date: todayStr,
+          total_screen_time_minutes: 450,
+          late_night_usage_minutes: 190,
+          academic_usage_minutes: 25,
+          social_usage_minutes: 260,
+          entertainment_usage_minutes: 165,
+          baseline_deviation_score: 2.7,
+        };
+        localStorage.setItem(storageKey, JSON.stringify({
+          activeSeconds: 450 * 60,
+          lateNightSeconds: 190 * 60,
+          academicSeconds: 25 * 60,
+          socialSeconds: 260 * 60,
+          entertainmentSeconds: 165 * 60,
+        }));
+      }
+
+      try {
+        await api.post("/chat/behavioral-features", payload);
+        refetchBehavioral();
+      } catch (err) {
+        console.error("Failed to update behavioral test state:", err);
+      }
+    };
+
     return (
       <Card className="border-border/50 bg-card/40 backdrop-blur-md shadow-sm overflow-hidden">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
@@ -742,15 +806,45 @@ export const StudentDashboard: React.FC = () => {
             </div>
           </div>
 
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => refetchBehavioral()}
-            className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground"
-          >
-            <RefreshCw className="h-3.5 w-3.5" />
-          </Button>
+          <div className="flex items-center gap-1.5">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => handleSimulateBehavioral('zero')}
+              className="h-7 text-[10px] font-semibold px-2 text-muted-foreground hover:text-foreground border-border/60"
+              title="Reset today's screen time to 0"
+            >
+              Reset (0m)
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => handleSimulateBehavioral('academic')}
+              className="h-7 text-[10px] font-semibold px-2 text-emerald-600 dark:text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/10"
+              title="Simulate 6 hours of high academic study (Rule 1 test)"
+            >
+              Test Study (83%)
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => handleSimulateBehavioral('doomscroll')}
+              className="h-7 text-[10px] font-semibold px-2 text-rose-600 dark:text-rose-400 border-rose-500/30 hover:bg-rose-500/10"
+              title="Simulate late-night doom-scrolling past 2 AM (Rule 2 test)"
+            >
+              Test Doomscroll (2AM)
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => refetchBehavioral()}
+              className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground"
+            >
+              <RefreshCw className="h-3.5 w-3.5" />
+            </Button>
+          </div>
         </CardHeader>
+
 
 
         <CardContent className="space-y-4 pt-1">
