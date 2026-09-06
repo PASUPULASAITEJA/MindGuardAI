@@ -63,30 +63,40 @@ class BehavioralService:
         late_night_deviation_z = (payload.late_night_usage_minutes - mean_late) / std_late
         late_night_deviation_z = round(float(late_night_deviation_z), 2)
 
-        # 4. Context-Aware Behavioral Risk Determination
+        # 4. Context-Aware Behavioral Risk Determination:
+        # --- RULE 1: High Screen Time Risk Evaluated by Usage Purpose ---
+        # --- RULE 2: Last Night Screen Time & Circadian Disruption Evaluation ---
         behavioral_risk_level = "LOW"
         risk_reasons = []
 
         total_mins = max(1, payload.total_screen_time_minutes)
-        academic_ratio = payload.academic_usage_minutes / total_mins
-        is_academic_heavy = academic_ratio >= 0.60
+        academic_mins = payload.academic_usage_minutes
+        social_mins = payload.social_usage_minutes
+        entertainment_mins = payload.entertainment_usage_minutes
+        adult_mins = payload.adult_usage_minutes
+        late_night_mins = payload.late_night_usage_minutes
+        non_academic_mins = social_mins + entertainment_mins + adult_mins
 
-        # Scenario A: Immediate Crisis Search Flag
+        academic_ratio = academic_mins / total_mins
+        non_academic_ratio = non_academic_mins / total_mins
+        is_academic_heavy = academic_ratio >= 0.65
+
+        # Priority 1: Direct Crisis Search Trigger (Immediate Escalation)
         if payload.is_crisis_search_flag:
             behavioral_risk_level = "HIGH"
             risk_reasons.append("Urgent distress/crisis search query detected in active browser window.")
         
-        # Scenario B: Compulsive Adult Content Spike
-        if payload.adult_usage_minutes >= 30:
+        # Priority 2: Compulsive Sensitive/Adult Browsing
+        if adult_mins >= 30:
             if behavioral_risk_level != "HIGH":
                 behavioral_risk_level = "HIGH"
-            risk_reasons.append(f"Compulsive sensitive/adult content browsing spike ({payload.adult_usage_minutes}m). High correlation with acute stress/avoidance coping.")
-        elif payload.adult_usage_minutes >= 10:
+            risk_reasons.append(f"Compulsive sensitive/adult content browsing spike ({adult_mins}m). High correlation with acute stress/avoidance coping.")
+        elif adult_mins >= 10:
             if behavioral_risk_level == "LOW":
                 behavioral_risk_level = "MEDIUM"
-            risk_reasons.append(f"Sensitive content detected ({payload.adult_usage_minutes}m). Healthy boundary pacing advised.")
+            risk_reasons.append(f"Sensitive content detected ({adult_mins}m). Healthy boundary pacing advised.")
 
-        # Scenario C: Severe Continuous Screen Strain (No breaks for 5h+)
+        # Priority 3: Severe Continuous Screen Strain (No breaks for 5h+)
         if payload.continuous_screen_minutes >= 300:
             if behavioral_risk_level != "HIGH":
                 behavioral_risk_level = "HIGH"
@@ -94,34 +104,45 @@ class BehavioralService:
         elif payload.continuous_screen_minutes >= 180:
             if behavioral_risk_level == "LOW":
                 behavioral_risk_level = "MEDIUM"
-            risk_reasons.append(f"Prolonged continuous computer usage ({payload.continuous_screen_minutes}m continuous). Eye rest advised.")
+            risk_reasons.append(f"Prolonged continuous computer usage ({payload.continuous_screen_minutes}m continuous). 20-20-20 eye rest advised.")
 
-        # Scenario D: High Academic Study & Exam/Project Focus
-        if is_academic_heavy:
-            if payload.late_night_usage_minutes >= 240:
+        # --- RULE 1: Screen Time Purpose Differentiation ---
+        if total_mins >= 300:
+            if is_academic_heavy:
+                # Heavy screen time dedicated to academic coursework/coding -> NOT HIGH RISK
+                risk_reasons.append(f"High Academic Focus: {int(academic_ratio * 100)}% dedicated to coursework & development ({academic_mins}m).")
+            elif non_academic_mins >= 360 or (non_academic_mins >= 250 and academic_mins < 30):
+                # Extreme digital isolation & near-zero academic productivity -> HIGH RISK
+                if behavioral_risk_level != "HIGH":
+                    behavioral_risk_level = "HIGH"
+                risk_reasons.append(f"Elevated digital isolation & passive doom-scrolling ({non_academic_mins}m social/media, {int(non_academic_ratio * 100)}% of total). Depressive avoidance marker.")
+            elif non_academic_mins >= 240:
+                # Moderate social & recreational browsing
                 if behavioral_risk_level == "LOW":
                     behavioral_risk_level = "MEDIUM"
-                risk_reasons.append(f"Extended late-night exam/project study ({payload.late_night_usage_minutes}m). Hydration & rest recommended.")
+                risk_reasons.append(f"Elevated social & recreational screen time ({non_academic_mins}m). Consider taking digital breaks.")
+
+        # --- RULE 2: Last Night Screen Time & Circadian Evaluation (12 AM - 5 AM) ---
+        if late_night_mins > 0:
+            if is_academic_heavy:
+                # Late-night study session for assignments / exams
+                if late_night_mins >= 240:
+                    if behavioral_risk_level == "LOW":
+                        behavioral_risk_level = "MEDIUM"
+                    risk_reasons.append(f"Extended late-night exam/project study ({late_night_mins}m). Hydration & morning rest recovery recommended.")
+                elif late_night_mins >= 60:
+                    risk_reasons.append(f"Productive late-night academic study ({late_night_mins}m coding/study).")
             else:
-                if payload.late_night_usage_minutes >= 60:
-                    risk_reasons.append(f"Productive late-night academic study ({payload.academic_usage_minutes}m coding/study).")
+                # Late-night passive social media doom-scrolling, gaming, or entertainment
+                if late_night_mins >= 180 or (late_night_deviation_z >= 2.5 and late_night_mins >= 150):
+                    behavioral_risk_level = "HIGH"
+                    risk_reasons.append(f"Critical late-night circadian disruption ({late_night_mins} mins past midnight, Z={late_night_deviation_z}). Social doom-scrolling suppresses melatonin.")
+                elif late_night_mins >= 60 or late_night_deviation_z >= 1.8:
+                    if behavioral_risk_level == "LOW":
+                        behavioral_risk_level = "MEDIUM"
+                    risk_reasons.append(f"Moderate circadian sleep disruption ({late_night_mins} mins after midnight).")
 
-        # Scenario E: Non-Academic Circadian Disruption & Digital Isolation
-        else:
-            if payload.late_night_usage_minutes >= 180 or (late_night_deviation_z >= 3.0 and payload.late_night_usage_minutes >= 120):
-                behavioral_risk_level = "HIGH"
-                risk_reasons.append(f"Critical late-night circadian disruption ({payload.late_night_usage_minutes} mins past midnight, Z={late_night_deviation_z})")
-            elif payload.late_night_usage_minutes >= 60 or late_night_deviation_z >= 1.8:
-                if behavioral_risk_level == "LOW":
-                    behavioral_risk_level = "MEDIUM"
-                risk_reasons.append(f"Moderate circadian sleep disruption ({payload.late_night_usage_minutes} mins after midnight)")
 
-            # App isolation factor: High social/gaming with low academic productivity
-            non_academic = payload.social_usage_minutes + payload.entertainment_usage_minutes
-            if payload.total_screen_time_minutes > 300 and payload.academic_usage_minutes < 30 and non_academic > 250:
-                if behavioral_risk_level == "LOW":
-                    behavioral_risk_level = "MEDIUM"
-                risk_reasons.append("Elevated digital isolation and doom-scrolling pattern detected.")
 
         # 5. Check if entry for today already exists (Upsert)
         today_str = payload.date or datetime.now(timezone.utc).strftime("%Y-%m-%d")
@@ -282,10 +303,70 @@ class BehavioralService:
         diff_mins = int((now - synced_at).total_seconds() / 60)
         is_live = diff_mins <= 10
 
+        # --- RULE 1: Purpose Health Breakdown ---
+        total_mins = max(1, latest.total_screen_time_minutes)
+        acad_mins = latest.academic_usage_minutes
+        soc_mins = latest.social_usage_minutes
+        ent_mins = latest.entertainment_usage_minutes
+        adult_mins = getattr(latest, "adult_usage_minutes", 0) or 0
+        non_acad_mins = soc_mins + ent_mins + adult_mins
+
+        acad_pct = round((acad_mins / total_mins) * 100)
+        non_acad_pct = min(100, 100 - acad_pct)
+
+        if acad_pct >= 65:
+            purpose_status = "Productive Academic Focus"
+            purpose_tier = "POSITIVE"
+            purpose_advice = f"{acad_pct}% of screen time dedicated to coursework & development."
+        elif non_acad_pct >= 60 and total_mins >= 240:
+            purpose_status = "High Social & Doom-Scrolling Isolation"
+            purpose_tier = "CRITICAL"
+            purpose_advice = f"{non_acad_pct}% spent on passive social media/gaming. Step outside or connect with peers."
+        else:
+            purpose_status = "Balanced Digital Routine"
+            purpose_tier = "BALANCED"
+            purpose_advice = "Balanced distribution between studies and leisure."
+
+        # --- RULE 2: Last Night Circadian Sleep Disruption Analysis ---
+        late_mins = latest.late_night_usage_minutes
+        if late_mins >= 120:
+            circadian_status = "Critical Circadian Sleep Delay"
+            circadian_tier = "HIGH"
+            estimated_sleep_onset = "After 02:30 AM"
+            circadian_debt_hours = round(min(4.5, (late_mins / 60) * 0.9), 1)
+            recovery_tip = "☀️ High circadian debt accrued last night. Get 10–15 min direct morning sunlight before 10 AM to reset cortisol."
+        elif late_mins >= 45:
+            circadian_status = "Moderate Late-Night Sleep Delay"
+            circadian_tier = "MEDIUM"
+            estimated_sleep_onset = "Around 01:15 AM"
+            circadian_debt_hours = round(min(2.5, (late_mins / 60) * 0.7), 1)
+            recovery_tip = "🌙 Active past midnight. Dim screens 30 mins before bed tonight to restore natural melatonin release."
+        else:
+            circadian_status = "Optimal Circadian Sleep Alignment"
+            circadian_tier = "HEALTHY"
+            estimated_sleep_onset = "Before 12:00 AM"
+            circadian_debt_hours = 0.0
+            recovery_tip = "✨ Screen shut off before midnight! Sleep architecture was well-preserved."
+
         return {
             "is_agent_connected": True,
             "is_currently_active": is_live,
             "last_synced_minutes_ago": diff_mins,
+            "purpose_analysis": {
+                "academic_percentage": acad_pct,
+                "non_academic_percentage": non_acad_pct,
+                "purpose_status": purpose_status,
+                "purpose_tier": purpose_tier,
+                "purpose_advice": purpose_advice,
+            },
+            "circadian_sleep_analysis": {
+                "last_night_minutes": late_mins,
+                "circadian_status": circadian_status,
+                "circadian_tier": circadian_tier,
+                "estimated_sleep_onset": estimated_sleep_onset,
+                "circadian_debt_hours": circadian_debt_hours,
+                "recovery_tip": recovery_tip,
+            },
             "latest_log": {
                 "date": latest.date,
                 "total_screen_time_minutes": latest.total_screen_time_minutes,
@@ -310,5 +391,6 @@ class BehavioralService:
                 for log in reversed(recent_logs)
             ]
         }
+
 
 behavioral_service = BehavioralService()
