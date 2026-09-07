@@ -50,6 +50,12 @@ SUGGESTED_ACTIONS_BY_INTENT: Dict[str, List[str]] = {
         "Simple grounding activity",
         "Take a PHQ-9 wellness survey"
     ],
+    "homesickness": [
+        "Schedule a quick call home",
+        "Campus clubs & social events",
+        "Ways to beat homesickness",
+        "Connect with a peer mentor"
+    ],
     "loneliness": [
         "Campus student support groups",
         "Ways to connect with peers",
@@ -114,6 +120,7 @@ class BuiltinEmpatheticGenerator(BaseLLMProvider):
     """
     Built-in high-quality empathetic response generator.
     Produces warm, supportive, student-centered responses adhering to non-diagnostic principles.
+    Crafted to be concise, conversational, and bite-sized so students stay engaged.
     """
 
     async def generate_response(
@@ -126,20 +133,31 @@ class BuiltinEmpatheticGenerator(BaseLLMProvider):
         emotion = context.get("primary_emotion", "neutral")
         risk_level = context.get("risk_level", "GREEN")
         history = context.get("recent_history", [])
-        last_user_msg = messages[-1]["content"] if messages else ""
+        last_user_msg = (messages[-1]["content"] if messages else "").lower()
 
-        # Context-aware templates and response branches
-        if intent == "exam_stress":
+        # Context-aware templates — concise, empathetic, 2-3 short sentences
+        if intent == "homesickness":
             templates = [
                 (
-                    f"I completely understand how overwhelming exams can feel. The pressure to perform often makes the workload seem impossible. "
-                    f"Remember that your worth as a person is not defined by an exam score. "
-                    f"Would you like to try a quick 2-minute breathing technique together, or would it help to talk through which specific subject is stressing you out most?"
+                    f"Moving away to college is a huge adjustment, and missing your family is completely natural. "
+                    f"You're not alone in feeling this way. How are you holding up today - have you been able to call home or chat with anyone?"
                 ),
                 (
-                    f"Exam periods bring so much cognitive and emotional stress. It's completely valid that you're feeling {emotion} right now. "
-                    f"Taking small, structured breaks actually improves retention and lowers anxiety. "
-                    f"Have you been able to take a short pause today, or has it been non-stop study mode?"
+                    f"Homesickness hits really hard, especially during quiet moments. "
+                    f"Be patient with yourself while you settle in. What's one comfort from home that usually helps you feel a little better?"
+                )
+            ]
+            return random.choice(templates)
+
+        elif intent == "exam_stress":
+            templates = [
+                (
+                    f"Exams can feel so overwhelming, but remember your grades don't define your worth. "
+                    f"Would you like to try a quick 1-minute breathing exercise, or talk through what's stressing you most?"
+                ),
+                (
+                    f"Exam pressure is real, and it's completely normal to feel stressed right now. "
+                    f"Remember to pace yourself - have you been able to take even a short 5-minute break today?"
                 )
             ]
             return random.choice(templates)
@@ -147,13 +165,12 @@ class BuiltinEmpatheticGenerator(BaseLLMProvider):
         elif intent == "academic_pressure":
             templates = [
                 (
-                    f"Academic deadlines and heavy course loads can build up so quickly. Feeling {emotion} under this kind of pressure is very natural. "
-                    f"When things pile up, focusing on just the very next small step can take some weight off your shoulders. "
-                    f"What is the most urgent task on your plate right now?"
+                    f"Deadlines can pile up fast and feel exhausting. "
+                    f"What's the single most urgent task on your plate right now? Let's break it down together."
                 ),
                 (
-                    f"It sounds like you're carrying a really heavy academic load right now. Please remember to give yourself grace—you're doing your best under demanding conditions. "
-                    f"Would you like some practical tips on chunking your workload, or would you prefer to just talk through it?"
+                    f"Carrying a heavy course load is really tough, so please be gentle with yourself. "
+                    f"Would you like a simple tip to tackle your work in smaller, easier chunks?"
                 )
             ]
             return random.choice(templates)
@@ -161,13 +178,12 @@ class BuiltinEmpatheticGenerator(BaseLLMProvider):
         elif intent == "anxiety":
             templates = [
                 (
-                    f"I hear how intense this anxiety feels right now. When anxiety peaks, our body goes into overdrive. "
-                    f"Let's take a slow breath together: breathe in for 4 seconds, hold for 4, and breathe out slowly for 4. "
-                    f"Are you in a comfortable spot right now? Tell me what is happening around you."
+                    f"I hear you - anxiety can feel really intense and overwhelming. "
+                    f"Take a slow, deep breath with me right now. Are you in a comfortable, quiet spot?"
                 ),
                 (
-                    f"Anxiety can make everything feel urgent and overwhelming. It is okay to pause and acknowledge that you're going through a tough moment. "
-                    f"You are safe here. Would you like to try the 5-4-3-2-1 grounding method to help center your thoughts?"
+                    f"You're safe here, and you don't have to carry this alone. "
+                    f"Would you like to try a quick 5-4-3-2-1 grounding exercise to help steady your thoughts?"
                 )
             ]
             return random.choice(templates)
@@ -175,27 +191,31 @@ class BuiltinEmpatheticGenerator(BaseLLMProvider):
         elif intent == "sadness":
             templates = [
                 (
-                    f"I'm really sorry you're feeling this weight today. Sadness can feel so heavy and draining. "
-                    f"I want to remind you that your feelings are valid, and it's okay not to feel okay all the time. "
-                    f"Would it help to share a bit more about what's been bringing you down lately?"
+                    f"I'm really sorry you're feeling down today. It's completely okay not to feel okay all the time. "
+                    f"I'm here to listen without judgment - would you like to share what's on your mind?"
                 ),
                 (
-                    f"Thank you for sharing this with me. Going through periods of sadness takes a lot of emotional energy. "
-                    f"I'm here to listen without judgment. Is there anything specific on your mind today, or has this feeling been building up for a while?"
+                    f"Sending you gentle support today. Carrying heavy feelings takes a lot out of you. "
+                    f"Take your time, and let me know if you just want to vent or talk through it."
                 )
             ]
             return random.choice(templates)
 
         elif intent == "loneliness":
+            # If student mentions missing family/home inside loneliness intent
+            if any(k in last_user_msg for k in ["miss my family", "miss home", "missing my family", "homesick", "moving to college", "moved to college"]):
+                return (
+                    f"Moving away to college is a huge adjustment, and missing your family is completely natural. "
+                    f"You're not alone in feeling this way. How are you holding up today - have you been able to call home or chat with anyone?"
+                )
             templates = [
                 (
-                    f"Loneliness can be one of the most painful feelings, especially in a busy campus environment where it seems like everyone else has things figured out. "
-                    f"Please know that what you're feeling is shared by many students, even if people don't talk about it openly. "
-                    f"I'm glad you reached out today. What has your day been like so far?"
+                    f"Feeling lonely on campus is really tough, but please know you're not alone. "
+                    f"I'm right here with you. How has your day been going so far?"
                 ),
                 (
-                    f"Feeling disconnected or alone is really tough to sit with. You took a brave step by reaching out here. "
-                    f"Would you like to explore small ways to find community or support on campus, or would you simply like someone to chat with right now?"
+                    f"Finding your circle in college takes time, and it's okay if you haven't found it yet. "
+                    f"Would you like to explore small ways to connect on campus, or just chat with me for a bit?"
                 )
             ]
             return random.choice(templates)
@@ -203,70 +223,98 @@ class BuiltinEmpatheticGenerator(BaseLLMProvider):
         elif intent == "sleep_problem":
             templates = [
                 (
-                    f"Struggling with sleep can make every other part of student life ten times harder. When your mind won't quiet down, nights can feel endless. "
-                    f"Have racing thoughts about classes or stress been keeping you awake, or is it more of a physical restlessness?"
+                    f"Trouble sleeping makes everything harder the next day. "
+                    f"Are racing thoughts keeping your mind active, or does your body just feel restless?"
                 ),
                 (
-                    f"Sleep disruption is one of the quickest ways stress affects our physical wellness. "
-                    f"Simple practices like stepping away from screens 30 minutes before bed or progressive muscle relaxation can help signal to your nervous system that it's safe to rest. "
-                    f"Would you like to walk through a soothing wind-down routine?"
+                    f"When sleep won't come, it's so frustrating. "
+                    f"Would you like a quick 2-minute wind-down breathing routine to help quiet your mind?"
                 )
             ]
             return random.choice(templates)
 
-        elif intent == "relationship_problem" or intent == "family_problem":
-            return (
-                f"Navigating relationship and family conflicts while balancing college life is deeply stressful. "
-                f"It's completely understandable that you're feeling {emotion}. "
-                f"When interpersonal conflicts arise, finding clarity on what you can control versus what you can't often brings relief. "
-                f"Would you like to talk more about what happened?"
-            )
+        elif intent == "relationship_problem":
+            templates = [
+                (
+                    f"Relationship struggles can take a huge emotional toll, especially alongside college stress. "
+                    f"I'm here to listen - would it help to talk through what happened?"
+                ),
+                (
+                    f"Navigating relationship conflict is deeply draining. "
+                    f"Remember to protect your own peace. Do you want to vent about what's going on?"
+                )
+            ]
+            return random.choice(templates)
 
-        elif intent == "motivation_problem" or intent == "self_esteem_problem":
-            return (
-                f"It is so easy to fall into cycles of low motivation and self-criticism, especially when you're exhausted. "
-                f"Experiencing a dip in energy doesn't mean you're lazy or failing—it often means your brain and body are asking for a break. "
-                f"What if we set aside the big picture for a moment and picked just one tiny, manageable thing for today?"
-            )
+        elif intent == "family_problem":
+            templates = [
+                (
+                    f"Dealing with family tension or pressure while balancing college is really draining. "
+                    f"Remember you don't have to carry everyone's expectations. Would it help to talk about what happened?"
+                ),
+                (
+                    f"Family conflicts can leave you feeling stuck and exhausted. "
+                    f"I'm here for you - take a breath, and tell me what's been going on if you'd like to share."
+                )
+            ]
+            return random.choice(templates)
+
+        elif intent == "motivation_problem":
+            templates = [
+                (
+                    f"Low motivation doesn't mean you're lazy - it usually means your brain is asking for a break! "
+                    f"What's just one tiny 2-minute task we can check off together today?"
+                ),
+                (
+                    f"Burnout is so common in college. Let's not worry about the whole to-do list right now. "
+                    f"What can you do right now to give yourself a little breather?"
+                )
+            ]
+            return random.choice(templates)
+
+        elif intent == "self_esteem_problem":
+            templates = [
+                (
+                    f"It's so easy to be hard on yourself, but you're doing much better than you realize. "
+                    f"What is one small win or positive thing from your week?"
+                ),
+                (
+                    f"Imposter syndrome is so common in college, but you truly earned your spot here. "
+                    f"What's making you doubt yourself today? I'm listening."
+                )
+            ]
+            return random.choice(templates)
 
         elif intent == "request_for_coping_strategy":
             return (
-                f"Here is a powerful 5-4-3-2-1 Sensory Grounding exercise you can do right now to help calm your nervous system:\n\n"
-                f"1. **Look around**: Name 5 things you can see.\n"
-                f"2. **Touch**: Notice 4 things you can physically feel (e.g., your feet on the floor, your sweater).\n"
-                f"3. **Listen**: Identify 3 distinct sounds around you.\n"
-                f"4. **Smell**: Notice 2 things you can smell.\n"
-                f"5. **Taste**: Focus on 1 taste in your mouth.\n\n"
-                f"Take a slow breath as you do each one. How is your breathing feeling right now?"
+                f"Let's try a quick **5-4-3-2-1 Grounding** exercise right now:\n"
+                f"Notice **5 things you see**, **4 you can touch**, **3 you hear**, **2 you smell**, and take **1 deep breath**.\n\n"
+                f"How are you feeling after that?"
             )
 
         elif intent == "request_for_human_support":
             return (
-                f"Reaching out to a counselor is one of the most proactive and healthy steps you can take for your mental wellbeing. "
-                f"MindGuard connects students directly with verified campus counselors in a safe, confidential environment. "
-                f"You can request an appointment or message a counselor through the **Counselor Connect** section on your dashboard. "
-                f"Would you like help preparing what to say in your first session?"
+                f"Reaching out for support is a sign of strength! You can connect with verified campus counselors anytime in the **Counselor Connect** tab. "
+                f"Would you like help preparing what to say in your first chat?"
             )
 
         elif intent == "greeting":
             return (
-                f"Hello! I'm your MindGuard AI wellness companion. I'm here to listen, support you with stress management, "
-                f"offer calming techniques, or just chat through whatever is on your mind today in complete privacy. "
-                f"How are you feeling right now?"
+                f"Hey there! I'm your MindGuard companion. I'm here to listen, share quick calming tools, or just chat in complete privacy. "
+                f"How are you feeling today?"
             )
 
         elif intent == "goodbye":
             return (
-                f"Take good care of yourself! Remember that your wellbeing comes first. "
-                f"I'm always here whenever you need a safe space to check in or talk. Have a restful day ahead!"
+                f"Take good care of yourself! Remember your wellbeing comes first. "
+                f"I'm always here whenever you need a safe space to chat. Have a great day!"
             )
 
         else:
             # Default supportive dialogue
             return (
-                f"Thank you for sharing that with me. I'm here to support you in whatever way is most helpful. "
-                f"Whether you want to unpack what you're experiencing, try a calming exercise, or explore campus resources, "
-                f"I'm listening. What's on your mind right now?"
+                f"I hear you, and I'm right here with you. "
+                f"Whether you want to vent, try a quick calming exercise, or talk things through, I'm listening. What's on your mind?"
             )
 
 class ResponseOrchestrator:
