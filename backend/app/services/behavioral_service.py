@@ -154,14 +154,14 @@ class BehavioralService:
         existing_log = existing_res.scalar_one_or_none()
 
         if existing_log:
-            existing_log.total_screen_time_minutes = payload.total_screen_time_minutes
-            existing_log.late_night_usage_minutes = payload.late_night_usage_minutes
-            existing_log.academic_usage_minutes = payload.academic_usage_minutes
-            existing_log.social_usage_minutes = payload.social_usage_minutes
-            existing_log.entertainment_usage_minutes = payload.entertainment_usage_minutes
-            existing_log.adult_usage_minutes = payload.adult_usage_minutes
-            existing_log.continuous_screen_minutes = payload.continuous_screen_minutes
-            existing_log.is_crisis_detected = payload.is_crisis_search_flag
+            existing_log.total_screen_time_minutes = max(existing_log.total_screen_time_minutes or 0, payload.total_screen_time_minutes)
+            existing_log.late_night_usage_minutes = max(existing_log.late_night_usage_minutes or 0, payload.late_night_usage_minutes)
+            existing_log.academic_usage_minutes = max(existing_log.academic_usage_minutes or 0, payload.academic_usage_minutes)
+            existing_log.social_usage_minutes = max(existing_log.social_usage_minutes or 0, payload.social_usage_minutes)
+            existing_log.entertainment_usage_minutes = max(existing_log.entertainment_usage_minutes or 0, payload.entertainment_usage_minutes)
+            existing_log.adult_usage_minutes = max(existing_log.adult_usage_minutes or 0, payload.adult_usage_minutes)
+            existing_log.continuous_screen_minutes = max(existing_log.continuous_screen_minutes or 0, payload.continuous_screen_minutes)
+            existing_log.is_crisis_detected = existing_log.is_crisis_detected or payload.is_crisis_search_flag
             existing_log.baseline_deviation_score = late_night_deviation_z
             existing_log.risk_level = behavioral_risk_level
             existing_log.synced_at = datetime.now(timezone.utc)
