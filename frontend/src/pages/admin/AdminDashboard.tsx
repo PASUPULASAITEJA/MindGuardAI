@@ -137,7 +137,7 @@ export const AdminDashboard: React.FC = () => {
               <div>
                 <h4 className="font-extrabold text-sm md:text-base text-foreground mb-3">Triage Instructions</h4>
                 <p className="text-muted-foreground text-xs md:text-sm leading-relaxed">
-                  MindGuard monitors Campus Stress Indices using NLP evaluations of daily journal check-ins. 
+                  MindGuardAI monitors Campus Stress Indices using NLP evaluations of daily journal check-ins. 
                   High risk indicators route warning flags to counselor triage consoles automatically.
                 </p>
               </div>
