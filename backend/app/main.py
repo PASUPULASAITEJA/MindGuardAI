@@ -48,8 +48,8 @@ async def lifespan(app: FastAPI):
     logger.info("Shutting down api application...")
 
 app = FastAPI(
-    title="MindGuard API",
-    description="Foundational backend infrastructure and security layer for the MindGuard wellness platform.",
+    title="MindGuardAI API",
+    description="Foundational backend infrastructure and security layer for the MindGuardAI wellness platform.",
     version="1.0.0",
     lifespan=lifespan
 )
