@@ -30,28 +30,28 @@ import api, { chatAPI, appointmentsAPI, AppointmentItem } from "@/services/api";
 import { useAuth } from "@/contexts/AuthContext";
 import { useScreenTimeTracker } from "@/hooks/useScreenTimeTracker";
 
-// Contextualized questions for Student PHQ-9 Depression assessment (validated 9-item scale)
+// Student-contextualized questions for PHQ-9 Depression survey
 const PHQ9_QUESTIONS = [
-  "Little interest or pleasure in things you usually enjoy (e.g., hanging out with friends, hobbies, clubs, or campus life)",
-  "Feeling down, depressed, emotionally exhausted, or hopeless about your studies or future",
-  "Trouble falling asleep, staying asleep through the night, or sleeping excessively and struggling to wake up for class",
-  "Feeling drained, chronically fatigued, or having very little energy to attend classes and finish assignments",
-  "Significant changes in appetite (skipping meals, loss of appetite, or stress-eating/overeating)",
-  "Feeling bad about yourself — feeling like a failure, dealing with imposter syndrome, or feeling you've let yourself or family down",
-  "Trouble concentrating or focusing on things, such as studying, attending lectures, reading course material, or completing coursework",
-  "Moving or speaking so slowly that other students notice, or the opposite — feeling so restless, fidgety, or agitated that it is hard to sit through class",
-  "Thoughts that you would be better off dead, or thoughts of hurting yourself in some way"
+  "Little interest or pleasure in doing things (hobbies, socializing, or hanging out with friends)",
+  "Feeling down, depressed, or hopeless about your studies, college life, or future",
+  "Trouble falling or staying asleep (racing thoughts, irregular study hours, or oversleeping)",
+  "Feeling tired, mentally drained, or burned out from coursework",
+  "Poor appetite (skipping meals due to stress) or stress-eating",
+  "Feeling bad about yourself — or feeling like an imposter, doubting your abilities, or letting family down",
+  "Trouble concentrating on things, such as studying, attending lectures, reading, or finishing assignments",
+  "Moving or speaking sluggishly, or feeling so restless and fidgety that you can't sit through class",
+  "Thoughts that you would be better off dead, or thoughts of self-harm or wanting to give up"
 ];
 
-// Contextualized questions for Student GAD-7 Anxiety assessment (validated 7-item scale)
+// Student-contextualized questions for GAD-7 Anxiety survey
 const GAD7_QUESTIONS = [
-  "Feeling nervous, anxious, high-strung, or constantly on edge regarding college life or exams",
-  "Not being able to stop or control worrying about grades, submissions, or your future",
-  "Worrying excessively about many different things at once (such as exams, GPA, career, finances, or personal relationships)",
-  "Trouble relaxing, unwinding, or taking a mental break from academic and social pressure",
-  "Being so restless or physically agitated that it is difficult to sit still during lectures or study sessions",
-  "Becoming easily annoyed, frustrated, or irritable with roommates, peers, professors, or family",
-  "Feeling sudden intense fear or dread, as if something terrible or catastrophic might happen"
+  "Feeling nervous, anxious, or constantly on edge about classes, exams, or daily life",
+  "Not being able to stop or control worrying, or having spiraling thoughts",
+  "Worrying too much about multiple things (grades, career, finances, or relationships)",
+  "Trouble relaxing or taking breaks without feeling guilty",
+  "Being so restless that it is hard to sit still during study sessions or lectures",
+  "Becoming easily annoyed, frustrated, or irritable with classmates or roommates",
+  "Feeling afraid as if something awful, disastrous, or catastrophic might happen"
 ];
 
 const SURVEY_OPTIONS = [
@@ -608,14 +608,9 @@ export const StudentDashboard: React.FC = () => {
               // Survey Wizard Active View
               <div className="space-y-4 py-2">
                 <div className="flex items-center justify-between border-b border-border/70 pb-2">
-                  <div className="flex items-center gap-2">
-                    <span className="rounded-md bg-primary/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-primary border border-primary/20">
-                      {activeSurvey === "phq-9" ? "PHQ-9 Depression" : "GAD-7 Anxiety"}
-                    </span>
-                    <h4 className="text-xs font-bold text-foreground">
-                      Question {currentQuestionIdx + 1} of {activeSurvey === "phq-9" ? 9 : 7}
-                    </h4>
-                  </div>
+                  <h4 className="text-xs font-extrabold text-foreground uppercase tracking-wider">
+                    {activeSurvey} Question {currentQuestionIdx + 1} of {activeSurvey === "phq-9" ? 9 : 7}
+                  </h4>
                   <Button 
                     onClick={() => setActiveSurvey(null)}
                     variant="ghost" 
@@ -626,11 +621,7 @@ export const StudentDashboard: React.FC = () => {
                   </Button>
                 </div>
 
-                <div className="rounded-lg bg-primary/5 border border-primary/10 px-3 py-1.5 text-[11px] text-muted-foreground">
-                  <span className="font-semibold text-primary">Over the last 2 weeks</span>, how often have you been bothered by:
-                </div>
-
-                <p className="text-foreground text-sm py-1 min-h-[44px] font-semibold leading-relaxed">
+                <p className="text-foreground text-sm py-2 min-h-[48px] font-medium leading-relaxed">
                   {activeSurvey === "phq-9" ? PHQ9_QUESTIONS[currentQuestionIdx] : GAD7_QUESTIONS[currentQuestionIdx]}
                 </p>
 
