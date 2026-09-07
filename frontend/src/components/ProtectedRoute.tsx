@@ -16,7 +16,7 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, allowe
     return (
       <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center text-slate-200">
         <Loader2 className="h-10 w-10 animate-spin text-violet-500 mb-4" />
-        <p className="text-sm font-semibold tracking-wide text-slate-400">MindGuard is loading secure session...</p>
+        <p className="text-sm font-semibold tracking-wide text-slate-400">MindGuardAI is loading secure session...</p>
       </div>
     );
   }
