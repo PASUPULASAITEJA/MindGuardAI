@@ -38,7 +38,6 @@ export const useScreenTimeTracker = () => {
         socialSecondsRef.current = parsed.socialSeconds || 0;
         entertainmentSecondsRef.current = parsed.entertainmentSeconds || 0;
       } else {
-        // Start fresh from real active usage
         activeSecondsRef.current = 0;
         lateNightSecondsRef.current = 0;
         academicSecondsRef.current = 0;
@@ -48,6 +47,23 @@ export const useScreenTimeTracker = () => {
     } catch (e) {
       activeSecondsRef.current = 0;
     }
+
+    // 1b. Fetch authoritative server daily baseline to prevent clobbering desktop agent tracking
+    api.get("/chat/behavioral-features/summary")
+      .then((res) => {
+        const latest = res.data?.latest_log;
+        if (latest && latest.date === todayStr) {
+          const serverActive = (latest.total_screen_time_minutes || 0) * 60;
+          if (serverActive > activeSecondsRef.current) {
+            activeSecondsRef.current = serverActive;
+            academicSecondsRef.current = Math.max(academicSecondsRef.current, (latest.academic_usage_minutes || 0) * 60);
+            lateNightSecondsRef.current = Math.max(lateNightSecondsRef.current, (latest.late_night_usage_minutes || 0) * 60);
+            socialSecondsRef.current = Math.max(socialSecondsRef.current, (latest.social_usage_minutes || 0) * 60);
+            entertainmentSecondsRef.current = Math.max(entertainmentSecondsRef.current, (latest.entertainment_usage_minutes || 0) * 60);
+          }
+        }
+      })
+      .catch(() => {});
 
 
     // 2. User interaction listeners
