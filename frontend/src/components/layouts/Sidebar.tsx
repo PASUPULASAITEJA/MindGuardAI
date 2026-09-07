@@ -69,10 +69,10 @@ const Sidebar: React.FC<SidebarProps> = ({ className, onCloseMobile }) => {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="h-10 w-10 rounded-xl border border-border/50 bg-background/50 shadow-sm overflow-hidden flex items-center justify-center">
-              <img src="/favicon.jpg" alt="MindGuard Logo" className="h-full w-full object-cover" />
+              <img src="/favicon.jpg" alt="MindGuardAI Logo" className="h-full w-full object-cover" />
             </div>
             <span className="text-xl font-extrabold tracking-tight text-foreground bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text">
-              MindGuard
+              MindGuardAI
             </span>
           </div>
           
