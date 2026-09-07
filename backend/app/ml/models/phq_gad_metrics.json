@@ -1,0 +1,61 @@
+{
+  "model_type": "RandomForestClassifier",
+  "sample_count": 24292,
+  "train_samples": 19433,
+  "test_samples": 4859,
+  "accuracy": 0.9924,
+  "macro_f1": 0.9886,
+  "weighted_f1": 0.9924,
+  "top_features": [
+    [
+      "pss_total",
+      0.356481392265542
+    ],
+    [
+      "phq_q9",
+      0.3393556316629658
+    ],
+    [
+      "phq_q6",
+      0.04361248316109451
+    ],
+    [
+      "gad_q2",
+      0.03635567675868417
+    ],
+    [
+      "gad_mean_time",
+      0.02397804099785503
+    ],
+    [
+      "gad_q6",
+      0.020577214856631908
+    ],
+    [
+      "phq_q2",
+      0.01719197841962199
+    ],
+    [
+      "gad_q7",
+      0.016041842930555588
+    ],
+    [
+      "isi_total",
+      0.015325464572806256
+    ],
+    [
+      "phq_q4",
+      0.014468390458883061
+    ]
+  ],
+  "class_distribution": {
+    "GREEN": 16628,
+    "YELLOW": 5678,
+    "RED": 1986
+  },
+  "dataset_demographics": {
+    "mean_age": 20.65,
+    "female_percent": 63.99,
+    "bachelor_enrolled_percent": 91.76
+  }
+}
