@@ -103,10 +103,10 @@ export const ForgotPassword: React.FC = () => {
       <div className="w-full max-w-md z-10">
         <div className="flex flex-col items-center mb-6 text-center">
           <div className="h-12 w-12 rounded-2xl border border-slate-800 overflow-hidden shadow-lg shadow-violet-500/10 mb-3 bg-slate-900 flex items-center justify-center">
-            <img src="/favicon.jpg" alt="MindGuard Logo" className="h-full w-full object-cover" />
+            <img src="/favicon.jpg" alt="MindGuardAI Logo" className="h-full w-full object-cover" />
           </div>
           <h1 className="text-3xl font-extrabold tracking-tight bg-gradient-to-r from-white via-slate-200 to-slate-400 bg-clip-text text-transparent">
-            MindGuard
+            MindGuardAI
           </h1>
           <p className="text-sm text-slate-400 mt-1">Self-Service Account Recovery</p>
         </div>
@@ -132,7 +132,7 @@ export const ForgotPassword: React.FC = () => {
                 <CheckCircle2 className="h-8 w-8" />
               </div>
               <p className="text-sm text-slate-300">
-                Your password has been successfully updated. You can now log into your MindGuard portal.
+                Your password has been successfully updated. You can now log into your MindGuardAI portal.
               </p>
               <div className="pt-2">
                 <Link to="/login">
