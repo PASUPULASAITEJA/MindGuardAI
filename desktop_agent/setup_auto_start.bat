@@ -10,7 +10,11 @@ echo Installing MindGuard Agent to Windows Startup...
 cd /d "%~dp0.."
 call backend\.venv\Scripts\python.exe desktop_agent\mindguard_pc_agent.py --install-startup
 echo.
+echo Starting MindGuard Agent in background now...
+start "" "%~dp0..\backend\.venv\Scripts\pythonw.exe" "%~dp0mindguard_pc_agent.py" --background
+echo.
 echo Setup Complete!
-echo MindGuard will now start automatically whenever your PC turns ON.
+echo MindGuard Agent is now running in the background and will
+echo start automatically whenever your PC turns ON or wakes up.
 echo.
 pause
