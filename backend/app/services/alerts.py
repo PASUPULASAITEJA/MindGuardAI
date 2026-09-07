@@ -110,7 +110,7 @@ class AlertService:
                 NotificationItem(
                     id="system-welcome",
                     type="SYSTEM_INFO",
-                    message="Welcome to MindGuard. Your dashboard and check-ins are fully active.",
+                    message="Welcome to MindGuardAI. Your dashboard and check-ins are fully active.",
                     is_read=True,
                     created_at=datetime.now(timezone.utc)
                 )
