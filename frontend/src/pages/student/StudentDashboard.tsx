@@ -1013,7 +1013,7 @@ export const StudentDashboard: React.FC = () => {
             <div className="flex items-center gap-2 text-indigo-700 dark:text-indigo-300 font-medium">
               <Monitor className="h-4 w-4 shrink-0" />
               <span>
-                <strong>Context-Aware Screen Time Active.</strong> MindGuard analyzes *what* you use your screen for (Academic vs Social) and *when* (Day vs Last Night) to protect wellness without false alarms.
+                <strong>Context-Aware Screen Time Active.</strong> MindGuardAI analyzes *what* you use your screen for (Academic vs Social) and *when* (Day vs Last Night) to protect wellness without false alarms.
               </span>
             </div>
           </div>
@@ -1146,7 +1146,7 @@ export const StudentDashboard: React.FC = () => {
                     {act.title}
                   </h5>
                   <p className="text-muted-foreground text-xs leading-normal truncate">
-                    Click to launch exercise stream from MindGuard directories.
+                    Click to launch exercise stream from MindGuardAI directories.
                   </p>
                 </div>
               </button>
@@ -1176,7 +1176,7 @@ export const StudentDashboard: React.FC = () => {
               <div>
                 <h4 className="text-foreground font-extrabold text-sm md:text-base flex items-center gap-2">
                   <Sparkles className="h-5 w-5 text-primary" />
-                  Welcome to MindGuard
+                  Welcome to MindGuardAI
                 </h4>
                 <p className="text-muted-foreground text-xs md:text-sm mt-2 leading-relaxed">
                   Your wellness index is currently calculated based on your latest emotional evaluation and surveys. 
@@ -1245,7 +1245,7 @@ export const StudentDashboard: React.FC = () => {
                 Why log your mood?
               </h5>
               <p className="text-muted-foreground leading-relaxed">
-                Regular check-ins help train the MindGuard risk-assessment model, enabling early warnings and private, automated self-care guidance.
+                Regular check-ins help train the MindGuardAI risk-assessment model, enabling early warnings and private, automated self-care guidance.
               </p>
             </Card>
           </div>
