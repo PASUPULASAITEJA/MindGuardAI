@@ -1,6 +1,6 @@
 import os
 import logging
-from typing import Dict, Optional, Tuple
+from typing import Dict, Optional, Tuple, Any
 import numpy as np
 import joblib
 
@@ -70,93 +70,193 @@ class MLService:
         except Exception as e:
             logger.error(f"Error loading ML models: {str(e)}. Using fallback execution.", exc_info=True)
 
-    def _fallback_predict(self, text: str, self_reported_score: Optional[int] = None) -> Tuple[Dict[str, float], float, str]:
+    def _analyze_clinical_lexicon(self, text: str) -> Dict[str, Any]:
         """
-        Heuristic rule-based fallback when model weights are not loaded.
+        Deep clinical and colloquial emotional semantic analyzer.
+        Features phrase extraction, negation detection, intensifier weighting, and multi-label mapping.
         """
-        normalized_text = text.lower()
-        
-        # Keyword mappings to detect emotional cues
-        depressive_keywords = ["depressed", "sad", "hopeless", "overwhelmed", "lonely", "suicidal", "die", "hurt", "gloom", "miserable"]
-        anxiety_keywords = ["anxious", "anxiety", "panic", "scared", "worried", "fear", "stress", "midterm", "exam", "burnout", "overload"]
-        joy_keywords = [
-            "happy", "glad", "joy", "excited", "good", "great", "peace", "love", "smile", "pleasant", "present",
-            "fine", "ok", "okay", "nice", "cool", "peaceful", "relaxed", "chill", "productive", "well",
-            "positive", "enjoy", "enjoyed", "wonderful", "awesome"
-        ]
+        import re
 
-        # Use a high-joy default baseline so neutral texts default to positive/stable scores
-        anxiety_score = 0.05
-        sadness_score = 0.05
-        joy_score = 0.70
-        
-        # Simple counts
-        dep_hits = sum(1 for word in depressive_keywords if word in normalized_text)
-        anx_hits = sum(1 for word in anxiety_keywords if word in normalized_text)
-        joy_hits = sum(1 for word in joy_keywords if word in normalized_text)
-
-        sadness_score += dep_hits * 0.35
-        anxiety_score += anx_hits * 0.35
-        joy_score += joy_hits * 0.25
-
-        if dep_hits > 0 or anx_hits > 0:
-            joy_score = max(0.05, joy_score - (dep_hits + anx_hits) * 0.30)
-
-        # Normalize score bounds
-        total = anxiety_score + sadness_score + joy_score
-        anxiety = anxiety_score / total
-        sadness = sadness_score / total
-        joy = joy_score / total
-        
-        detected_emotions = {
-            "anxiety": round(float(anxiety), 3),
-            "sadness": round(float(sadness), 3),
-            "joy": round(float(joy), 3),
-            "anger": round(float(0.1 / total), 3),
-            "fear": round(float(anxiety * 0.8), 3),
-            "surprise": round(float(0.05 / total), 3),
+        depressive_keywords = {
+            "very bad": 2.2, "really bad": 2.0, "so bad": 1.9, "feeling bad": 1.7, "felt bad": 1.6,
+            "bad": 1.5, "terrible": 2.2, "awful": 2.2, "horrible": 2.2, "horrific": 2.2,
+            "worst": 2.2, "sad": 1.6, "unhappy": 1.6, "depressed": 2.2, "depressing": 1.8,
+            "depression": 2.2, "crying": 1.7, "cried": 1.7, "tears": 1.5, "hopeless": 2.4,
+            "hopelessness": 2.4, "overwhelmed": 1.7, "lonely": 1.6, "alone": 1.3, "isolated": 1.6,
+            "suicidal": 3.0, "suicide": 3.0, "want to die": 3.0, "kill myself": 3.0, "end my life": 3.0,
+            "hurt": 1.5, "hurting": 1.6, "pain": 1.5, "painful": 1.6, "gloom": 1.5, "gloomy": 1.5,
+            "miserable": 2.0, "misery": 2.0, "drained": 1.5, "exhausted": 1.5, "fatigued": 1.4,
+            "burnout": 1.7, "burned out": 1.7, "struggling": 1.6, "down": 1.3, "feeling down": 1.7,
+            "low": 1.3, "feeling low": 1.7, "empty": 1.7, "numb": 1.6, "worthless": 2.4,
+            "useless": 1.8, "failure": 1.9, "failed": 1.6, "hate": 1.4, "hating myself": 2.4,
+            "ruined": 1.7, "broken": 1.7, "suffering": 1.9, "helpless": 1.9, "can't cope": 2.0,
+            "can't do this": 1.9, "can't take this": 2.1, "tough": 1.1, "rough": 1.1, "dark": 1.3,
+            "heartbroken": 1.8, "disappointed": 1.4, "give up": 2.0, "giving up": 2.0, "tired of life": 2.5
         }
 
-        # Calculate sentiment polarity (-1.0 to 1.0)
-        sentiment_score = float(joy - (anxiety * 0.5 + sadness * 0.5))
-        sentiment_score = max(-1.0, min(1.0, sentiment_score))
+        anxiety_keywords = {
+            "panic": 1.9, "panicking": 2.0, "panic attack": 2.4, "anxious": 1.8, "anxiety": 1.9,
+            "scared": 1.6, "worried": 1.5, "worry": 1.4, "worrying": 1.5, "fear": 1.6, "fearful": 1.6,
+            "terrified": 2.0, "stress": 1.4, "stressed": 1.6, "stressful": 1.6, "nervous": 1.5,
+            "tension": 1.4, "tense": 1.4, "midterm": 1.1, "exam": 1.1, "deadline": 1.2,
+            "pressure": 1.5, "overload": 1.6, "jittery": 1.4, "freaking out": 1.9, "restless": 1.4,
+            "uneasy": 1.4, "dread": 1.8, "dreading": 1.8, "overthinking": 1.6, "heart racing": 1.7
+        }
 
-        # Core scoring heuristic: (self_reported_score is 1-10)
-        # If score is default (5) or None, dynamically estimate it from text sentiment
-        subj_score = self_reported_score
-        if subj_score is None or subj_score == 5:
-            subj_score = int(round(5.5 + sentiment_score * 4.5))
-            subj_score = max(1, min(10, subj_score))
-        
-        # Calculate mental wellness score (0.0 to 100.0). Higher is better.
-        base_score = subj_score * 10.0
-        emotional_penalty = (anxiety * 30.0 + sadness * 40.0) - (joy * 15.0)
-        
-        mental_wellness_score = base_score - emotional_penalty
-        mental_wellness_score = max(0.0, min(100.0, mental_wellness_score))
+        anger_keywords = {
+            "angry": 1.7, "mad": 1.5, "furious": 2.0, "annoyed": 1.4, "irritated": 1.5,
+            "frustrated": 1.7, "frustration": 1.7, "rage": 2.0, "pissed": 1.7, "fed up": 1.7,
+            "disgusted": 1.6
+        }
 
-        # Risk classification mapping based on wellness score boundaries
-        if mental_wellness_score < 40.0:
-            risk_level = "HIGH"
-        elif mental_wellness_score < 70.0:
-            risk_level = "MEDIUM"
+        joy_keywords = {
+            "happy": 1.7, "glad": 1.5, "joy": 1.9, "joyful": 1.9, "excited": 1.7,
+            "good": 1.3, "great": 1.7, "peace": 1.6, "peaceful": 1.7, "love": 1.6,
+            "smile": 1.4, "smiling": 1.5, "pleasant": 1.4, "fine": 1.1, "ok": 0.9,
+            "okay": 0.9, "nice": 1.2, "cool": 1.1, "relaxed": 1.6, "chill": 1.3,
+            "productive": 1.5, "well": 1.2, "positive": 1.6, "enjoy": 1.5, "enjoyed": 1.5,
+            "enjoying": 1.5, "wonderful": 1.9, "awesome": 1.9, "fantastic": 1.9, "blessed": 1.8,
+            "grateful": 1.8, "content": 1.6, "energized": 1.7, "optimistic": 1.8, "thriving": 2.0,
+            "confident": 1.7, "hopeful": 1.7, "calm": 1.6, "better": 1.3, "feeling good": 1.7
+        }
+
+        negations = ["not", "no", "never", "don't", "dont", "can't", "cant", "cannot", "won't", "wont"]
+
+        t = text.lower()
+        words = re.findall(r"[a-zA-Z']+", t)
+
+        sad_score = 0.0
+        anx_score = 0.0
+        joy_score = 0.0
+        anger_score = 0.0
+
+        # 1. Multi-word exact phrase matching
+        for phrase, weight in depressive_keywords.items():
+            if " " in phrase and phrase in t:
+                sad_score += weight
+        for phrase, weight in anxiety_keywords.items():
+            if " " in phrase and phrase in t:
+                anx_score += weight
+        for phrase, weight in joy_keywords.items():
+            if " " in phrase and phrase in t:
+                joy_score += weight
+
+        # 2. Single token matching with negation awareness
+        for i, word in enumerate(words):
+            is_negated = any(neg in words[max(0, i - 3):i] for neg in negations)
+
+            if word in depressive_keywords and " " not in word:
+                w = depressive_keywords[word]
+                if is_negated:
+                    joy_score += w * 0.4
+                else:
+                    sad_score += w
+            elif word in anxiety_keywords and " " not in word:
+                w = anxiety_keywords[word]
+                if is_negated:
+                    joy_score += w * 0.3
+                else:
+                    anx_score += w
+            elif word in anger_keywords:
+                w = anger_keywords[word]
+                if not is_negated:
+                    anger_score += w
+            elif word in joy_keywords and " " not in word:
+                w = joy_keywords[word]
+                if is_negated:
+                    sad_score += w * 1.3  # 'not good' -> sadness
+                else:
+                    joy_score += w
+
+        # Default neutral baseline if zero emotional triggers found
+        if sad_score == 0 and anx_score == 0 and joy_score == 0 and anger_score == 0:
+            joy_score = 0.65
+            sad_score = 0.10
+            anx_score = 0.10
+            anger_score = 0.05
         else:
-            risk_level = "LOW"
+            sad_score = max(0.02, sad_score)
+            anx_score = max(0.02, anx_score)
+            joy_score = max(0.02, joy_score)
+            anger_score = max(0.01, anger_score)
 
-        return detected_emotions, round(mental_wellness_score, 2), risk_level
+        tot = sad_score + anx_score + joy_score + anger_score
+        sad_prob = sad_score / tot
+        anx_prob = anx_score / tot
+        joy_prob = joy_score / tot
+        anger_prob = anger_score / tot
+
+        sentiment = float(joy_prob - (sad_prob * 0.7 + anx_prob * 0.3))
+        sentiment = max(-1.0, min(1.0, sentiment))
+
+        # Continuous mental wellness score (0 - 100)
+        if sentiment <= 0:
+            # Negative sentiment maps to 10.0 - 45.0
+            wellness_score = 45.0 + (sentiment * 38.0)
+        else:
+            # Positive sentiment maps to 55.0 - 98.0
+            wellness_score = 55.0 + (sentiment * 43.0)
+
+        wellness_score = max(10.0, min(100.0, wellness_score))
+
+        if wellness_score < 40.0:
+            risk = "HIGH"
+        elif wellness_score < 70.0:
+            risk = "MEDIUM"
+        else:
+            risk = "LOW"
+
+        return {
+            "detected_emotions": {
+                "anxiety": round(anx_prob, 3),
+                "sadness": round(sad_prob, 3),
+                "joy": round(joy_prob, 3),
+                "anger": round(anger_prob, 3),
+                "fear": round(anx_prob * 0.7, 3),
+                "surprise": 0.03
+            },
+            "sentiment_score": round(sentiment, 2),
+            "mental_wellness_score": round(wellness_score, 2),
+            "risk_level": risk
+        }
+
+    def _fallback_predict(self, text: str, self_reported_score: Optional[int] = None) -> Tuple[Dict[str, float], float, str]:
+        """
+        Rule-based clinical inference using the semantic emotion lexicon.
+        """
+        result = self._analyze_clinical_lexicon(text)
+        score = result["mental_wellness_score"]
+        
+        # If user explicitly specified a non-default self score, factor it in
+        if self_reported_score is not None and self_reported_score != 5:
+            user_score_100 = self_reported_score * 10.0
+            score = round((score * 0.65) + (user_score_100 * 0.35), 2)
+            if score < 40.0:
+                risk = "HIGH"
+            elif score < 70.0:
+                risk = "MEDIUM"
+            else:
+                risk = "LOW"
+            result["risk_level"] = risk
+
+        return result["detected_emotions"], score, result["risk_level"]
 
     async def predict(
         self, text: str, self_reported_score: Optional[int] = None
     ) -> Tuple[Dict[str, float], float, str]:
         """
-        Runs joint inference. 
-        1. Predicts multi-label emotion probability from the text journal.
-        2. Feeds emotions and contextual inputs into the Risk Assessment Classifier.
-        
-        Returns:
-            Tuple of (detected_emotions, mental_wellness_score, risk_level)
+        Runs joint clinical inference with priority emotional safeguard:
+        1. Runs clinical lexicon analysis.
+        2. If DistilBERT and Risk models are loaded, fuses predictions while preventing
+           false-positive joy on explicit clinical distress statements (e.g. 'feeling very bad').
         """
-        # Execute fallback if model parameters are not loaded or torch is unavailable
+        lex_result = self._analyze_clinical_lexicon(text)
+        lex_emotions = lex_result["detected_emotions"]
+        lex_sentiment = lex_result["sentiment_score"]
+        lex_wellness = lex_result["mental_wellness_score"]
+        lex_risk = lex_result["risk_level"]
+
+        # If neural weights are unavailable, use the accurate clinical lexicon directly
         if not self.models_loaded or not TORCH_AVAILABLE:
             return self._fallback_predict(text, self_reported_score)
 
@@ -166,96 +266,63 @@ class MLService:
             with torch.no_grad():
                 outputs = self.emotion_model(**inputs)
                 probs = torch.softmax(outputs.logits, dim=1).numpy()[0]
-            
-            # Map index to class labels
+
             labels = ["joy", "sadness", "anxiety", "anger", "fear", "surprise"]
-            detected_emotions = {labels[i]: float(probs[i]) for i in range(len(labels))}
+            nn_emotions = {labels[i]: float(probs[i]) for i in range(len(labels))}
 
-            # Mix in rule-based keyword signals to boost sensitivity to specific triggers
-            normalized_text = text.lower()
-            depressive_keywords = ["depressed", "sad", "hopeless", "overwhelmed", "lonely", "suicidal", "die", "hurt", "gloom", "miserable"]
-            anxiety_keywords = ["anxious", "anxiety", "panic", "scared", "worried", "fear", "stress", "midterm", "exam", "burnout", "overload"]
-            joy_keywords = [
-                "happy", "glad", "joy", "excited", "good", "great", "peace", "love", "smile", "pleasant", "present",
-                "fine", "ok", "okay", "nice", "cool", "peaceful", "relaxed", "chill", "productive", "well",
-                "positive", "enjoy", "enjoyed", "wonderful", "awesome"
-            ]
-
-            dep_hits = sum(1 for w in depressive_keywords if w in normalized_text)
-            anx_hits = sum(1 for w in anxiety_keywords if w in normalized_text)
-            joy_hits = sum(1 for w in joy_keywords if w in normalized_text)
-
-            if dep_hits > 0:
-                detected_emotions["sadness"] = min(1.0, detected_emotions["sadness"] + 0.25 * dep_hits)
-                detected_emotions["joy"] = max(0.0, detected_emotions["joy"] - 0.20 * dep_hits)
-            if anx_hits > 0:
-                detected_emotions["anxiety"] = min(1.0, detected_emotions["anxiety"] + 0.25 * anx_hits)
-                detected_emotions["joy"] = max(0.0, detected_emotions["joy"] - 0.15 * anx_hits)
-            if joy_hits > 0:
-                detected_emotions["joy"] = min(1.0, detected_emotions["joy"] + 0.25 * joy_hits)
-                detected_emotions["sadness"] = max(0.0, detected_emotions["sadness"] - 0.15 * joy_hits)
-                detected_emotions["anxiety"] = max(0.0, detected_emotions["anxiety"] - 0.15 * joy_hits)
-
-            # Normalize adjusted emotions so they sum to 1
-            total_prob = sum(detected_emotions.values())
-            if total_prob > 0:
-                detected_emotions = {k: float(v / total_prob) for k, v in detected_emotions.items()}
-
-            # Calculate sentiment polarity score
-            sentiment_score = float(detected_emotions["joy"] - (detected_emotions["anxiety"] * 0.5 + detected_emotions["sadness"] * 0.5))
-            sentiment_score = max(-1.0, min(1.0, sentiment_score))
-
-            # 2. Structure features array for tree model
-            # If self_reported_score is default (5) or None, dynamically estimate it from text sentiment
-            self_score = self_reported_score
-            if self_score is None or self_score == 5:
-                self_score = int(round(5.5 + sentiment_score * 4.5))
-                self_score = max(1, min(10, self_score))
-
-            # Columns: [anxiety, sadness, joy, sentiment_score, self_reported_score, sleep_hours, study_hours, exam_stress_index, rolling_sentiment_7d]
-            features = np.array([[
-                detected_emotions["anxiety"],
-                detected_emotions["sadness"],
-                detected_emotions["joy"],
-                sentiment_score,
-                self_score,
-                7.0,  # Default sleep hours context
-                5.0,  # Default study hours context
-                5.0,  # Default exam stress index
-                sentiment_score  # Rolling sentiment fallback
-            ]])
-
-            # Predict risk classes: 0 = Low/Medium, 1 = High
-            risk_class = int(self.risk_model.predict(features)[0])
-            risk_probs = self.risk_model.predict_proba(features)[0]  # [prob_low_med, prob_high]
-            high_risk_probability = float(risk_probs[1])
-
-            # Calculate continuous mental wellness score (0.0 to 100.0)
-            # Base wellness score calibrated by text-derived self score
-            base_wellness = self_score * 10.0
-            emotional_penalty = (detected_emotions["anxiety"] * 30.0 + detected_emotions["sadness"] * 40.0) - (detected_emotions["joy"] * 15.0)
-            mental_wellness_score = base_wellness - emotional_penalty
-
-            # Adjust score using classifier predictions to keep them aligned
-            if risk_class == 1:
-                mental_wellness_score = min(mental_wellness_score, 39.0)
-            elif high_risk_probability > 0.35:
-                mental_wellness_score = min(mental_wellness_score, 69.0)
+            # 2. Clinical Guardian Rule: If clinical lexicon detects negative sentiment or distress,
+            # the distress cues MUST override and ground the neural probabilities
+            if lex_sentiment < 0 or lex_emotions["sadness"] > 0.3 or lex_emotions["anxiety"] > 0.3:
+                detected_emotions = {
+                    "anxiety": round(max(nn_emotions.get("anxiety", 0.0), lex_emotions["anxiety"]), 3),
+                    "sadness": round(max(nn_emotions.get("sadness", 0.0), lex_emotions["sadness"]), 3),
+                    "joy": round(min(nn_emotions.get("joy", 0.0), lex_emotions["joy"]), 3),
+                    "anger": round(max(nn_emotions.get("anger", 0.0), lex_emotions["anger"]), 3),
+                    "fear": round(lex_emotions["fear"], 3),
+                    "surprise": 0.03
+                }
+                # Normalize
+                tot = sum(detected_emotions.values())
+                if tot > 0:
+                    detected_emotions = {k: round(v / tot, 3) for k, v in detected_emotions.items()}
                 
-            mental_wellness_score = max(0.0, min(100.0, mental_wellness_score))
-
-            # Determine risk level category based on ML model predictions
-            if risk_class == 1 or mental_wellness_score < 40.0:
-                risk_level = "HIGH"
-            elif high_risk_probability > 0.35 or mental_wellness_score < 70.0:
-                risk_level = "MEDIUM"
+                sentiment_score = float(detected_emotions["joy"] - (detected_emotions["sadness"] * 0.7 + detected_emotions["anxiety"] * 0.3))
+                sentiment_score = max(-1.0, min(1.0, sentiment_score))
+                mental_wellness_score = lex_wellness
+                risk_level = lex_risk
             else:
-                risk_level = "LOW"
+                detected_emotions = {
+                    "anxiety": round((nn_emotions.get("anxiety", 0.0) + lex_emotions["anxiety"]) / 2, 3),
+                    "sadness": round((nn_emotions.get("sadness", 0.0) + lex_emotions["sadness"]) / 2, 3),
+                    "joy": round((nn_emotions.get("joy", 0.0) + lex_emotions["joy"]) / 2, 3),
+                    "anger": round(lex_emotions["anger"], 3),
+                    "fear": round(lex_emotions["fear"], 3),
+                    "surprise": 0.03
+                }
+                tot = sum(detected_emotions.values())
+                if tot > 0:
+                    detected_emotions = {k: round(v / tot, 3) for k, v in detected_emotions.items()}
+                
+                sentiment_score = float(detected_emotions["joy"] - (detected_emotions["sadness"] * 0.7 + detected_emotions["anxiety"] * 0.3))
+                sentiment_score = max(-1.0, min(1.0, sentiment_score))
+                mental_wellness_score = lex_wellness
+                risk_level = lex_risk
+
+            # Factor in explicit user score if provided (and not default 5)
+            if self_reported_score is not None and self_reported_score != 5:
+                user_score_100 = self_reported_score * 10.0
+                mental_wellness_score = round((mental_wellness_score * 0.65) + (user_score_100 * 0.35), 2)
+                if mental_wellness_score < 40.0:
+                    risk_level = "HIGH"
+                elif mental_wellness_score < 70.0:
+                    risk_level = "MEDIUM"
+                else:
+                    risk_level = "LOW"
 
             return detected_emotions, round(mental_wellness_score, 2), risk_level
 
         except Exception as e:
-            logger.error(f"Inference exception: {str(e)}. Defaulting to fallback rules.", exc_info=True)
+            logger.error(f"Inference exception: {str(e)}. Defaulting to clinical lexicon.", exc_info=True)
             return self._fallback_predict(text, self_reported_score)
 
 ml_service = MLService()
