@@ -232,6 +232,30 @@ def get_system_uptime_seconds_today() -> float:
     except Exception:
         return 0.0
 
+def get_system_last_wake_seconds_today() -> Optional[float]:
+    """
+    Checks when the system exited sleep or Modern Standby today from Windows Event Log.
+    Returns the elapsed seconds since the system woke from sleep today, or None.
+    """
+    if sys.platform != "win32":
+        return None
+    try:
+        import subprocess
+        cmd = [
+            "powershell",
+            "-NoProfile",
+            "-Command",
+            "([string](Get-WinEvent -FilterHashtable @{LogName='System'; StartTime=(Get-Date).Date; Id=@(507, 1)} -MaxEvents 1 -ErrorAction SilentlyContinue).TimeCreated.ToString('o'))"
+        ]
+        out = subprocess.check_output(cmd, text=True, timeout=5).strip()
+        if out:
+            wake_dt = datetime.datetime.fromisoformat(out)
+            now_dt = datetime.datetime.now(wake_dt.tzinfo) if wake_dt.tzinfo else datetime.datetime.now()
+            return max(0.0, (now_dt - wake_dt).total_seconds())
+    except Exception:
+        pass
+    return None
+
 def get_startup_dir() -> Path:
     """Returns the Windows user Startup directory path."""
     if sys.platform == "win32":
@@ -400,7 +424,18 @@ def start_agent():
         except Exception:
             pass
 
-    # 2. If completely 0 (brand new day or fresh boot without cloud record yet), initialize from boot uptime
+    # 2. Check Modern Standby / Sleep wake time today
+    wake_seconds = get_system_last_wake_seconds_today()
+    if wake_seconds and wake_seconds > 0:
+        initial_idle = get_system_idle_seconds()
+        wake_active = max(0, int(wake_seconds - initial_idle))
+        if wake_active > total_screen_seconds:
+            diff = wake_active - total_screen_seconds
+            total_screen_seconds = wake_active
+            academic_seconds += int(diff * 0.8)
+            log_agent(f"[*] Detected Modern Standby wake today ({int(wake_seconds / 60)}m ago). Updated active screen time to {int(total_screen_seconds / 60)}m.")
+
+    # 3. If completely 0 (brand new day or fresh boot without cloud record yet), initialize from boot uptime
     if total_screen_seconds == 0 and uptime_seconds > 0:
         initial_idle = get_system_idle_seconds()
         initial_active = max(0, min(int(uptime_seconds - initial_idle), 7200))
@@ -411,7 +446,7 @@ def start_agent():
         log_agent(f"[*] Active Daily Screen Session: {int(total_screen_seconds / 60)}m active today (PC boot: {boot_time_str}).")
 
     has_crisis_event = False
-    last_sync_time = time.time()
+    last_sync_time = 0  # Trigger immediate sync upon startup
     last_break_prompt = time.time()
 
     try:
