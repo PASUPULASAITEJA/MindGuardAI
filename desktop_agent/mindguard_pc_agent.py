@@ -25,6 +25,7 @@ from typing import Dict, Optional, Tuple
 
 import requests
 import psutil
+import math
 
 def notify_break_reminder(title: str, message: str):
     """
@@ -137,18 +138,39 @@ def get_system_idle_seconds() -> float:
             return 0.0
     return 0.0
 
+_DESKTOP_HANDLE = None
+
+def attach_interactive_desktop():
+    """Ensures the thread is attached to the user's interactive desktop to read foreground windows."""
+    global _DESKTOP_HANDLE
+    if sys.platform == "win32":
+        try:
+            if _DESKTOP_HANDLE is None:
+                _DESKTOP_HANDLE = ctypes.windll.user32.OpenDesktopW("Default", 0, False, 0x01FF)
+            if _DESKTOP_HANDLE:
+                ctypes.windll.user32.SetThreadDesktop(_DESKTOP_HANDLE)
+        except Exception:
+            pass
+
 def get_active_window_details() -> Tuple[str, str, str, bool]:
     """
     Returns (process_name, window_title, category, is_crisis_flag)
     Extracts foreground process and inspects window title/search intent.
     """
+    global _DESKTOP_HANDLE
     proc_name = "desktop"
     window_title = ""
     is_crisis = False
 
     if sys.platform == "win32":
         try:
+            attach_interactive_desktop()
             hwnd = ctypes.windll.user32.GetForegroundWindow()
+            if not hwnd:
+                _DESKTOP_HANDLE = None
+                attach_interactive_desktop()
+                hwnd = ctypes.windll.user32.GetForegroundWindow()
+
             if hwnd:
                 pid = ctypes.c_ulong()
                 ctypes.windll.user32.GetWindowThreadProcessId(hwnd, ctypes.byref(pid))
@@ -518,7 +540,7 @@ def start_agent():
                     "academic_usage_minutes": int(academic_seconds / 60),
                     "social_usage_minutes": int(social_seconds / 60),
                     "entertainment_usage_minutes": int(entertainment_seconds / 60),
-                    "adult_usage_minutes": int(adult_seconds / 60),
+                    "adult_usage_minutes": max(1, int(math.ceil(adult_seconds / 60.0))) if adult_seconds >= 10 else 0,
                     "continuous_screen_minutes": int(continuous_active_seconds / 60),
                     "baseline_deviation_score": 0.0,
                     "is_crisis_search_flag": has_crisis_event
@@ -547,6 +569,7 @@ def start_agent():
                         log_agent(
                             f"{status_color} Synced: "
                             f"{payload['total_screen_time_minutes']}m Active | "
+                            f"{payload['adult_usage_minutes']}m Adult | "
                             f"{payload['late_night_usage_minutes']}m Late-Night | "
                             f"Context: {category} ({display_title}) | "
                             f"Risk: {risk_level}"
