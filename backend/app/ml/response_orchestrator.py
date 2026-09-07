@@ -300,7 +300,7 @@ class BuiltinEmpatheticGenerator(BaseLLMProvider):
 
         elif intent == "greeting":
             return (
-                f"Hey there! I'm your MindGuard companion. I'm here to listen, share quick calming tools, or just chat in complete privacy. "
+                f"Hey there! I'm your MindGuardAI companion. I'm here to listen, share quick calming tools, or just chat in complete privacy. "
                 f"How are you feeling today?"
             )
 
@@ -369,7 +369,7 @@ class ResponseOrchestrator:
         }
 
         system_prompt = (
-            "You are MindGuard AI, an empathetic student mental wellness companion. "
+            "You are MindGuardAI, an empathetic student mental wellness companion. "
             "Your role is to offer warm, supportive, active listening and evidence-based coping strategies. "
             "Never diagnose medical conditions. Keep responses concise, student-friendly, and compassionate."
         )
