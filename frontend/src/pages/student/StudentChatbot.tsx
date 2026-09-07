@@ -508,7 +508,7 @@ export const StudentChatbot: React.FC = () => {
             <div>
               <div className="flex items-center gap-2">
                 <h3 className="text-sm font-bold text-slate-800 dark:text-slate-100">
-                  MindGuard Companion
+                  MindGuardAI Companion
                 </h3>
                 <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] font-semibold text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
                   <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
@@ -939,7 +939,7 @@ export const StudentChatbot: React.FC = () => {
           </div>
 
           <div className="mt-2 flex items-center justify-between px-1 text-[11px] text-slate-400 dark:text-slate-500">
-            <span>MindGuard AI provides supportive peer guidance, not clinical diagnoses.</span>
+            <span>MindGuardAI provides supportive peer guidance, not clinical diagnoses.</span>
             <span>{inputMessage.length} / 4000</span>
           </div>
         </div>
