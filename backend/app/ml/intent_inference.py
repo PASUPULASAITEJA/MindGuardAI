@@ -44,37 +44,50 @@ INTENT_PATTERNS: Dict[str, Dict[str, any]] = {
         "regex": r"\b(sad|depress|crying|miserab|hopeless|heartbroken|unhappy)\b",
         "weight": 0.80
     },
+    "homesickness": {
+        "keywords": [
+            "miss my family", "missing my family", "miss home", "missing home",
+            "miss my parents", "missing my parents", "homesick", "homesickness",
+            "moved to college", "moving to college", "away from home", "first time away from home",
+            "new city", "miss my room", "miss my mom", "miss my dad"
+        ],
+        "regex": r"\b(homesick|homesickness|miss (my )?(family|parents|home|mom|dad)|missing (my )?(family|parents|home|mom|dad)|away from home|moving to college|moved to college)\b",
+        "weight": 0.90
+    },
     "loneliness": {
         "keywords": [
             "lonely", "alone", "no friends", "isolated", "nobody cares", "left out", "disconnected",
-            "homesick", "alienated", "no one understands", "nobody to talk to"
+            "homesick", "alienated", "no one understands", "nobody to talk to", "feeling lonely", "feel lonely"
         ],
-        "regex": r"\b(lonel|isolated|no friends|nobody cares|homesick|alienat)\b",
-        "weight": 0.80
+        "regex": r"\b(lonel|isolated|no friends|nobody cares|alienat|feeling lonely|feel lonely)\b",
+        "weight": 0.85
     },
     "sleep_problem": {
         "keywords": [
             "insomnia", "cannot sleep", "can't sleep", "trouble sleeping", "nightmares", "staying up all night",
-            "exhausted", "sleep deprivation", "wake up tired", "sleep schedule", "no sleep"
+            "fall asleep", "cannot fall asleep", "can't fall asleep", "exhausted", "sleep deprivation",
+            "wake up tired", "sleep schedule", "no sleep", "sleeping problem"
         ],
-        "regex": r"\b(insomnia|can'?t sleep|trouble sleeping|exhausted|sleep deprivation|nightmare)\b",
-        "weight": 0.80
+        "regex": r"\b(insomnia|can'?t sleep|cannot sleep|fall asleep|trouble sleeping|exhausted|sleep deprivation|nightmare)\b",
+        "weight": 0.85
     },
     "relationship_problem": {
         "keywords": [
             "breakup", "broke up", "girlfriend", "boyfriend", "partner", "cheating", "fight with friend",
             "toxic friend", "roommate issue", "argument with partner", "relationship"
         ],
-        "regex": r"\b(breakup|broke up|girlfriend|boyfriend|partner|cheating|roommate|relationship)\b",
+        "regex": r"\b(breakup|broke up|girlfriend|boyfriend|cheating|roommate fight|fight with friend|toxic friend)\b",
         "weight": 0.75
     },
     "family_problem": {
         "keywords": [
-            "parents", "mother", "father", "dad", "mom", "family pressure", "parents arguing",
-            "family expectations", "strict parents", "family conflict"
+            "family pressure", "parents arguing", "parents fighting", "strict parents",
+            "family conflict", "fight with parents", "arguing with parents", "family fight",
+            "toxic parents", "parents disappointed", "pressure from parents", "family expectations",
+            "parents yelling", "abusive parents", "fighting with parents"
         ],
-        "regex": r"\b(parents|mother|father|family pressure|strict parents|family)\b",
-        "weight": 0.75
+        "regex": r"\b(family pressure|strict parents|family conflict|family fight|parents (are )?(fighting|arguing|yelling|screaming)|fight(ing)? with (my )?parents|toxic (family|parents)|parents pressure)\b",
+        "weight": 0.85
     },
     "motivation_problem": {
         "keywords": [
