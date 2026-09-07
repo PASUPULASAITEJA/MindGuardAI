@@ -48,7 +48,7 @@ export const Login: React.FC = () => {
 
       toast({
         title: "Welcome back!",
-        description: "Successfully authenticated to MindGuard.",
+        description: "Successfully authenticated to MindGuardAI.",
         variant: "success",
       });
 
@@ -84,10 +84,10 @@ export const Login: React.FC = () => {
         {/* Brand Header */}
         <div className="flex flex-col items-center mb-6 text-center">
           <div className="h-12 w-12 rounded-2xl border border-slate-800 overflow-hidden shadow-lg shadow-violet-500/10 mb-3 bg-slate-900 flex items-center justify-center">
-            <img src="/favicon.jpg" alt="MindGuard Logo" className="h-full w-full object-cover" />
+            <img src="/favicon.jpg" alt="MindGuardAI Logo" className="h-full w-full object-cover" />
           </div>
           <h1 className="text-3xl font-extrabold tracking-tight bg-gradient-to-r from-white via-slate-200 to-slate-400 bg-clip-text text-transparent">
-            MindGuard
+            MindGuardAI
           </h1>
           <p className="text-sm text-slate-400 mt-1">Student Mental Health & Alert Management Gateway</p>
         </div>
