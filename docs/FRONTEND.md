@@ -103,15 +103,17 @@ src/
 The central hub for primary users to track and manage their mental well-being.
 
 * **Components & Widgets:**
-  * **Wellness Score Widget:** A radial gauge (`Recharts RadialBarChart`) displaying the latest Mental Wellness Score (0-100). Color-coded based on risk (Green for Low, Yellow for Medium, Red for High).
-  * **Mood Check-In Panel:** Tabbed interface for structured text, simulated voice transcript, and standardized PHQ-9/GAD-7 surveys.
-  * **Behavioral Telemetry Widget:** Real-time PC screen time, late-night usage indicators, and agent connection status.
+  * **Wellness Score Widget:** A calibrated dial gauge displaying the latest Mental Wellness Index (`/100`). Features an intuitive 3-tier clinical reference bar (`0-34 Critical`, `35-64 Moderate`, `65-100 Optimal`) with color-coded status badges (`Stable Wellness 🟢`, `Moderate Strain 🟡`, `Critical Distress 🔴`).
+  * **Mood Check-In Panel:** Tabbed interface for structured text, simulated voice transcript, and standardized student-contextualized PHQ-9/GAD-7 surveys.
+  * **Behavioral Telemetry Widget:** Real-time PC screen time, late-night usage indicators, adult habit warning badges, and agent connection status.
 
 ### 4.3 Student Companion Chat & CBT Micro-Modules (`/student/chat`)
 
 * **Components:** `StudentChatbot`, `DualBreathingPacer`, `SensoryGroundingWidget`, `ThoughtReframerModal`, `EmergencySOSModal`.
 * **Features:**
   * Real-time Server-Sent Events (SSE) word-by-word streaming.
+  * Emotion-Adaptive Empathetic Responses: Tailors responses to user emotional state (celebrates `joy` and positive wins, provides comfort for `sadness` and `loneliness`, guides structured calming for `anxiety` and `exam_stress`).
+  * Smart Anti-Repetition Engine: Prevents repeated replies across consecutive chat turns.
   * In-chat Box Breathing (4-4-4-4) and Relaxing Breath (4-7-8) countdown timers.
   * Interactive 5-4-3-2-1 Sensory Grounding step completion.
   * Cognitive Reframer for identifying and restructuring Automatic Negative Thoughts (ANT).
