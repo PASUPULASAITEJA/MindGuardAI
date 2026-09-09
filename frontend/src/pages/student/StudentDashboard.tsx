@@ -390,7 +390,7 @@ export const StudentDashboard: React.FC = () => {
     <Card className="border-border/50 bg-card/40 backdrop-blur-md lg:col-span-1 shadow-sm">
       <CardHeader>
         <CardTitle className="text-foreground text-sm font-extrabold">Mental Wellness Index</CardTitle>
-        <CardDescription className="text-muted-foreground text-xs">Calculated well-being metric</CardDescription>
+        <CardDescription className="text-muted-foreground text-xs">Continuous well-being score (0 to 100)</CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col items-center justify-center pb-6">
         {isAssessmentLoading ? (
@@ -416,18 +416,32 @@ export const StudentDashboard: React.FC = () => {
               </PieChart>
             </ResponsiveContainer>
             <div className="absolute inset-0 flex flex-col items-center justify-center">
-              <span className="text-3xl font-extrabold text-foreground">{hasAssessment ? wellnessScore : "--"}</span>
+              <div className="flex items-baseline justify-center">
+                <span className="text-3xl font-extrabold text-foreground tracking-tight">{hasAssessment ? wellnessScore : "--"}</span>
+                {hasAssessment && <span className="text-xs font-bold text-muted-foreground ml-0.5">/100</span>}
+              </div>
               <span 
-                className="text-[10px] font-bold tracking-widest uppercase mt-0.5 px-2 py-0.5 rounded"
+                className="text-[10px] font-bold tracking-widest uppercase mt-0.5 px-2 py-0.5 rounded-full"
                 style={{ backgroundColor: `${riskColor}20`, color: riskColor }}
               >
-                {hasAssessment ? `${assessment?.risk_level} RISK` : "NO DATA"}
+                {hasAssessment 
+                  ? assessment?.risk_level === "LOW"
+                    ? "Stable Wellness"
+                    : assessment?.risk_level === "MEDIUM"
+                    ? "Moderate Strain"
+                    : "High Distress"
+                  : "NO DATA"}
               </span>
+              {hasAssessment && (
+                <span className="text-[10px] text-muted-foreground font-medium mt-0.5">
+                  ({assessment?.risk_level} Risk Tier)
+                </span>
+              )}
             </div>
           </div>
         )}
         
-        <div className="mt-4 text-center max-w-xs">
+        <div className="mt-3 text-center max-w-xs w-full">
           {!hasAssessment && (
             <p className="text-xs text-muted-foreground font-medium">No check-ins logged yet. Daily logs will map your stress indices.</p>
           )}
@@ -443,6 +457,19 @@ export const StudentDashboard: React.FC = () => {
           {hasAssessment && assessment?.risk_level === "LOW" && (
             <p className="text-xs text-emerald-500 font-medium">Wellness parameters are stable. Keep it up!</p>
           )}
+
+          {/* 3-Tier Clinical Reference Legend */}
+          <div className="w-full grid grid-cols-3 gap-1 text-center text-[10px] text-muted-foreground pt-3 mt-3 border-t border-border/50">
+            <div className={`py-1 px-0.5 rounded transition-colors ${hasAssessment && assessment?.risk_level === 'HIGH' ? 'bg-red-500/15 text-red-500 font-bold border border-red-500/20' : 'opacity-70'}`}>
+              0-34 Critical
+            </div>
+            <div className={`py-1 px-0.5 rounded transition-colors ${hasAssessment && assessment?.risk_level === 'MEDIUM' ? 'bg-amber-500/15 text-amber-500 font-bold border border-amber-500/20' : 'opacity-70'}`}>
+              35-64 Moderate
+            </div>
+            <div className={`py-1 px-0.5 rounded transition-colors ${hasAssessment && assessment?.risk_level === 'LOW' ? 'bg-emerald-500/15 text-emerald-500 font-bold border border-emerald-500/20' : 'opacity-70'}`}>
+              65-100 Optimal
+            </div>
+          </div>
 
           {/* 1-on-1 Counselor Booking Trigger when risk is Elevated or High */}
           <div className="mt-4 pt-3 border-t border-border/60 flex flex-col gap-2 w-full">
