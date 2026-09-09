@@ -134,6 +134,11 @@ sequenceDiagram
 
 * **Singleton Pattern:** Models are loaded into memory exactly once during the FastAPI `@app.lifespan` startup event to completely eliminate disk I/O bottlenecks during individual API requests.
 
+### 8.1 Clinical Guardian Rule & Emotional Recalibration
+
+* **Distress Cue Override:** Neural transformer models can occasionally yield false-positive joy predictions on short negative statements (e.g., "feeling very bad"). The Clinical Guardian layer analyzes semantic lexicon distress cues and forces negative sentiment bounds to override anomalous transformer logits.
+* **Proportional Scaling:** Mild to moderate sadness phrases (e.g., "i am feeling sad") map to moderate strain (~40-48/100, `MEDIUM` risk) rather than triggering premature clinical crisis workflows (`HIGH` risk), while explicit self-harm or hopelessness cues immediately escalate to high-priority triage.
+
 ---
 
 ## 9. Recommendation Engine

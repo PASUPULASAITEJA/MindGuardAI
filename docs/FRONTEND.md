@@ -132,6 +132,19 @@ The central hub for primary users to track and manage their mental well-being.
 * **Mood History Chart:** `Recharts LineChart` mapping `self_reported_score` and `sentiment_score` over the last 7 or 30 days.
 * **Recommendation List:** A CSS Grid of `Card` components displaying wellness articles or video thumbnails based on the current risk level.
 
+### 4.2.1 Mental Wellness Gauge & Clinical Survey Architecture
+
+* **Mental Wellness Gauge Component (`renderWellnessGauge`):**
+  * **Continuous 0-100 Score Dial:** Uses a Recharts `PieChart` donut dial to visually display normalized student wellness (`score` vs. `remainder`).
+  * **Standardized 3-Tier Cutoffs:**
+    * `65 - 100` (Green): Optimal Wellness / Stable Parameters (LOW Risk).
+    * `35 - 64` (Amber): Moderate Strain / Elevated Stress Indices (MEDIUM Risk).
+    * `0 - 34` (Red): Critical Distress / Counselor Alert Triggered (HIGH Risk).
+  * **Clinical Action Trigger:** Automatically surfaces an urgent counselor booking action and crisis badge when score enters High Distress.
+* **Clinical Surveys (PHQ-9 & GAD-7 Wizard):**
+  * Multi-step questionnaire modal contextualized for college students (academic strain, imposter feelings, sleep disruptions).
+  * Auto-evaluates severity upon completion and updates real-time risk profile with zero page reloads.
+
 
 * **API Integration:** `GET /predictions/assessment/latest`, `POST /journal/entries`, `GET /mood/history`, `GET /recommendations/current`.
 * **Loading State:** Full-page Skeleton components mimicking the layout of the widgets while React Query fetches data.
