@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { X, Printer, ShieldAlert, FileText, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -25,6 +25,16 @@ export const ClinicalDossierModal: React.FC<ClinicalDossierModalProps> = ({
   totalScreenMins = 320,
   sentimentScore = -0.15,
 }) => {
+  // Allow closing via Escape key
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   const handlePrint = () => {
@@ -50,37 +60,44 @@ export const ClinicalDossierModal: React.FC<ClinicalDossierModalProps> = ({
   const riskBadge = getRiskBadge();
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm overflow-y-auto">
-      <div className="relative w-full max-w-3xl bg-card border border-border shadow-2xl rounded-2xl overflow-hidden my-8 print:border-none print:shadow-none print:m-0">
+    <div 
+      onClick={onClose}
+      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-slate-950/70 backdrop-blur-sm animate-in fade-in duration-200"
+    >
+      <div 
+        onClick={(e) => e.stopPropagation()}
+        className="relative w-full max-w-3xl bg-card border border-border shadow-2xl rounded-2xl overflow-hidden max-h-[92vh] flex flex-col print:border-none print:shadow-none print:max-h-none print:m-0"
+      >
         
-        {/* Top Action Bar (Hidden when printing) */}
-        <div className="p-4 bg-muted/40 border-b border-border flex items-center justify-between print:hidden">
+        {/* Top Action Bar (Sticky, hidden when printing) */}
+        <div className="p-3.5 sm:p-4 bg-muted/60 border-b border-border flex items-center justify-between shrink-0 print:hidden z-10">
           <div className="flex items-center gap-2">
             <FileText className="h-5 w-5 text-primary" />
-            <span className="text-sm font-bold text-foreground">Official Clinical Assessment Dossier</span>
+            <span className="text-xs sm:text-sm font-bold text-foreground">Official Clinical Assessment Dossier</span>
           </div>
           <div className="flex items-center gap-2">
             <Button
               onClick={handlePrint}
               size="sm"
-              className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold h-8 px-3 rounded-lg"
+              className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold h-8 px-3 rounded-lg text-xs shadow-sm"
             >
-              <Printer className="h-4 w-4 mr-1.5" />
+              <Printer className="h-3.5 w-3.5 mr-1.5" />
               Print / Save PDF
             </Button>
             <Button
               onClick={onClose}
-              variant="ghost"
+              variant="outline"
               size="sm"
-              className="h-8 w-8 p-0 rounded-lg text-muted-foreground hover:text-foreground"
+              className="h-8 px-3 rounded-lg text-xs font-bold border-border hover:bg-muted text-foreground flex items-center gap-1"
             >
-              <X className="h-4 w-4" />
+              <X className="h-3.5 w-3.5" />
+              Close
             </Button>
           </div>
         </div>
 
-        {/* Printable Report Document */}
-        <div className="p-6 md:p-8 space-y-6 text-foreground bg-card">
+        {/* Scrollable Printable Report Document */}
+        <div className="p-6 md:p-8 overflow-y-auto space-y-6 text-foreground bg-card">
           
           {/* Institution Header */}
           <div className="border-b-2 border-primary/30 pb-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -90,7 +107,7 @@ export const ClinicalDossierModal: React.FC<ClinicalDossierModalProps> = ({
               <p className="text-xs text-muted-foreground mt-0.5">Department of Student Wellness & Psychological Services</p>
             </div>
             <div className="text-left md:text-right text-xs text-muted-foreground space-y-0.5">
-              <div><strong>Document Ref:</strong> MG-CLN-{Math.abs(wellnessScore * 149 + 1024)}</div>
+              <div><strong>Document Ref:</strong> MG-CLN-{Math.abs(Math.round(wellnessScore * 149 + 1024))}</div>
               <div><strong>Issue Date:</strong> {currentDate}</div>
               <div><strong>Confidentiality:</strong> Tier-3 Protected Health Record</div>
             </div>
@@ -105,7 +122,10 @@ export const ClinicalDossierModal: React.FC<ClinicalDossierModalProps> = ({
             </div>
             <div>
               <span className="text-muted-foreground block text-[10px] font-bold uppercase tracking-wider">Evaluation Index</span>
-              <span className="font-black text-foreground text-xl">{wellnessScore} <span className="text-xs font-normal text-muted-foreground">/ 100.0</span></span>
+              <div className="text-xl font-black text-foreground">
+                {typeof wellnessScore === "number" ? wellnessScore.toFixed(1) : wellnessScore}{" "}
+                <span className="text-xs font-normal text-muted-foreground">/ 100.0</span>
+              </div>
               <span className="text-muted-foreground block text-[11px]">Continuous Wellness Index</span>
             </div>
             <div>
@@ -176,7 +196,7 @@ export const ClinicalDossierModal: React.FC<ClinicalDossierModalProps> = ({
             <div className="p-3 rounded-xl border border-border/60 bg-muted/20 text-xs space-y-1">
               <div className="flex justify-between">
                 <span className="font-semibold text-foreground">DistilBERT Model Sentiment Score:</span>
-                <span className="font-bold text-primary">{sentimentScore.toFixed(3)}</span>
+                <span className="font-bold text-primary">{typeof sentimentScore === "number" ? sentimentScore.toFixed(3) : sentimentScore}</span>
               </div>
               <p className="text-[11px] text-muted-foreground">
                 Guardian Rule check: Clinical sentiment lexicon fused with neural emotion probabilities. No active suicidal ideation or self-harm keywords detected in current logging window.
@@ -216,6 +236,29 @@ export const ClinicalDossierModal: React.FC<ClinicalDossierModalProps> = ({
             MindGuard AI Clinical Support System is an adjunctive triage tool designed under ICMR/APA ethical guidelines. Final clinical diagnoses must be confirmed via licensed mental health practitioners.
           </div>
 
+        </div>
+
+        {/* Bottom Action Bar (Fixed at bottom so user can always exit) */}
+        <div className="p-3.5 sm:p-4 bg-muted/40 border-t border-border flex items-center justify-between shrink-0 print:hidden">
+          <span className="text-[11px] text-muted-foreground">Press <strong>ESC</strong> or click outside to close</span>
+          <div className="flex items-center gap-2">
+            <Button
+              onClick={handlePrint}
+              variant="outline"
+              size="sm"
+              className="h-8 px-3 rounded-lg text-xs font-bold"
+            >
+              <Printer className="h-3.5 w-3.5 mr-1.5" />
+              Print
+            </Button>
+            <Button
+              onClick={onClose}
+              size="sm"
+              className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold h-8 px-4 rounded-lg text-xs"
+            >
+              Close Dossier
+            </Button>
+          </div>
         </div>
 
       </div>
