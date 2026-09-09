@@ -98,6 +98,18 @@ SUGGESTED_ACTIONS_BY_INTENT: Dict[str, List[str]] = {
         "I want to talk about my day",
         "Log a mood check-in"
     ],
+    "joy": [
+        "Reflect on what went well",
+        "Save a positive journal note",
+        "Share a small win",
+        "Set a positive intention"
+    ],
+    "casual_conversation": [
+        "Share what's on my mind",
+        "Check my wellness trends",
+        "Try a quick relaxation tool",
+        "Take a daily check-in"
+    ],
     "default": [
         "Guided breathing exercise",
         "Talk about what's on my mind",
@@ -131,9 +143,41 @@ class BuiltinEmpatheticGenerator(BaseLLMProvider):
     ) -> str:
         intent = context.get("intent", "casual_conversation")
         emotion = context.get("primary_emotion", "neutral")
+        sentiment_score = context.get("sentiment_score", 0.0)
         risk_level = context.get("risk_level", "GREEN")
         history = context.get("recent_history", [])
         last_user_msg = (messages[-1]["content"] if messages else "").lower()
+
+        # 1. Gratitude detection
+        if any(k in last_user_msg for k in ["thank you", "thanks", "thx", "appreciate it"]):
+            return (
+                "You're very welcome! I'm always right here whenever you need a sounding board or a quick break. "
+                "Keep taking good care of yourself!"
+            )
+
+        # 2. Joy / Happiness / Positive mood detection
+        if emotion == "joy" or sentiment_score > 0.15 or any(k in last_user_msg for k in ["good", "great", "happy", "excited", "awesome", "wonderful", "proud", "fantastic", "feeling well", "better", "joy"]):
+            joy_templates = [
+                (
+                    "That's wonderful to hear! I'm so glad you're feeling so good today. "
+                    "What's been the highlight of your day so far?"
+                ),
+                (
+                    "I love hearing that! Celebrating these bright, positive moments is such an important part of mental wellness. "
+                    "Did something exciting happen, or are you just in a great flow?"
+                ),
+                (
+                    "That's fantastic! It's so refreshing to feel happy and at peace. "
+                    "Soak in those positive vibes — is there anything special you're looking forward to doing today?"
+                ),
+                (
+                    "Hearing this brings a smile! Recognizing when you're feeling great helps anchor positive habits. "
+                    "What made today feel so good?"
+                )
+            ]
+            prev_assistant_msgs = [turn.get("message", "") for turn in history if turn.get("sender") != "STUDENT"]
+            available = [t for t in joy_templates if t not in prev_assistant_msgs]
+            return random.choice(available or joy_templates)
 
         # Context-aware templates — concise, empathetic, 2-3 short sentences
         if intent == "homesickness":
@@ -310,12 +354,35 @@ class BuiltinEmpatheticGenerator(BaseLLMProvider):
                 f"I'm always here whenever you need a safe space to chat. Have a great day!"
             )
 
+        elif intent in ["casual_conversation", "general_checkin"]:
+            casual_templates = [
+                "I'm here and listening! How has the rest of your day been going?",
+                "Always glad to chat with you. What's been on your mind lately?",
+                "I'm all ears! Whether you want to talk about your classes, your day, or just check in, what would you like to explore?",
+            ]
+            prev_assistant_msgs = [turn.get("message", "") for turn in history if turn.get("sender") != "STUDENT"]
+            available = [t for t in casual_templates if t not in prev_assistant_msgs]
+            return random.choice(available or casual_templates)
+
         else:
-            # Default supportive dialogue
-            return (
-                f"I hear you, and I'm right here with you. "
-                f"Whether you want to vent, try a quick calming exercise, or talk things through, I'm listening. What's on your mind?"
-            )
+            # Diverse supportive fallbacks
+            fallbacks = [
+                (
+                    "I hear you, and I'm right here with you. "
+                    "Whether you want to vent, try a quick calming exercise, or talk things through, I'm listening. What's on your mind?"
+                ),
+                (
+                    "I'm listening and glad you're sharing with me. "
+                    "Take all the time you need — tell me more about what's going on."
+                ),
+                (
+                    "Thanks for reaching out. Whatever is on your mind today, this is a safe, confidential space. "
+                    "How are you feeling right now?"
+                )
+            ]
+            prev_assistant_msgs = [turn.get("message", "") for turn in history if turn.get("sender") != "STUDENT"]
+            available = [t for t in fallbacks if t not in prev_assistant_msgs]
+            return random.choice(available or fallbacks)
 
 class ResponseOrchestrator:
     """
@@ -384,7 +451,10 @@ class ResponseOrchestrator:
         response_text = await self.provider.generate_response(system_prompt, messages, context)
 
         # 3. Populate Suggested Actions
-        suggested = SUGGESTED_ACTIONS_BY_INTENT.get(intent, SUGGESTED_ACTIONS_BY_INTENT["default"])
+        if primary_emotion == "joy" or sentiment_score > 0.15:
+            suggested = SUGGESTED_ACTIONS_BY_INTENT.get("joy", SUGGESTED_ACTIONS_BY_INTENT["default"])
+        else:
+            suggested = SUGGESTED_ACTIONS_BY_INTENT.get(intent, SUGGESTED_ACTIONS_BY_INTENT["default"])
 
         return {
             "response": response_text,
