@@ -1,45 +1,22 @@
 import React, { useState, useEffect } from "react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { useToast } from "@/components/ui/toast";
-import { 
-  Sliders, Moon, Wind, Clock, Sparkles, TrendingUp, RotateCcw, 
-  Target, CheckCircle2, PlayCircle, Award
-} from "lucide-react";
+import { Sliders, Moon, Wind, Clock, Sparkles, TrendingUp, RotateCcw } from "lucide-react";
 
 interface HabitRecoverySimulatorProps {
   currentScore: number;
-  onStartBreathing?: () => void;
 }
 
-interface CommittedGoal {
-  reduceLateNightHours: number;
-  mindfulnessMinutes: number;
-  consistentBedtime: boolean;
-  studyBreaks: boolean;
-  targetPoints: number;
-  projectedScore: number;
-  committedDate: string;
-}
-
-export const HabitRecoverySimulator: React.FC<HabitRecoverySimulatorProps> = ({ 
-  currentScore,
-  onStartBreathing
-}) => {
-  const { toast } = useToast();
+export const HabitRecoverySimulator: React.FC<HabitRecoverySimulatorProps> = ({ currentScore }) => {
   const [reduceLateNightHours, setReduceLateNightHours] = useState<number>(1.5);
   const [mindfulnessMinutes, setMindfulnessMinutes] = useState<number>(10);
   const [consistentBedtime, setConsistentBedtime] = useState<boolean>(true);
   const [studyBreaks, setStudyBreaks] = useState<boolean>(true);
-  const [activeGoal, setActiveGoal] = useState<CommittedGoal | null>(null);
 
-  // Load saved goal from localStorage on mount
+  // Clear legacy stored state if present
   useEffect(() => {
     try {
-      const saved = localStorage.getItem("mindguard_active_habit_goal");
-      if (saved) {
-        setActiveGoal(JSON.parse(saved));
-      }
+      localStorage.removeItem("mindguard_active_habit_goal");
     } catch {
       // ignore
     }
@@ -68,46 +45,6 @@ export const HabitRecoverySimulator: React.FC<HabitRecoverySimulatorProps> = ({
     setMindfulnessMinutes(0);
     setConsistentBedtime(false);
     setStudyBreaks(false);
-  };
-
-  const handleCommitGoal = () => {
-    const goal: CommittedGoal = {
-      reduceLateNightHours,
-      mindfulnessMinutes,
-      consistentBedtime,
-      studyBreaks,
-      targetPoints: totalPointsGained,
-      projectedScore,
-      committedDate: new Date().toLocaleDateString()
-    };
-
-    try {
-      localStorage.setItem("mindguard_active_habit_goal", JSON.stringify(goal));
-    } catch {
-      // ignore
-    }
-
-    setActiveGoal(goal);
-
-    toast({
-      title: "🎯 7-Day Wellness Goal Activated!",
-      description: `Target: +${totalPointsGained} wellness points recovery. Your daily targets are now locked into your profile.`,
-      variant: "success"
-    });
-  };
-
-  const handleCancelGoal = () => {
-    try {
-      localStorage.removeItem("mindguard_active_habit_goal");
-    } catch {
-      // ignore
-    }
-    setActiveGoal(null);
-    toast({
-      title: "Goal Adjusted",
-      description: "You can configure and commit to a new habit recovery plan anytime.",
-      variant: "default"
-    });
   };
 
   return (
@@ -147,7 +84,10 @@ export const HabitRecoverySimulator: React.FC<HabitRecoverySimulatorProps> = ({
         <div className="p-3 rounded-2xl bg-gradient-to-r from-background via-muted/30 to-background border border-border/70 flex items-center justify-around text-center">
           <div>
             <span className="text-[11px] font-semibold text-muted-foreground block">Current Baseline</span>
-            <div className="text-2xl font-black text-foreground mt-0.5">{currentScore}<span className="text-xs font-normal text-muted-foreground">/100</span></div>
+            <div className="text-2xl font-black text-foreground mt-0.5">
+              {typeof currentScore === "number" ? currentScore.toFixed(1) : currentScore}
+              <span className="text-xs font-normal text-muted-foreground">/100</span>
+            </div>
             <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${currentTier.bg} ${currentTier.color}`}>
               {currentTier.label}
             </span>
@@ -160,14 +100,17 @@ export const HabitRecoverySimulator: React.FC<HabitRecoverySimulatorProps> = ({
 
           <div>
             <span className="text-[11px] font-semibold text-muted-foreground block">Projected Wellness</span>
-            <div className="text-2xl font-black text-emerald-500 mt-0.5">{projectedScore}<span className="text-xs font-normal text-muted-foreground">/100</span></div>
+            <div className="text-2xl font-black text-emerald-500 mt-0.5">
+              {projectedScore.toFixed(1)}
+              <span className="text-xs font-normal text-muted-foreground">/100</span>
+            </div>
             <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${projectedTier.bg} ${projectedTier.color}`}>
               {projectedTier.label}
             </span>
           </div>
         </div>
 
-        {/* Sliders & Toggles */}
+        {/* Sliders */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
           {/* Slider 1: Late-night screen reduction */}
           <div className="p-3 rounded-xl bg-background/50 border border-border/60 space-y-2">
@@ -255,77 +198,11 @@ export const HabitRecoverySimulator: React.FC<HabitRecoverySimulatorProps> = ({
           </button>
         </div>
 
-        {/* Dynamic takeaway message */}
+        {/* Dynamic Takeaway Message */}
         <div className="p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-xs text-emerald-800 dark:text-emerald-300 font-medium">
           🌟 <strong>Clinical Projection:</strong> Adopting these habit adjustments for 7–10 days shifts circadian melatonin regulation, recovering approximately{" "}
           <strong>{totalPointsGained} wellness points</strong> into <strong>{projectedTier.label}</strong>.
         </div>
-
-        {/* Action / Commitment Section */}
-        {activeGoal ? (
-          <div className="p-3.5 rounded-2xl bg-primary/10 border border-primary/20 space-y-2.5">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Award className="h-4 w-4 text-primary" />
-                <span className="text-xs font-bold text-foreground">
-                  Active 7-Day Habit Goal Committed!
-                </span>
-              </div>
-              <span className="text-[10px] font-bold text-primary bg-primary/15 px-2 py-0.5 rounded-full">
-                Target: +{activeGoal.targetPoints} pts
-              </span>
-            </div>
-
-            <div className="flex flex-wrap gap-1.5 text-[11px] text-foreground">
-              <span className="px-2 py-0.5 rounded-md bg-background/60 border border-border/60 flex items-center gap-1">
-                <CheckCircle2 className="h-3 w-3 text-emerald-500" />
-                Screen Cutoff: -{activeGoal.reduceLateNightHours}h nightly
-              </span>
-              <span className="px-2 py-0.5 rounded-md bg-background/60 border border-border/60 flex items-center gap-1">
-                <CheckCircle2 className="h-3 w-3 text-emerald-500" />
-                Mindfulness: {activeGoal.mindfulnessMinutes}m daily
-              </span>
-              {activeGoal.consistentBedtime && (
-                <span className="px-2 py-0.5 rounded-md bg-background/60 border border-border/60 flex items-center gap-1">
-                  <CheckCircle2 className="h-3 w-3 text-emerald-500" />
-                  Bedtime: by 11:30 PM
-                </span>
-              )}
-            </div>
-
-            <div className="flex items-center justify-between pt-1">
-              {onStartBreathing && (
-                <Button
-                  onClick={onStartBreathing}
-                  size="sm"
-                  className="h-8 px-3 text-xs font-bold bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl shadow"
-                >
-                  <PlayCircle className="h-3.5 w-3.5 mr-1.5" />
-                  Launch Today's Breathing Session
-                </Button>
-              )}
-              <Button
-                onClick={handleCancelGoal}
-                variant="ghost"
-                size="sm"
-                className="text-xs h-8 text-muted-foreground hover:text-foreground"
-              >
-                Change Target
-              </Button>
-            </div>
-          </div>
-        ) : (
-          <div className="pt-1">
-            <Button
-              onClick={handleCommitGoal}
-              disabled={totalPointsGained === 0}
-              className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-xs h-10 rounded-xl shadow transition-all duration-300"
-            >
-              <Target className="h-4 w-4 mr-2" />
-              Commit to This 7-Day Habit Goal (+{totalPointsGained} pts)
-            </Button>
-          </div>
-        )}
       </CardContent>
     </Card>
   );
