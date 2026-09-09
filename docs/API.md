@@ -642,3 +642,45 @@ data: {"type": "done", "risk_level": "GREEN", "is_crisis": false}
 }
 ```
 * **Response (201 Created):** Returns appointment booking object.
+
+---
+
+## 17. CBT Micro-Modules & Emotion-Adaptive Dialogue API
+
+### 17.1 Chat Companion Message Exchange
+
+* **URL:** `/chat/conversations/{conversation_id}/messages`
+* **Method:** `POST`
+* **Authentication:** Required (Role: `STUDENT`)
+* **Request:**
+```json
+{
+  "message": "Today I am feeling very good and energetic"
+}
+```
+* **Response (200 OK):**
+```json
+{
+  "message_id": "m-8888-9999",
+  "response": "That's wonderful to hear! Celebrating these bright moments is an important part of mental wellness. What made today feel so good?",
+  "intent": "casual_conversation",
+  "primary_emotion": "joy",
+  "emotion_scores": {
+    "joy": 0.85,
+    "sadness": 0.05,
+    "anxiety": 0.05,
+    "anger": 0.02,
+    "fear": 0.01,
+    "surprise": 0.02
+  },
+  "sentiment_score": 0.80,
+  "risk_level": "GREEN",
+  "suggested_actions": [
+    "Reflect on what went well",
+    "Save a positive journal note",
+    "Share a small win",
+    "Set a positive intention"
+  ]
+}
+```
+* **Error Codes:** `401 UNAUTHORIZED`, `404 NOT_FOUND`.
