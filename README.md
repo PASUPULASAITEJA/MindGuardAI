@@ -548,6 +548,16 @@ The complete design specifications, threat models, and developer guides are loca
 
 ---
 
-## 10. License
+## 10. Project Team & Contributors
+
+| Name | Role | GitHub Profile |
+| :--- | :--- | :--- |
+| **Pasupula Sai Teja** | Full-Stack AI Architecture & Backend Core | [@PASUPULASAITEJA](https://github.com/PASUPULASAITEJA) |
+| **Avuti Anoushka** | Clinical UI/UX & Mental Health Assessment Pipelines | [@Avutianoushka](https://github.com/Avutianoushka) |
+
+---
+
+## 11. License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
+
