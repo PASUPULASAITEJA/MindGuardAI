@@ -130,9 +130,9 @@ To create a proactive and preventive mental wellness ecosystem that provides con
 | **As a Counselor**, I want to receive instant alerts for high-risk students so that I can intervene timely. | - Early Warning Alerts populate on Counselor Dashboard. <br>
 
 <br> - High Risk criteria trigger Notification Service. |
-| **As an Institution Admin**, I want to view aggregated wellness reports so I can assess the overall mental health of the campus. | - Institution Dashboard displays anonymized analytics. <br>
-
-<br> - Data accurately reflects overall wellness trends. |
+| **As an Institution Admin**, I want to view aggregated wellness reports so I can assess the overall mental health of the campus. | - Institution Dashboard displays anonymized analytics. <br><br> - Data accurately reflects overall wellness trends. |
+| **As a Student**, I want background screen time & study habit tracking so that late-night burnout is detected without manual logging. | - Passive PC agent tracks active screen and late-night usage. <br><br> - Sensitive habit indicators guide mindful pauses. |
+| **As a Student**, I want the AI companion to celebrate my positive moods and achievements so that conversations feel uplifting. | - Companion validates joy, gratitude, and small wins. <br><br> - Prevents repetitive crisis prompts on positive check-ins. |
 
 ---
 
