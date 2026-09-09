@@ -77,30 +77,36 @@ class MLService:
         """
         import re
 
+        crisis_keywords = {
+            "suicidal": 3.5, "suicide": 3.5, "want to die": 3.5, "kill myself": 3.5,
+            "end my life": 3.5, "self harm": 3.0, "cutting myself": 3.0, "overdose": 3.0,
+            "no reason to live": 3.0, "hopeless": 2.5, "hopelessness": 2.5,
+            "worthless": 2.5, "tired of life": 2.8, "giving up": 2.2, "can't take this": 2.2
+        }
+
         depressive_keywords = {
-            "very bad": 2.2, "really bad": 2.0, "so bad": 1.9, "feeling bad": 1.7, "felt bad": 1.6,
-            "bad": 1.5, "terrible": 2.2, "awful": 2.2, "horrible": 2.2, "horrific": 2.2,
-            "worst": 2.2, "sad": 1.6, "unhappy": 1.6, "depressed": 2.2, "depressing": 1.8,
-            "depression": 2.2, "crying": 1.7, "cried": 1.7, "tears": 1.5, "hopeless": 2.4,
-            "hopelessness": 2.4, "overwhelmed": 1.7, "lonely": 1.6, "alone": 1.3, "isolated": 1.6,
-            "suicidal": 3.0, "suicide": 3.0, "want to die": 3.0, "kill myself": 3.0, "end my life": 3.0,
-            "hurt": 1.5, "hurting": 1.6, "pain": 1.5, "painful": 1.6, "gloom": 1.5, "gloomy": 1.5,
-            "miserable": 2.0, "misery": 2.0, "drained": 1.5, "exhausted": 1.5, "fatigued": 1.4,
-            "burnout": 1.7, "burned out": 1.7, "struggling": 1.6, "down": 1.3, "feeling down": 1.7,
-            "low": 1.3, "feeling low": 1.7, "empty": 1.7, "numb": 1.6, "worthless": 2.4,
-            "useless": 1.8, "failure": 1.9, "failed": 1.6, "hate": 1.4, "hating myself": 2.4,
-            "ruined": 1.7, "broken": 1.7, "suffering": 1.9, "helpless": 1.9, "can't cope": 2.0,
-            "can't do this": 1.9, "can't take this": 2.1, "tough": 1.1, "rough": 1.1, "dark": 1.3,
-            "heartbroken": 1.8, "disappointed": 1.4, "give up": 2.0, "giving up": 2.0, "tired of life": 2.5
+            "very bad": 1.5, "really bad": 1.4, "so bad": 1.3, "feeling bad": 1.2, "felt bad": 1.2,
+            "bad": 1.0, "terrible": 1.6, "awful": 1.6, "horrible": 1.6, "horrific": 1.7,
+            "worst": 1.6, "sad": 1.0, "unhappy": 1.0, "depressed": 1.6, "depressing": 1.3,
+            "depression": 1.6, "crying": 1.3, "cried": 1.3, "tears": 1.1, "overwhelmed": 1.3,
+            "lonely": 1.2, "alone": 1.0, "isolated": 1.2, "hurt": 1.1, "hurting": 1.2,
+            "pain": 1.1, "painful": 1.2, "gloom": 1.1, "gloomy": 1.1, "miserable": 1.5,
+            "misery": 1.5, "drained": 1.2, "exhausted": 1.2, "fatigued": 1.1, "burnout": 1.3,
+            "burned out": 1.3, "struggling": 1.2, "down": 0.9, "feeling down": 1.2, "low": 0.9,
+            "feeling low": 1.2, "empty": 1.3, "numb": 1.3, "useless": 1.4, "failure": 1.4,
+            "failed": 1.2, "hate": 1.1, "ruined": 1.3, "broken": 1.3, "suffering": 1.4,
+            "helpless": 1.4, "can't cope": 1.5, "tough": 0.8, "rough": 0.8, "dark": 1.0,
+            "heartbroken": 1.4, "disappointed": 1.0
         }
 
         anxiety_keywords = {
-            "panic": 1.9, "panicking": 2.0, "panic attack": 2.4, "anxious": 1.8, "anxiety": 1.9,
-            "scared": 1.6, "worried": 1.5, "worry": 1.4, "worrying": 1.5, "fear": 1.6, "fearful": 1.6,
-            "terrified": 2.0, "stress": 1.4, "stressed": 1.6, "stressful": 1.6, "nervous": 1.5,
-            "tension": 1.4, "tense": 1.4, "midterm": 1.1, "exam": 1.1, "deadline": 1.2,
-            "pressure": 1.5, "overload": 1.6, "jittery": 1.4, "freaking out": 1.9, "restless": 1.4,
-            "uneasy": 1.4, "dread": 1.8, "dreading": 1.8, "overthinking": 1.6, "heart racing": 1.7
+            "panic": 1.6, "panicking": 1.7, "panic attack": 2.2, "anxious": 1.4, "anxiety": 1.5,
+            "scared": 1.3, "worried": 1.2, "worry": 1.1, "worrying": 1.2, "fear": 1.3,
+            "fearful": 1.3, "terrified": 1.7, "stress": 1.1, "stressed": 1.3, "stressful": 1.3,
+            "nervous": 1.2, "tension": 1.1, "tense": 1.1, "midterm": 0.9, "exam": 0.9,
+            "deadline": 1.0, "pressure": 1.2, "overload": 1.3, "jittery": 1.2, "freaking out": 1.6,
+            "restless": 1.2, "uneasy": 1.2, "dread": 1.5, "dreading": 1.5, "overthinking": 1.3,
+            "heart racing": 1.4
         }
 
         anger_keywords = {
@@ -129,6 +135,12 @@ class MLService:
         anx_score = 0.0
         joy_score = 0.0
         anger_score = 0.0
+
+        # Crisis detection
+        has_crisis = any(phrase in t for phrase in crisis_keywords)
+        for phrase, weight in crisis_keywords.items():
+            if phrase in t:
+                sad_score += weight
 
         # 1. Multi-word exact phrase matching
         for phrase, weight in depressive_keywords.items():
@@ -174,13 +186,15 @@ class MLService:
             sad_score = 0.10
             anx_score = 0.10
             anger_score = 0.05
+            neutral_baseline = 0.5
         else:
             sad_score = max(0.02, sad_score)
             anx_score = max(0.02, anx_score)
             joy_score = max(0.02, joy_score)
             anger_score = max(0.01, anger_score)
+            neutral_baseline = 1.0  # Prevents a single word from inflating to 99% probability
 
-        tot = sad_score + anx_score + joy_score + anger_score
+        tot = sad_score + anx_score + joy_score + anger_score + neutral_baseline
         sad_prob = sad_score / tot
         anx_prob = anx_score / tot
         joy_prob = joy_score / tot
@@ -189,19 +203,24 @@ class MLService:
         sentiment = float(joy_prob - (sad_prob * 0.7 + anx_prob * 0.3))
         sentiment = max(-1.0, min(1.0, sentiment))
 
-        # Continuous mental wellness score (0 - 100)
+        # Continuous mental wellness score (0.0 to 100.0)
+        # Neutral sentiment (0.0) maps to 60.0 (healthy stable baseline)
+        # Positive sentiment (+1.0) maps to ~95.0
+        # Mild negative sentiment (-0.2 to -0.4) maps to ~45.0 - 55.0 (Moderate / Managed stress)
+        # Severe crisis sentiment maps to < 35.0
         if sentiment <= 0:
-            # Negative sentiment maps to 10.0 - 45.0
-            wellness_score = 45.0 + (sentiment * 38.0)
+            wellness_score = 60.0 + (sentiment * 40.0)
         else:
-            # Positive sentiment maps to 55.0 - 98.0
-            wellness_score = 55.0 + (sentiment * 43.0)
+            wellness_score = 60.0 + (sentiment * 35.0)
+
+        if has_crisis:
+            wellness_score = min(wellness_score, 25.0)
 
         wellness_score = max(10.0, min(100.0, wellness_score))
 
-        if wellness_score < 40.0:
+        if has_crisis or wellness_score < 35.0:
             risk = "HIGH"
-        elif wellness_score < 70.0:
+        elif wellness_score < 65.0:
             risk = "MEDIUM"
         else:
             risk = "LOW"
@@ -227,13 +246,16 @@ class MLService:
         result = self._analyze_clinical_lexicon(text)
         score = result["mental_wellness_score"]
         
-        # If user explicitly specified a non-default self score, factor it in
-        if self_reported_score is not None and self_reported_score != 5:
-            user_score_100 = self_reported_score * 10.0
-            score = round((score * 0.65) + (user_score_100 * 0.35), 2)
-            if score < 40.0:
+        # If user provided a self score, factor it in proportionally
+        if self_reported_score is not None:
+            user_score_100 = float(self_reported_score * 10.0)
+            score = round((score * 0.60) + (user_score_100 * 0.40), 2)
+            has_crisis = any(k in text.lower() for k in [
+                "suicide", "suicidal", "want to die", "kill myself", "end my life", "self harm"
+            ])
+            if has_crisis or score < 35.0:
                 risk = "HIGH"
-            elif score < 70.0:
+            elif score < 65.0:
                 risk = "MEDIUM"
             else:
                 risk = "LOW"
@@ -308,13 +330,16 @@ class MLService:
                 mental_wellness_score = lex_wellness
                 risk_level = lex_risk
 
-            # Factor in explicit user score if provided (and not default 5)
-            if self_reported_score is not None and self_reported_score != 5:
-                user_score_100 = self_reported_score * 10.0
-                mental_wellness_score = round((mental_wellness_score * 0.65) + (user_score_100 * 0.35), 2)
-                if mental_wellness_score < 40.0:
+            # Factor in explicit user score if provided
+            if self_reported_score is not None:
+                user_score_100 = float(self_reported_score * 10.0)
+                mental_wellness_score = round((mental_wellness_score * 0.60) + (user_score_100 * 0.40), 2)
+                has_crisis = any(k in text.lower() for k in [
+                    "suicide", "suicidal", "want to die", "kill myself", "end my life", "self harm"
+                ])
+                if has_crisis or mental_wellness_score < 35.0:
                     risk_level = "HIGH"
-                elif mental_wellness_score < 70.0:
+                elif mental_wellness_score < 65.0:
                     risk_level = "MEDIUM"
                 else:
                     risk_level = "LOW"
