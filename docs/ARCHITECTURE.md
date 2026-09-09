@@ -264,3 +264,31 @@ mindguard-monorepo/
 ├── docker-compose.yml      # Local orchestration
 └── README.md
 ```
+
+---
+
+## 10. Passive Behavioral Telemetry & Multimodal Triage Architecture
+
+MindGuardAI incorporates non-invasive, privacy-preserving desktop behavioral phenotyping to complement active journal entries:
+
+```mermaid
+graph TD
+    Agent[Desktop Phenotyping Agent - PC/Laptop] -->|Sampling 5s| OS[Windows Interactive Session Hook]
+    OS --> Intent[Active Window & Semantic Categorization]
+    Intent --> Tiers{Context Taxonomy}
+    Tiers -->|Academic| Acad[Code, Lecture, Textbook]
+    Tiers -->|Circadian Disruption| Night[12 AM - 5 AM Strain]
+    Tiers -->|Avoidance Coping| Adult[Sensitive Content Warning]
+    Tiers -->|Crisis Flag| Crisis[Emergency Suicide Trigger]
+    
+    Agent -->|Sync 30s JWT| Gateway[FastAPI Behavioral API]
+    Gateway --> DB[(SQLite / PostgreSQL)]
+    DB --> StudentUI[Student Dashboard Gauge & Tiers]
+    DB --> CounselorUI[Counselor Triage Queue]
+```
+
+* **Privacy Guarantee**: Zero keystrokes, camera feeds, or full-screen pixel captures are recorded.
+* **Continuous Clinical Scale**: Scores are mapped to an intuitive 0–100 Mental Wellness Index:
+  * **0–34**: High Distress (Early Warning Alert queue initiated)
+  * **35–64**: Moderate Strain (Guided self-care & CBT micro-tools)
+  * **65–100**: Optimal Wellness (Healthy baseline habits)
