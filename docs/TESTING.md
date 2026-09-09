@@ -219,7 +219,9 @@ python scripts/test_all_features.py
 
 Validates the conversational AI companion and clinical safety triggers:
 * Multi-turn conversational persistence across student sessions.
-* Fine-grained emotion probability vector extraction.
+* Fine-grained emotion probability vector extraction (`joy`, `sadness`, `anxiety`, `anger`, `fear`).
+* Emotion-adaptive response routing: Ensures positive emotions (`joy`, gratitude) receive encouraging reinforcement, while distress intents trigger compassionate active listening and relevant CBT tools.
+* Smart anti-repetition validation: Confirms that consecutive replies never repeat the identical canned text.
 * Real-time Server-Sent Events (SSE) streaming verification.
 * Emergency safety events: Verifies that explicit suicidal ideation triggers immediate `RED` safety alerts in the counselor triage queue and presents 24/7 crisis helplines.
 

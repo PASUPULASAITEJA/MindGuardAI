@@ -118,6 +118,11 @@ erDiagram
         string date
         int total_screen_time_minutes
         int late_night_usage_minutes
+        int academic_usage_minutes
+        int social_usage_minutes
+        int entertainment_usage_minutes
+        int adult_usage_minutes
+        int continuous_screen_minutes
         boolean is_crisis_detected
         timestamp synced_at
     }
@@ -341,3 +346,9 @@ Database schema evolution is managed via **Alembic** (integrated with SQLAlchemy
 | id | assessment_id | student_id | counselor_id | status | created_at |
 | --- | --- | --- | --- | --- | --- |
 | `al-404` | `a-303` | `u-1111` | `NULL` | `PENDING` | `2026-06-26T14:21:06Z` |
+
+**BEHAVIORAL_LOGS Table**
+
+| id | student_id | date | total_screen_time_minutes | late_night_usage_minutes | academic_usage_minutes | adult_usage_minutes | is_crisis_detected | synced_at |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| `b-505` | `u-1111` | `2026-09-09` | 285 | 15 | 120 | 0 | FALSE | `2026-09-09T18:45:00Z` |
