@@ -1,10 +1,21 @@
 import React, { useState } from "react";
+import { NavLink } from "react-router-dom";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Sliders, Moon, Wind, Clock, Sparkles, TrendingUp, RotateCcw } from "lucide-react";
+import { Sliders, Moon, Wind, Clock, Sparkles, TrendingUp, RotateCcw, Target, Trophy, CheckCircle, Check } from "lucide-react";
 
 interface HabitRecoverySimulatorProps {
   currentScore: number;
+}
+
+interface ActiveHabitGoal {
+  targetPoints: number;
+  reduceHours: number;
+  mindfulnessMins: number;
+  bedtime: boolean;
+  studyBreaks: boolean;
+  day: number;
+  startDate: string;
 }
 
 export const HabitRecoverySimulator: React.FC<HabitRecoverySimulatorProps> = ({ currentScore }) => {
@@ -12,6 +23,18 @@ export const HabitRecoverySimulator: React.FC<HabitRecoverySimulatorProps> = ({ 
   const [mindfulnessMinutes, setMindfulnessMinutes] = useState<number>(10);
   const [consistentBedtime, setConsistentBedtime] = useState<boolean>(true);
   const [studyBreaks, setStudyBreaks] = useState<boolean>(true);
+
+  // Active committed goal state with localStorage persistence
+  const [activeGoal, setActiveGoal] = useState<ActiveHabitGoal | null>(() => {
+    try {
+      const saved = localStorage.getItem("mindguard_active_habit_goal");
+      return saved ? JSON.parse(saved) : null;
+    } catch {
+      return null;
+    }
+  });
+
+  const [isJustCommitted, setIsJustCommitted] = useState<boolean>(false);
 
   // Compute simulated projected wellness score
   const screenTimeRecovery = Math.round(reduceLateNightHours * 9);
@@ -36,6 +59,32 @@ export const HabitRecoverySimulator: React.FC<HabitRecoverySimulatorProps> = ({ 
     setMindfulnessMinutes(0);
     setConsistentBedtime(false);
     setStudyBreaks(false);
+  };
+
+  const handleCommitGoal = () => {
+    if (totalPointsGained === 0) return;
+    const newGoal: ActiveHabitGoal = {
+      targetPoints: totalPointsGained,
+      reduceHours: reduceLateNightHours,
+      mindfulnessMins: mindfulnessMinutes,
+      bedtime: consistentBedtime,
+      studyBreaks: studyBreaks,
+      day: 1,
+      startDate: new Date().toISOString(),
+    };
+    setActiveGoal(newGoal);
+    setIsJustCommitted(true);
+    setTimeout(() => setIsJustCommitted(false), 3000);
+    try {
+      localStorage.setItem("mindguard_active_habit_goal", JSON.stringify(newGoal));
+    } catch {}
+  };
+
+  const handleClearGoal = () => {
+    setActiveGoal(null);
+    try {
+      localStorage.removeItem("mindguard_active_habit_goal");
+    } catch {}
   };
 
   return (
@@ -188,6 +237,61 @@ export const HabitRecoverySimulator: React.FC<HabitRecoverySimulatorProps> = ({ 
           🌟 <strong>Clinical Projection:</strong> Adopting these habit adjustments for 7–10 days shifts circadian melatonin regulation, recovering approximately{" "}
           <strong>{totalPointsGained} wellness points</strong> into <strong>{projectedTier.label}</strong>.
         </div>
+
+        {/* Action Button: Commit to Habit Goal */}
+        {!activeGoal ? (
+          <Button
+            onClick={handleCommitGoal}
+            disabled={totalPointsGained === 0}
+            className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs h-9 rounded-xl shadow-md transition-all flex items-center justify-center gap-2"
+          >
+            <Target className="h-4 w-4" />
+            Set as My Active 7-Day Habit Challenge (+{totalPointsGained} pts)
+          </Button>
+        ) : (
+          /* Active Habit Challenge Display Banner */
+          <div className="p-3.5 rounded-2xl bg-emerald-500/15 border border-emerald-500/30 space-y-2.5 animate-in fade-in duration-300">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Trophy className="h-4 w-4 text-emerald-500" />
+                <span className="text-xs font-black text-foreground">
+                  Active 7-Day Challenge in Progress
+                </span>
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500 text-white">
+                  Day 1 of 7
+                </span>
+              </div>
+              <button
+                onClick={handleClearGoal}
+                className="text-[11px] text-muted-foreground hover:text-foreground font-semibold"
+              >
+                Change Plan
+              </button>
+            </div>
+
+            <p className="text-[11px] text-muted-foreground leading-relaxed">
+              Target: Recovering <strong>+{activeGoal.targetPoints} points</strong> by reducing screen by{" "}
+              <strong>{activeGoal.reduceHours}h</strong> and logging <strong>{activeGoal.mindfulnessMins}m</strong> daily mindfulness.
+            </p>
+
+            {isJustCommitted && (
+              <div className="flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400 font-bold">
+                <CheckCircle className="h-4 w-4" />
+                Challenge locked in! Your daily check-ins will track this recovery.
+              </div>
+            )}
+
+            <div className="pt-1 flex gap-2">
+              <NavLink
+                to="/student/chat"
+                className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-xs h-8 rounded-lg flex items-center justify-center gap-1.5 shadow transition-all"
+              >
+                <Wind className="h-3.5 w-3.5" />
+                Launch 10-Min Breathing Pacer
+              </NavLink>
+            </div>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
