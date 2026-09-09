@@ -1295,7 +1295,6 @@ export const StudentDashboard: React.FC = () => {
             />
             <HabitRecoverySimulator
               currentScore={wellnessScore || 50}
-              onStartBreathing={() => setActivePathway({ type: "breath", title: "4-7-8 Resonance Breathing", url: "/companion" })}
             />
           </div>
 
