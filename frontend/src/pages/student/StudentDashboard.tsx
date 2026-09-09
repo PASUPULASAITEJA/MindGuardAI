@@ -29,6 +29,7 @@ import {
 import api, { chatAPI, appointmentsAPI, AppointmentItem } from "@/services/api";
 import { useAuth } from "@/contexts/AuthContext";
 import { useScreenTimeTracker } from "@/hooks/useScreenTimeTracker";
+import { classifyMentalWellness } from "@/utils/wellness";
 
 // Student-contextualized questions for PHQ-9 Depression survey
 const PHQ9_QUESTIONS = [
@@ -378,7 +379,8 @@ export const StudentDashboard: React.FC = () => {
   // Recharts Pie Chart configuration for Wellness Score Dial
   const hasAssessment = !!assessment;
   const wellnessScore = hasAssessment ? assessment.mental_wellness_score : 0;
-  const riskColor = hasAssessment ? getRiskColor(assessment.risk_level) : "#64748b"; // slate-500
+  const classification = classifyMentalWellness(wellnessScore);
+  const riskColor = hasAssessment ? classification.color : "#64748b"; // slate-500
   
   const dialData = [
     { name: "score", value: hasAssessment ? wellnessScore : 100 },
@@ -421,20 +423,13 @@ export const StudentDashboard: React.FC = () => {
                 {hasAssessment && <span className="text-xs font-bold text-muted-foreground ml-0.5">/100</span>}
               </div>
               <span 
-                className="text-[10px] font-bold tracking-widest uppercase mt-0.5 px-2 py-0.5 rounded-full"
-                style={{ backgroundColor: `${riskColor}20`, color: riskColor }}
+                className={`text-[10px] font-bold tracking-widest uppercase mt-0.5 px-2 py-0.5 rounded-full border ${hasAssessment ? classification.badgeClass : "bg-muted text-muted-foreground"}`}
               >
-                {hasAssessment 
-                  ? assessment?.risk_level === "LOW"
-                    ? "Stable Wellness"
-                    : assessment?.risk_level === "MEDIUM"
-                    ? "Moderate Strain"
-                    : "High Distress"
-                  : "NO DATA"}
+                {hasAssessment ? classification.label : "NO DATA"}
               </span>
               {hasAssessment && (
                 <span className="text-[10px] text-muted-foreground font-medium mt-0.5">
-                  ({assessment?.risk_level} Risk Tier)
+                  ({assessment?.risk_level || classification.tier} Risk Tier)
                 </span>
               )}
             </div>
@@ -445,28 +440,27 @@ export const StudentDashboard: React.FC = () => {
           {!hasAssessment && (
             <p className="text-xs text-muted-foreground font-medium">No check-ins logged yet. Daily logs will map your stress indices.</p>
           )}
-          {hasAssessment && assessment?.risk_level === "HIGH" && (
-            <div className="flex items-center justify-center gap-1.5 text-xs font-semibold text-red-500">
+          {hasAssessment && classification.tier === "HIGH" && (
+            <div className="flex items-center justify-center gap-1.5 text-xs font-semibold text-rose-500">
               <AlertCircle className="h-4 w-4" />
               Counselor Alert Queue Triggered
             </div>
           )}
-          {hasAssessment && assessment?.risk_level === "MEDIUM" && (
-            <p className="text-xs text-amber-500 font-medium">Elevated stress indices. Guided support advised.</p>
-          )}
-          {hasAssessment && assessment?.risk_level === "LOW" && (
-            <p className="text-xs text-emerald-500 font-medium">Wellness parameters are stable. Keep it up!</p>
+          {hasAssessment && classification.tier !== "HIGH" && (
+            <p className={`text-xs font-medium ${classification.tier === "MEDIUM" ? "text-amber-500" : "text-emerald-500"}`}>
+              {classification.recommendation}
+            </p>
           )}
 
           {/* 3-Tier Clinical Reference Legend */}
           <div className="w-full grid grid-cols-3 gap-1 text-center text-[10px] text-muted-foreground pt-3 mt-3 border-t border-border/50">
-            <div className={`py-1 px-0.5 rounded transition-colors ${hasAssessment && assessment?.risk_level === 'HIGH' ? 'bg-red-500/15 text-red-500 font-bold border border-red-500/20' : 'opacity-70'}`}>
+            <div className={`py-1 px-0.5 rounded transition-colors ${hasAssessment && classification.tier === 'HIGH' ? 'bg-rose-500/15 text-rose-500 font-bold border border-rose-500/20' : 'opacity-70'}`}>
               0-34 Critical
             </div>
-            <div className={`py-1 px-0.5 rounded transition-colors ${hasAssessment && assessment?.risk_level === 'MEDIUM' ? 'bg-amber-500/15 text-amber-500 font-bold border border-amber-500/20' : 'opacity-70'}`}>
+            <div className={`py-1 px-0.5 rounded transition-colors ${hasAssessment && classification.tier === 'MEDIUM' ? 'bg-amber-500/15 text-amber-500 font-bold border border-amber-500/20' : 'opacity-70'}`}>
               35-64 Moderate
             </div>
-            <div className={`py-1 px-0.5 rounded transition-colors ${hasAssessment && assessment?.risk_level === 'LOW' ? 'bg-emerald-500/15 text-emerald-500 font-bold border border-emerald-500/20' : 'opacity-70'}`}>
+            <div className={`py-1 px-0.5 rounded transition-colors ${hasAssessment && classification.tier === 'LOW' ? 'bg-emerald-500/15 text-emerald-500 font-bold border border-emerald-500/20' : 'opacity-70'}`}>
               65-100 Optimal
             </div>
           </div>
