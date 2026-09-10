@@ -47,6 +47,10 @@ export const ClinicalDossierModal: React.FC<ClinicalDossierModalProps> = ({
     day: "numeric",
   });
 
+  const cleanScore = typeof wellnessScore === "number" && !isNaN(wellnessScore) ? wellnessScore : 50;
+  const docRefNumber = Math.abs(Math.round(cleanScore * 149 + 1024));
+  const cleanSentiment = typeof sentimentScore === "number" && !isNaN(sentimentScore) ? sentimentScore : 0.15;
+
   const getRiskBadge = () => {
     if (riskLevel === "HIGH") {
       return { label: "CRITICAL DISTRESS (HIGH RISK)", bg: "bg-rose-500/20 text-rose-600 border-rose-500/40" };
@@ -107,7 +111,7 @@ export const ClinicalDossierModal: React.FC<ClinicalDossierModalProps> = ({
               <p className="text-xs text-muted-foreground mt-0.5">Department of Student Wellness & Psychological Services</p>
             </div>
             <div className="text-left md:text-right text-xs text-muted-foreground space-y-0.5">
-              <div><strong>Document Ref:</strong> MG-CLN-{Math.abs(Math.round(wellnessScore * 149 + 1024))}</div>
+              <div><strong>Document Ref:</strong> MG-CLN-{docRefNumber}</div>
               <div><strong>Issue Date:</strong> {currentDate}</div>
               <div><strong>Confidentiality:</strong> Tier-3 Protected Health Record</div>
             </div>
@@ -123,7 +127,7 @@ export const ClinicalDossierModal: React.FC<ClinicalDossierModalProps> = ({
             <div>
               <span className="text-muted-foreground block text-[10px] font-bold uppercase tracking-wider">Evaluation Index</span>
               <div className="text-xl font-black text-foreground">
-                {typeof wellnessScore === "number" ? wellnessScore.toFixed(1) : wellnessScore}{" "}
+                {cleanScore.toFixed(1)}{" "}
                 <span className="text-xs font-normal text-muted-foreground">/ 100.0</span>
               </div>
               <span className="text-muted-foreground block text-[11px]">Continuous Wellness Index</span>
@@ -196,7 +200,7 @@ export const ClinicalDossierModal: React.FC<ClinicalDossierModalProps> = ({
             <div className="p-3 rounded-xl border border-border/60 bg-muted/20 text-xs space-y-1">
               <div className="flex justify-between">
                 <span className="font-semibold text-foreground">DistilBERT Model Sentiment Score:</span>
-                <span className="font-bold text-primary">{typeof sentimentScore === "number" ? sentimentScore.toFixed(3) : sentimentScore}</span>
+                <span className="font-bold text-primary">{cleanSentiment.toFixed(3)}</span>
               </div>
               <p className="text-[11px] text-muted-foreground">
                 Guardian Rule check: Clinical sentiment lexicon fused with neural emotion probabilities. No active suicidal ideation or self-harm keywords detected in current logging window.

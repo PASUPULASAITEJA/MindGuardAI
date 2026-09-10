@@ -41,7 +41,7 @@ export const ExplainableAIFactors: React.FC<ExplainableAIFactorsProps> = ({
                 </span>
               </CardTitle>
               <CardDescription className="text-xs text-muted-foreground">
-                Transparent explanation of factors contributing to your {hasAssessment ? `${wellnessScore}/100` : "--"} wellness index
+                Transparent explanation of factors contributing to your {hasAssessment ? `${(typeof wellnessScore === "number" && !isNaN(wellnessScore) ? wellnessScore : 50).toFixed(1)}/100` : "--"} wellness index
               </CardDescription>
             </div>
           </div>
@@ -97,7 +97,7 @@ export const ExplainableAIFactors: React.FC<ExplainableAIFactorsProps> = ({
             />
           </div>
           <p className="text-[11px] text-muted-foreground">
-            Semantic transformer evaluated recent journal affect at {sentimentScore.toFixed(2)}.{" "}
+            Semantic transformer evaluated recent journal affect at {(typeof sentimentScore === "number" && !isNaN(sentimentScore) ? sentimentScore : 0.15).toFixed(2)}.{" "}
             {sentimentScore < -0.2
               ? "Elevated despair cues flagged in natural language."
               : "Affect is balanced with mild academic fatigue."}

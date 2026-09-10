@@ -10,7 +10,8 @@ class AuthService:
         """
         Authenticate a user by checking email and password, returning JWT access & refresh tokens.
         """
-        user = await user_service.get_user_by_email(db, login_in.email)
+        clean_email = login_in.email.lower().strip() if login_in.email else ""
+        user = await user_service.get_user_by_email(db, clean_email)
         if not user or not verify_password(login_in.password, user.password_hash):
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
