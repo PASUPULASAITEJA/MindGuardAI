@@ -4,51 +4,50 @@
 
 @layer base {
   :root {
-    /* MindGuardAI Real Application - Light Theme */
-    /* Mind (Clinical Sapphire/Slate) & Guard (Healing Sentinel Emerald) */
-    --background: 210 20% 98%;          /* #F8FAFC - crisp high-trust clinical canvas */
-    --foreground: 222 47% 11%;          /* #0F172A - deep readable slate */
-    --card: 0 0% 100%;                  /* #FFFFFF - pure solid white clinical surface */
-    --card-foreground: 222 47% 11%;
+    /* Warm Interactive Companion (Finch / Notion style) - Light Palette */
+    --background: 40 20% 97.5%;          /* #FAF9F5 - warm soothing organic canvas */
+    --foreground: 220 30% 12%;           /* #141A24 - deep warm charcoal */
+    --card: 0 0% 100%;                   /* #FFFFFF - clean elevated warm surface */
+    --card-foreground: 220 30% 12%;
     --popover: 0 0% 100%;
-    --popover-foreground: 222 47% 11%;
-    --primary: 224 76% 48%;             /* #1D4ED8 / #2563EB - MindGuard Sapphire Blue */
+    --popover-foreground: 220 30% 12%;
+    --primary: 224 76% 50%;              /* #2563EB - MindGuard Royal Indigo */
     --primary-foreground: 0 0% 100%;
-    --secondary: 214 32% 95%;           /* #EEF2F6 */
-    --secondary-foreground: 222 47% 14%;
-    --muted: 214 32% 95%;
-    --muted-foreground: 217 19% 45%;    /* #5B6B82 - crisp secondary typography */
-    --accent: 214 32% 92%;
-    --accent-foreground: 222 47% 11%;
+    --secondary: 40 18% 92%;             /* #ECEAE4 - warm Notion-like secondary */
+    --secondary-foreground: 220 30% 15%;
+    --muted: 40 18% 92%;
+    --muted-foreground: 218 14% 46%;     /* #667080 - comfortable secondary text */
+    --accent: 40 25% 90%;
+    --accent-foreground: 220 30% 12%;
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
-    --border: 214 20% 88%;              /* #DDE3EC - clean defined card border */
-    --input: 214 20% 88%;
-    --ring: 224 76% 48%;
-    --radius: 1rem;                     /* Polished modern corner curvature */
+    --border: 38 16% 87%;                /* #E2DED6 - warm organic border */
+    --input: 38 16% 87%;
+    --ring: 224 76% 50%;
+    --radius: 1.25rem;                   /* Friendly organic rounded edges */
   }
 
   .dark {
-    /* MindGuardAI Real Application - Dark Theme (Obsidian Slate & Sentinel Accents) */
-    --background: 222 47% 6.5%;         /* #0B0F19 - deep authoritative dark canvas */
-    --foreground: 210 40% 98%;          /* #F8FAFC - sharp readable typography */
-    --card: 222 42% 10%;                /* #101726 - elevated solid card surface */
-    --card-foreground: 210 40% 98%;
-    --popover: 222 42% 10%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 217 91% 60%;             /* #3B82F6 - clear luminous sapphire */
+    /* Warm Interactive Companion (Finch / Notion style) - Dark Palette */
+    --background: 220 32% 8%;            /* #0E131B - deep midnight slate */
+    --foreground: 40 20% 96%;            /* #F7F6F3 - warm cream text */
+    --card: 220 28% 12.5%;               /* #161D28 - warm elevated card surface */
+    --card-foreground: 40 20% 96%;
+    --popover: 220 28% 12.5%;
+    --popover-foreground: 40 20% 96%;
+    --primary: 217 91% 62%;              /* #4D8EFF - luminous warm sapphire */
     --primary-foreground: 0 0% 100%;
-    --secondary: 222 28% 15%;           /* #1B2436 */
-    --secondary-foreground: 210 40% 98%;
-    --muted: 222 28% 15%;
-    --muted-foreground: 217 19% 65%;    /* #92A3BB */
-    --accent: 222 28% 18%;              /* #212C42 */
-    --accent-foreground: 210 40% 98%;
+    --secondary: 220 22% 18%;            /* #232C3A */
+    --secondary-foreground: 40 20% 96%;
+    --muted: 220 22% 18%;
+    --muted-foreground: 218 14% 66%;     /* #9AA4B2 */
+    --accent: 220 22% 21%;               /* #2A3546 */
+    --accent-foreground: 40 20% 96%;
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
-    --border: 222 24% 17%;              /* #1E283C - crisp defined dark card borders */
-    --input: 222 24% 17%;
-    --ring: 217 91% 60%;
+    --border: 220 18% 21%;               /* #2A3444 - refined warm border */
+    --input: 220 18% 21%;
+    --ring: 217 91% 62%;
   }
 }
 
@@ -70,20 +69,22 @@
     @apply bg-background text-foreground transition-colors duration-200;
     font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     background-image: 
-      radial-gradient(circle at 10% 0%, rgba(37, 99, 235, 0.04), transparent 40%),
-      radial-gradient(circle at 90% 10%, rgba(16, 185, 129, 0.03), transparent 35%);
+      radial-gradient(circle at 12% 0%, rgba(37, 99, 235, 0.04), transparent 45%),
+      radial-gradient(circle at 88% 12%, rgba(245, 158, 11, 0.035), transparent 40%),
+      radial-gradient(circle at 50% 90%, rgba(16, 185, 129, 0.035), transparent 45%);
     background-attachment: fixed;
   }
   
   html.dark body,
   .dark body {
     background-image: 
-      radial-gradient(circle at 10% 0%, rgba(59, 130, 246, 0.08), transparent 45%),
-      radial-gradient(circle at 90% 10%, rgba(16, 185, 129, 0.05), transparent 40%);
+      radial-gradient(circle at 12% 0%, rgba(77, 142, 255, 0.07), transparent 45%),
+      radial-gradient(circle at 88% 12%, rgba(245, 158, 11, 0.05), transparent 40%),
+      radial-gradient(circle at 50% 90%, rgba(16, 185, 129, 0.05), transparent 45%);
     background-attachment: fixed;
   }
 
-  /* Custom Clean Scrollbar */
+  /* Custom Smooth Scrollbar */
   ::-webkit-scrollbar {
     width: 6px;
     height: 6px;
@@ -92,22 +93,22 @@
     @apply bg-transparent;
   }
   ::-webkit-scrollbar-thumb {
-    @apply bg-muted-foreground/20 rounded-full hover:bg-muted-foreground/35 transition-colors;
+    @apply bg-muted-foreground/25 rounded-full hover:bg-muted-foreground/40 transition-colors;
   }
 }
 
 @layer utilities {
-  /* Real Application Solid / Frosted Surfaces */
-  .glass-panel {
-    @apply bg-card/95 dark:bg-card/90 backdrop-blur-xl border border-border shadow-xs transition-all duration-200;
-  }
-  
-  .glass-card {
-    @apply bg-card border border-border shadow-xs transition-all duration-200 hover:border-primary/40 hover:shadow-md;
+  /* Finch / Notion Companion Surfaces */
+  .finch-card {
+    @apply bg-card border border-border/85 rounded-3xl shadow-xs transition-all duration-300 hover:shadow-md hover:border-primary/40 hover:-translate-y-0.5;
   }
 
-  /* MindGuard Sentinel Indicators */
-  .sentinel-badge-active {
-    @apply inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 shadow-xs;
+  .notion-pill {
+    @apply inline-flex items-center gap-1.5 px-3 py-1 rounded-2xl text-xs font-semibold border transition-all;
+  }
+
+  /* Soft Interactive Halo */
+  .companion-aura {
+    box-shadow: 0 0 30px -5px rgba(37, 99, 235, 0.15);
   }
 }
