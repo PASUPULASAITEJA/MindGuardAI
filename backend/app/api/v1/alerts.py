@@ -22,7 +22,7 @@ async def get_active_alerts(
     status_filter: Optional[AlertStatus] = Query(None, alias="status", description="Filter by alert status: PENDING, REVIEWED, RESOLVED"),
     limit: int = Query(50, ge=1, le=100, description="Max results limit"),
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_role([UserRole.COUNSELOR]))
+    current_user: User = Depends(require_role([UserRole.COUNSELOR, UserRole.ADMIN]))
 ):
     """
     Retrieves the queue of outstanding high-risk assessments for clinic staff.
