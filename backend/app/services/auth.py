@@ -33,7 +33,12 @@ class AuthService:
             )
 
         # Generate access and refresh tokens
-        access_token = create_access_token(subject=user.id, role=user.role.value)
+        access_token = create_access_token(
+            subject=user.id,
+            role=user.role.value,
+            email=user.email,
+            full_name=user.full_name
+        )
         refresh_token = create_refresh_token(subject=user.id, role=user.role.value)
 
         return TokenResponse(
@@ -74,7 +79,12 @@ class AuthService:
             )
 
         # Generate new pair of tokens
-        access_token = create_access_token(subject=user.id, role=user.role.value)
+        access_token = create_access_token(
+            subject=user.id,
+            role=user.role.value,
+            email=user.email,
+            full_name=user.full_name
+        )
         new_refresh_token = create_refresh_token(subject=user.id, role=user.role.value)
 
         return TokenResponse(
