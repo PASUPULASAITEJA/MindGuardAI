@@ -933,7 +933,7 @@ export const LandingPage: React.FC = () => {
 
           <div className="text-center md:text-right text-[11px]">
             <p>© 2026 MindGuardAI Platform. All rights reserved.</p>
-            <p className="text-muted-foreground/80 mt-0.5">Designed for NMIMS University Campus Health & Wellness.</p>
+            <p className="text-muted-foreground/80 mt-0.5">Designed by <span className="font-semibold text-foreground">Pasupula Sai Teja</span> for NMIMS University Campus Health & Wellness.</p>
           </div>
         </div>
       </footer>
