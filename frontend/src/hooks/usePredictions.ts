@@ -6,6 +6,7 @@ export interface LatestAssessment {
   mental_wellness_score: number;
   risk_level: "LOW" | "MEDIUM" | "HIGH";
   emotions_detected: Record<string, number>;
+  sentiment_score?: number;
   evaluated_at: string;
 }
 
@@ -19,6 +20,6 @@ export const useLatestAssessment = (studentId?: string) => {
       const response = await api.get(url);
       return response.data;
     },
-    staleTime: 2 * 60 * 1000,
+    staleTime: 0,
   });
 };
