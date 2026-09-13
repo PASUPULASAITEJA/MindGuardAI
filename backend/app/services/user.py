@@ -62,6 +62,7 @@ class UserService:
             "email": normalized_email,
             "role": whitelisted_role,  # Enforce officially assigned roster role
             "password_hash": hashed_password,
+            "full_name": (user_in.full_name or normalized_email.split("@")[0]).strip(),
             "is_active": True
         }
         
