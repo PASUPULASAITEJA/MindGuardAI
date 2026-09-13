@@ -123,7 +123,9 @@ class MLService:
             "productive": 1.5, "well": 1.2, "positive": 1.6, "enjoy": 1.5, "enjoyed": 1.5,
             "enjoying": 1.5, "wonderful": 1.9, "awesome": 1.9, "fantastic": 1.9, "blessed": 1.8,
             "grateful": 1.8, "content": 1.6, "energized": 1.7, "optimistic": 1.8, "thriving": 2.0,
-            "confident": 1.7, "hopeful": 1.7, "calm": 1.6, "better": 1.3, "feeling good": 1.7
+            "confident": 1.7, "hopeful": 1.7, "calm": 1.6, "better": 1.3, "feeling good": 1.7,
+            "proud": 1.8, "relieved": 1.7, "accomplished": 1.8, "amazing": 1.9, "feeling great": 1.9,
+            "feeling amazing": 2.0, "clarity": 1.6
         }
 
         negations = ["not", "no", "never", "don't", "dont", "can't", "cant", "cannot", "won't", "wont"]
@@ -204,19 +206,20 @@ class MLService:
         sentiment = max(-1.0, min(1.0, sentiment))
 
         # Continuous mental wellness score (0.0 to 100.0)
-        # Neutral sentiment (0.0) maps to 60.0 (healthy stable baseline)
-        # Positive sentiment (+1.0) maps to ~95.0
-        # Mild negative sentiment (-0.2 to -0.4) maps to ~45.0 - 55.0 (Moderate / Managed stress)
-        # Severe crisis sentiment maps to < 35.0
-        if sentiment <= 0:
-            wellness_score = 60.0 + (sentiment * 40.0)
+        # Neutral sentiment (0.0) maps to 68.0 (healthy stable baseline)
+        # Positive sentiment (+1.0) maps to 96.0 (Optimal Wellness)
+        # Mild negative sentiment (-0.2 to -0.4) maps to 45.0 - 58.0 (Moderate / Managed stress)
+        # Deep negative / despair (-0.5 to -0.8) maps to 28.0 - 42.0 (Elevated distress)
+        # Severe crisis sentiment maps to < 25.0
+        if sentiment >= 0:
+            wellness_score = 68.0 + (sentiment * 28.0)
         else:
-            wellness_score = 60.0 + (sentiment * 35.0)
+            wellness_score = 68.0 + (sentiment * 48.0)
 
         if has_crisis:
-            wellness_score = min(wellness_score, 25.0)
+            wellness_score = min(wellness_score, 20.0)
 
-        wellness_score = max(10.0, min(100.0, wellness_score))
+        wellness_score = max(10.0, min(99.0, wellness_score))
 
         if has_crisis or wellness_score < 35.0:
             risk = "HIGH"
@@ -246,10 +249,10 @@ class MLService:
         result = self._analyze_clinical_lexicon(text)
         score = result["mental_wellness_score"]
         
-        # If user provided a self score, factor it in proportionally
+        # If user explicitly provided a self score, blend with high NLP priority (85% NLP / 15% self)
         if self_reported_score is not None:
             user_score_100 = float(self_reported_score * 10.0)
-            score = round((score * 0.60) + (user_score_100 * 0.40), 2)
+            score = round((score * 0.85) + (user_score_100 * 0.15), 2)
             has_crisis = any(k in text.lower() for k in [
                 "suicide", "suicidal", "want to die", "kill myself", "end my life", "self harm"
             ])
@@ -330,10 +333,10 @@ class MLService:
                 mental_wellness_score = lex_wellness
                 risk_level = lex_risk
 
-            # Factor in explicit user score if provided
+            # Factor in explicit user score if provided (85% NLP / 15% self score)
             if self_reported_score is not None:
                 user_score_100 = float(self_reported_score * 10.0)
-                mental_wellness_score = round((mental_wellness_score * 0.60) + (user_score_100 * 0.40), 2)
+                mental_wellness_score = round((mental_wellness_score * 0.85) + (user_score_100 * 0.15), 2)
                 has_crisis = any(k in text.lower() for k in [
                     "suicide", "suicidal", "want to die", "kill myself", "end my life", "self harm"
                 ])
