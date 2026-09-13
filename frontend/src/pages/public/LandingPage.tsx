@@ -104,17 +104,17 @@ export const LandingPage: React.FC = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition-colors duration-300 flex flex-col selection:bg-indigo-500 selection:text-white relative overflow-x-hidden font-sans">
+    <div className="min-h-screen bg-background text-foreground transition-colors duration-300 flex flex-col selection:bg-primary selection:text-white relative overflow-x-hidden font-sans">
       {/* Background Decorative Grid & Ambient Aurora Orbs */}
       <div className="fixed inset-0 pointer-events-none -z-10 overflow-hidden">
-        <div className="absolute -top-40 -left-40 w-[600px] h-[600px] bg-indigo-500/10 dark:bg-indigo-600/15 rounded-full blur-[140px]" />
-        <div className="absolute top-1/3 -right-40 w-[550px] h-[550px] bg-purple-500/10 dark:bg-purple-600/15 rounded-full blur-[140px]" />
-        <div className="absolute -bottom-40 left-1/3 w-[600px] h-[600px] bg-emerald-500/10 dark:bg-emerald-600/10 rounded-full blur-[140px]" />
+        <div className="absolute -top-40 -left-40 w-[600px] h-[600px] bg-primary/10 rounded-full blur-[140px]" />
+        <div className="absolute top-1/3 -right-40 w-[550px] h-[550px] bg-purple-500/10 rounded-full blur-[140px]" />
+        <div className="absolute -bottom-40 left-1/3 w-[600px] h-[600px] bg-emerald-500/10 rounded-full blur-[140px]" />
         <div className="absolute inset-0 bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:32px_32px]" />
       </div>
 
       {/* 1. Header Navigation Bar */}
-      <header className="sticky top-0 z-50 backdrop-blur-2xl bg-white/75 dark:bg-slate-950/75 border-b border-slate-200/80 dark:border-slate-800/80 transition-all shadow-sm">
+      <header className="sticky top-0 z-50 backdrop-blur-2xl bg-card/85 border-b border-border/80 transition-all shadow-xs">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-18 flex items-center justify-between">
           {/* Logo */}
           <div
@@ -971,21 +971,21 @@ export const LandingPage: React.FC = () => {
       </section>
 
       {/* 10. Footer */}
-      <footer className="mt-auto py-8 bg-white dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800 text-center text-xs text-slate-500 dark:text-slate-400">
+      <footer className="mt-auto py-8 bg-card border-t border-border text-center text-xs text-muted-foreground">
         <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded-lg bg-indigo-600 flex items-center justify-center text-white font-black text-xs">
+            <div className="w-6 h-6 rounded-lg bg-primary flex items-center justify-center text-primary-foreground font-black text-xs">
               M
             </div>
-            <span className="font-bold text-slate-800 dark:text-slate-200">MindGuardAI</span>
+            <span className="font-bold text-foreground">MindGuardAI</span>
             <span>&copy; {new Date().getFullYear()} Campus Psychological Support Architecture.</span>
           </div>
           <div className="flex items-center gap-4">
-            <Link to="/login" className="hover:text-indigo-600 dark:hover:text-indigo-400 transition font-medium">
+            <Link to="/login" className="hover:text-primary transition font-medium">
               Student Sign In
             </Link>
             <span>&bull;</span>
-            <Link to="/login" className="hover:text-indigo-600 dark:hover:text-indigo-400 transition font-medium">
+            <Link to="/login" className="hover:text-primary transition font-medium">
               Staff Portal
             </Link>
             <span>&bull;</span>
