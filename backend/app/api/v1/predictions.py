@@ -72,17 +72,19 @@ async def get_latest_assessment(
         select(EmotionAnalysis)
         .join(MoodLog)
         .where(MoodLog.student_id == target_student_id)
-        .order_by(EmotionAnalysis.analyzed_at.desc())
+        .order_by(EmotionAnalysis.analyzed_at.desc(), EmotionAnalysis.id.desc())
         .limit(1)
     )
     result = await db.execute(statement)
     latest_analysis = result.scalars().first()
     emotions = latest_analysis.detected_emotions if latest_analysis else {}
+    sentiment_score = latest_analysis.sentiment_score if latest_analysis else None
 
     return AssessmentLatestResponse(
         assessment_id=assessment.id,
         mental_wellness_score=assessment.mental_wellness_score,
         risk_level=assessment.risk_level,
         emotions_detected=emotions,
-        evaluated_at=assessment.evaluated_at
+        evaluated_at=assessment.evaluated_at,
+        sentiment_score=sentiment_score
     )
