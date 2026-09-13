@@ -20,7 +20,7 @@ class Settings(BaseSettings):
         default="super_secret_cryptographic_key_32_bytes",
         description="Key used to sign user access and refresh tokens"
     )
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = Field(default=15, description="Lifetime of the access token in minutes")
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = Field(default=43200, description="Lifetime of the access token in minutes (30 days)")
     REFRESH_TOKEN_EXPIRE_DAYS: int = Field(default=7, description="Expiration limit for HttpOnly cookies in days")
     CORS_ORIGINS: Union[List[str], str] = Field(
         default=["http://localhost:5173"],
