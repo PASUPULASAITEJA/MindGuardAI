@@ -61,26 +61,26 @@ const Sidebar: React.FC<SidebarProps> = ({ className, onCloseMobile }) => {
   return (
     <aside
       className={cn(
-        "flex flex-col justify-between border-r border-border bg-card/95 dark:bg-card/90 backdrop-blur-xl p-5 h-full",
+        "flex flex-col justify-between border-r border-border/70 bg-card/85 dark:bg-card/80 backdrop-blur-2xl p-5 h-full transition-all",
         className
       )}
     >
       <div className="space-y-8">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-2xl bg-gradient-to-tr from-indigo-600 via-purple-600 to-emerald-500 p-0.5 shadow-md shadow-indigo-500/20 flex items-center justify-center">
+            <div className="h-10 w-10 rounded-2xl bg-gradient-to-tr from-indigo-500 via-indigo-600 to-emerald-400 p-0.5 shadow-md shadow-indigo-500/15 flex items-center justify-center">
               <div className="w-full h-full rounded-[14px] bg-card overflow-hidden flex items-center justify-center">
                 <img src="/favicon.jpg" alt="MindGuardAI Logo" className="h-full w-full object-cover" />
               </div>
             </div>
             <div>
               <div className="flex items-center gap-1.5">
-                <span className="text-lg font-extrabold tracking-tight bg-gradient-to-r from-indigo-600 via-purple-600 to-emerald-600 dark:from-indigo-400 dark:via-purple-300 dark:to-emerald-400 bg-clip-text text-transparent">
+                <span className="text-lg font-bold tracking-tight bg-gradient-to-r from-indigo-600 to-emerald-600 dark:from-indigo-400 dark:to-emerald-400 bg-clip-text text-transparent">
                   MindGuardAI
                 </span>
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
               </div>
-              <p className="text-[10px] text-muted-foreground tracking-wider uppercase font-bold">Campus Wellness</p>
+              <p className="text-[10px] text-muted-foreground tracking-wider uppercase font-semibold">Campus Wellness</p>
             </div>
           </div>
           
