@@ -48,7 +48,7 @@ export const HabitRecoverySimulator: React.FC<HabitRecoverySimulatorProps> = ({ 
   };
 
   return (
-    <Card className="border-border/50 bg-card/50 backdrop-blur-md shadow-sm">
+    <Card className="shadow-sm">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
