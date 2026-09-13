@@ -14,7 +14,8 @@ from app.schemas.chatbot import (
     SendMessageRequest,
     ChatMessageItem,
     ChatResponsePayload,
-    BehavioralFeaturesPayload
+    BehavioralFeaturesPayload,
+    WearableSleepSyncPayload
 )
 from app.services.conversation_service import conversation_service
 from app.services.chatbot_service import chatbot_service
@@ -299,3 +300,25 @@ async def get_behavioral_summary(
         db=db,
         student_id=current_user.id
     )
+
+@router.post("/wearable-sleep-sync", status_code=status.HTTP_200_OK)
+async def sync_wearable_sleep_metrics(
+    payload: WearableSleepSyncPayload,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    Ingests smart wearable biometric sleep metrics (Apple Health, Fitbit, Google Fit).
+    """
+    if current_user.role != UserRole.STUDENT:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Wearable sensor integration is restricted to student accounts."
+        )
+
+    return await behavioral_service.sync_wearable_sleep(
+        db=db,
+        student=current_user,
+        data=payload.model_dump()
+    )
+
