@@ -121,37 +121,39 @@ export const LandingPage: React.FC = () => {
             className="flex items-center gap-3 cursor-pointer group"
             onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
           >
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-indigo-600 via-purple-600 to-emerald-500 flex items-center justify-center shadow-lg shadow-indigo-500/25 group-hover:scale-105 transition-transform duration-300">
-              <Brain className="w-5 h-5 text-white" />
+            <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-indigo-500 via-indigo-600 to-emerald-400 p-0.5 shadow-md shadow-indigo-500/15 flex items-center justify-center group-hover:scale-105 transition-transform duration-300">
+              <div className="w-full h-full rounded-[14px] bg-card flex items-center justify-center overflow-hidden">
+                <img src="/favicon.jpg" alt="MindGuardAI Logo" className="w-full h-full object-cover" />
+              </div>
             </div>
             <div>
               <div className="flex items-center gap-1.5">
-                <span className="font-extrabold text-xl tracking-tight bg-gradient-to-r from-indigo-600 via-purple-600 to-emerald-500 dark:from-indigo-400 dark:via-purple-300 dark:to-emerald-400 bg-clip-text text-transparent">
-                  MindGuardAI
+                <span className="font-bold text-xl tracking-tight text-foreground">
+                  MindGuard<span className="text-primary">AI</span>
                 </span>
                 <span className="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse" title="System Live & Secure" />
               </div>
-              <p className="text-[10px] text-slate-500 dark:text-slate-400 tracking-wider uppercase font-bold">
-                Student Wellness & Early Care
+              <p className="text-[10px] text-muted-foreground tracking-wider uppercase font-semibold">
+                Campus Psychological Safety
               </p>
             </div>
           </div>
 
           {/* Nav Links */}
-          <nav className="hidden md:flex items-center gap-7 text-sm font-semibold text-slate-600 dark:text-slate-300">
-            <a href="#features" className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
+          <nav className="hidden md:flex items-center gap-7 text-sm font-semibold text-muted-foreground">
+            <a href="#features" className="hover:text-primary transition-colors">
               Pillars of Care
             </a>
-            <a href="#portals" className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
+            <a href="#portals" className="hover:text-primary transition-colors">
               Platform Experience
             </a>
-            <a href="#how-it-works" className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
+            <a href="#how-it-works" className="hover:text-primary transition-colors">
               How It Works
             </a>
-            <a href="#privacy" className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
+            <a href="#privacy" className="hover:text-primary transition-colors">
               Privacy Promise
             </a>
-            <a href="#helplines" className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
+            <a href="#helplines" className="hover:text-primary transition-colors">
               Crisis Helplines
             </a>
           </nav>
@@ -161,14 +163,14 @@ export const LandingPage: React.FC = () => {
             <button
               onClick={toggleTheme}
               aria-label="Toggle theme"
-              className="p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:border-indigo-300 dark:hover:border-indigo-700 transition shadow-sm"
+              className="p-2.5 rounded-xl border border-border/80 bg-card/80 text-muted-foreground hover:text-foreground hover:border-primary/40 transition shadow-xs"
             >
               {theme === "dark" ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-slate-600" />}
             </button>
 
             <Link
               to="/login"
-              className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-bold rounded-xl text-white bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-700 hover:opacity-95 shadow-md shadow-indigo-600/25 transition active:scale-[0.98]"
+              className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-bold rounded-xl text-primary-foreground bg-primary hover:bg-primary/90 shadow-md shadow-primary/20 transition active:scale-[0.98]"
             >
               Sign In
               <ArrowRight className="w-4 h-4" />
@@ -181,19 +183,19 @@ export const LandingPage: React.FC = () => {
       <section className="relative pt-16 pb-20 md:pt-24 md:pb-32">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           {/* Shimmer Pill Badge */}
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-indigo-200/80 dark:border-indigo-800/80 bg-white/80 dark:bg-indigo-950/40 backdrop-blur-md text-indigo-700 dark:text-indigo-300 text-xs font-bold mb-8 shadow-sm">
-            <Sparkles className="w-4 h-4 text-indigo-500 animate-pulse" />
-            <span>Next-Generation Proactive Campus Psychological Safety</span>
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-primary/25 bg-card/90 backdrop-blur-md text-primary text-xs font-bold mb-8 shadow-xs">
+            <Sparkles className="w-4 h-4 text-primary animate-pulse" />
+            <span>Proactive Campus Psychological Safety & Early Care</span>
           </div>
 
           {/* Main Title */}
-          <h1 className="text-4xl sm:text-6xl md:text-7xl font-extrabold tracking-tight leading-[1.1] mb-6 max-w-4xl mx-auto text-slate-900 dark:text-white">
+          <h1 className="text-4xl sm:text-6xl md:text-7xl font-extrabold tracking-tight leading-[1.1] mb-6 max-w-4xl mx-auto text-foreground">
             Transforming Student Mental Health From{" "}
-            <span className="bg-gradient-to-r from-rose-500 via-amber-500 to-indigo-500 bg-clip-text text-transparent">
+            <span className="text-rose-500">
               Reactive Crisis
             </span>{" "}
             To{" "}
-            <span className="bg-gradient-to-r from-indigo-600 via-purple-500 to-emerald-500 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-primary to-emerald-500 bg-clip-text text-transparent">
               Proactive Care
             </span>
           </h1>
@@ -207,7 +209,7 @@ export const LandingPage: React.FC = () => {
           <div className="flex flex-wrap items-center justify-center gap-4 mb-14">
             <Link
               to="/login"
-              className="inline-flex items-center gap-2.5 px-7 py-3.5 rounded-2xl text-base font-bold text-white bg-indigo-600 hover:bg-indigo-700 shadow-xl shadow-indigo-600/25 transition active:scale-[0.98]"
+              className="inline-flex items-center gap-2.5 px-7 py-3.5 rounded-2xl text-base font-bold text-primary-foreground bg-primary hover:bg-primary/90 shadow-xl shadow-primary/20 transition active:scale-[0.98]"
             >
               <GraduationCap className="w-5 h-5" />
               Launch Student Hub
@@ -216,15 +218,15 @@ export const LandingPage: React.FC = () => {
 
             <Link
               to="/login"
-              className="inline-flex items-center gap-2 px-6 py-3.5 rounded-2xl text-base font-semibold border border-slate-300 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md text-slate-800 dark:text-slate-200 hover:border-purple-400 dark:hover:border-purple-600 hover:bg-purple-500/5 transition shadow-sm"
+              className="inline-flex items-center gap-2 px-6 py-3.5 rounded-2xl text-base font-semibold border border-border/80 bg-card/80 backdrop-blur-md text-foreground hover:border-primary/40 hover:bg-primary/5 transition shadow-xs"
             >
-              <HeartHandshake className="w-5 h-5 text-purple-500" />
+              <HeartHandshake className="w-5 h-5 text-primary" />
               Counselor Triage Board
             </Link>
 
             <Link
               to="/login"
-              className="inline-flex items-center gap-2 px-6 py-3.5 rounded-2xl text-base font-semibold border border-slate-300 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md text-slate-800 dark:text-slate-200 hover:border-emerald-400 dark:hover:border-emerald-600 hover:bg-emerald-500/5 transition shadow-sm"
+              className="inline-flex items-center gap-2 px-6 py-3.5 rounded-2xl text-base font-semibold border border-border/80 bg-card/80 backdrop-blur-md text-foreground hover:border-emerald-500/40 hover:bg-emerald-500/5 transition shadow-xs"
             >
               <Building2 className="w-5 h-5 text-emerald-500" />
               Campus Analytics
@@ -232,14 +234,14 @@ export const LandingPage: React.FC = () => {
           </div>
 
           {/* Interactive Live Product Preview Card (Hero Interactive Showcase) */}
-          <div className="max-w-4xl mx-auto rounded-3xl border border-slate-200/80 dark:border-slate-800/90 bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl shadow-2xl p-6 sm:p-8 text-left transition-all relative overflow-hidden">
+          <div className="max-w-4xl mx-auto rounded-3xl border border-border/80 bg-card/90 backdrop-blur-2xl shadow-xl p-6 sm:p-8 text-left transition-all relative overflow-hidden">
             {/* Top Bar */}
-            <div className="flex flex-wrap items-center justify-between pb-6 border-b border-slate-200/80 dark:border-slate-800/80 gap-3">
+            <div className="flex flex-wrap items-center justify-between pb-6 border-b border-border/80 gap-3">
               <div className="flex items-center gap-3">
                 <div className="w-3 h-3 rounded-full bg-rose-500" />
                 <div className="w-3 h-3 rounded-full bg-amber-500" />
                 <div className="w-3 h-3 rounded-full bg-emerald-500" />
-                <span className="text-xs font-bold text-slate-500 dark:text-slate-400 ml-2">
+                <span className="text-xs font-semibold text-muted-foreground ml-2">
                   MindGuard Live Student Telemetry Simulator
                 </span>
               </div>
