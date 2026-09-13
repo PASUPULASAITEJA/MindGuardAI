@@ -2365,63 +2365,39 @@ export const StudentDashboard: React.FC = () => {
       {/* 1. OVERVIEW VIEW */}
       {isOverview && (
         <>
-          {/* Unified Commercial-Grade Sanctuary Hero */}
-          <div className="relative overflow-hidden rounded-3xl border border-border/70 bg-gradient-to-br from-card via-card to-primary/5 p-6 md:p-8 shadow-xs">
+          {/* Finch / Notion Warm Companion Sanctuary Hero */}
+          <div className="relative overflow-hidden rounded-3xl border border-border/80 bg-gradient-to-br from-card via-card to-primary/5 p-6 md:p-8 shadow-sm">
             <div className="absolute top-0 right-0 -mt-12 -mr-12 h-64 w-64 rounded-full bg-primary/10 blur-3xl pointer-events-none" />
             <div className="absolute bottom-0 left-1/4 -mb-12 h-48 w-48 rounded-full bg-amber-500/10 blur-3xl pointer-events-none" />
 
-            <div className="relative z-10 space-y-6">
-              {/* Header Pill & Real-Time Status Indicator ("How am I doing?") */}
-              <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border/50 pb-4">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-bold tracking-wide">
+            {/* Header pill & greeting */}
+            <div className="relative z-10 space-y-4">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-bold tracking-wide">
                   <Sparkles className="h-3.5 w-3.5 text-primary animate-pulse" />
-                  <span>Student Sanctuary • 256-Bit Encrypted & Confidential</span>
+                  <span>Student Sanctuary • Safe, Private & Encrypted</span>
                 </div>
-                
-                {/* Live Status Pill answering "How am I doing?" */}
-                <div className="flex items-center gap-2">
-                  <span className="text-xs font-semibold text-muted-foreground">Today's Status:</span>
-                  <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border ${
-                    hasAssessment 
-                      ? classification.badgeClass 
-                      : "bg-muted text-muted-foreground border-border/60"
-                  }`}>
-                    <span className={`h-2 w-2 rounded-full ${
-                      hasAssessment && classification.tier === "HIGH" 
-                        ? "bg-rose-500 animate-ping" 
-                        : hasAssessment && classification.tier === "MEDIUM" 
-                        ? "bg-amber-500" 
-                        : "bg-emerald-500"
-                    }`} />
-                    <span>{hasAssessment ? `${formattedWellnessScore}/100 • ${classification.label}` : "Pending First Check-In"}</span>
-                  </span>
+                <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground">
+                  <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+                  <span>AI Wellness Companion Active</span>
                 </div>
               </div>
 
-              {/* Greeting & Actionable Guidance */}
-              <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-5">
-                <div className="space-y-1.5 max-w-xl">
-                  <h1 className="text-2xl sm:text-3xl font-black text-foreground tracking-tight">
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div className="space-y-1">
+                  <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-foreground tracking-tight">
                     {getGreeting()}, <span className="capitalize text-primary">{studentDisplayName}</span> ✨
                   </h1>
-                  <p className="text-sm font-bold text-foreground/90">
-                    {hasAssessment && classification.tier === "HIGH"
-                      ? "You're navigating elevated emotional stress. We're here with you."
-                      : (behavioralSummary?.latest_log?.late_night_usage_minutes || 0) > 60
-                      ? "Late-night screen activity was detected. Let's focus on restorative sleep tonight."
-                      : "Your wellness momentum and academic study balance are steady today."}
+                  <p className="text-sm sm:text-base font-semibold text-foreground/90">
+                    How are you feeling today?
                   </p>
-                  <p className="text-xs text-muted-foreground leading-relaxed">
-                    {hasAssessment && classification.tier === "HIGH"
-                      ? "Campus counselors and your confidential AI Companion are available anytime."
-                      : (behavioralSummary?.latest_log?.late_night_usage_minutes || 0) > 60
-                      ? "Try a 2-minute breath reset and dim your display 30 minutes before sleep."
-                      : "Log your daily check-in or practice a gentle mindfulness exercise to keep your streak going."}
+                  <p className="text-xs sm:text-sm text-muted-foreground max-w-2xl leading-relaxed">
+                    "Take a slow, gentle breath. You don't have to carry the whole semester today—just this one moment."
                   </p>
                 </div>
 
-                {/* Primary Action Buttons ("What should I do next?") */}
-                <div className="flex flex-wrap items-center gap-2.5 shrink-0">
+                {/* Primary Student Quick Action CTAs */}
+                <div className="flex flex-wrap items-center gap-2.5 shrink-0 self-start md:self-auto">
                   <Button
                     type="button"
                     onClick={() => {
@@ -2430,7 +2406,7 @@ export const StudentDashboard: React.FC = () => {
                         panel.scrollIntoView({ behavior: "smooth", block: "start" });
                       }
                     }}
-                    className="h-10 px-4 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-xs shadow-sm shadow-primary/20 transition-all flex items-center gap-2 active:scale-95"
+                    className="h-10 px-4 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-xs shadow-md shadow-primary/20 transition-all flex items-center gap-2 active:scale-95"
                   >
                     <ClipboardCheck className="h-4 w-4" />
                     <span>Start Daily Check-In</span>
@@ -2438,20 +2414,21 @@ export const StudentDashboard: React.FC = () => {
                   <Button
                     type="button"
                     variant="outline"
-                    onClick={() => setIsBreathModalOpen(true)}
-                    className="h-10 px-3.5 rounded-xl border-border/80 bg-card hover:bg-accent text-foreground font-bold text-xs transition-all flex items-center gap-1.5 active:scale-95"
+                    onClick={() => navigate("/student/chat")}
+                    className="h-10 px-3.5 rounded-xl border-border/80 bg-card/60 hover:bg-card text-foreground font-bold text-xs transition-all flex items-center gap-1.5"
                   >
-                    <Wind className="h-4 w-4 text-emerald-500" />
-                    <span>2-Min Breath Break</span>
+                    <MessageSquare className="h-3.5 w-3.5 text-primary" />
+                    <span>AI Companion</span>
                   </Button>
                   <Button
                     type="button"
                     variant="outline"
-                    onClick={() => navigate("/student/chat")}
-                    className="h-10 px-3.5 rounded-xl border-border/80 bg-card hover:bg-accent text-foreground font-bold text-xs transition-all flex items-center gap-1.5 active:scale-95"
+                    onClick={() => setIsSOSOpen(true)}
+                    className="h-10 px-3 rounded-xl border-rose-500/30 bg-rose-500/5 hover:bg-rose-500/10 text-rose-600 dark:text-rose-400 font-bold text-xs transition-all flex items-center gap-1.5"
+                    title="24/7 Immediate Help"
                   >
-                    <MessageSquare className="h-3.5 w-3.5 text-primary" />
-                    <span>AI Companion</span>
+                    <AlertTriangle className="h-3.5 w-3.5 text-rose-500" />
+                    <span>SOS Help</span>
                   </Button>
                 </div>
               </div>
@@ -2586,7 +2563,6 @@ export const StudentDashboard: React.FC = () => {
           {/* TAB 1: DAILY SANCTUARY & REFLECTION */}
           {activeSanctuaryTab === "sanctuary" && (
             <div className="space-y-6">
-
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
                 {/* Left Column (2 Cols): Primary Interactive Check-In & Trajectory */}
                 <div className="lg:col-span-2 space-y-6">
