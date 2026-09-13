@@ -45,13 +45,13 @@ export const ExplainableAIFactors: React.FC<ExplainableAIFactorsProps> = ({
             </div>
             <div>
               <CardTitle className="text-sm font-extrabold text-foreground flex items-center gap-1.5">
-                Explainable AI (XAI) Decision Breakdown
+                What Affects Your Wellness Score
                 <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-primary/15 text-primary tracking-wide">
-                  SHAP Weights
+                  Key Factors
                 </span>
               </CardTitle>
               <CardDescription className="text-xs text-muted-foreground">
-                Transparent explanation of factors contributing to your {hasAssessment ? `${(typeof wellnessScore === "number" && !isNaN(wellnessScore) ? wellnessScore : 50).toFixed(1)}/100` : "--"} wellness index
+                Clear breakdown of the daily habits and check-ins that shape your {hasAssessment ? `${(typeof wellnessScore === "number" && !isNaN(wellnessScore) ? wellnessScore : 50).toFixed(1)}/100` : "--"} wellness score
               </CardDescription>
             </div>
           </div>
@@ -59,15 +59,15 @@ export const ExplainableAIFactors: React.FC<ExplainableAIFactorsProps> = ({
       </CardHeader>
 
       <CardContent className="space-y-3.5">
-        {/* Factor 1: Circadian Disruption (Telemetry-driven) */}
+        {/* Factor 1: Late-night screen use */}
         <div className="space-y-1.5">
           <div className="flex justify-between items-center text-xs">
             <span className="font-semibold text-foreground flex items-center gap-1.5">
               <Moon className="h-3.5 w-3.5 text-indigo-400" />
-              Circadian Rhythm & Late-Night Exposure
+              Late-Night Screen Time & Sleep
             </span>
             <span className={`font-bold ${circadianRisk > 25 ? "text-rose-500" : "text-amber-500"}`}>
-              +{circadianRisk}% Risk Weight
+              +{circadianRisk}% Impact
             </span>
           </div>
           <div className="w-full h-2 rounded-full bg-secondary overflow-hidden">
@@ -80,22 +80,22 @@ export const ExplainableAIFactors: React.FC<ExplainableAIFactorsProps> = ({
           </div>
           <p className="text-[11px] text-muted-foreground">
             {lateNightMins > 60
-              ? `${lateNightMins}m screen activity logged after 1:00 AM. Significant circadian disruption detected.`
+              ? `${lateNightMins} mins of screen activity logged after 1:00 AM. Staying up late disrupts deep sleep.`
               : lateNightMins > 0
-              ? `${lateNightMins}m late-night usage. Mild circadian strain.`
-              : "No late-night screen disruption detected. Normal sleep schedule."}
+              ? `${lateNightMins} mins of late-night screen time. Mild impact on your sleep schedule.`
+              : "Great sleep habits! No late-night screen disruption detected."}
           </p>
         </div>
 
-        {/* Factor 2: Linguistic Affect (Journal NLP driven) */}
+        {/* Factor 2: Journal Mood */}
         <div className="space-y-1.5">
           <div className="flex justify-between items-center text-xs">
             <span className="font-semibold text-foreground flex items-center gap-1.5">
               <Sparkles className="h-3.5 w-3.5 text-amber-400" />
-              Linguistic Sentiment & Emotional Despair Markers
+              Mood in Your Daily Journals
             </span>
             <span className={`font-bold ${linguisticRisk > 25 ? "text-rose-500" : "text-emerald-500"}`}>
-              +{linguisticRisk}% Sentiment Weight
+              +{linguisticRisk}% Influence
             </span>
           </div>
           <div className="w-full h-2 rounded-full bg-secondary overflow-hidden">
@@ -107,24 +107,23 @@ export const ExplainableAIFactors: React.FC<ExplainableAIFactorsProps> = ({
             />
           </div>
           <p className="text-[11px] text-muted-foreground">
-            Semantic transformer evaluated recent journal affect at {(typeof sentimentScore === "number" && !isNaN(sentimentScore) ? sentimentScore : 0.15).toFixed(2)}.{" "}
             {sentimentScore < -0.3
-              ? "Elevated despair or negative affect flagged in recent journal text."
+              ? "Recent journal entries suggest you may be feeling overwhelmed or down. Taking some rest or talking to a counselor can help."
               : sentimentScore < 0.1
-              ? "Journal affect reflects moderate academic pressure and transient stress."
-              : "Journal affect reflects positive emotional valence, optimism, and healthy perspective."}
+              ? "Your journal entries reflect normal everyday stress and typical student workload."
+              : "Your journal entries reflect positive feelings, balance, and optimism."}
           </p>
         </div>
 
-        {/* Factor 3: Psychometric Survey Inputs (Clinical cutoff benchmark) */}
+        {/* Factor 3: Survey Responses */}
         <div className="space-y-1.5">
           <div className="flex justify-between items-center text-xs">
             <span className="font-semibold text-foreground flex items-center gap-1.5">
               <FileSpreadsheet className="h-3.5 w-3.5 text-blue-400" />
-              Standardized Clinical Cutoffs (PHQ-9 / GAD-7)
+              Well-Being Survey Responses
             </span>
             <span className="font-bold text-blue-500">
-              +{surveyRisk}% Psychometric Weight
+              +{surveyRisk}% Baseline
             </span>
           </div>
           <div className="w-full h-2 rounded-full bg-secondary overflow-hidden">
@@ -135,20 +134,20 @@ export const ExplainableAIFactors: React.FC<ExplainableAIFactorsProps> = ({
           </div>
           <p className="text-[11px] text-muted-foreground">
             {surveyScore !== undefined
-              ? "Completed psychometric survey evaluated against university clinical cutoffs."
-              : "Standardized medical questionnaire baseline (PHQ-9 / GAD-7 normative campus cutoff)."}
+              ? "Based on your completed student well-being assessment responses."
+              : "Based on standard student well-being questionnaires (PHQ-9 & GAD-7)."}
           </p>
         </div>
 
-        {/* Factor 4: Protective Behavioral Buffer (Daytime productivity) */}
+        {/* Factor 4: Healthy Focus & Habits */}
         <div className="space-y-1.5">
           <div className="flex justify-between items-center text-xs">
             <span className="font-semibold text-foreground flex items-center gap-1.5">
               <ShieldCheck className="h-3.5 w-3.5 text-emerald-400" />
-              Protective Behavioral Resilience Buffer
+              Healthy Daytime Focus & Self-Care
             </span>
             <span className="font-bold text-emerald-500">
-              -{protectiveBuffer}% Risk Reduction
+              +{protectiveBuffer}% Protection
             </span>
           </div>
           <div className="w-full h-2 rounded-full bg-secondary overflow-hidden">
@@ -159,16 +158,16 @@ export const ExplainableAIFactors: React.FC<ExplainableAIFactorsProps> = ({
           </div>
           <p className="text-[11px] text-muted-foreground">
             {totalScreenMins > 0 && lateNightMins < 60
-              ? "Active daytime academic focus sessions and self-care engagement act as a protective stabilizer."
-              : "Maintain consistent daytime focus blocks and periodic breaks to maximize cognitive resilience."}
+              ? "Active daytime study sessions and healthy breaks help protect your mental well-being."
+              : "Setting regular study hours and taking short breaks helps you stay refreshed and relaxed."}
           </p>
         </div>
 
-        {/* Academic Note Badge */}
+        {/* Informational Note */}
         <div className="p-2.5 rounded-xl bg-muted/40 border border-border/60 flex items-start gap-2 text-[11px] text-muted-foreground">
           <Info className="h-4 w-4 text-primary shrink-0 mt-0.5" />
           <span>
-            <strong className="text-foreground">Clinical Audit Trail:</strong> Weights are derived using TreeSHAP on multimodal inputs (behavioral telemetry + fine-tuned DistilBERT logits), ensuring zero black-box opacity for campus healthcare teams.
+            <strong className="text-foreground">How this works:</strong> Your score combines your sleep patterns, journal reflections, survey check-ins, and study habits to provide an honest, personalized view of your overall wellness.
           </span>
         </div>
       </CardContent>
