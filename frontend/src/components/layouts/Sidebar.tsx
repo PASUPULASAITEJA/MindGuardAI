@@ -68,15 +68,15 @@ const Sidebar: React.FC<SidebarProps> = ({ className, onCloseMobile }) => {
       <div className="space-y-8">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-2xl bg-gradient-to-tr from-indigo-500 via-indigo-600 to-emerald-400 p-0.5 shadow-md shadow-indigo-500/15 flex items-center justify-center">
+            <div className="h-10 w-10 rounded-2xl bg-gradient-to-tr from-primary to-emerald-500 p-0.5 shadow-md shadow-primary/20 flex items-center justify-center">
               <div className="w-full h-full rounded-[14px] bg-card overflow-hidden flex items-center justify-center">
                 <img src="/favicon.jpg" alt="MindGuardAI Logo" className="h-full w-full object-cover" />
               </div>
             </div>
             <div>
               <div className="flex items-center gap-1.5">
-                <span className="text-lg font-bold tracking-tight bg-gradient-to-r from-indigo-600 to-emerald-600 dark:from-indigo-400 dark:to-emerald-400 bg-clip-text text-transparent">
-                  MindGuardAI
+                <span className="text-lg font-extrabold tracking-tight text-foreground">
+                  MindGuard<span className="text-primary">AI</span>
                 </span>
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
               </div>
