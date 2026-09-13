@@ -41,10 +41,6 @@ BASE_AUTHORIZED_ROSTER: Dict[str, UserRole] = {
     "t.rishikesh.talpalikar41@nmims.in": UserRole.STUDENT,
     "s.saikarthik.reddy18@nmims.in": UserRole.STUDENT,
     "sathwika.sv54@nmims.in": UserRole.STUDENT,
-    "student@nmims.in": UserRole.STUDENT,
-    "student1@nmims.in": UserRole.STUDENT,
-    "student2@nmims.in": UserRole.STUDENT,
-    "student3@nmims.in": UserRole.STUDENT,
 
     # 2. NMIMS Clinical Counselor Staff Roster
     "naresh.vurukonda@nmims.edu": UserRole.COUNSELOR,
@@ -53,17 +49,12 @@ BASE_AUTHORIZED_ROSTER: Dict[str, UserRole] = {
     "rahul.koshti@nmims.edu": UserRole.COUNSELOR,
     "nikita.pande@nmims.edu": UserRole.COUNSELOR,
     "bhanusree.y@nmims.edu": UserRole.COUNSELOR,
-    "counselor@nmims.edu": UserRole.COUNSELOR,
-    "counselor1@nmims.edu": UserRole.COUNSELOR,
-    "counselor2@nmims.edu": UserRole.COUNSELOR,
     "dr.singh@nmims.edu": UserRole.COUNSELOR,
     "dr.kapoor@nmims.edu": UserRole.COUNSELOR,
     "wellness.counselor@nmims.edu": UserRole.COUNSELOR,
 
     # 3. NMIMS Institutional Administration Roster
     "raja.govindaacharyk@nmims.edu": UserRole.ADMIN,
-    "admin@nmims.edu": UserRole.ADMIN,
-    "superadmin@nmims.edu": UserRole.ADMIN,
     "dean.studentaffairs@nmims.edu": UserRole.ADMIN,
 }
 
