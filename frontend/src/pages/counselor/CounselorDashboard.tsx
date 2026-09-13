@@ -124,34 +124,49 @@ export const CounselorDashboard: React.FC = () => {
         <div className="space-y-6">
           {/* Summary metrics row */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <Card className="border-border/50 bg-card/40 backdrop-blur-md p-5 flex flex-col justify-between">
-              <div>
-                <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Active Alerts Queue</p>
-                <h4 className="text-3xl font-extrabold text-red-500 mt-1">
-                  {allAlertsData?.alerts.filter((a) => a.status === "PENDING").length ?? 0}
-                </h4>
+            <Card className="border-t-2 border-t-rose-500 p-5 flex flex-col justify-between shadow-sm hover:shadow-md transition-all">
+              <div className="flex items-start justify-between">
+                <div>
+                  <span className="text-[11px] font-extrabold text-muted-foreground uppercase tracking-wider">Active Alerts Queue</span>
+                  <h4 className="text-3xl font-black text-rose-500 mt-1 tracking-tight">
+                    {allAlertsData?.alerts.filter((a) => a.status === "PENDING").length ?? 0}
+                  </h4>
+                </div>
+                <div className="p-2.5 rounded-xl bg-rose-500/10 text-rose-500 border border-rose-500/20">
+                  <AlertCircle className="h-5 w-5 animate-pulse" />
+                </div>
               </div>
-              <p className="text-xs text-muted-foreground mt-3">High risk assessments awaiting evaluation</p>
+              <p className="text-xs text-muted-foreground mt-3 font-medium">Urgent flags awaiting counselor assessment</p>
             </Card>
 
-            <Card className="border-border/50 bg-card/40 backdrop-blur-md p-5 flex flex-col justify-between">
-              <div>
-                <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Under Active Review</p>
-                <h4 className="text-3xl font-extrabold text-amber-500 mt-1">
-                  {allAlertsData?.alerts.filter((a) => a.status === "REVIEWED").length ?? 0}
-                </h4>
+            <Card className="border-t-2 border-t-amber-500 p-5 flex flex-col justify-between shadow-sm hover:shadow-md transition-all">
+              <div className="flex items-start justify-between">
+                <div>
+                  <span className="text-[11px] font-extrabold text-muted-foreground uppercase tracking-wider">Under Active Review</span>
+                  <h4 className="text-3xl font-black text-amber-500 mt-1 tracking-tight">
+                    {allAlertsData?.alerts.filter((a) => a.status === "REVIEWED").length ?? 0}
+                  </h4>
+                </div>
+                <div className="p-2.5 rounded-xl bg-amber-500/10 text-amber-500 border border-amber-500/20">
+                  <Clock className="h-5 w-5" />
+                </div>
               </div>
-              <p className="text-xs text-muted-foreground mt-3">Claimed case files being triaged</p>
+              <p className="text-xs text-muted-foreground mt-3 font-medium">Claimed cases actively being triaged</p>
             </Card>
 
-            <Card className="border-border/50 bg-card/40 backdrop-blur-md p-5 flex flex-col justify-between">
-              <div>
-                <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Resolved Cases</p>
-                <h4 className="text-3xl font-extrabold text-emerald-500 mt-1">
-                  {allAlertsData?.alerts.filter((a) => a.status === "RESOLVED").length ?? 0}
-                </h4>
+            <Card className="border-t-2 border-t-emerald-500 p-5 flex flex-col justify-between shadow-sm hover:shadow-md transition-all">
+              <div className="flex items-start justify-between">
+                <div>
+                  <span className="text-[11px] font-extrabold text-muted-foreground uppercase tracking-wider">Resolved Cases</span>
+                  <h4 className="text-3xl font-black text-emerald-500 mt-1 tracking-tight">
+                    {allAlertsData?.alerts.filter((a) => a.status === "RESOLVED").length ?? 0}
+                  </h4>
+                </div>
+                <div className="p-2.5 rounded-xl bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">
+                  <CheckCircle2 className="h-5 w-5" />
+                </div>
               </div>
-              <p className="text-xs text-muted-foreground mt-3">Interventions completed successfully</p>
+              <p className="text-xs text-muted-foreground mt-3 font-medium">Interventions successfully concluded</p>
             </Card>
           </div>
 
@@ -167,7 +182,7 @@ export const CounselorDashboard: React.FC = () => {
           </div>
 
           {/* Teaser Alerts Queue */}
-          <Card className="border-border/50 bg-card/40 backdrop-blur-md overflow-hidden">
+          <Card className="overflow-hidden">
             <CardContent className="p-0">
               {isAlertsLoading ? (
                 <div className="space-y-3 p-6">
@@ -245,7 +260,7 @@ export const CounselorDashboard: React.FC = () => {
             </div>
 
 
-            <Card className="border-border/50 bg-card/40 backdrop-blur-md overflow-hidden">
+            <Card className="overflow-hidden">
               <CardContent className="p-0">
                 {isAppointmentsLoading ? (
                   <div className="p-6 text-center text-xs text-muted-foreground">Loading appointment queue...</div>
@@ -553,10 +568,15 @@ const StudentDetailSheet: React.FC<StudentDetailSheetProps> = ({ studentId, onCl
   const { theme } = useTheme();
   // 1. Load details using react-query hooks
   const { data: latestAssessment, isLoading: isProfileLoading } = useLatestAssessment(studentId);
-  const { data: moodHistory, isLoading: isHistoryLoading } = useMoodHistory("7d"); // get student history
+  const { data: moodHistory, isLoading: isHistoryLoading } = useMoodHistory("7d", studentId); // get student history
 
   return (
-    <div className="fixed inset-y-0 right-0 w-full max-w-lg bg-card border-l border-border shadow-2xl z-50 flex flex-col justify-between animate-in slide-in-from-right duration-300 text-foreground">
+    <>
+      <div 
+        className="fixed inset-0 z-40 bg-background/80 backdrop-blur-xs animate-in fade-in duration-200" 
+        onClick={onClose} 
+      />
+      <div className="fixed inset-y-0 right-0 w-full max-w-lg bg-card border-l border-border shadow-2xl z-50 flex flex-col justify-between animate-in slide-in-from-right duration-300 text-foreground">
       
       {/* Header */}
       <div className="p-6 border-b border-border flex items-center justify-between bg-background/20">
@@ -592,7 +612,9 @@ const StudentDetailSheet: React.FC<StudentDetailSheetProps> = ({ studentId, onCl
             <div className="grid grid-cols-2 gap-4">
               <Card className="border-border/50 bg-background/30 p-4 rounded-xl">
                 <p className="text-muted-foreground text-xs font-bold uppercase tracking-wider">Wellness Score</p>
-                <h5 className="text-2xl font-extrabold text-foreground mt-1">{latestAssessment.mental_wellness_score}</h5>
+                <h5 className="text-2xl font-extrabold text-foreground mt-1">
+                  {Number(latestAssessment.mental_wellness_score).toFixed(1)}
+                </h5>
                 <p className="text-muted-foreground text-xs mt-1">Scale bounds: 0.0 - 100.0</p>
               </Card>
 
@@ -667,6 +689,7 @@ const StudentDetailSheet: React.FC<StudentDetailSheetProps> = ({ studentId, onCl
         </Button>
       </div>
     </div>
+    </>
   );
 };
 export default CounselorDashboard;
