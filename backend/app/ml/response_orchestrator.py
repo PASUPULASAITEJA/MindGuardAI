@@ -1,4 +1,5 @@
 import os
+import re
 import random
 from abc import ABC, abstractmethod
 from typing import List, Dict, Any, Optional
@@ -118,6 +119,30 @@ SUGGESTED_ACTIONS_BY_INTENT: Dict[str, List[str]] = {
     ]
 }
 
+def is_hinglish_message(text: str) -> bool:
+    """
+    Detects if the message contains code-mixed Hinglish patterns.
+    """
+    if not text:
+        return False
+    text_lower = text.lower()
+    hinglish_markers = [
+        "bohot", "bahut", "zyada", "raha", "rahi", "rahe", "hai", "hain", "hoon", "yaar", "bhai",
+        "kuch", "kya", "nahi", "karu", "kaise", "kare", "karna", "padhai", "darr", "lag", "udas",
+        "neend", "ghar", "mummy", "papa", "mann", "dimag", "thak", "pareshan", "bechaini", "ghabrahat",
+        "shant", "khatam", "chal", "accha", "theek", "shukriya", "dhanyawad", "namaste", "aap", "tum",
+        "aur", "hoga", "hogi", "batao", "karo", "chahiye", "karunga", "karungi", "lagta", "lagti",
+        "baat", "karni", "kardo", "karein", "se", "ki", "ka", "ke", "wali", "wale"
+    ]
+    tokens = re.findall(r"\b[a-zA-Z]+\b", text_lower)
+    matches = sum(1 for t in tokens if t in hinglish_markers)
+    key_phrases = [
+        "ho rahi", "ho raha", "nahi ho", "darr lag", "kuch samajh", "mann nahi", "kya haal",
+        "neend nahi", "ghar ki yaad", "bohot zyada", "bahut zyada", "pareshan hoon", "udas hoon",
+        "rona aa raha", "fail ho", "padhai nahi"
+    ]
+    return matches >= 2 or any(p in text_lower for p in key_phrases)
+
 class BaseLLMProvider(ABC):
     @abstractmethod
     async def generate_response(
@@ -147,6 +172,100 @@ class BuiltinEmpatheticGenerator(BaseLLMProvider):
         risk_level = context.get("risk_level", "GREEN")
         history = context.get("recent_history", [])
         last_user_msg = (messages[-1]["content"] if messages else "").lower()
+
+        # 0. Hinglish Cultural & Code-Mixed Empathetic Dialogue
+        if is_hinglish_message(last_user_msg):
+            # Hinglish Gratitude
+            if any(k in last_user_msg for k in ["shukriya", "dhanyawad", "thank you", "thanks", "thx"]):
+                return (
+                    "Arey koi baat nahi! Main hamesha yahin hoon jab bhi baat karni ho ya halka mehsoos karna ho. "
+                    "Apna khayal rakhna aur take care!"
+                )
+            # Hinglish Joy / Positive
+            if emotion == "joy" or sentiment_score > 0.15 or any(k in last_user_msg for k in ["accha", "theek", "khush", "happy", "badhiya", "mast", "maza"]):
+                return (
+                    "Yeh sunkar bohot accha laga! Aise positive moments ko enjoy karna mental wellness ke liye bohot zaroori hai. "
+                    "Aaj aisa kya hua jo itna accha feel ho raha hai?"
+                )
+            # Hinglish Exam Stress
+            if intent == "exam_stress":
+                return (
+                    "Main samajh sakta hoon, exam ke time aisi tension aur stress hona bohot natural hai. "
+                    "Par yaad rakho tumhare marks tumhari worth decide nahi karte. "
+                    "Kya hum 2-minute ka deep breathing exercise try karein ya syllabus ko chote steps me divide karein?"
+                )
+            # Hinglish Academic Pressure
+            if intent == "academic_pressure":
+                return (
+                    "Deadlines aur assignments ka load bohot exhausting ho jata hai. Pehle ek gehri saans lo. "
+                    "Sabse zaroori kaam kaunsa hai jo pehle nipatana hai? Hum milkar plan karte hain."
+                )
+            # Hinglish Anxiety
+            if intent == "anxiety":
+                return (
+                    "Main tumhare sath hoon. Anxiety me aisi ghabrahat aur overthinking hona samajh aata hai. "
+                    "Pehle ek lambi, gehri saans lo aur thoda paani piyo. "
+                    "Kya hum 5-4-3-2-1 grounding exercise try karein jisse thoda calm feel ho?"
+                )
+            # Hinglish Sadness
+            if intent == "sadness":
+                return (
+                    "Main samajh sakta hoon ki aaj tumhara mann bohot udaas hai. Har waqt strong rehna zaroori nahi hota, "
+                    "bura lagna normal hai. Agar mann halka karna ho toh batao kya chal raha hai, main sun raha hoon."
+                )
+            # Hinglish Homesickness
+            if intent == "homesickness":
+                return (
+                    "Hostel ya college aakar ghar aur mummy-papa ki yaad aana bohot normal hai. Yeh ek naya phase hai, "
+                    "khud par thoda patience rakho. Kya aaj ghar par kisi se baat hui ya phone lagane ka mann hai?"
+                )
+            # Hinglish Loneliness
+            if intent == "loneliness":
+                return (
+                    "College me kabhi kabhi bohot akela pan mehsoos hota hai, par tum bilkul akele nahi ho. "
+                    "Main yahin hoon tumhare sath. Aaj ka din kaisa guzra?"
+                )
+            # Hinglish Sleep Problem
+            if intent == "sleep_problem":
+                return (
+                    "Jab neend na aaye toh agla pura din kharab lagta hai. Kya dimag me thoughts chal rahe hain ya bechaini hai? "
+                    "Kya hum ek quick wind-down breathing routine karein jisse neend aane me aasani ho?"
+                )
+            # Hinglish Motivation Problem
+            if intent == "motivation_problem":
+                return (
+                    "Mann nahi lag raha toh iska matlab yeh nahi ki tum lazy ho — shayad tumhara dimag thoda break maang raha hai. "
+                    "Sirf 5 minute ka chota sa task karte hain, fir dekhenge!"
+                )
+            # Hinglish Family Problem
+            if intent == "family_problem":
+                return (
+                    "Ghar ka pressure aur expectations handle karna bohot exhausting ho jata hai. "
+                    "Tum har kisi ko khush nahi rakh sakte. Apna thoda dhyan rakho, kya hua ghar me agar share karna chaho?"
+                )
+            # Hinglish Coping Strategy Request
+            if intent == "request_for_coping_strategy":
+                return (
+                    "Bilkul! Chalo turant ek quick calming exercise karte hain. 4 seconds saans andar lo, 4 seconds roko, "
+                    "aur 4 seconds me dheere se bahar chhodo. Isse nervous system turant shant hoga."
+                )
+            # Hinglish Human Support Request
+            if intent == "request_for_human_support":
+                return (
+                    "Bilkul, main samajh sakta hoon. Agar tum campus counselor se baat karna chahte ho, "
+                    "toh tum Counselor booking tab se easily confidential appointment schedule kar sakte ho."
+                )
+            # Hinglish Greeting
+            if intent == "greeting":
+                return (
+                    "Namaste! Kaisa chal raha hai aaj ka din? Main tumhara AI Wellness Assistant hoon. "
+                    "Kuch baat karni ho ya stress share karna ho toh batao!"
+                )
+            # General Hinglish Fallback
+            return (
+                "Main samajh sakta hoon tum kya feel kar rahe ho. Jo bhi mann me chal raha hai, khulkar share kar sakte ho, "
+                "main yahin hoon bina kisi judgment ke sunne ke liye."
+            )
 
         # 1. Gratitude detection
         if any(k in last_user_msg for k in ["thank you", "thanks", "thx", "appreciate it"]):
@@ -407,7 +526,18 @@ class ResponseOrchestrator:
         
         # 1. Deterministic RED Risk Crisis Response (Highest Priority)
         if risk_level == "RED":
-            chosen_response = random.choice(CRISIS_SAFETY_RESPONSES)
+            if is_hinglish_message(student_message):
+                chosen_response = (
+                    "Main samajh sakta hoon ki tum iss waqt bohot zyada dard aur mushkil me ho, "
+                    "par please yaad rakho tum akele nahi ho aur tumhari zindagi sabse zyada keemti hai. "
+                    "Turant kisi se baat karo jo tumhari madad kar sake:\n\n"
+                    "• **National Crisis Helpline (Tele-MANAS)**: Call **14416** ya **1800-891-4416** (24/7 Free & Confidential)\n"
+                    "• **Suicide Prevention Helpline (KIRAN)**: Call **1800-599-0019**\n"
+                    "• **Campus Wellness Desk**: Campus counselor ko turant alert bhej diya gaya hai.\n\n"
+                    "Kya tum iss waqt kisi safe jagah par ho? Please kisi dost ya family member ke sath raho."
+                )
+            else:
+                chosen_response = random.choice(CRISIS_SAFETY_RESPONSES)
             return {
                 "response": chosen_response,
                 "suggested_actions": [
