@@ -2563,6 +2563,59 @@ export const StudentDashboard: React.FC = () => {
           {/* TAB 1: DAILY SANCTUARY & REFLECTION */}
           {activeSanctuaryTab === "sanctuary" && (
             <div className="space-y-6">
+              {/* Core Clarity Banner: "How am I doing?" -> "What should I do next?" */}
+              <div className="rounded-3xl border border-border/80 bg-gradient-to-r from-card via-card to-primary/5 p-5 sm:p-6 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-5">
+                <div className="space-y-1.5 max-w-xl">
+                  <div className="flex items-center gap-2">
+                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-primary/10 text-primary border border-primary/20">
+                      How You're Doing Today
+                    </span>
+                    <span className="text-xs font-bold text-foreground">
+                      {hasAssessment ? `${formattedWellnessScore}/100 • ${classification.label}` : "No check-ins logged yet"}
+                    </span>
+                  </div>
+                  <h3 className="text-base sm:text-lg font-black text-foreground">
+                    {hasAssessment && classification.tier === "HIGH"
+                      ? "You're navigating elevated emotional stress. You don't have to carry this alone."
+                      : (behavioralSummary?.latest_log?.late_night_usage_minutes || 0) > 60
+                      ? "Late-night screen activity was detected. Your mind and circadian sleep cycle need gentle recovery."
+                      : "Your wellness momentum and academic study balance are steady today."}
+                  </h3>
+                  <p className="text-xs text-muted-foreground leading-relaxed">
+                    {hasAssessment && classification.tier === "HIGH"
+                      ? "Compassionate campus counselors and your confidential AI Companion are available 24/7."
+                      : (behavioralSummary?.latest_log?.late_night_usage_minutes || 0) > 60
+                      ? "Try a 2-minute breath reset and dim screens 30 mins before sleeping tonight."
+                      : "Log your daily check-in or complete a quick mindful reflection to keep your positive streak going."}
+                  </p>
+                </div>
+
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 shrink-0">
+                  <Button
+                    type="button"
+                    onClick={() => {
+                      const panel = document.getElementById("check-in-panel");
+                      if (panel) {
+                        panel.scrollIntoView({ behavior: "smooth", block: "start" });
+                      }
+                    }}
+                    className="h-10 px-4 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-xs shadow-md shadow-primary/20 transition-all flex items-center justify-center gap-2 active:scale-95"
+                  >
+                    <ClipboardCheck className="h-4 w-4" />
+                    <span>What Next: Daily Check-In</span>
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setIsBreathModalOpen(true)}
+                    className="h-10 px-3.5 rounded-xl border-border/80 bg-card hover:bg-accent text-foreground font-bold text-xs transition-all flex items-center justify-center gap-1.5"
+                  >
+                    <Wind className="h-4 w-4 text-emerald-500" />
+                    <span>2-Min Breath Break</span>
+                  </Button>
+                </div>
+              </div>
+
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
                 {/* Left Column (2 Cols): Primary Interactive Check-In & Trajectory */}
                 <div className="lg:col-span-2 space-y-6">
