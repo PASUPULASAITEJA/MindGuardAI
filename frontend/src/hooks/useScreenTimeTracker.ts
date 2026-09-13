@@ -24,7 +24,8 @@ export const useScreenTimeTracker = () => {
       return;
     }
 
-    const todayStr = new Date().toISOString().split("T")[0];
+    const now = new Date();
+    const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
     const storageKey = `mindguard_screen_data_${user.id}_${todayStr}`;
 
     // 1. Restore existing today's accumulated duration from localStorage
@@ -60,6 +61,18 @@ export const useScreenTimeTracker = () => {
             lateNightSecondsRef.current = Math.max(lateNightSecondsRef.current, (latest.late_night_usage_minutes || 0) * 60);
             socialSecondsRef.current = Math.max(socialSecondsRef.current, (latest.social_usage_minutes || 0) * 60);
             entertainmentSecondsRef.current = Math.max(entertainmentSecondsRef.current, (latest.entertainment_usage_minutes || 0) * 60);
+            try {
+              localStorage.setItem(
+                storageKey,
+                JSON.stringify({
+                  activeSeconds: activeSecondsRef.current,
+                  lateNightSeconds: lateNightSecondsRef.current,
+                  academicSeconds: academicSecondsRef.current,
+                  socialSeconds: socialSecondsRef.current,
+                  entertainmentSeconds: entertainmentSecondsRef.current,
+                })
+              );
+            } catch (e) {}
           }
         }
       })
