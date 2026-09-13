@@ -7,6 +7,8 @@ from app.models.mood_logs import MoodLog
 from app.repositories.base import CRUDBase
 from pydantic import BaseModel
 
+from sqlalchemy.orm import selectinload
+
 class MoodLogRepository(CRUDBase[MoodLog, BaseModel, BaseModel]):
     async def get_student_history(
         self,
@@ -15,15 +17,20 @@ class MoodLogRepository(CRUDBase[MoodLog, BaseModel, BaseModel]):
         timeframe_days: Optional[int] = None
     ) -> List[MoodLog]:
         """
-        Fetch mood log history for a specific student, optionally filtered by timeframe in days.
+        Fetch mood log history for a specific student in chronological ascending order,
+        eagerly loading NLP emotion analysis.
         """
-        statement = select(self.model).where(self.model.student_id == student_id)
+        statement = (
+            select(self.model)
+            .where(self.model.student_id == student_id)
+            .options(selectinload(self.model.emotion_analysis))
+        )
         
         if timeframe_days is not None:
             cutoff = datetime.now(timezone.utc) - timedelta(days=timeframe_days)
             statement = statement.where(self.model.logged_at >= cutoff)
             
-        statement = statement.order_by(self.model.logged_at.desc())
+        statement = statement.order_by(self.model.logged_at.asc())
         result = await db.execute(statement)
         return list(result.scalars().all())
 
