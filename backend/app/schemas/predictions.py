@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Dict
+from typing import Dict, Optional
 from uuid import UUID
 from pydantic import BaseModel, Field
 from app.models.assessments import RiskLevel
@@ -10,3 +10,4 @@ class AssessmentLatestResponse(BaseModel):
     risk_level: RiskLevel
     emotions_detected: Dict[str, float]
     evaluated_at: datetime
+    sentiment_score: Optional[float] = None
