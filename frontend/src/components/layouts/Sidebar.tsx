@@ -61,19 +61,27 @@ const Sidebar: React.FC<SidebarProps> = ({ className, onCloseMobile }) => {
   return (
     <aside
       className={cn(
-        "flex flex-col justify-between border-r border-border/50 bg-card/60 backdrop-blur-md p-6 h-full",
+        "flex flex-col justify-between border-r border-border bg-card/95 dark:bg-card/90 backdrop-blur-xl p-5 h-full",
         className
       )}
     >
       <div className="space-y-8">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-xl border border-border/50 bg-background/50 shadow-sm overflow-hidden flex items-center justify-center">
-              <img src="/favicon.jpg" alt="MindGuardAI Logo" className="h-full w-full object-cover" />
+            <div className="h-10 w-10 rounded-2xl bg-gradient-to-tr from-indigo-600 via-purple-600 to-emerald-500 p-0.5 shadow-md shadow-indigo-500/20 flex items-center justify-center">
+              <div className="w-full h-full rounded-[14px] bg-card overflow-hidden flex items-center justify-center">
+                <img src="/favicon.jpg" alt="MindGuardAI Logo" className="h-full w-full object-cover" />
+              </div>
             </div>
-            <span className="text-xl font-extrabold tracking-tight text-foreground bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text">
-              MindGuardAI
-            </span>
+            <div>
+              <div className="flex items-center gap-1.5">
+                <span className="text-lg font-extrabold tracking-tight bg-gradient-to-r from-indigo-600 via-purple-600 to-emerald-600 dark:from-indigo-400 dark:via-purple-300 dark:to-emerald-400 bg-clip-text text-transparent">
+                  MindGuardAI
+                </span>
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              </div>
+              <p className="text-[10px] text-muted-foreground tracking-wider uppercase font-bold">Campus Wellness</p>
+            </div>
           </div>
           
           {onCloseMobile && (
@@ -97,16 +105,23 @@ const Sidebar: React.FC<SidebarProps> = ({ className, onCloseMobile }) => {
                 onClick={onCloseMobile}
                 className={({ isActive }) =>
                   cn(
-                    "group flex items-center gap-3 rounded-xl border px-3.5 py-2.5 text-sm font-semibold transition-all duration-300",
-                    "hover:bg-accent hover:text-accent-foreground",
+                    "group relative flex items-center gap-3 rounded-xl border px-3.5 py-2.5 text-sm font-semibold transition-all duration-300",
+                    "hover:bg-accent/70 hover:text-accent-foreground",
                     isActive
-                      ? "border-primary/20 bg-primary/10 text-primary shadow-sm shadow-primary/5"
+                      ? "border-primary/30 bg-primary/10 text-primary shadow-sm shadow-primary/5 font-bold"
                       : "border-transparent text-muted-foreground hover:border-border/50"
                   )
                 }
               >
-                <Icon className="h-4 w-4 shrink-0 transition-transform group-hover:scale-105" />
-                <span>{item.label}</span>
+                {({ isActive }) => (
+                  <>
+                    <Icon className={cn("h-4 w-4 shrink-0 transition-transform group-hover:scale-110", isActive && "text-primary")} />
+                    <span>{item.label}</span>
+                    {isActive && (
+                      <span className="ml-auto h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
+                    )}
+                  </>
+                )}
               </NavLink>
             );
           })}
@@ -114,24 +129,45 @@ const Sidebar: React.FC<SidebarProps> = ({ className, onCloseMobile }) => {
       </div>
 
       <div className="space-y-3 border-t border-border/50 pt-5">
-        <div className="flex items-center gap-3 rounded-xl border border-border/50 bg-background/40 p-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-muted text-muted-foreground">
-            <User className="h-4 w-4" />
+        {user.role === "STUDENT" && (
+          <a
+            href="tel:14416"
+            className="flex items-center justify-between p-2.5 rounded-xl border border-rose-500/20 bg-rose-500/5 hover:bg-rose-500/10 text-rose-600 dark:text-rose-400 text-xs transition-colors group"
+            title="Tele-MANAS Toll-Free 24/7 National Mental Health Helpline"
+          >
+            <div className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse shrink-0" />
+              <span className="font-bold text-[11px]">24/7 Crisis: 14416</span>
+            </div>
+            <span className="text-[10px] uppercase font-bold text-rose-500 group-hover:underline">Call Free</span>
+          </a>
+        )}
+
+        <div className="flex items-center gap-3 rounded-2xl border border-border/60 bg-background/50 p-3 shadow-sm">
+          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500/10 to-purple-500/10 border border-primary/20 text-primary font-bold text-xs uppercase shrink-0">
+            {user.email.charAt(0)}
           </div>
-          <div className="min-w-0">
-            <p className="text-xs font-semibold text-muted-foreground">Logged in as</p>
-            <p className="truncate text-xs font-bold text-foreground">{user.email}</p>
-            <span className="mt-0.5 inline-block px-1.5 py-0.5 rounded bg-primary/10 border border-primary/20 text-[9px] font-bold tracking-wider text-primary uppercase">
-              {user.role}
-            </span>
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-xs font-bold text-foreground">
+              {user.email.split("@")[0]}
+            </p>
+            <p className="truncate text-[10px] text-muted-foreground">{user.email}</p>
           </div>
+          <span className={cn(
+            "px-2 py-0.5 rounded-md text-[9px] font-black uppercase tracking-wider border shrink-0",
+            user.role === "STUDENT" ? "bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-indigo-500/20" :
+            user.role === "COUNSELOR" ? "bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20" :
+            "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20"
+          )}>
+            {user.role}
+          </span>
         </div>
 
         <button
           onClick={() => logout()}
-          className="flex w-full items-center justify-center gap-2 rounded-xl border border-transparent px-4 py-2.5 text-sm font-semibold text-muted-foreground transition-all duration-300 hover:border-border/50 hover:bg-accent hover:text-accent-foreground"
+          className="flex w-full items-center justify-center gap-2 rounded-xl border border-border/40 bg-background/30 px-4 py-2 text-xs font-bold text-muted-foreground transition-all duration-300 hover:border-border hover:bg-accent hover:text-accent-foreground active:scale-[0.99]"
         >
-          <LogOut className="h-4 w-4" />
+          <LogOut className="h-3.5 w-3.5" />
           Sign Out
         </button>
       </div>
