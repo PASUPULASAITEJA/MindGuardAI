@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
-import { useLocation, NavLink } from "react-router-dom";
+import { useLocation, NavLink, useNavigate } from "react-router-dom";
 import { useQueryClient, useQuery } from "@tanstack/react-query";
 import { 
   useLatestAssessment 
@@ -26,7 +26,7 @@ import {
   Mic, Square, Sparkles, BookOpen, Video, FileText, AlertCircle, HelpCircle,
   X, Play, Pause, Heart, Check, ClipboardCheck, Activity,
   Laptop, Moon, Clock, Monitor, RefreshCw, Zap, PlayCircle, Calendar, UserPlus, FileDown, Cpu, Watch, Sun, BarChart3, TrendingUp, Wind,
-  Smile, Droplets, CheckCircle2, ChevronRight, ShieldCheck, Flame, HeartHandshake
+  Smile, Droplets, CheckCircle2, ChevronRight, ShieldCheck, Flame, HeartHandshake, AlertTriangle, MessageSquare
 } from "lucide-react";
 import api, { chatAPI, appointmentsAPI, AppointmentItem } from "@/services/api";
 import { useAuth } from "@/contexts/AuthContext";
@@ -36,6 +36,7 @@ import { ExplainableAIFactors } from "@/components/ExplainableAIFactors";
 import { HabitRecoverySimulator } from "@/components/HabitRecoverySimulator";
 import { ClinicalDossierModal } from "@/components/ClinicalDossierModal";
 import { ModelBenchmarksModal } from "@/components/ModelBenchmarksModal";
+import { EmergencySOSModal } from "@/components/EmergencySOSModal";
 
 // Holistic, whole-life well-being assessment questions for PHQ-9 Depression screening
 export interface SurveyQuestionItem {
@@ -177,7 +178,9 @@ export const StudentDashboard: React.FC = () => {
   const queryClient = useQueryClient();
   const { theme } = useTheme();
   const location = useLocation();
+  const navigate = useNavigate();
   const path = location.pathname;
+  const [isSOSOpen, setIsSOSOpen] = useState(false);
   
   // State variables
   const [timeframe, setTimeframe] = useState<"7d" | "30d">("7d");
@@ -2380,13 +2383,54 @@ export const StudentDashboard: React.FC = () => {
                 </div>
               </div>
 
-              <div className="space-y-1">
-                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-foreground tracking-tight">
-                  {getGreeting()}, <span className="capitalize text-primary">{studentDisplayName}</span> ✨
-                </h1>
-                <p className="text-sm sm:text-base text-muted-foreground max-w-2xl leading-relaxed">
-                  "Take a slow, gentle breath. You don't have to carry the whole semester today—just this one moment."
-                </p>
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div className="space-y-1">
+                  <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-foreground tracking-tight">
+                    {getGreeting()}, <span className="capitalize text-primary">{studentDisplayName}</span> ✨
+                  </h1>
+                  <p className="text-sm sm:text-base font-semibold text-foreground/90">
+                    How are you feeling today?
+                  </p>
+                  <p className="text-xs sm:text-sm text-muted-foreground max-w-2xl leading-relaxed">
+                    "Take a slow, gentle breath. You don't have to carry the whole semester today—just this one moment."
+                  </p>
+                </div>
+
+                {/* Primary Student Quick Action CTAs */}
+                <div className="flex flex-wrap items-center gap-2.5 shrink-0 self-start md:self-auto">
+                  <Button
+                    type="button"
+                    onClick={() => {
+                      const panel = document.getElementById("check-in-panel");
+                      if (panel) {
+                        panel.scrollIntoView({ behavior: "smooth", block: "start" });
+                      }
+                    }}
+                    className="h-10 px-4 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-xs shadow-md shadow-primary/20 transition-all flex items-center gap-2 active:scale-95"
+                  >
+                    <ClipboardCheck className="h-4 w-4" />
+                    <span>Start Daily Check-In</span>
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => navigate("/student/chat")}
+                    className="h-10 px-3.5 rounded-xl border-border/80 bg-card/60 hover:bg-card text-foreground font-bold text-xs transition-all flex items-center gap-1.5"
+                  >
+                    <MessageSquare className="h-3.5 w-3.5 text-primary" />
+                    <span>AI Companion</span>
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setIsSOSOpen(true)}
+                    className="h-10 px-3 rounded-xl border-rose-500/30 bg-rose-500/5 hover:bg-rose-500/10 text-rose-600 dark:text-rose-400 font-bold text-xs transition-all flex items-center gap-1.5"
+                    title="24/7 Immediate Help"
+                  >
+                    <AlertTriangle className="h-3.5 w-3.5 text-rose-500" />
+                    <span>SOS Help</span>
+                  </Button>
+                </div>
               </div>
 
               {/* Emotional Weather Board (5 Tactile Mood Cards) */}
@@ -2847,6 +2891,12 @@ export const StudentDashboard: React.FC = () => {
       <ModelBenchmarksModal
         isOpen={isBenchmarksOpen}
         onClose={() => setIsBenchmarksOpen(false)}
+      />
+
+      {/* Emergency SOS Modal */}
+      <EmergencySOSModal
+        isOpen={isSOSOpen}
+        onClose={() => setIsSOSOpen(false)}
       />
     </div>
   );
