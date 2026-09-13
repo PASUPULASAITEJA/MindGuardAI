@@ -98,17 +98,43 @@
 }
 
 @layer utilities {
+  /* Modern Wellness Platform & Healthcare SaaS Surfaces */
+  .wellness-card {
+    @apply bg-card border border-border/80 rounded-2xl shadow-xs transition-all duration-200 hover:shadow-sm;
+  }
+
+  .wellness-card-interactive {
+    @apply bg-card border border-border/80 rounded-2xl shadow-xs transition-all duration-200 hover:shadow-md hover:border-primary/40 hover:-translate-y-0.5;
+  }
+
+  .metric-pill {
+    @apply inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-semibold border transition-all;
+  }
+
+  /* Semantic Soft Badges */
+  .badge-low-risk {
+    @apply bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20 font-bold;
+  }
+
+  .badge-medium-risk {
+    @apply bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-500/20 font-bold;
+  }
+
+  .badge-high-risk {
+    @apply bg-rose-500/10 text-rose-700 dark:text-rose-400 border border-rose-500/20 font-bold;
+  }
+
   /* Finch / Notion Companion Surfaces */
   .finch-card {
-    @apply bg-card border border-border/85 rounded-3xl shadow-xs transition-all duration-300 hover:shadow-md hover:border-primary/40 hover:-translate-y-0.5;
+    @apply bg-card border border-border/80 rounded-2xl shadow-xs transition-all duration-200 hover:shadow-sm hover:border-primary/40;
   }
 
   .notion-pill {
-    @apply inline-flex items-center gap-1.5 px-3 py-1 rounded-2xl text-xs font-semibold border transition-all;
+    @apply inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-semibold border transition-all;
   }
 
-  /* Soft Interactive Halo */
+  /* Soft Ambient Halo */
   .companion-aura {
-    box-shadow: 0 0 30px -5px rgba(37, 99, 235, 0.15);
+    box-shadow: 0 0 25px -5px rgba(37, 99, 235, 0.12);
   }
 }
