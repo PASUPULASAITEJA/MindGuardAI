@@ -344,11 +344,10 @@ export const LandingPage: React.FC = () => {
                       key={m.score}
                       type="button"
                       onClick={() => setDemoMood(m.score)}
-                      className={`p-2.5 rounded-xl border text-center transition-all ${
-                        demoMood === m.score
-                          ? "bg-primary text-primary-foreground border-primary shadow-sm font-bold scale-[1.02]"
-                          : "bg-card hover:bg-secondary border-border/70 text-muted-foreground"
-                      }`}
+                      className={`p-2.5 rounded-xl border text-center transition-all ${demoMood === m.score
+                        ? "bg-primary text-primary-foreground border-primary shadow-sm font-bold scale-[1.02]"
+                        : "bg-card hover:bg-secondary border-border/70 text-muted-foreground"
+                        }`}
                     >
                       <span className="text-lg block mb-0.5">{m.emoji}</span>
                       <span className="text-[11px] block">{m.label}</span>
@@ -467,11 +466,10 @@ export const LandingPage: React.FC = () => {
                   <button
                     key={t.id}
                     onClick={() => setActiveTab(t.id as any)}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
-                      isSelected
-                        ? "bg-card text-foreground shadow-sm font-extrabold"
-                        : "text-muted-foreground hover:text-foreground"
-                    }`}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${isSelected
+                      ? "bg-card text-foreground shadow-sm font-extrabold"
+                      : "text-muted-foreground hover:text-foreground"
+                      }`}
                   >
                     <Icon className={`w-3.5 h-3.5 ${isSelected ? "text-primary" : ""}`} />
                     <span>{t.label}</span>
@@ -932,8 +930,8 @@ export const LandingPage: React.FC = () => {
           </div>
 
           <div className="text-center md:text-right text-[11px]">
-            <p>© 2026 MindGuardAI Platform. All rights reserved.</p>
-            <p className="text-muted-foreground/80 mt-0.5">Designed by <span className="font-semibold text-foreground">Pasupula Sai Teja</span> for NMIMS University Campus Health & Wellness.</p>
+            <p>© 2026 MindGuardAI Platform.</p>
+            <p className="text-muted-foreground/80 mt-0.5">Designed by <span className="font-semibold text-foreground">Pasupula Sai Teja</span></p>
           </div>
         </div>
       </footer>
