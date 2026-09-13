@@ -74,6 +74,7 @@ def log_agent(msg: str):
 # Canonical Application Categorization Taxonomy
 APP_CATEGORIES = {
     "ACADEMIC": [
+        "antigravity ide.exe", "antigravity.exe", "antigravity",
         "code.exe", "code", "pycharm64.exe", "pycharm", "devenv.exe",
         "winword.exe", "powerpnt.exe", "excel.exe", "acrobat.exe", "acrord32.exe",
         "notion.exe", "zoom.exe", "teams.exe", "jupyter-lab.exe", "cursor.exe",
@@ -92,7 +93,7 @@ APP_CATEGORIES = {
 
 # Semantic Keywords for Search Intent & Window Title Classification
 ACADEMIC_KEYWORDS = [
-    "leetcode", "github", "stackoverflow", "docs", "documentation", "tutorial",
+    "antigravity", "leetcode", "github", "stackoverflow", "docs", "documentation", "tutorial",
     "assignment", "syllabus", "midterm", "exam", "quiz", "coursera", "edx", "udemy",
     "overleaf", "jupyter", "chatgpt", "gemini", "claude", "notion", "canvas",
     "blackboard", "moodle", "arxiv", "research", "python", "react", "c++", "java",
