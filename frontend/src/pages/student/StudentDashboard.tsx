@@ -2360,7 +2360,7 @@ export const StudentDashboard: React.FC = () => {
                 }`}
               >
                 <Cpu className="h-3.5 w-3.5 text-primary" />
-                <span>AI Science & Explainability</span>
+                <span>Score Factors & Habits</span>
               </button>
 
               <button
@@ -2373,7 +2373,7 @@ export const StudentDashboard: React.FC = () => {
                 }`}
               >
                 <Laptop className="h-3.5 w-3.5 text-emerald-500" />
-                <span>Digital Balance & Phenotyping</span>
+                <span>Screen Time & Digital Balance</span>
               </button>
             </div>
 
