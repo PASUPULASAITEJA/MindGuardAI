@@ -4,49 +4,49 @@
 
 @layer base {
   :root {
-    /* Clean, modern, high-contrast light theme */
-    --background: 220 33% 98%;        /* #F8FAFC - crisp slate canvas */
-    --foreground: 222 47% 11%;        /* #0F172A - sharp slate-900 text */
-    --card: 0 0% 100%;                /* #FFFFFF - pure solid white surface */
-    --card-foreground: 222 47% 11%;   /* #0F172A */
+    /* Premium Calm HealthTech - Light Palette */
+    --background: 215 28% 97%;         /* #F6F8FB - tranquil serene canvas */
+    --foreground: 222 47% 11%;         /* #0F172A - deep readable slate */
+    --card: 0 0% 100%;                 /* #FFFFFF - pure pristine clinical surface */
+    --card-foreground: 222 47% 11%;
     --popover: 0 0% 100%;
     --popover-foreground: 222 47% 11%;
-    --primary: 238 82% 59%;           /* #4F46E5 - Royal Indigo, calming & clinical */
+    --primary: 238 78% 58%;            /* #4F46E5 - Royal Indigo, soothing yet focused */
     --primary-foreground: 0 0% 100%;
-    --secondary: 220 14% 94%;         /* #EDF1F5 */
+    --secondary: 215 20% 93%;          /* #E8EEF5 */
     --secondary-foreground: 222 47% 15%;
-    --muted: 220 14% 94%;
-    --muted-foreground: 215 16% 45%;  /* #5F6E84 - readable secondary text */
-    --accent: 220 14% 93%;
+    --muted: 215 20% 93%;
+    --muted-foreground: 217 19% 45%;   /* #596B82 */
+    --accent: 215 25% 92%;
     --accent-foreground: 222 47% 11%;
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
-    --border: 220 13% 89%;            /* #E0E4EC - clean visible border */
-    --input: 220 13% 89%;
-    --ring: 238 82% 59%;
-    --radius: 1rem;
+    --border: 218 18% 89%;             /* #E0E6F0 - soft crisp border */
+    --input: 218 18% 89%;
+    --ring: 238 78% 58%;
+    --radius: 1.25rem;                 /* Organic rounded corners */
   }
 
   .dark {
-    /* Deep Obsidian Slate dark theme with rich contrast and luminous accents */
-    --background: 222 47% 7%;          /* #0B0F19 - rich dark canvas */
-    --foreground: 210 40% 98%;         /* #F8FAFC - crisp readable white */
-    --card: 222 40% 11%;               /* #111827 - clearly elevated above background */
+    /* Premium Calm HealthTech - Dark Palette (Deep Obsidian Slate & Glowing Accents) */
+    --background: 224 45% 6%;          /* #090D18 - deep obsidian midnight */
+    --foreground: 210 40% 98%;          /* #F8FAFC - crisp readable text */
+    --card: 224 38% 10%;               /* #101626 - elevated glassmorphic surface */
     --card-foreground: 210 40% 98%;
-    --popover: 222 40% 11%;
+    --popover: 224 38% 10%;
     --popover-foreground: 210 40% 98%;
-    --primary: 239 84% 67%;            /* #6366F1 - luminous vibrant indigo */
+    --primary: 239 84% 67%;             /* #6366F1 - luminous calming indigo */
     --primary-foreground: 0 0% 100%;
-    --secondary: 222 35% 16%;          /* #1A2538 */
+    --secondary: 224 28% 15%;          /* #1B2336 */
     --secondary-foreground: 210 40% 98%;
-    --muted: 222 35% 16%;
-    --muted-foreground: 215 20% 65%;   /* #94A3B8 - comfortable secondary text */
-    --accent: 222 35% 18%;             /* #202D44 */
+    --muted: 224 28% 15%;
+    --muted-foreground: 217 19% 65%;   /* #92A4BF */
+    --accent: 224 28% 18%;             /* #222C44 */
     --accent-foreground: 210 40% 98%;
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
-    --border: 217 33% 18%;             /* #1E293B - defined card borders */
-    --input: 217 33% 18%;
+    --border: 224 25% 18%;             /* #1D263B - subtle dark border */
+    --input: 224 25% 18%;
     --ring: 239 84% 67%;
   }
 }
@@ -55,25 +55,36 @@
   * {
     @apply border-border;
   }
-  body {
-    @apply bg-background text-foreground transition-colors duration-200;
+  
+  html {
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
     font-family: 'Outfit', sans-serif;
+    letter-spacing: -0.02em;
+  }
+
+  body {
+    @apply bg-background text-foreground transition-colors duration-300;
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     background-image: 
-      radial-gradient(ellipse at 85% 0%, rgba(99, 102, 241, 0.04), transparent 50%),
-      radial-gradient(ellipse at 15% 100%, rgba(139, 92, 246, 0.03), transparent 50%);
+      radial-gradient(circle at 10% 0%, rgba(99, 102, 241, 0.05), transparent 35%),
+      radial-gradient(circle at 90% 10%, rgba(16, 185, 129, 0.04), transparent 30%),
+      radial-gradient(circle at 50% 90%, rgba(147, 51, 234, 0.03), transparent 40%);
     background-attachment: fixed;
   }
   
   html.dark body,
   .dark body {
     background-image: 
-      radial-gradient(ellipse at 85% 0%, rgba(99, 102, 241, 0.12), transparent 50%),
-      radial-gradient(ellipse at 15% 100%, rgba(139, 92, 246, 0.08), transparent 50%),
-      radial-gradient(ellipse at 50% 50%, rgba(16, 185, 129, 0.03), transparent 60%);
+      radial-gradient(circle at 10% 0%, rgba(99, 102, 241, 0.12), transparent 40%),
+      radial-gradient(circle at 90% 10%, rgba(16, 185, 129, 0.08), transparent 35%),
+      radial-gradient(circle at 50% 90%, rgba(147, 51, 234, 0.06), transparent 45%);
     background-attachment: fixed;
   }
 
-  /* Custom Premium Scrollbar */
+  /* Custom Smooth Scrollbar */
   ::-webkit-scrollbar {
     width: 6px;
     height: 6px;
@@ -82,17 +93,47 @@
     @apply bg-transparent;
   }
   ::-webkit-scrollbar-thumb {
-    @apply bg-muted-foreground/20 rounded-full hover:bg-muted-foreground/30 transition-colors;
+    @apply bg-muted-foreground/20 rounded-full hover:bg-muted-foreground/35 transition-colors;
   }
 }
 
 @layer utilities {
+  /* Frosted Glass Floating Panels */
   .glass-panel {
-    @apply bg-card/95 dark:bg-card/90 backdrop-blur-xl border border-border shadow-sm transition-all duration-200;
+    @apply bg-card/85 dark:bg-card/80 backdrop-blur-2xl border border-border/80 shadow-sm transition-all duration-300;
   }
   
+  /* Modern Calm Health Surface */
   .glass-card {
-    @apply bg-card border border-border shadow-sm transition-all duration-200 hover:border-primary/40 hover:shadow-md hover:shadow-primary/5;
+    @apply bg-card/95 dark:bg-card/90 backdrop-blur-xl border border-border/80 shadow-sm transition-all duration-300;
+  }
+
+  .glass-card:hover {
+    @apply border-primary/40 shadow-lg shadow-primary/5 -translate-y-0.5;
+  }
+
+  /* Mindful Breathing & Pulse Animations */
+  @keyframes mindful-pulse {
+    0%, 100% {
+      transform: scale(1);
+      opacity: 0.9;
+    }
+    50% {
+      transform: scale(1.04);
+      opacity: 1;
+    }
+  }
+
+  .animate-mindful-breathe {
+    animation: mindful-pulse 4s ease-in-out infinite;
+  }
+
+  /* Ambient Glow Utilities */
+  .glow-indigo {
+    box-shadow: 0 0 40px -10px rgba(99, 102, 241, 0.25);
+  }
+
+  .glow-emerald {
+    box-shadow: 0 0 40px -10px rgba(16, 185, 129, 0.25);
   }
 }
-
