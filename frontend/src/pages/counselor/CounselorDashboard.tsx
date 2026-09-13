@@ -124,7 +124,7 @@ export const CounselorDashboard: React.FC = () => {
         <div className="space-y-6">
           {/* Summary metrics row */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <Card className="border-t-2 border-t-rose-500 p-5 flex flex-col justify-between shadow-sm hover:shadow-md transition-all">
+            <Card className="wellness-card border-l-4 border-l-rose-500 p-5 flex flex-col justify-between shadow-xs">
               <div className="flex items-start justify-between">
                 <div>
                   <span className="text-[11px] font-extrabold text-muted-foreground uppercase tracking-wider">Active Alerts Queue</span>
@@ -139,7 +139,7 @@ export const CounselorDashboard: React.FC = () => {
               <p className="text-xs text-muted-foreground mt-3 font-medium">Urgent flags awaiting counselor assessment</p>
             </Card>
 
-            <Card className="border-t-2 border-t-amber-500 p-5 flex flex-col justify-between shadow-sm hover:shadow-md transition-all">
+            <Card className="wellness-card border-l-4 border-l-amber-500 p-5 flex flex-col justify-between shadow-xs">
               <div className="flex items-start justify-between">
                 <div>
                   <span className="text-[11px] font-extrabold text-muted-foreground uppercase tracking-wider">Under Active Review</span>
@@ -154,7 +154,7 @@ export const CounselorDashboard: React.FC = () => {
               <p className="text-xs text-muted-foreground mt-3 font-medium">Claimed cases actively being triaged</p>
             </Card>
 
-            <Card className="border-t-2 border-t-emerald-500 p-5 flex flex-col justify-between shadow-sm hover:shadow-md transition-all">
+            <Card className="wellness-card border-l-4 border-l-emerald-500 p-5 flex flex-col justify-between shadow-xs">
               <div className="flex items-start justify-between">
                 <div>
                   <span className="text-[11px] font-extrabold text-muted-foreground uppercase tracking-wider">Resolved Cases</span>
@@ -222,8 +222,8 @@ export const CounselorDashboard: React.FC = () => {
                               {alert.student_id.substring(0, 8)}...
                             </td>
                             <td className="p-4">
-                              <span className="inline-block px-2 py-0.5 rounded font-bold text-xs tracking-wide bg-red-500/10 text-red-500 border border-red-500/20">
-                                HIGH
+                              <span className="badge-high-risk px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wide">
+                                HIGH RISK
                               </span>
                             </td>
                             <td className="p-4 text-right" onClick={(e) => e.stopPropagation()}>
@@ -305,11 +305,11 @@ export const CounselorDashboard: React.FC = () => {
                               {app.reason || "General Wellness"}
                             </td>
                             <td className="p-3.5">
-                              <span className={`inline-block px-2 py-0.5 rounded font-bold text-[11px] ${
+                              <span className={`inline-block px-2.5 py-0.5 rounded-full font-bold text-[10px] uppercase tracking-wide ${
                                 app.status === "CONFIRMED"
-                                  ? "bg-emerald-500/10 text-emerald-500 border border-emerald-500/20"
+                                  ? "badge-low-risk"
                                   : app.status === "PENDING"
-                                  ? "bg-amber-500/10 text-amber-500 border border-amber-500/20"
+                                  ? "badge-medium-risk"
                                   : "bg-muted text-muted-foreground"
                               }`}>
                                 {app.status}
@@ -419,8 +419,8 @@ export const CounselorDashboard: React.FC = () => {
                             {alert.student_id.substring(0, 8)}...
                           </td>
                           <td className="p-4">
-                            <span className="inline-block px-2 py-0.5 rounded font-bold text-xs tracking-wide bg-red-500/10 text-red-500 border border-red-500/20">
-                              HIGH
+                            <span className="badge-high-risk px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wide">
+                              HIGH RISK
                             </span>
                           </td>
                           <td className="p-4 text-muted-foreground">{alert.assessment_id.substring(0, 12)}...</td>
