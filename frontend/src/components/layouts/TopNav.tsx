@@ -33,7 +33,7 @@ const TopNav: React.FC<TopNavProps> = ({ title, subtitle, onMenuClick }) => {
                 <h2 className="leading-tight text-sm md:text-base font-bold text-foreground tracking-tight">{title}</h2>
                 <span className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 shadow-xs">
                   <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                  Telemetry Active
+                  Activity Tracking Active
                 </span>
               </div>
               <p className="mt-0.5 hidden text-[11px] text-muted-foreground sm:block font-normal">{subtitle}</p>
