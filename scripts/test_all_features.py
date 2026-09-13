@@ -354,6 +354,30 @@ async def run_all_tests():
             f"Status: {res_sec_3.status_code}"
         )
 
+        # Teardown temporary test accounts to prevent polluting database with dummy records
+        try:
+            from sqlalchemy import delete
+            from app.models.mood_logs import MoodLog
+            from app.models.emotion_analyses import EmotionAnalysis
+            from app.models.assessments import Assessment
+            from app.models.alerts import Alert
+
+            async with AsyncSessionLocal() as session:
+                for email in ["student@nmims.in", "counselor@nmims.edu", "admin@nmims.edu"]:
+                    res = await session.execute(select(User).where(User.email == email))
+                    u = res.scalars().first()
+                    if u:
+                        await session.execute(delete(Alert).where(Alert.student_id == u.id))
+                        mood_ids = (await session.execute(select(MoodLog.id).where(MoodLog.student_id == u.id))).scalars().all()
+                        if mood_ids:
+                            await session.execute(delete(EmotionAnalysis).where(EmotionAnalysis.mood_log_id.in_(mood_ids)))
+                        await session.execute(delete(MoodLog).where(MoodLog.student_id == u.id))
+                        await session.execute(delete(Assessment).where(Assessment.student_id == u.id))
+                        await session.execute(delete(User).where(User.id == u.id))
+                await session.commit()
+        except Exception as teardown_err:
+            pass
+
     # -------------------------------------------------------------
     # Test Summary
     # -------------------------------------------------------------
