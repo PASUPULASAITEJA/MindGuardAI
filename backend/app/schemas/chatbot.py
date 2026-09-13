@@ -86,5 +86,22 @@ class BehavioralFeaturesPayload(BaseModel):
     baseline_deviation_score: float = Field(default=0.0, ge=0.0, le=10.0)
     detected_intent_summary: Optional[str] = Field(default=None, description="Semantic summary of active apps/searches (e.g., Exam Prep, Project Coding)")
     is_crisis_search_flag: bool = Field(default=False, description="Flagged if active search queries match distress/self-harm keywords")
+    # Circadian & Sleep Pattern Analysis Extension
+    inferred_sleep_onset: Optional[str] = Field(default=None, description="Inferred sleep onset time (e.g., '02:30 AM')")
+    inferred_wake_time: Optional[str] = Field(default=None, description="Inferred morning wake time (e.g., '08:50 AM')")
+    sleep_duration_hours: Optional[float] = Field(default=None, ge=0.0, le=24.0, description="Estimated total sleep duration in hours")
+    circadian_regularity_score: Optional[float] = Field(default=None, ge=0.0, le=100.0, description="0-100 Circadian Regularity Index")
+    pre_bedtime_screen_minutes: Optional[int] = Field(default=None, ge=0, description="Active entertainment screen time in the 2h before sleep")
+    wearable_synced: Optional[bool] = Field(default=False, description="Whether data originated or was augmented from wearable device")
+
+class WearableSleepSyncPayload(BaseModel):
+    sleep_duration_hours: float = Field(..., ge=1.0, le=18.0, description="Total sleep duration in hours")
+    sleep_efficiency_pct: Optional[float] = Field(default=85.0, ge=0.0, le=100.0, description="Sleep efficiency percentage")
+    deep_sleep_minutes: Optional[int] = Field(default=60, ge=0, description="Minutes spent in restorative deep slow-wave sleep")
+    rem_sleep_minutes: Optional[int] = Field(default=90, ge=0, description="Minutes spent in REM dream stage")
+    bedtime: Optional[str] = Field(default="11:30 PM", description="Clock time user went to bed")
+    wake_time: Optional[str] = Field(default="07:30 AM", description="Clock time user woke up")
+    device_name: Optional[str] = Field(default="Apple Watch / Fitbit", description="Source wearable sensor model")
+
 
 
