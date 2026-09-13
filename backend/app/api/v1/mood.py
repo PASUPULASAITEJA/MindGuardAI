@@ -8,6 +8,8 @@ from app.models.users import User, UserRole
 from app.schemas.mood import JournalSubmissionRequest, JournalSubmissionResponse, MoodHistoryResponse
 from app.services.mood import mood_service, process_journal_entry_background
 
+from uuid import UUID
+
 mood_router = APIRouter()
 journal_router = APIRouter()
 
@@ -19,13 +21,22 @@ journal_router = APIRouter()
 )
 async def get_mood_history(
     timeframe: Optional[str] = Query("7d", description="Filter timeframe: 7d or 30d"),
+    student_id: Optional[str] = Query(None, description="Target student ID (for counselors)"),
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_role([UserRole.STUDENT]))
+    current_user: User = Depends(require_role([UserRole.STUDENT, UserRole.COUNSELOR]))
 ):
     """
-    Fetches the historical mood logging entries for the authenticated student.
+    Fetches historical mood logging entries for the student.
+    Counselors can query any student by ID; students access their own history.
     """
-    history = await mood_service.get_history(db, student_id=current_user.id, timeframe=timeframe)
+    target_id = current_user.id
+    if current_user.role == UserRole.COUNSELOR and student_id:
+        try:
+            target_id = UUID(str(student_id).strip())
+        except (ValueError, TypeError):
+            target_id = current_user.id
+
+    history = await mood_service.get_history(db, student_id=target_id, timeframe=timeframe)
     return MoodHistoryResponse(history=history)
 
 @journal_router.post(
@@ -54,7 +65,7 @@ async def submit_journal_entry(
     await db.commit()
     
     # 2. Execute NLP and Risk assessment tasks synchronously to avoid front-end query race conditions
-    await process_journal_entry_background(
+    detected_emotions, mental_wellness_score, risk_level, sentiment_score = await process_journal_entry_background(
         mood_log_id=mood_log.id,
         content=payload.content,
         self_reported_score=payload.self_reported_score,
@@ -64,5 +75,9 @@ async def submit_journal_entry(
     return JournalSubmissionResponse(
         mood_log_id=mood_log.id,
         status="completed",
-        message="Journal entry saved and analyzed successfully."
+        message="Journal entry saved and analyzed successfully.",
+        mental_wellness_score=mental_wellness_score,
+        risk_level=risk_level,
+        emotions_detected=detected_emotions,
+        sentiment_score=sentiment_score
     )
