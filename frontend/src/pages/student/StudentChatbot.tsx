@@ -26,7 +26,7 @@ import {
   Check,
 } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { chatAPI, ChatMessageItem, ChatResponsePayload } from "@/services/api";
+import { chatAPI, ChatMessageItem, ChatResponsePayload, getAccessToken } from "@/services/api";
 import { cn } from "@/utils/cn";
 import { useToast } from "@/components/ui/toast";
 import { EmergencySOSModal } from "@/components/EmergencySOSModal";
@@ -341,10 +341,12 @@ export const StudentChatbot: React.FC = () => {
 
     // Use SSE Streaming endpoint for word-by-word real-time stream
     try {
+      const token = getAccessToken();
       const response = await fetch(`/api/v1/chat/conversations/${targetConvId}/messages/stream`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
         credentials: "include",
         body: JSON.stringify({ message: text }),
@@ -438,19 +440,19 @@ export const StudentChatbot: React.FC = () => {
   };
 
   return (
-    <div className="flex h-[calc(100vh-8.5rem)] w-full gap-4 overflow-hidden rounded-2xl bg-white/70 p-2 shadow-xl backdrop-blur-md dark:bg-slate-900/70 border border-slate-200/80 dark:border-slate-800">
+    <div className="flex h-[calc(100vh-8.5rem)] w-full gap-4 overflow-hidden rounded-2xl bg-card p-2 shadow-sm border border-border">
       {/* LEFT SIDEBAR: Conversations List */}
-      <div className="hidden w-72 flex-col rounded-xl border border-slate-200/60 bg-slate-50/50 p-3 dark:border-slate-800 dark:bg-slate-950/40 md:flex">
+      <div className="hidden w-72 flex-col rounded-xl border border-border bg-secondary/30 p-3 md:flex">
         <button
           onClick={() => createConvMutation.mutate("New Wellness Conversation")}
           disabled={createConvMutation.isPending}
-          className="flex w-full items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-md shadow-indigo-500/20 transition-all hover:bg-indigo-700 active:scale-[0.98] disabled:opacity-50"
+          className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm shadow-primary/20 transition-all hover:bg-primary/90 active:scale-[0.98] disabled:opacity-50"
         >
           <Plus className="h-4 w-4" />
           <span>New Chat</span>
         </button>
 
-        <div className="mt-4 flex items-center justify-between px-2 text-xs font-semibold tracking-wider text-slate-400 dark:text-slate-500 uppercase">
+        <div className="mt-4 flex items-center justify-between px-2 text-xs font-semibold tracking-wider text-muted-foreground uppercase">
           <span>Recent Conversations</span>
           <span>{conversations.length}</span>
         </div>
@@ -472,8 +474,8 @@ export const StudentChatbot: React.FC = () => {
                   className={cn(
                     "flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left text-xs font-medium transition-all",
                     isActive
-                      ? "bg-indigo-50 text-indigo-700 shadow-sm dark:bg-indigo-950/60 dark:text-indigo-300 font-semibold"
-                      : "text-slate-600 hover:bg-slate-100/80 dark:text-slate-400 dark:hover:bg-slate-900/60"
+                      ? "bg-primary/10 text-primary border border-primary/20 font-bold"
+                      : "text-muted-foreground hover:bg-secondary hover:text-foreground"
                   )}
                 >
                   <div className="flex items-center gap-2.5 truncate">
@@ -498,24 +500,24 @@ export const StudentChatbot: React.FC = () => {
       </div>
 
       {/* RIGHT MAIN CHAT AREA */}
-      <div className="flex flex-1 flex-col overflow-hidden rounded-xl border border-slate-200/60 bg-white/50 dark:border-slate-800 dark:bg-slate-950/20">
+      <div className="flex flex-1 flex-col overflow-hidden rounded-xl border border-border bg-card">
         {/* Chat Header */}
-        <div className="flex items-center justify-between border-b border-slate-200/60 px-5 py-3.5 backdrop-blur dark:border-slate-800">
+        <div className="flex items-center justify-between border-b border-border px-5 py-3.5 bg-card">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-tr from-indigo-500 to-violet-500 text-white shadow-md shadow-indigo-500/20">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-tr from-primary to-violet-600 text-primary-foreground shadow-md shadow-primary/20">
               <Bot className="h-5 w-5" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h3 className="text-sm font-bold text-slate-800 dark:text-slate-100">
+                <h3 className="text-sm font-bold text-foreground">
                   MindGuardAI Companion
                 </h3>
                 <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] font-semibold text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
-                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
                   AI Active
                 </span>
               </div>
-              <p className="text-xs text-slate-400 dark:text-slate-500">
+              <p className="text-xs text-muted-foreground">
                 Safe, non-judgmental student wellness guidance & CBT micro-tools
               </p>
             </div>
@@ -594,10 +596,10 @@ export const StudentChatbot: React.FC = () => {
                       className={cn(
                         "rounded-2xl px-4 py-3 text-xs leading-relaxed shadow-sm transition-all",
                         isStudent
-                          ? "rounded-tr-none bg-gradient-to-r from-indigo-600 to-violet-600 text-white shadow-indigo-500/10"
+                          ? "rounded-tr-none bg-gradient-to-r from-primary to-violet-600 text-primary-foreground shadow-primary/10"
                           : isRed
-                          ? "rounded-tl-none border border-rose-300 bg-rose-50/90 text-slate-800 dark:border-rose-900 dark:bg-rose-950/40 dark:text-slate-100"
-                          : "rounded-tl-none border border-slate-200/80 bg-white text-slate-800 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100"
+                          ? "rounded-tl-none border border-rose-400/40 bg-rose-500/10 text-foreground"
+                          : "rounded-tl-none border border-border/70 bg-card/90 text-foreground"
                       )}
                     >
                       <div className="whitespace-pre-wrap">{msg.message}</div>
@@ -918,27 +920,27 @@ export const StudentChatbot: React.FC = () => {
         </div>
 
         {/* Input Box */}
-        <div className="border-t border-slate-200/60 p-3 sm:p-4 dark:border-slate-800">
-          <div className="relative flex items-end gap-2 rounded-xl border border-slate-200 bg-white p-2 shadow-inner focus-within:border-indigo-500 focus-within:ring-2 focus-within:ring-indigo-500/20 dark:border-slate-800 dark:bg-slate-900">
+        <div className="border-t border-border p-3 sm:p-4 bg-secondary/20">
+          <div className="relative flex items-end gap-2 rounded-2xl border border-border bg-card p-2.5 shadow-xs focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20">
             <textarea
               rows={2}
               value={inputMessage}
               onChange={(e) => setInputMessage(e.target.value)}
               onKeyDown={handleKeyPress}
               placeholder="Type your message here in complete privacy... (Press Enter to send)"
-              className="max-h-28 flex-1 resize-none bg-transparent px-2 py-1 text-xs text-slate-800 outline-none placeholder:text-slate-400 dark:text-slate-100"
+              className="max-h-28 flex-1 resize-none bg-transparent px-2 py-1 text-xs text-foreground outline-none placeholder:text-muted-foreground"
             />
 
             <button
               onClick={() => handleSendMessage()}
               disabled={!inputMessage.trim() || isSending}
-              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-indigo-600 text-white shadow-md shadow-indigo-500/20 transition-all hover:bg-indigo-700 active:scale-95 disabled:opacity-40"
+              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-md shadow-primary/20 transition-all hover:bg-primary/90 active:scale-95 disabled:opacity-40"
             >
               <Send className="h-4 w-4" />
             </button>
           </div>
 
-          <div className="mt-2 flex items-center justify-between px-1 text-[11px] text-slate-400 dark:text-slate-500">
+          <div className="mt-2 flex items-center justify-between px-1 text-[11px] text-muted-foreground">
             <span>MindGuardAI provides supportive peer guidance, not clinical diagnoses.</span>
             <span>{inputMessage.length} / 4000</span>
           </div>
