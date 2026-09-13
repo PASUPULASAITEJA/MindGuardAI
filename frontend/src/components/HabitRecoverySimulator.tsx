@@ -57,13 +57,13 @@ export const HabitRecoverySimulator: React.FC<HabitRecoverySimulatorProps> = ({ 
             </div>
             <div>
               <CardTitle className="text-sm font-extrabold text-foreground flex items-center gap-1.5">
-                "What-If" Behavioral Recovery Simulator
+                Habit & Wellness Simulator
                 <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400">
-                  Interactive ML
+                  Interactive
                 </span>
               </CardTitle>
               <CardDescription className="text-xs text-muted-foreground">
-                Adjust lifestyle variables to simulate clinical wellness improvement in real time
+                See how small daily habit changes can improve your wellness score in real time
               </CardDescription>
             </div>
           </div>
@@ -83,7 +83,7 @@ export const HabitRecoverySimulator: React.FC<HabitRecoverySimulatorProps> = ({ 
         {/* Real-time comparison banner */}
         <div className="p-3 rounded-2xl bg-gradient-to-r from-background via-muted/30 to-background border border-border/70 flex items-center justify-around text-center">
           <div>
-            <span className="text-[11px] font-semibold text-muted-foreground block">Current Baseline</span>
+            <span className="text-[11px] font-semibold text-muted-foreground block">Current Score</span>
             <div className="text-2xl font-black text-foreground mt-0.5">
               {typeof currentScore === "number" ? currentScore.toFixed(1) : currentScore}
               <span className="text-xs font-normal text-muted-foreground">/100</span>
@@ -99,7 +99,7 @@ export const HabitRecoverySimulator: React.FC<HabitRecoverySimulatorProps> = ({ 
           </div>
 
           <div>
-            <span className="text-[11px] font-semibold text-muted-foreground block">Projected Wellness</span>
+            <span className="text-[11px] font-semibold text-muted-foreground block">Potential Score</span>
             <div className="text-2xl font-black text-emerald-500 mt-0.5">
               {projectedScore.toFixed(1)}
               <span className="text-xs font-normal text-muted-foreground">/100</span>
@@ -132,17 +132,17 @@ export const HabitRecoverySimulator: React.FC<HabitRecoverySimulatorProps> = ({ 
             />
             <div className="flex justify-between text-[10px] text-muted-foreground">
               <span>0h (no change)</span>
-              <span>1.5h</span>
-              <span>3h (cut blue light)</span>
+              <span>1.5h less</span>
+              <span>3h less (better sleep)</span>
             </div>
           </div>
 
-          {/* Slider 2: Daily Mindfulness */}
+          {/* Slider 2: Daily Relaxation */}
           <div className="p-3 rounded-xl bg-background/50 border border-border/60 space-y-2">
             <div className="flex justify-between items-center text-xs">
               <span className="font-semibold text-foreground flex items-center gap-1.5">
                 <Wind className="h-3.5 w-3.5 text-emerald-400" />
-                Daily Paced Breathing / Mindfulness
+                Daily Relaxation & Deep Breathing
               </span>
               <span className="font-bold text-emerald-500">+{mindfulnessMinutes} mins</span>
             </div>
@@ -156,9 +156,9 @@ export const HabitRecoverySimulator: React.FC<HabitRecoverySimulatorProps> = ({ 
               className="w-full accent-emerald-500 cursor-pointer h-1.5 bg-secondary rounded-lg"
             />
             <div className="flex justify-between text-[10px] text-muted-foreground">
-              <span>0m</span>
-              <span>10m</span>
-              <span>20m daily</span>
+              <span>0 mins</span>
+              <span>10 mins</span>
+              <span>20 mins daily</span>
             </div>
           </div>
         </div>
@@ -192,7 +192,7 @@ export const HabitRecoverySimulator: React.FC<HabitRecoverySimulatorProps> = ({ 
           >
             <span className="flex items-center gap-1.5">
               <Sparkles className="h-3.5 w-3.5" />
-              Pomodoro Breaks (5m per 45m study)
+              Study Breaks (5 mins every 45 mins)
             </span>
             <span className="font-bold">{studyBreaks ? "+5 pts" : "Off"}</span>
           </button>
@@ -200,8 +200,8 @@ export const HabitRecoverySimulator: React.FC<HabitRecoverySimulatorProps> = ({ 
 
         {/* Dynamic Takeaway Message */}
         <div className="p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-xs text-emerald-800 dark:text-emerald-300 font-medium">
-          🌟 <strong>Clinical Projection:</strong> Adopting these habit adjustments for 7–10 days shifts circadian melatonin regulation, recovering approximately{" "}
-          <strong>{totalPointsGained} wellness points</strong> into <strong>{projectedTier.label}</strong>.
+          🌟 <strong>What This Means:</strong> Practicing these simple habit changes for 1 to 2 weeks can improve your sleep and energy, adding about{" "}
+          <strong>{totalPointsGained} points</strong> to reach <strong>{projectedTier.label}</strong>!
         </div>
       </CardContent>
     </Card>
