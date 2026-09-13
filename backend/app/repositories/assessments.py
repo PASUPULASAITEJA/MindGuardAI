@@ -18,7 +18,7 @@ class AssessmentRepository(CRUDBase[Assessment, BaseModel, BaseModel]):
         statement = (
             select(self.model)
             .where(self.model.student_id == student_id)
-            .order_by(self.model.evaluated_at.desc())
+            .order_by(self.model.evaluated_at.desc(), self.model.id.desc())
             .limit(1)
         )
         result = await db.execute(statement)
