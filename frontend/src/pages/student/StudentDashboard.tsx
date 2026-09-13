@@ -25,7 +25,8 @@ import {
 import { 
   Mic, Square, Sparkles, BookOpen, Video, FileText, AlertCircle, HelpCircle,
   X, Play, Pause, Heart, Check, ClipboardCheck, Activity,
-  Laptop, Moon, Clock, Monitor, RefreshCw, Zap, PlayCircle, Calendar, UserPlus, FileDown, Cpu, Watch, Sun, BarChart3, TrendingUp, Wind
+  Laptop, Moon, Clock, Monitor, RefreshCw, Zap, PlayCircle, Calendar, UserPlus, FileDown, Cpu, Watch, Sun, BarChart3, TrendingUp, Wind,
+  Smile, Droplets, CheckCircle2, ChevronRight, ShieldCheck, Flame, HeartHandshake
 } from "lucide-react";
 import api, { chatAPI, appointmentsAPI, AppointmentItem } from "@/services/api";
 import { useAuth } from "@/contexts/AuthContext";
@@ -114,6 +115,113 @@ export const StudentDashboard: React.FC = () => {
   const [isBreathModalOpen, setIsBreathModalOpen] = useState(false);
   const [breathCount, setBreathCount] = useState(4);
   const [breathPhase, setBreathPhase] = useState<"Inhale" | "Hold" | "Exhale">("Inhale");
+
+  // Finch / Notion Interactive Companion State
+  const [activeSanctuaryTab, setActiveSanctuaryTab] = useState<"sanctuary" | "clinical" | "phenotyping">("sanctuary");
+  const [companionAffirmation, setCompanionAffirmation] = useState<string | null>(null);
+
+  const todayDateStr = new Date().toISOString().slice(0, 10);
+  const HABITS_STORAGE_KEY = `mindguard_daily_habits_${todayDateStr}`;
+
+  const defaultHabits = [
+    { id: "water", label: "Mindful Hydration", icon: "💧", description: "Drank 500ml fresh water", completed: false },
+    { id: "breathe", label: "2-Min Breath Break", icon: "🫁", description: "Paused to center your nervous system", completed: false },
+    { id: "walk", label: "Campus Fresh Air", icon: "🚶", description: "Took a 10-min screen-free walk", completed: false },
+    { id: "gratitude", label: "Daily Reflection", icon: "✍️", description: "Noted 1 thought or positive moment", completed: false },
+  ];
+
+  const [habits, setHabits] = useState(() => {
+    try {
+      const saved = localStorage.getItem(HABITS_STORAGE_KEY);
+      if (saved) return JSON.parse(saved);
+    } catch (e) {
+      // fallback
+    }
+    return defaultHabits;
+  });
+
+  const toggleHabit = (id: string) => {
+    setHabits((prev: typeof defaultHabits) => {
+      const updated = prev.map((h) => (h.id === id ? { ...h, completed: !h.completed } : h));
+      try {
+        localStorage.setItem(HABITS_STORAGE_KEY, JSON.stringify(updated));
+      } catch (e) {}
+      const target = updated.find((h) => h.id === id);
+      if (target?.completed) {
+        toast({
+          title: `${target.icon} Habit Completed!`,
+          description: `Great job: ${target.label}. Taking small steps creates big peace.`,
+          variant: "success",
+        });
+      }
+      return updated;
+    });
+  };
+
+  const completedHabitsCount = habits.filter((h: any) => h.completed).length;
+  const habitPercentage = Math.round((completedHabitsCount / habits.length) * 100);
+
+  const MOOD_WEATHER = [
+    {
+      score: 5,
+      icon: "🌟",
+      label: "Radiant",
+      subtext: "Energized & Motivated",
+      tagColor: "border-amber-400/50 bg-amber-500/10 text-amber-600 dark:text-amber-400",
+      affirmation: "🌟 You are glowing with positive energy today! Celebrate this momentum and cherish it."
+    },
+    {
+      score: 4,
+      icon: "🌿",
+      label: "Calm",
+      subtext: "Grounded & Balanced",
+      tagColor: "border-emerald-400/50 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
+      affirmation: "🌿 A peaceful, centered mind is your greatest strength. Stay grounded in this steady focus."
+    },
+    {
+      score: 3,
+      icon: "☕",
+      label: "Tired",
+      subtext: "Low Energy / Foggy",
+      tagColor: "border-amber-600/50 bg-amber-600/10 text-amber-700 dark:text-amber-300",
+      affirmation: "☕ College life is demanding. Don't run on empty fuel—give yourself permission to pause and rest."
+    },
+    {
+      score: 2,
+      icon: "🌊",
+      label: "Anxious",
+      subtext: "Overthinking / Racing",
+      tagColor: "border-cyan-400/50 bg-cyan-500/10 text-cyan-600 dark:text-cyan-400",
+      affirmation: "🌊 Your anxious thoughts are just passing clouds. Take a slow, grounding breath right now."
+    },
+    {
+      score: 1,
+      icon: "🌧️",
+      label: "Overwhelmed",
+      subtext: "Heavy / Need Support",
+      tagColor: "border-rose-400/50 bg-rose-500/10 text-rose-600 dark:text-rose-400",
+      affirmation: "🌧️ We hear you, and you are not alone. Be extra kind to yourself. MindGuard and campus counselors are here."
+    }
+  ];
+
+  const handleMoodSelect = (item: typeof MOOD_WEATHER[0]) => {
+    setSelectedMoodScore(item.score);
+    setCompanionAffirmation(item.affirmation);
+    if (!journalText.trim()) {
+      if (item.score >= 4) {
+        setJournalText(`Today I feel ${item.label.toLowerCase()} because `);
+      } else if (item.score === 3) {
+        setJournalText(`I am feeling tired today, especially with `);
+      } else {
+        setJournalText(`I'm feeling stress or anxiety about `);
+      }
+    }
+    toast({
+      title: `${item.icon} Mood Logged: ${item.label}`,
+      description: item.affirmation,
+      variant: "default"
+    });
+  };
 
   // Calming breath cadence timer
   useEffect(() => {
@@ -1777,84 +1885,318 @@ export const StudentDashboard: React.FC = () => {
       {/* 1. OVERVIEW VIEW */}
       {isOverview && (
         <>
-          {/* Friendly Student Hero Greeting & Quick Action Pills */}
-          <div className="relative overflow-hidden rounded-3xl border border-border bg-gradient-to-br from-card via-card to-primary/5 p-6 md:p-8 shadow-xs">
-            <div className="absolute top-0 right-0 -mt-10 -mr-10 h-48 w-48 rounded-full bg-primary/10 blur-3xl pointer-events-none" />
-            <div className="absolute bottom-0 left-1/3 -mb-10 h-36 w-36 rounded-full bg-emerald-500/10 blur-2xl pointer-events-none" />
-            
-            <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-              <div className="space-y-1.5">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-bold tracking-wide">
-                  <Sparkles className="h-3.5 w-3.5" />
-                  <span>Student Sanctuary • Safe & Private</span>
+          {/* Finch / Notion Warm Companion Sanctuary Hero */}
+          <div className="relative overflow-hidden rounded-3xl border border-border/80 bg-gradient-to-br from-card via-card to-primary/5 p-6 md:p-8 shadow-sm">
+            <div className="absolute top-0 right-0 -mt-12 -mr-12 h-64 w-64 rounded-full bg-primary/10 blur-3xl pointer-events-none" />
+            <div className="absolute bottom-0 left-1/4 -mb-12 h-48 w-48 rounded-full bg-amber-500/10 blur-3xl pointer-events-none" />
+
+            {/* Header pill & greeting */}
+            <div className="relative z-10 space-y-4">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-bold tracking-wide">
+                  <Sparkles className="h-3.5 w-3.5 text-primary animate-pulse" />
+                  <span>Student Sanctuary • Safe, Private & Encrypted</span>
                 </div>
-                <h2 className="text-2xl sm:text-3xl font-black text-foreground tracking-tight">
+                <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground">
+                  <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+                  <span>AI Wellness Companion Active</span>
+                </div>
+              </div>
+
+              <div className="space-y-1">
+                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-foreground tracking-tight">
                   {getGreeting()}, <span className="capitalize text-primary">{studentDisplayName}</span> ✨
-                </h2>
-                <p className="text-xs sm:text-sm text-muted-foreground max-w-xl leading-relaxed">
-                  How are you feeling today? Your data is encrypted and private. Take a moment to reflect, check your score, or try a quick calming exercise.
+                </h1>
+                <p className="text-sm sm:text-base text-muted-foreground max-w-2xl leading-relaxed">
+                  "Take a slow, gentle breath. You don't have to carry the whole semester today—just this one moment."
                 </p>
               </div>
 
-              {/* 5 Quick Action 1-Tap Pills */}
-              <div className="flex flex-wrap items-center gap-2 sm:gap-2.5">
-                <button
-                  onClick={() => {
-                    setCheckInTab("text");
-                    document.getElementById("check-in-panel")?.scrollIntoView({ behavior: "smooth" });
-                  }}
-                  className="inline-flex items-center gap-2 px-3.5 py-2 rounded-2xl bg-secondary/80 hover:bg-primary/10 border border-border hover:border-primary/40 text-foreground hover:text-primary text-xs font-bold transition-all shadow-xs active:scale-95"
-                >
-                  <Heart className="h-3.5 w-3.5 text-rose-500" />
-                  <span>Log Reflection</span>
-                </button>
+              {/* Emotional Weather Board (5 Tactile Mood Cards) */}
+              <div className="pt-2 space-y-2.5">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-extrabold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+                    <Heart className="h-3.5 w-3.5 text-rose-500" />
+                    How is your emotional weather right now?
+                  </span>
+                  {selectedMoodScore && (
+                    <span className="text-xs font-bold text-primary">
+                      Mood score: {selectedMoodScore}/5 recorded
+                    </span>
+                  )}
+                </div>
 
-                <button
-                  onClick={() => setIsBreathModalOpen(true)}
-                  className="inline-flex items-center gap-2 px-3.5 py-2 rounded-2xl bg-secondary/80 hover:bg-emerald-500/10 border border-border hover:border-emerald-500/40 text-foreground hover:text-emerald-500 text-xs font-bold transition-all shadow-xs active:scale-95"
-                >
-                  <Wind className="h-3.5 w-3.5 text-emerald-500" />
-                  <span>10s Breath Pacer</span>
-                </button>
+                <div className="grid grid-cols-2 sm:grid-cols-5 gap-2.5 sm:gap-3">
+                  {MOOD_WEATHER.map((item) => {
+                    const isSelected = selectedMoodScore === item.score;
+                    return (
+                      <button
+                        key={item.score}
+                        type="button"
+                        onClick={() => handleMoodSelect(item)}
+                        className={`group relative flex flex-col items-center text-center p-3.5 sm:p-4 rounded-2xl border transition-all duration-200 active:scale-95 ${
+                          isSelected
+                            ? `${item.tagColor} shadow-md scale-[1.02] font-black`
+                            : "bg-card/70 hover:bg-card border-border/70 hover:border-primary/40 text-foreground"
+                        }`}
+                      >
+                        <span className="text-2xl sm:text-3xl mb-1.5 transition-transform group-hover:scale-125">
+                          {item.icon}
+                        </span>
+                        <span className="text-xs font-bold tracking-tight">{item.label}</span>
+                        <span className="text-[10px] text-muted-foreground line-clamp-1 mt-0.5">{item.subtext}</span>
+                        {isSelected && (
+                          <div className="absolute top-2 right-2">
+                            <CheckCircle2 className="h-3.5 w-3.5 text-primary" />
+                          </div>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
 
-                <NavLink
-                  to="/student/chat"
-                  className="inline-flex items-center gap-2 px-3.5 py-2 rounded-2xl bg-primary hover:bg-primary/90 text-primary-foreground text-xs font-bold transition-all shadow-sm shadow-primary/20 active:scale-95"
-                >
-                  <Sparkles className="h-3.5 w-3.5" />
-                  <span>Chat with AI</span>
-                </NavLink>
-
-                <button
-                  onClick={() => startSurvey("phq-9")}
-                  className="inline-flex items-center gap-2 px-3.5 py-2 rounded-2xl bg-secondary/80 hover:bg-violet-500/10 border border-border hover:border-violet-500/40 text-foreground hover:text-violet-500 text-xs font-bold transition-all shadow-xs active:scale-95"
-                >
-                  <ClipboardCheck className="h-3.5 w-3.5 text-violet-500" />
-                  <span>Survey Check-In</span>
-                </button>
-
-                <button
-                  onClick={() => setIsBookingOpen(true)}
-                  className="inline-flex items-center gap-2 px-3.5 py-2 rounded-2xl bg-secondary/80 hover:bg-indigo-500/10 border border-border hover:border-indigo-500/40 text-foreground hover:text-indigo-500 text-xs font-bold transition-all shadow-xs active:scale-95"
-                >
-                  <Calendar className="h-3.5 w-3.5 text-indigo-500" />
-                  <span>Book Counselor</span>
-                </button>
+                {/* Empathetic Affirmation Toast Banner */}
+                {companionAffirmation && (
+                  <div className="p-3.5 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-between gap-3 text-xs sm:text-sm font-medium text-foreground transition-all">
+                    <div className="flex items-center gap-2.5">
+                      <span className="text-lg">🌿</span>
+                      <span>{companionAffirmation}</span>
+                    </div>
+                    <button
+                      onClick={() => setCompanionAffirmation(null)}
+                      className="text-muted-foreground hover:text-foreground text-xs p-1"
+                    >
+                      <X className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           </div>
 
-          {/* Top Capstone Intelligence Bar: Official Dossier & Benchmarks */}
-          <div className="flex flex-wrap items-center justify-between gap-3 p-3.5 rounded-2xl bg-card border border-border shadow-sm">
-            <div className="flex items-center gap-2.5">
-              <span className="relative flex h-2.5 w-2.5">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
-              </span>
-              <span className="text-xs font-bold text-foreground">
-                MindGuard AI Multi-Modal Engine <span className="text-muted-foreground font-normal">• Validated on N=24,292 Cohort</span>
-              </span>
+          {/* Notion-Style Daily Self-Care Checklist & Sanctuary 1-Tap Pods */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Notion Habit Checklist (1 Col) */}
+            <div className="finch-card p-5 lg:p-6 space-y-4 bg-card border border-border/80 rounded-3xl shadow-xs">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-sm font-black text-foreground flex items-center gap-1.5">
+                    <CheckCircle2 className="h-4 w-4 text-emerald-500" />
+                    Daily Self-Care Routine
+                  </h3>
+                  <p className="text-xs text-muted-foreground mt-0.5">Gentle mindful habits for today</p>
+                </div>
+                <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                  {completedHabitsCount} / {habits.length} ({habitPercentage}%)
+                </span>
+              </div>
+
+              {/* Animated Progress Bar */}
+              <div className="w-full bg-secondary rounded-full h-2 overflow-hidden">
+                <div
+                  className="bg-gradient-to-r from-emerald-500 to-primary h-2 rounded-full transition-all duration-500 ease-out"
+                  style={{ width: `${habitPercentage}%` }}
+                />
+              </div>
+
+              {/* Habit Items */}
+              <div className="space-y-2">
+                {habits.map((habit: any) => (
+                  <button
+                    key={habit.id}
+                    type="button"
+                    onClick={() => toggleHabit(habit.id)}
+                    className={`w-full flex items-center justify-between p-3 rounded-2xl border text-left transition-all active:scale-[0.98] ${
+                      habit.completed
+                        ? "bg-emerald-500/5 border-emerald-500/30 text-foreground line-through opacity-80"
+                        : "bg-secondary/40 hover:bg-secondary/70 border-border/60 text-foreground"
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div
+                        className={`h-5 w-5 rounded-lg flex items-center justify-center border transition-colors ${
+                          habit.completed
+                            ? "bg-emerald-500 border-emerald-500 text-white"
+                            : "border-muted-foreground/40 bg-card"
+                        }`}
+                      >
+                        {habit.completed && <Check className="h-3 w-3" />}
+                      </div>
+                      <div>
+                        <span className="text-xs font-bold block">{habit.icon} {habit.label}</span>
+                        <span className="text-[10px] text-muted-foreground block">{habit.description}</span>
+                      </div>
+                    </div>
+                  </button>
+                ))}
+              </div>
+
+              {habitPercentage === 100 && (
+                <div className="p-3 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-center text-xs font-bold text-amber-600 dark:text-amber-400">
+                  🎉 Fantastic! You completed all daily habits today.
+                </div>
+              )}
             </div>
+
+            {/* 4 Sanctuary Quick Action Pods (2 Cols) */}
+            <div className="lg:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {/* Pod 1: AI Chat */}
+              <NavLink
+                to="/student/chat"
+                className="group p-5 rounded-3xl border border-primary/20 bg-gradient-to-br from-primary/5 via-card to-card hover:border-primary/50 transition-all shadow-xs hover:shadow-md hover:-translate-y-0.5 flex flex-col justify-between"
+              >
+                <div>
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="h-10 w-10 rounded-2xl bg-primary/10 text-primary flex items-center justify-center group-hover:scale-110 transition-transform">
+                      <Sparkles className="h-5 w-5" />
+                    </div>
+                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-primary/10 text-primary border border-primary/20">
+                      24/7 Confidential
+                    </span>
+                  </div>
+                  <h4 className="text-sm font-extrabold text-foreground group-hover:text-primary transition-colors">
+                    AI Wellness Companion
+                  </h4>
+                  <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                    Need to vent or process difficult coursework feelings? Talk through your thoughts in a private safe space.
+                  </p>
+                </div>
+                <div className="mt-4 flex items-center gap-1.5 text-xs font-bold text-primary">
+                  <span>Open Safe Chat</span>
+                  <ChevronRight className="h-3.5 w-3.5 group-hover:translate-x-1 transition-transform" />
+                </div>
+              </NavLink>
+
+              {/* Pod 2: Breath Pacer */}
+              <button
+                type="button"
+                onClick={() => setIsBreathModalOpen(true)}
+                className="group p-5 rounded-3xl border border-emerald-500/20 bg-gradient-to-br from-emerald-500/5 via-card to-card hover:border-emerald-500/50 transition-all shadow-xs hover:shadow-md hover:-translate-y-0.5 flex flex-col justify-between text-left"
+              >
+                <div>
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="h-10 w-10 rounded-2xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center group-hover:scale-110 transition-transform">
+                      <Wind className="h-5 w-5" />
+                    </div>
+                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                      Instant Reset
+                    </span>
+                  </div>
+                  <h4 className="text-sm font-extrabold text-foreground group-hover:text-emerald-500 transition-colors">
+                    10s Box Breathing
+                  </h4>
+                  <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                    Calm your autonomic nervous system with clinically guided 4-4-4 respiration cadence.
+                  </p>
+                </div>
+                <div className="mt-4 flex items-center gap-1.5 text-xs font-bold text-emerald-600 dark:text-emerald-400">
+                  <span>Start Calming Breath</span>
+                  <ChevronRight className="h-3.5 w-3.5 group-hover:translate-x-1 transition-transform" />
+                </div>
+              </button>
+
+              {/* Pod 3: Survey Check-In */}
+              <button
+                type="button"
+                onClick={() => startSurvey("phq-9")}
+                className="group p-5 rounded-3xl border border-violet-500/20 bg-gradient-to-br from-violet-500/5 via-card to-card hover:border-violet-500/50 transition-all shadow-xs hover:shadow-md hover:-translate-y-0.5 flex flex-col justify-between text-left"
+              >
+                <div>
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="h-10 w-10 rounded-2xl bg-violet-500/10 text-violet-500 flex items-center justify-center group-hover:scale-110 transition-transform">
+                      <ClipboardCheck className="h-5 w-5" />
+                    </div>
+                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-violet-500/10 text-violet-600 dark:text-violet-400 border border-violet-500/20">
+                      PHQ-9 & GAD-7
+                    </span>
+                  </div>
+                  <h4 className="text-sm font-extrabold text-foreground group-hover:text-violet-500 transition-colors">
+                    Clinical Self-Check
+                  </h4>
+                  <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                    Validated depression and anxiety assessment calibrated specifically for university students.
+                  </p>
+                </div>
+                <div className="mt-4 flex items-center gap-1.5 text-xs font-bold text-violet-600 dark:text-violet-400">
+                  <span>Begin Assessment</span>
+                  <ChevronRight className="h-3.5 w-3.5 group-hover:translate-x-1 transition-transform" />
+                </div>
+              </button>
+
+              {/* Pod 4: Counselor Booking */}
+              <button
+                type="button"
+                onClick={() => setIsBookingOpen(true)}
+                className="group p-5 rounded-3xl border border-indigo-500/20 bg-gradient-to-br from-indigo-500/5 via-card to-card hover:border-indigo-500/50 transition-all shadow-xs hover:shadow-md hover:-translate-y-0.5 flex flex-col justify-between text-left"
+              >
+                <div>
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="h-10 w-10 rounded-2xl bg-indigo-500/10 text-indigo-500 flex items-center justify-center group-hover:scale-110 transition-transform">
+                      <Calendar className="h-5 w-5" />
+                    </div>
+                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20">
+                      Free Campus Care
+                    </span>
+                  </div>
+                  <h4 className="text-sm font-extrabold text-foreground group-hover:text-indigo-500 transition-colors">
+                    Campus Counselor
+                  </h4>
+                  <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                    Schedule a confidential 1-on-1 session with a campus mental health professional.
+                  </p>
+                </div>
+                <div className="mt-4 flex items-center gap-1.5 text-xs font-bold text-indigo-600 dark:text-indigo-400">
+                  <span>Book Free Session</span>
+                  <ChevronRight className="h-3.5 w-3.5 group-hover:translate-x-1 transition-transform" />
+                </div>
+              </button>
+            </div>
+          </div>
+
+          {/* Dynamic Sanctuary View Switcher Tabs */}
+          <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
+            <div className="flex items-center p-1 rounded-2xl bg-secondary/70 border border-border/70 text-xs font-bold">
+              <button
+                type="button"
+                onClick={() => setActiveSanctuaryTab("sanctuary")}
+                className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-all ${
+                  activeSanctuaryTab === "sanctuary"
+                    ? "bg-card text-foreground shadow-sm font-black"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                <Heart className="h-3.5 w-3.5 text-rose-500" />
+                <span>Daily Sanctuary & Reflection</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setActiveSanctuaryTab("clinical")}
+                className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-all ${
+                  activeSanctuaryTab === "clinical"
+                    ? "bg-card text-foreground shadow-sm font-black"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                <Cpu className="h-3.5 w-3.5 text-primary" />
+                <span>AI Science & Explainability</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setActiveSanctuaryTab("phenotyping")}
+                className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-all ${
+                  activeSanctuaryTab === "phenotyping"
+                    ? "bg-card text-foreground shadow-sm font-black"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                <Laptop className="h-3.5 w-3.5 text-emerald-500" />
+                <span>Digital Balance & Phenotyping</span>
+              </button>
+            </div>
+
+            {/* Clinical Dossier Quick Trigger */}
             <div className="flex items-center gap-2">
               <Button
                 onClick={() => setIsDossierOpen(true)}
@@ -1863,50 +2205,67 @@ export const StudentDashboard: React.FC = () => {
                 className="h-8 px-3 text-xs font-bold border-primary/30 hover:bg-primary/10 hover:text-primary rounded-xl transition-all"
               >
                 <FileText className="h-3.5 w-3.5 mr-1.5 text-primary" />
-                Export Clinical Dossier (PDF)
+                Export Dossier
               </Button>
               <Button
                 onClick={() => setIsBenchmarksOpen(true)}
                 size="sm"
-                className="h-8 px-3 text-xs font-bold bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl shadow transition-all"
+                className="h-8 px-3 text-xs font-bold bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl shadow-xs transition-all"
               >
                 <Cpu className="h-3.5 w-3.5 mr-1.5" />
-                AI Benchmarks (97.8% Recall)
+                AI Benchmarks
               </Button>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Wellness Score Gauge */}
-            {renderWellnessGauge()}
-            
-            {/* Direct Daily Check-In Panel */}
-            {renderCheckInPanel()}
-          </div>
+          {/* TAB 1: DAILY SANCTUARY & REFLECTION */}
+          {activeSanctuaryTab === "sanctuary" && (
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                {/* Wellness Score Gauge */}
+                {renderWellnessGauge()}
+                
+                {/* Direct Daily Check-In Panel */}
+                {renderCheckInPanel()}
+              </div>
 
-          {/* Explainable AI (XAI) & "What-If" Behavioral Simulator Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <ExplainableAIFactors
-              wellnessScore={wellnessScore}
-              riskLevel={assessment?.risk_level || "LOW"}
-              lateNightMins={behavioralSummary?.latest_log?.late_night_usage_minutes || 0}
-              totalScreenMins={behavioralSummary?.latest_log?.total_screen_time_minutes || 0}
-              sentimentScore={computedSentiment}
-              hasAssessment={hasAssessment}
-            />
-            <HabitRecoverySimulator
-              currentScore={wellnessScore || 50}
-            />
-          </div>
+              {/* Recommended Activities List */}
+              {renderRecommendationsGrid()}
+            </div>
+          )}
 
-          {/* PC Digital Phenotyping & Screen Time Activity */}
-          {renderDigitalPhenotypingCard()}
-          
-          {/* Volatility Line Chart */}
-          {renderVolatilityChart()}
-          
-          {/* Recommended Activities List */}
-          {renderRecommendationsGrid()}
+          {/* TAB 2: AI SCIENCE & EXPLAINABILITY */}
+          {activeSanctuaryTab === "clinical" && (
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <ExplainableAIFactors
+                  wellnessScore={wellnessScore}
+                  riskLevel={assessment?.risk_level || "LOW"}
+                  lateNightMins={behavioralSummary?.latest_log?.late_night_usage_minutes || 0}
+                  totalScreenMins={behavioralSummary?.latest_log?.total_screen_time_minutes || 0}
+                  sentimentScore={computedSentiment}
+                  hasAssessment={hasAssessment}
+                />
+                <HabitRecoverySimulator
+                  currentScore={wellnessScore || 50}
+                />
+              </div>
+
+              {/* Recommended Activities List */}
+              {renderRecommendationsGrid()}
+            </div>
+          )}
+
+          {/* TAB 3: DIGITAL BALANCE & PHENOTYPING */}
+          {activeSanctuaryTab === "phenotyping" && (
+            <div className="space-y-6">
+              {/* PC Digital Phenotyping & Screen Time Activity */}
+              {renderDigitalPhenotypingCard()}
+              
+              {/* Volatility Line Chart */}
+              {renderVolatilityChart()}
+            </div>
+          )}
         </>
       )}
 
