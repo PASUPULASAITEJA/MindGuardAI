@@ -88,7 +88,7 @@ export const AdminDashboard: React.FC = () => {
 
           {/* Quick Info Cards Row */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <Card className="border-t-2 border-t-primary p-5 flex flex-col justify-between shadow-sm hover:shadow-md transition-all">
+            <Card className="wellness-card border-l-4 border-l-primary p-5 flex flex-col justify-between shadow-xs">
               <div className="flex items-start justify-between">
                 <div>
                   <span className="text-[11px] font-extrabold text-muted-foreground uppercase tracking-wider">Campus Wellness Index</span>
@@ -107,7 +107,7 @@ export const AdminDashboard: React.FC = () => {
               <p className="text-xs text-muted-foreground mt-3 font-medium">Aggregated campus-wide continuous score</p>
             </Card>
 
-            <Card className="border-t-2 border-t-rose-500 p-5 flex flex-col justify-between shadow-sm hover:shadow-md transition-all">
+            <Card className="wellness-card border-l-4 border-l-rose-500 p-5 flex flex-col justify-between shadow-xs">
               <div className="flex items-start justify-between">
                 <div>
                   <span className="text-[11px] font-extrabold text-muted-foreground uppercase tracking-wider">Active Alerts Queue</span>
@@ -126,7 +126,7 @@ export const AdminDashboard: React.FC = () => {
               <p className="text-xs text-muted-foreground mt-3 font-medium">Elevated risk cases awaiting counselor review</p>
             </Card>
 
-            <Card className="border-t-2 border-t-indigo-500 p-5 flex flex-col justify-between shadow-sm hover:shadow-md transition-all">
+            <Card className="wellness-card border-l-4 border-l-indigo-500 p-5 flex flex-col justify-between shadow-xs">
               <div className="flex items-start justify-between">
                 <div>
                   <span className="text-[11px] font-extrabold text-muted-foreground uppercase tracking-wider">Monitored Cohort Base</span>
@@ -148,7 +148,7 @@ export const AdminDashboard: React.FC = () => {
 
           {/* Risk distribution Breakdown */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <Card className="lg:col-span-1 p-6 flex flex-col justify-between">
+            <Card className="lg:col-span-1 p-6 flex flex-col justify-between wellness-card shadow-xs">
               <div>
                 <h4 className="font-extrabold text-sm md:text-base text-foreground mb-3">Triage Instructions</h4>
                 <p className="text-muted-foreground text-xs md:text-sm leading-relaxed">
@@ -168,7 +168,7 @@ export const AdminDashboard: React.FC = () => {
               </div>
             </Card>
 
-            <Card className="lg:col-span-2 overflow-hidden">
+            <Card className="lg:col-span-2 overflow-hidden wellness-card shadow-xs">
               <CardHeader>
                 <CardTitle className="text-foreground text-sm md:text-base font-extrabold">Clinical Risk Breakdown</CardTitle>
                 <CardDescription className="text-muted-foreground text-xs md:text-sm">Distribution of students based on assessed security risk levels.</CardDescription>
@@ -341,7 +341,7 @@ export const AdminDashboard: React.FC = () => {
           </div>
 
           {/* User Table card */}
-          <Card className="overflow-hidden">
+          <Card className="wellness-card overflow-hidden shadow-xs">
             <CardContent className="p-0">
               {isDirectoryLoading ? (
                 <div className="space-y-3 p-6">
@@ -374,11 +374,11 @@ export const AdminDashboard: React.FC = () => {
                             </td>
                             <td className="p-4 font-bold text-foreground">{user.email}</td>
                             <td className="p-4">
-                              <span className={`inline-block px-1.5 py-0.5 rounded text-xs font-bold tracking-wider uppercase ${
+                              <span className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-extrabold tracking-wider uppercase ${
                                 user.role === "STUDENT" 
-                                  ? "bg-blue-500/10 text-blue-500 border border-blue-500/20"
+                                  ? "bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20"
                                   : user.role === "COUNSELOR"
-                                  ? "bg-amber-500/10 text-amber-500 border border-amber-500/20"
+                                  ? "bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20"
                                   : "bg-primary/10 text-primary border border-primary/20"
                               }`}>
                                 {user.role}
