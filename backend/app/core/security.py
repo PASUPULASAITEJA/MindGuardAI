@@ -24,10 +24,12 @@ def get_password_hash(password: str) -> str:
 def create_access_token(
     subject: Union[str, Any],
     role: str,
+    email: Optional[str] = None,
+    full_name: Optional[str] = None,
     expires_delta: Optional[timedelta] = None
 ) -> str:
     """
-    Generate a signed JWT access token containing subject (user ID) and role claims.
+    Generate a signed JWT access token containing subject (user ID), role, email, and full_name claims.
     """
     if expires_delta:
         expire = datetime.now(timezone.utc) + expires_delta
@@ -38,6 +40,8 @@ def create_access_token(
         "exp": expire,
         "sub": str(subject),
         "role": role,
+        "email": email or "",
+        "full_name": full_name or "",
         "type": "access"
     }
     return jwt.encode(to_encode, settings.JWT_SECRET_KEY, algorithm=ALGORITHM)
