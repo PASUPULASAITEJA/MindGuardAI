@@ -651,7 +651,7 @@ export const StudentDashboard: React.FC = () => {
 
   // Helper renderers for modular views
   const renderWellnessGauge = () => (
-    <Card className="lg:col-span-1 shadow-sm">
+    <Card className="wellness-card shadow-xs">
       <CardHeader>
         <CardTitle className="text-foreground text-sm font-extrabold">Mental Wellness Index</CardTitle>
         <CardDescription className="text-muted-foreground text-xs">Continuous well-being score (0 to 100)</CardDescription>
@@ -755,7 +755,7 @@ export const StudentDashboard: React.FC = () => {
   );
 
   const renderCheckInPanel = () => (
-    <Card id="check-in-panel" className="lg:col-span-2 shadow-sm scroll-mt-20">
+    <Card id="check-in-panel" className="wellness-card shadow-xs scroll-mt-20">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
         <div>
           <CardTitle className="text-foreground text-sm font-extrabold">Daily Check-In</CardTitle>
@@ -2048,6 +2048,302 @@ export const StudentDashboard: React.FC = () => {
     </Card>
   );
 
+  const renderRecentActivityCard = () => {
+    const recentLogs = (moodHistory || [])
+      .slice()
+      .sort((a, b) => new Date(b.logged_at).getTime() - new Date(a.logged_at).getTime())
+      .slice(0, 4);
+
+    return (
+      <Card className="wellness-card shadow-xs">
+        <CardHeader className="flex flex-row items-center justify-between pb-3">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <div className="h-7 w-7 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+                <Clock className="h-3.5 w-3.5" />
+              </div>
+              <CardTitle className="text-foreground text-sm font-extrabold">Recent Daily Reflections</CardTitle>
+            </div>
+            <CardDescription className="text-muted-foreground text-xs">
+              Your recent mood check-ins and journal entries
+            </CardDescription>
+          </div>
+          <NavLink
+            to="/student/history"
+            className="text-xs font-bold text-primary hover:underline flex items-center gap-1"
+          >
+            <span>View all</span>
+            <ChevronRight className="h-3 w-3" />
+          </NavLink>
+        </CardHeader>
+        <CardContent>
+          {recentLogs.length === 0 ? (
+            <div className="text-center py-8 px-4 rounded-xl border border-dashed border-border/70">
+              <div className="h-10 w-10 mx-auto rounded-full bg-muted/50 flex items-center justify-center text-muted-foreground mb-2">
+                <BookOpen className="h-5 w-5" />
+              </div>
+              <p className="text-xs font-bold text-foreground">No reflections logged yet</p>
+              <p className="text-[11px] text-muted-foreground mt-1 max-w-xs mx-auto">
+                Share how you feel in the check-in panel above to start mapping your personal emotional journey.
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-2.5">
+              {recentLogs.map((log: any, idx: number) => {
+                const logDate = new Date(log.logged_at);
+                const dateStr = logDate.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+                const timeStr = logDate.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+                const emotion = log.primary_emotion ? (log.primary_emotion.charAt(0).toUpperCase() + log.primary_emotion.slice(1)) : "Balanced";
+                const score = log.self_reported_score ?? (log.nlp_sentiment_scaled ? Math.round(log.nlp_sentiment_scaled) : null);
+
+                return (
+                  <div
+                    key={log.id || idx}
+                    className="flex items-start justify-between p-3 rounded-xl border border-border/60 bg-card/60 hover:bg-card hover:border-primary/30 transition-all text-xs"
+                  >
+                    <div className="space-y-1 pr-3 flex-1">
+                      <div className="flex items-center gap-2">
+                        <span className="font-bold text-foreground">{dateStr}</span>
+                        <span className="text-[10px] text-muted-foreground">{timeStr}</span>
+                        <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-primary/10 text-primary border border-primary/20">
+                          {emotion}
+                        </span>
+                      </div>
+                      {log.content ? (
+                        <p className="text-muted-foreground line-clamp-1 text-[11px] italic">
+                          "{log.content}"
+                        </p>
+                      ) : (
+                        <p className="text-muted-foreground text-[10px]">Mood logged without journal note</p>
+                      )}
+                    </div>
+                    {score !== null && (
+                      <div className="text-right flex-shrink-0">
+                        <span className="text-xs font-black text-foreground">{score}/10</span>
+                        <span className="block text-[9px] text-muted-foreground">Mood Index</span>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    );
+  };
+
+  const renderAssessmentStatusCard = () => {
+    const riskTier = assessment?.risk_level || classification.tier;
+    const badgeClass =
+      riskTier === "HIGH"
+        ? "badge-high-risk"
+        : riskTier === "MEDIUM"
+        ? "badge-medium-risk"
+        : "badge-low-risk";
+
+    const lastEvalDate = assessment?.evaluated_at
+      ? new Date(assessment.evaluated_at).toLocaleDateString(undefined, {
+          month: "short",
+          day: "numeric",
+          year: "numeric",
+        })
+      : "Pending initial screener";
+
+    return (
+      <Card className="wellness-card shadow-xs">
+        <CardHeader className="pb-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <div className="h-7 w-7 rounded-xl bg-violet-500/10 flex items-center justify-center text-violet-500">
+                <ClipboardCheck className="h-3.5 w-3.5" />
+              </div>
+              <CardTitle className="text-foreground text-sm font-extrabold">Clinical Assessment</CardTitle>
+            </div>
+            <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full ${badgeClass}`}>
+              {riskTier} RISK
+            </span>
+          </div>
+          <CardDescription className="text-muted-foreground text-xs mt-1">
+            Standard PHQ-9 & GAD-7 screener status
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-3.5">
+          <div className="p-3 rounded-xl bg-muted/40 border border-border/60 text-xs space-y-1.5">
+            <div className="flex items-center justify-between">
+              <span className="text-muted-foreground">Last Evaluation:</span>
+              <span className="font-bold text-foreground">{lastEvalDate}</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-muted-foreground">Recommended Frequency:</span>
+              <span className="font-bold text-foreground">Every 14 days</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-muted-foreground">Privacy Status:</span>
+              <span className="font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+                <ShieldCheck className="h-3 w-3" /> Encrypted & Private
+              </span>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-2 pt-1">
+            <Button
+              type="button"
+              onClick={() => startSurvey("phq-9")}
+              size="sm"
+              className="w-full text-xs font-bold rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground shadow-xs"
+            >
+              <ClipboardCheck className="h-3.5 w-3.5 mr-1" />
+              Take Screener
+            </Button>
+            <Button
+              type="button"
+              onClick={() => setIsDossierOpen(true)}
+              size="sm"
+              variant="outline"
+              className="w-full text-xs font-bold rounded-xl border-border/80 hover:bg-secondary"
+            >
+              <FileText className="h-3.5 w-3.5 mr-1 text-primary" />
+              View Dossier
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  };
+
+  const renderSelfCareChecklist = () => (
+    <Card className="wellness-card shadow-xs">
+      <CardHeader className="pb-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="h-7 w-7 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-500">
+              <CheckCircle2 className="h-3.5 w-3.5" />
+            </div>
+            <div>
+              <CardTitle className="text-foreground text-sm font-extrabold">Daily Self-Care</CardTitle>
+              <CardDescription className="text-muted-foreground text-[11px]">Gentle mindful habits for today</CardDescription>
+            </div>
+          </div>
+          <span className="px-2 py-0.5 rounded-full text-[11px] font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+            {completedHabitsCount}/{habits.length}
+          </span>
+        </div>
+      </CardHeader>
+      <CardContent className="space-y-3">
+        {/* Animated Progress Bar */}
+        <div className="w-full bg-secondary rounded-full h-1.5 overflow-hidden">
+          <div
+            className="bg-emerald-500 h-1.5 rounded-full transition-all duration-500 ease-out"
+            style={{ width: `${habitPercentage}%` }}
+          />
+        </div>
+
+        {/* Habit Items */}
+        <div className="space-y-2">
+          {habits.map((habit: any) => (
+            <button
+              key={habit.id}
+              type="button"
+              onClick={() => toggleHabit(habit.id)}
+              className={`w-full flex items-center justify-between p-2.5 rounded-xl border text-left transition-all active:scale-[0.98] ${
+                habit.completed
+                  ? "bg-emerald-500/5 border-emerald-500/30 text-foreground line-through opacity-80"
+                  : "bg-secondary/40 hover:bg-secondary/70 border-border/60 text-foreground"
+              }`}
+            >
+              <div className="flex items-center gap-2.5">
+                <div
+                  className={`h-4 w-4 rounded-md flex items-center justify-center border transition-colors ${
+                    habit.completed
+                      ? "bg-emerald-500 border-emerald-500 text-white"
+                      : "border-muted-foreground/40 bg-card"
+                  }`}
+                >
+                  {habit.completed && <Check className="h-3 w-3" />}
+                </div>
+                <div>
+                  <span className="text-xs font-bold block">{habit.icon} {habit.label}</span>
+                  <span className="text-[10px] text-muted-foreground block">{habit.description}</span>
+                </div>
+              </div>
+            </button>
+          ))}
+        </div>
+
+        {habitPercentage === 100 && (
+          <div className="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-center text-xs font-bold text-amber-600 dark:text-amber-400">
+            🎉 Fantastic! You completed all daily habits today.
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+
+  const renderQuickSupportTools = () => (
+    <Card className="wellness-card shadow-xs">
+      <CardHeader className="pb-3">
+        <div className="flex items-center gap-2">
+          <div className="h-7 w-7 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+            <HeartHandshake className="h-3.5 w-3.5" />
+          </div>
+          <CardTitle className="text-foreground text-sm font-extrabold">Instant Calming & Support</CardTitle>
+        </div>
+      </CardHeader>
+      <CardContent className="space-y-2">
+        <button
+          type="button"
+          onClick={() => setIsBreathModalOpen(true)}
+          className="w-full flex items-center justify-between p-3 rounded-xl border border-border/70 hover:border-emerald-500/40 hover:bg-emerald-500/5 transition-all text-left group"
+        >
+          <div className="flex items-center gap-3">
+            <div className="h-9 w-9 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center group-hover:scale-105 transition-transform">
+              <Wind className="h-4 w-4" />
+            </div>
+            <div>
+              <span className="text-xs font-bold text-foreground block">Box Breathing Pacer</span>
+              <span className="text-[10px] text-muted-foreground block">4-4-4 nervous system reset</span>
+            </div>
+          </div>
+          <ChevronRight className="h-3.5 w-3.5 text-muted-foreground group-hover:translate-x-1 transition-transform" />
+        </button>
+
+        <NavLink
+          to="/student/chat"
+          className="w-full flex items-center justify-between p-3 rounded-xl border border-border/70 hover:border-primary/40 hover:bg-primary/5 transition-all text-left group"
+        >
+          <div className="flex items-center gap-3">
+            <div className="h-9 w-9 rounded-xl bg-primary/10 text-primary flex items-center justify-center group-hover:scale-105 transition-transform">
+              <Sparkles className="h-4 w-4" />
+            </div>
+            <div>
+              <span className="text-xs font-bold text-foreground block">AI Companion Chat</span>
+              <span className="text-[10px] text-muted-foreground block">24/7 safe confidential venting</span>
+            </div>
+          </div>
+          <ChevronRight className="h-3.5 w-3.5 text-muted-foreground group-hover:translate-x-1 transition-transform" />
+        </NavLink>
+
+        <button
+          type="button"
+          onClick={() => setIsBookingOpen(true)}
+          className="w-full flex items-center justify-between p-3 rounded-xl border border-border/70 hover:border-indigo-500/40 hover:bg-indigo-500/5 transition-all text-left group"
+        >
+          <div className="flex items-center gap-3">
+            <div className="h-9 w-9 rounded-xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center group-hover:scale-105 transition-transform">
+              <Calendar className="h-4 w-4" />
+            </div>
+            <div>
+              <span className="text-xs font-bold text-foreground block">Book Campus Counselor</span>
+              <span className="text-[10px] text-muted-foreground block">Free confidential 1-on-1 session</span>
+            </div>
+          </div>
+          <ChevronRight className="h-3.5 w-3.5 text-muted-foreground group-hover:translate-x-1 transition-transform" />
+        </button>
+      </CardContent>
+    </Card>
+  );
+
   const isCheckInOnly = path === "/student/check-in";
   const isHistoryOnly = path === "/student/history";
   const isResourcesOnly = path === "/student/resources";
@@ -2155,187 +2451,8 @@ export const StudentDashboard: React.FC = () => {
             </div>
           </div>
 
-          {/* Notion-Style Daily Self-Care Checklist & Sanctuary 1-Tap Pods */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Notion Habit Checklist (1 Col) */}
-            <div className="finch-card p-5 lg:p-6 space-y-4 bg-card border border-border/80 rounded-3xl shadow-xs">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="text-sm font-black text-foreground flex items-center gap-1.5">
-                    <CheckCircle2 className="h-4 w-4 text-emerald-500" />
-                    Daily Self-Care Routine
-                  </h3>
-                  <p className="text-xs text-muted-foreground mt-0.5">Gentle mindful habits for today</p>
-                </div>
-                <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
-                  {completedHabitsCount} / {habits.length} ({habitPercentage}%)
-                </span>
-              </div>
-
-              {/* Animated Progress Bar */}
-              <div className="w-full bg-secondary rounded-full h-2 overflow-hidden">
-                <div
-                  className="bg-gradient-to-r from-emerald-500 to-primary h-2 rounded-full transition-all duration-500 ease-out"
-                  style={{ width: `${habitPercentage}%` }}
-                />
-              </div>
-
-              {/* Habit Items */}
-              <div className="space-y-2">
-                {habits.map((habit: any) => (
-                  <button
-                    key={habit.id}
-                    type="button"
-                    onClick={() => toggleHabit(habit.id)}
-                    className={`w-full flex items-center justify-between p-3 rounded-2xl border text-left transition-all active:scale-[0.98] ${
-                      habit.completed
-                        ? "bg-emerald-500/5 border-emerald-500/30 text-foreground line-through opacity-80"
-                        : "bg-secondary/40 hover:bg-secondary/70 border-border/60 text-foreground"
-                    }`}
-                  >
-                    <div className="flex items-center gap-3">
-                      <div
-                        className={`h-5 w-5 rounded-lg flex items-center justify-center border transition-colors ${
-                          habit.completed
-                            ? "bg-emerald-500 border-emerald-500 text-white"
-                            : "border-muted-foreground/40 bg-card"
-                        }`}
-                      >
-                        {habit.completed && <Check className="h-3 w-3" />}
-                      </div>
-                      <div>
-                        <span className="text-xs font-bold block">{habit.icon} {habit.label}</span>
-                        <span className="text-[10px] text-muted-foreground block">{habit.description}</span>
-                      </div>
-                    </div>
-                  </button>
-                ))}
-              </div>
-
-              {habitPercentage === 100 && (
-                <div className="p-3 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-center text-xs font-bold text-amber-600 dark:text-amber-400">
-                  🎉 Fantastic! You completed all daily habits today.
-                </div>
-              )}
-            </div>
-
-            {/* 4 Sanctuary Quick Action Pods (2 Cols) */}
-            <div className="lg:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {/* Pod 1: AI Chat */}
-              <NavLink
-                to="/student/chat"
-                className="group p-5 rounded-3xl border border-primary/20 bg-gradient-to-br from-primary/5 via-card to-card hover:border-primary/50 transition-all shadow-xs hover:shadow-md hover:-translate-y-0.5 flex flex-col justify-between"
-              >
-                <div>
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="h-10 w-10 rounded-2xl bg-primary/10 text-primary flex items-center justify-center group-hover:scale-110 transition-transform">
-                      <Sparkles className="h-5 w-5" />
-                    </div>
-                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-primary/10 text-primary border border-primary/20">
-                      24/7 Confidential
-                    </span>
-                  </div>
-                  <h4 className="text-sm font-extrabold text-foreground group-hover:text-primary transition-colors">
-                    AI Wellness Companion
-                  </h4>
-                  <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
-                    Need to vent or process difficult coursework feelings? Talk through your thoughts in a private safe space.
-                  </p>
-                </div>
-                <div className="mt-4 flex items-center gap-1.5 text-xs font-bold text-primary">
-                  <span>Open Safe Chat</span>
-                  <ChevronRight className="h-3.5 w-3.5 group-hover:translate-x-1 transition-transform" />
-                </div>
-              </NavLink>
-
-              {/* Pod 2: Breath Pacer */}
-              <button
-                type="button"
-                onClick={() => setIsBreathModalOpen(true)}
-                className="group p-5 rounded-3xl border border-emerald-500/20 bg-gradient-to-br from-emerald-500/5 via-card to-card hover:border-emerald-500/50 transition-all shadow-xs hover:shadow-md hover:-translate-y-0.5 flex flex-col justify-between text-left"
-              >
-                <div>
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="h-10 w-10 rounded-2xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center group-hover:scale-110 transition-transform">
-                      <Wind className="h-5 w-5" />
-                    </div>
-                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
-                      Instant Reset
-                    </span>
-                  </div>
-                  <h4 className="text-sm font-extrabold text-foreground group-hover:text-emerald-500 transition-colors">
-                    10s Box Breathing
-                  </h4>
-                  <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
-                    Calm your autonomic nervous system with clinically guided 4-4-4 respiration cadence.
-                  </p>
-                </div>
-                <div className="mt-4 flex items-center gap-1.5 text-xs font-bold text-emerald-600 dark:text-emerald-400">
-                  <span>Start Calming Breath</span>
-                  <ChevronRight className="h-3.5 w-3.5 group-hover:translate-x-1 transition-transform" />
-                </div>
-              </button>
-
-              {/* Pod 3: Survey Check-In */}
-              <button
-                type="button"
-                onClick={() => startSurvey("phq-9")}
-                className="group p-5 rounded-3xl border border-violet-500/20 bg-gradient-to-br from-violet-500/5 via-card to-card hover:border-violet-500/50 transition-all shadow-xs hover:shadow-md hover:-translate-y-0.5 flex flex-col justify-between text-left"
-              >
-                <div>
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="h-10 w-10 rounded-2xl bg-violet-500/10 text-violet-500 flex items-center justify-center group-hover:scale-110 transition-transform">
-                      <ClipboardCheck className="h-5 w-5" />
-                    </div>
-                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-violet-500/10 text-violet-600 dark:text-violet-400 border border-violet-500/20">
-                      PHQ-9 & GAD-7
-                    </span>
-                  </div>
-                  <h4 className="text-sm font-extrabold text-foreground group-hover:text-violet-500 transition-colors">
-                    Clinical Self-Check
-                  </h4>
-                  <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
-                    Validated depression and anxiety assessment calibrated specifically for university students.
-                  </p>
-                </div>
-                <div className="mt-4 flex items-center gap-1.5 text-xs font-bold text-violet-600 dark:text-violet-400">
-                  <span>Begin Assessment</span>
-                  <ChevronRight className="h-3.5 w-3.5 group-hover:translate-x-1 transition-transform" />
-                </div>
-              </button>
-
-              {/* Pod 4: Counselor Booking */}
-              <button
-                type="button"
-                onClick={() => setIsBookingOpen(true)}
-                className="group p-5 rounded-3xl border border-indigo-500/20 bg-gradient-to-br from-indigo-500/5 via-card to-card hover:border-indigo-500/50 transition-all shadow-xs hover:shadow-md hover:-translate-y-0.5 flex flex-col justify-between text-left"
-              >
-                <div>
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="h-10 w-10 rounded-2xl bg-indigo-500/10 text-indigo-500 flex items-center justify-center group-hover:scale-110 transition-transform">
-                      <Calendar className="h-5 w-5" />
-                    </div>
-                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20">
-                      Free Campus Care
-                    </span>
-                  </div>
-                  <h4 className="text-sm font-extrabold text-foreground group-hover:text-indigo-500 transition-colors">
-                    Campus Counselor
-                  </h4>
-                  <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
-                    Schedule a confidential 1-on-1 session with a campus mental health professional.
-                  </p>
-                </div>
-                <div className="mt-4 flex items-center gap-1.5 text-xs font-bold text-indigo-600 dark:text-indigo-400">
-                  <span>Book Free Session</span>
-                  <ChevronRight className="h-3.5 w-3.5 group-hover:translate-x-1 transition-transform" />
-                </div>
-              </button>
-            </div>
-          </div>
-
-          {/* Dynamic Sanctuary View Switcher Tabs */}
-          <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
+          {/* Dynamic Sanctuary View Switcher Tabs & Quick Actions */}
+          <div className="flex flex-wrap items-center justify-between gap-3 pt-1">
             <div className="flex items-center p-1 rounded-2xl bg-secondary/70 border border-border/70 text-xs font-bold">
               <button
                 type="button"
@@ -2402,16 +2519,23 @@ export const StudentDashboard: React.FC = () => {
           {/* TAB 1: DAILY SANCTUARY & REFLECTION */}
           {activeSanctuaryTab === "sanctuary" && (
             <div className="space-y-6">
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {/* Wellness Score Gauge */}
-                {renderWellnessGauge()}
-                
-                {/* Direct Daily Check-In Panel */}
-                {renderCheckInPanel()}
-              </div>
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+                {/* Left Column (2 Cols): Primary Interactive Check-In & Trajectory */}
+                <div className="lg:col-span-2 space-y-6">
+                  {renderCheckInPanel()}
+                  {renderVolatilityChart()}
+                  {renderRecentActivityCard()}
+                  {renderRecommendationsGrid()}
+                </div>
 
-              {/* Recommended Activities List */}
-              {renderRecommendationsGrid()}
+                {/* Right Column (1 Col): Status, Assessment, Habits & Coping */}
+                <div className="lg:col-span-1 space-y-6">
+                  {renderWellnessGauge()}
+                  {renderAssessmentStatusCard()}
+                  {renderSelfCareChecklist()}
+                  {renderQuickSupportTools()}
+                </div>
+              </div>
             </div>
           )}
 
