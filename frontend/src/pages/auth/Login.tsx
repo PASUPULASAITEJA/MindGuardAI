@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label, FormItem } from "@/components/ui/label";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
-import { Eye, EyeOff, Loader2, Sparkles } from "lucide-react";
+import { Eye, EyeOff, Loader2, Sparkles, ArrowLeft } from "lucide-react";
 
 // Form validation schema
 const loginSchema = z.object({
@@ -81,6 +81,14 @@ export const Login: React.FC = () => {
       <div className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] rounded-full bg-indigo-500/10 blur-[100px] pointer-events-none" />
 
       <div className="w-full max-w-md z-10">
+        <Link
+          to="/"
+          className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-400 hover:text-white transition-colors mb-5 group"
+        >
+          <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-1 transition-transform" />
+          Back to Overview
+        </Link>
+
         {/* Brand Header */}
         <div className="flex flex-col items-center mb-6 text-center">
           <div className="h-12 w-12 rounded-2xl border border-slate-800 overflow-hidden shadow-lg shadow-violet-500/10 mb-3 bg-slate-900 flex items-center justify-center">
