@@ -500,11 +500,11 @@ export const StudentChatbot: React.FC = () => {
       </div>
 
       {/* RIGHT MAIN CHAT AREA */}
-      <div className="flex flex-1 flex-col overflow-hidden rounded-xl border border-border bg-card">
+      <div className="flex flex-1 flex-col overflow-hidden rounded-2xl border border-border/80 bg-card/95 dark:bg-card/90 backdrop-blur-xl shadow-sm">
         {/* Chat Header */}
-        <div className="flex items-center justify-between border-b border-border px-5 py-3.5 bg-card">
+        <div className="flex items-center justify-between border-b border-border/80 px-5 py-3.5 bg-card/50">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-tr from-primary to-violet-600 text-primary-foreground shadow-md shadow-primary/20">
+            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-tr from-primary to-indigo-600 text-primary-foreground shadow-md shadow-primary/20">
               <Bot className="h-5 w-5" />
             </div>
             <div>
