@@ -19,8 +19,8 @@ logger = logging.getLogger("mindguard-mood-service")
 async def process_journal_entry_background(
     mood_log_id: UUID,
     content: str,
-    self_reported_score: int,
-    student_id: UUID
+    self_reported_score: Optional[int] = None,
+    student_id: UUID = None
 ) -> None:
     """
     Background worker task to execute ML evaluations asynchronously.
@@ -39,7 +39,7 @@ async def process_journal_entry_background(
             # 2. Derive sentiment polarity and primary emotion
             primary_emotion = max(detected_emotions, key=detected_emotions.get)
             sentiment_score = detected_emotions.get("joy", 0.0) - (
-                detected_emotions.get("anxiety", 0.0) * 0.5 + detected_emotions.get("sadness", 0.0) * 0.5
+                detected_emotions.get("sadness", 0.0) * 0.7 + detected_emotions.get("anxiety", 0.0) * 0.3
             )
             sentiment_score = max(-1.0, min(1.0, sentiment_score))
             
@@ -48,7 +48,8 @@ async def process_journal_entry_background(
                 mood_log_id=mood_log_id,
                 detected_emotions=detected_emotions,
                 sentiment_score=sentiment_score,
-                primary_emotion=primary_emotion
+                primary_emotion=primary_emotion,
+                analyzed_at=datetime.now(timezone.utc)
             )
             db.add(analysis_obj)
 
@@ -56,7 +57,8 @@ async def process_journal_entry_background(
             assessment_obj = Assessment(
                 student_id=student_id,
                 mental_wellness_score=mental_wellness_score,
-                risk_level=RiskLevel(risk_level)
+                risk_level=RiskLevel(risk_level),
+                evaluated_at=datetime.now(timezone.utc)
             )
             db.add(assessment_obj)
             
@@ -76,10 +78,12 @@ async def process_journal_entry_background(
             
             await db.commit()
             logger.info(f"Asynchronous analysis successfully committed for mood log ID {mood_log_id}.")
+            return detected_emotions, mental_wellness_score, risk_level, sentiment_score
             
         except Exception as e:
             await db.rollback()
             logger.error(f"Failed to process background mood log analysis {mood_log_id}: {str(e)}", exc_info=True)
+            return None, None, None, None
 
 class MoodService:
     async def create_journal_entry(
@@ -88,7 +92,7 @@ class MoodService:
         *,
         student_id: UUID,
         content: str,
-        self_reported_score: int
+        self_reported_score: Optional[int] = None
     ) -> MoodLog:
         """
         Creates a raw mood log in the database.
@@ -106,13 +110,39 @@ class MoodService:
         db,  # AsyncSession
         student_id: UUID,
         timeframe: Optional[str] = "7d"
-    ) -> List[MoodLog]:
+    ) -> List[dict]:
         """
-        Fetch journal history filtered by timeframe (7d or 30d).
+        Fetch journal history filtered by timeframe (7d or 30d) in chronological ascending order,
+        including NLP sentiment scores scaled to the 1-10 range for visual comparison.
         """
         days = 7
         if timeframe == "30d":
             days = 30
-        return await mood_log_repository.get_student_history(db, student_id, timeframe_days=days)
+        logs = await mood_log_repository.get_student_history(db, student_id, timeframe_days=days)
+        history = []
+        for l in logs:
+            sentiment = l.emotion_analysis.sentiment_score if getattr(l, "emotion_analysis", None) else None
+            emotion = l.emotion_analysis.primary_emotion if getattr(l, "emotion_analysis", None) else None
+            
+            # Map sentiment (-1.0 to 1.0) into clinical 1-10 scale:
+            # -1.0 -> 1.0, 0.0 -> 5.5, +1.0 -> 10.0
+            nlp_scaled = round(((sentiment + 1.0) / 2.0) * 9.0 + 1.0, 1) if sentiment is not None else None
+            
+            self_score = l.self_reported_score
+            if self_score is None and nlp_scaled is not None:
+                self_score = int(round(nlp_scaled))
+            elif nlp_scaled is None and self_score is not None:
+                nlp_scaled = float(self_score)
+
+            history.append({
+                "id": l.id,
+                "input_type": l.input_type,
+                "self_reported_score": self_score,
+                "sentiment_score": sentiment,
+                "nlp_sentiment_scaled": nlp_scaled,
+                "primary_emotion": emotion,
+                "logged_at": l.logged_at
+            })
+        return history
 
 mood_service = MoodService()
