@@ -3,20 +3,20 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Link, useNavigate } from "react-router-dom";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth, UserRole } from "@/contexts/AuthContext";
 import { useToast } from "@/components/ui/toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label, FormItem } from "@/components/ui/label";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
-import { Eye, EyeOff, Loader2, Sparkles, CheckCircle2, ArrowLeft } from "lucide-react";
-import { UserRole } from "@/contexts/AuthContext";
+import { Eye, EyeOff, Loader2, Sparkles, CheckCircle2, ArrowLeft, ShieldCheck, Lock } from "lucide-react";
+import ThemeToggle from "@/components/layouts/ThemeToggle";
 import api from "@/services/api";
 
 // Registration validation schema
 const registerSchema = z
   .object({
-    email: z.string().email("Please enter a valid email address."),
+    email: z.string().email("Please enter a valid university email address."),
     password: z.string().min(8, "Password must be at least 8 characters long."),
     role: z.enum(["STUDENT", "COUNSELOR", "ADMIN"], {
       errorMap: () => ({ message: "Please select an account type." })
@@ -120,54 +120,67 @@ export const Register: React.FC = () => {
   };
 
   return (
-    <div className="relative min-h-screen flex items-center justify-center bg-slate-950 p-4 overflow-hidden">
-      {/* Background blurs */}
-      <div className="absolute top-1/4 left-1/4 w-[400px] h-[400px] rounded-full bg-violet-600/10 blur-[100px] pointer-events-none" />
-      <div className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] rounded-full bg-indigo-500/10 blur-[100px] pointer-events-none" />
+    <div className="relative min-h-screen flex items-center justify-center bg-background px-4 py-12 transition-colors duration-300">
+      {/* Calm Ambient Lighting */}
+      <div className="absolute top-12 left-1/2 -translate-x-1/2 w-[600px] h-[350px] bg-primary/10 rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute bottom-10 left-10 w-[300px] h-[300px] bg-emerald-500/5 rounded-full blur-[100px] pointer-events-none" />
 
-      <div className="w-full max-w-md z-10">
+      {/* Top Controls */}
+      <div className="absolute top-6 left-6 right-6 flex items-center justify-between z-10 max-w-5xl mx-auto">
         <Link
           to="/"
-          className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-400 hover:text-white transition-colors mb-5 group"
+          className="inline-flex items-center gap-2 text-xs font-semibold text-muted-foreground hover:text-foreground transition-colors px-3 py-1.5 rounded-xl border border-border/60 bg-card/60 backdrop-blur-md group"
         >
           <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-1 transition-transform" />
-          Back to Overview
+          <span>Home</span>
         </Link>
+        <ThemeToggle />
+      </div>
 
+      <div className="w-full max-w-md z-10 pt-4">
         {/* Brand Header */}
-        <div className="flex flex-col items-center mb-6 text-center">
-          <div className="h-12 w-12 rounded-2xl border border-slate-800 overflow-hidden shadow-lg shadow-violet-500/10 mb-3 bg-slate-900 flex items-center justify-center">
-            <img src="/favicon.jpg" alt="MindGuardAI Logo" className="h-full w-full object-cover" />
+        <div className="flex flex-col items-center mb-7 text-center">
+          <div className="h-14 w-14 rounded-2xl bg-gradient-to-tr from-indigo-500 via-indigo-600 to-emerald-400 p-0.5 shadow-xl shadow-indigo-500/15 mb-3.5 flex items-center justify-center">
+            <div className="w-full h-full rounded-[14px] bg-card overflow-hidden flex items-center justify-center">
+              <img src="/favicon.jpg" alt="MindGuardAI Logo" className="h-full w-full object-cover" />
+            </div>
           </div>
-          <h1 className="text-3xl font-extrabold tracking-tight bg-gradient-to-r from-white via-slate-200 to-slate-400 bg-clip-text text-transparent">
-            MindGuardAI
+          <h1 className="text-3xl font-extrabold tracking-tight text-foreground">
+            MindGuard<span className="text-primary">AI</span>
           </h1>
-          <p className="text-sm text-slate-400 mt-1">Student Mental Health & Alert Management Gateway</p>
+          <p className="text-xs text-muted-foreground mt-1.5 font-medium">Join the University Wellness Network</p>
         </div>
 
-        <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-md shadow-2xl">
-          <CardHeader>
-            <CardTitle className="text-xl text-white">Create Account</CardTitle>
-            <CardDescription className="text-slate-400">
-              Join the university wellness network
+        {/* Auth Glass Card */}
+        <Card className="border-border/80 bg-card/85 dark:bg-card/80 backdrop-blur-2xl shadow-xl shadow-black/5 dark:shadow-black/20 rounded-3xl">
+          <CardHeader className="space-y-1 pb-4">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-xl font-bold tracking-tight">Create Account</CardTitle>
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                <ShieldCheck className="w-3 h-3" />
+                Verified Campus
+              </span>
+            </div>
+            <CardDescription className="text-xs text-muted-foreground">
+              Register using your authorized NMIMS institutional email
             </CardDescription>
           </CardHeader>
 
           <form onSubmit={handleSubmit(onSubmit)}>
             <CardContent className="space-y-4">
-              {/* Account Type Selector (Button tabs style for premium visual interaction) */}
+              {/* Account Type Selector */}
               <FormItem>
-                <Label className="text-slate-300">Account Type</Label>
-                <div className="grid grid-cols-3 gap-2 bg-slate-950/60 p-1 rounded-xl border border-slate-800">
+                <Label className="text-xs font-semibold text-foreground">Account Type</Label>
+                <div className="grid grid-cols-3 gap-1.5 bg-muted/50 p-1 rounded-xl border border-border/60">
                   {(["STUDENT", "COUNSELOR", "ADMIN"] as UserRole[]).map((r) => (
                     <button
                       key={r}
                       type="button"
                       onClick={() => setValue("role", r, { shouldValidate: true })}
-                      className={`py-2 px-3 rounded-lg text-xs font-semibold tracking-wider transition-all ${
+                      className={`py-2 px-2.5 rounded-lg text-xs font-semibold tracking-wide transition-all ${
                         selectedRole === r
-                          ? "bg-gradient-to-tr from-violet-600 to-indigo-500 text-white shadow shadow-violet-500/10"
-                          : "text-slate-400 hover:text-slate-200 hover:bg-slate-900/40"
+                          ? "bg-primary text-primary-foreground shadow-sm font-bold"
+                          : "text-muted-foreground hover:text-foreground hover:bg-card/50"
                       }`}
                     >
                       {r}
@@ -182,9 +195,9 @@ export const Register: React.FC = () => {
               {/* Email Address */}
               <FormItem>
                 <div className="flex justify-between items-center">
-                  <Label htmlFor="email" className="text-slate-300">Institutional Email</Label>
-                  <span className="text-[11px] text-violet-400 font-medium">
-                    {selectedRole === "STUDENT" ? "@nmims.in or @nmims.edu.in" : "@nmims.edu"}
+                  <Label htmlFor="email" className="text-xs font-semibold text-foreground">Institutional Email</Label>
+                  <span className="text-[10px] text-primary font-medium">
+                    {selectedRole === "STUDENT" ? "@nmims.in / @nmims.edu.in" : "@nmims.edu"}
                   </span>
                 </div>
                 <Input
@@ -197,13 +210,13 @@ export const Register: React.FC = () => {
                       ? "counselor.name@nmims.edu"
                       : "admin.name@nmims.edu"
                   }
-                  className="border-slate-800 bg-slate-950/50 text-white placeholder:text-slate-600 focus-visible:ring-violet-500"
+                  className="h-11 rounded-xl border-border/80 bg-background/60 text-sm focus-visible:ring-primary focus-visible:ring-1"
                   {...register("email")}
                 />
                 {rosterStatus.isAuthorized && (
-                  <div className="flex items-center gap-1.5 text-xs text-emerald-400 bg-emerald-950/40 border border-emerald-800/60 py-1.5 px-3 rounded-lg mt-1.5 font-medium">
-                    <CheckCircle2 className="h-3.5 w-3.5 flex-shrink-0" />
-                    <span>Authorized Institutional Roster — Assigned Role: <strong className="text-emerald-300">{rosterStatus.assignedRole}</strong></span>
+                  <div className="flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 py-1.5 px-3 rounded-xl mt-1.5 font-medium">
+                    <CheckCircle2 className="h-3.5 w-3.5 shrink-0" />
+                    <span>Authorized Institutional Roster — Assigned: <strong>{rosterStatus.assignedRole}</strong></span>
                   </div>
                 )}
                 {errors.email && (
@@ -213,19 +226,19 @@ export const Register: React.FC = () => {
 
               {/* Password */}
               <FormItem>
-                <Label htmlFor="password" className="text-slate-300">Password</Label>
+                <Label htmlFor="password" className="text-xs font-semibold text-foreground">Password</Label>
                 <div className="relative">
                   <Input
                     id="password"
                     type={showPassword ? "text" : "password"}
                     placeholder="Min. 8 characters"
-                    className="border-slate-800 bg-slate-950/50 text-white placeholder:text-slate-600 pr-10 focus-visible:ring-violet-500"
+                    className="h-11 rounded-xl border-border/80 bg-background/60 text-sm pr-10 focus-visible:ring-primary focus-visible:ring-1"
                     {...register("password")}
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-3 text-slate-500 hover:text-slate-300 transition-colors"
+                    className="absolute right-3.5 top-3.5 text-muted-foreground hover:text-foreground transition-colors"
                   >
                     {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </button>
@@ -236,11 +249,11 @@ export const Register: React.FC = () => {
               </FormItem>
             </CardContent>
 
-            <CardFooter className="flex flex-col gap-3">
+            <CardFooter className="flex flex-col gap-4 pt-2">
               <Button
                 type="submit"
                 disabled={isSubmitting || !isValid}
-                className="w-full bg-gradient-to-r from-violet-600 to-indigo-500 hover:from-violet-500 hover:to-indigo-400 text-white shadow-md shadow-violet-600/10 font-semibold"
+                className="w-full h-11 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground font-bold shadow-md shadow-primary/20 transition-all active:scale-[0.99]"
               >
                 {isSubmitting ? (
                   <>
@@ -248,13 +261,19 @@ export const Register: React.FC = () => {
                     Creating Profile...
                   </>
                 ) : (
-                  "Register Account"
+                  "Create Account"
                 )}
               </Button>
-              <div className="text-xs text-center text-slate-400 mt-2">
+
+              <div className="w-full p-3 rounded-xl bg-muted/40 border border-border/60 text-[11px] text-muted-foreground flex items-center gap-2.5">
+                <Lock className="w-4 h-4 text-primary shrink-0" />
+                <span>Protected by end-to-end data encryption and strict campus privacy charters.</span>
+              </div>
+
+              <div className="text-xs text-center text-muted-foreground">
                 Already registered?{" "}
-                <Link to="/login" className="text-violet-400 hover:text-violet-300 font-semibold transition-colors">
-                  Sign in
+                <Link to="/login" className="text-primary hover:underline font-bold">
+                  Sign In
                 </Link>
               </div>
             </CardFooter>
@@ -264,4 +283,5 @@ export const Register: React.FC = () => {
     </div>
   );
 };
+
 export default Register;
