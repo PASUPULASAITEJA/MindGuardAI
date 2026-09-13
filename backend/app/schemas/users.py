@@ -9,6 +9,7 @@ class UserBase(BaseModel):
     role: UserRole = Field(..., description="Role of the user (STUDENT, COUNSELOR, ADMIN)")
 
 class UserCreate(UserBase):
+    full_name: Optional[str] = Field(None, max_length=255, description="Full display name or username")
     password: str = Field(..., min_length=8, description="Cleartext password (min 8 characters)")
 
     @model_validator(mode="after")
@@ -40,6 +41,7 @@ class UserRegisterResponse(BaseModel):
     id: UUID
     email: EmailStr
     role: UserRole
+    full_name: Optional[str] = None
 
     class Config:
         from_attributes = True
