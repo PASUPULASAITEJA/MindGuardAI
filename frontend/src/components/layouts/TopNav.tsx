@@ -14,10 +14,6 @@ const TopNav: React.FC<TopNavProps> = ({ title, subtitle, onMenuClick }) => {
   const { user, logout } = useAuth();
   const [isSOSOpen, setIsSOSOpen] = useState(false);
 
-  // Extract a readable name or handle from email
-  const displayName = user?.email ? user.email.split("@")[0] : "Student";
-  const userInitials = displayName.substring(0, 2).toUpperCase();
-
   return (
     <>
       <header className="sticky top-0 z-20 h-16 shrink-0 border-b border-border/70 bg-card/80 dark:bg-card/75 backdrop-blur-2xl px-4 md:px-8 transition-all">
@@ -58,18 +54,7 @@ const TopNav: React.FC<TopNavProps> = ({ title, subtitle, onMenuClick }) => {
 
             <ThemeToggle />
 
-            {/* User Profile Badge (Desktop) */}
-            {user && (
-              <div className="hidden md:flex items-center gap-2.5 pl-2 border-l border-border/60">
-                <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br from-primary/20 via-primary/10 to-indigo-500/20 text-primary font-black text-xs border border-primary/30 shadow-sm">
-                  {userInitials}
-                </div>
-                <div className="text-left leading-none">
-                  <p className="text-xs font-bold text-foreground capitalize truncate max-w-[120px]">{displayName}</p>
-                  <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">{user.role}</span>
-                </div>
-              </div>
-            )}
+
 
             <button
               onClick={() => logout()}
