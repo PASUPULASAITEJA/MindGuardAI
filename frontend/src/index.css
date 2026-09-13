@@ -4,48 +4,50 @@
 
 @layer base {
   :root {
-    --background: 210 40% 98%;
-    --foreground: 222.2 84% 4.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    /* Clean, modern, high-contrast light theme */
+    --background: 220 33% 98%;        /* #F8FAFC - crisp slate canvas */
+    --foreground: 222 47% 11%;        /* #0F172A - sharp slate-900 text */
+    --card: 0 0% 100%;                /* #FFFFFF - pure solid white surface */
+    --card-foreground: 222 47% 11%;   /* #0F172A */
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-    --primary: 262.1 83.3% 57.8%;
-    --primary-foreground: 210 20% 98%;
-    --secondary: 220 14.3% 95.9%;
-    --secondary-foreground: 220.9 39.3% 11%;
-    --muted: 220 14.3% 95.9%;
-    --muted-foreground: 220 8.9% 46.1%;
-    --accent: 220 14.3% 95.9%;
-    --accent-foreground: 220.9 39.3% 11%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 20% 98%;
-    --border: 220 13% 91%;
-    --input: 220 13% 91%;
-    --ring: 262.1 83.3% 57.8%;
+    --popover-foreground: 222 47% 11%;
+    --primary: 238 82% 59%;           /* #4F46E5 - Royal Indigo, calming & clinical */
+    --primary-foreground: 0 0% 100%;
+    --secondary: 220 14% 94%;         /* #EDF1F5 */
+    --secondary-foreground: 222 47% 15%;
+    --muted: 220 14% 94%;
+    --muted-foreground: 215 16% 45%;  /* #5F6E84 - readable secondary text */
+    --accent: 220 14% 93%;
+    --accent-foreground: 222 47% 11%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 220 13% 89%;            /* #E0E4EC - clean visible border */
+    --input: 220 13% 89%;
+    --ring: 238 82% 59%;
     --radius: 1rem;
   }
 
   .dark {
-    --background: 224 71.4% 4.1%;
-    --foreground: 210 20% 98%;
-    --card: 224 71.4% 6%;
-    --card-foreground: 210 20% 98%;
-    --popover: 224 71.4% 4.1%;
-    --popover-foreground: 210 20% 98%;
-    --primary: 263.4 75% 57%;
-    --primary-foreground: 210 20% 98%;
-    --secondary: 215 27.9% 16.9%;
-    --secondary-foreground: 210 20% 98%;
-    --muted: 215 27.9% 16.9%;
-    --muted-foreground: 217.9 10.6% 64.9%;
-    --accent: 215 27.9% 16.9%;
-    --accent-foreground: 210 20% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 20% 98%;
-    --border: 215 27.9% 16.9%;
-    --input: 215 27.9% 16.9%;
-    --ring: 263.4 75% 57%;
+    /* Deep Obsidian Slate dark theme with rich contrast and luminous accents */
+    --background: 222 47% 7%;          /* #0B0F19 - rich dark canvas */
+    --foreground: 210 40% 98%;         /* #F8FAFC - crisp readable white */
+    --card: 222 40% 11%;               /* #111827 - clearly elevated above background */
+    --card-foreground: 210 40% 98%;
+    --popover: 222 40% 11%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 239 84% 67%;            /* #6366F1 - luminous vibrant indigo */
+    --primary-foreground: 0 0% 100%;
+    --secondary: 222 35% 16%;          /* #1A2538 */
+    --secondary-foreground: 210 40% 98%;
+    --muted: 222 35% 16%;
+    --muted-foreground: 215 20% 65%;   /* #94A3B8 - comfortable secondary text */
+    --accent: 222 35% 18%;             /* #202D44 */
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 217 33% 18%;             /* #1E293B - defined card borders */
+    --input: 217 33% 18%;
+    --ring: 239 84% 67%;
   }
 }
 
@@ -54,18 +56,21 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground transition-colors duration-300;
+    @apply bg-background text-foreground transition-colors duration-200;
     font-family: 'Outfit', sans-serif;
     background-image: 
-      radial-gradient(at top right, rgba(139, 92, 246, 0.03), transparent 50%),
-      radial-gradient(at bottom left, rgba(79, 70, 229, 0.03), transparent 50%);
+      radial-gradient(ellipse at 85% 0%, rgba(99, 102, 241, 0.04), transparent 50%),
+      radial-gradient(ellipse at 15% 100%, rgba(139, 92, 246, 0.03), transparent 50%);
     background-attachment: fixed;
   }
   
+  html.dark body,
   .dark body {
     background-image: 
-      radial-gradient(at top right, rgba(139, 92, 246, 0.08), transparent 60%),
-      radial-gradient(at bottom left, rgba(79, 70, 229, 0.06), transparent 60%);
+      radial-gradient(ellipse at 85% 0%, rgba(99, 102, 241, 0.12), transparent 50%),
+      radial-gradient(ellipse at 15% 100%, rgba(139, 92, 246, 0.08), transparent 50%),
+      radial-gradient(ellipse at 50% 50%, rgba(16, 185, 129, 0.03), transparent 60%);
+    background-attachment: fixed;
   }
 
   /* Custom Premium Scrollbar */
@@ -83,10 +88,11 @@
 
 @layer utilities {
   .glass-panel {
-    @apply bg-background/60 dark:bg-card/40 backdrop-blur-md border border-border/50 dark:border-border/40 shadow-sm transition-all duration-300;
+    @apply bg-card/95 dark:bg-card/90 backdrop-blur-xl border border-border shadow-sm transition-all duration-200;
   }
   
   .glass-card {
-    @apply bg-background/50 dark:bg-card/30 backdrop-blur-md border border-border/50 dark:border-border/40 shadow-sm transition-all duration-300 hover:border-primary/30 dark:hover:border-primary/20 hover:shadow-md hover:shadow-primary/5;
+    @apply bg-card border border-border shadow-sm transition-all duration-200 hover:border-primary/40 hover:shadow-md hover:shadow-primary/5;
   }
 }
+
