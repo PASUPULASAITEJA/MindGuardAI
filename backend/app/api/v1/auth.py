@@ -66,6 +66,25 @@ async def login(
     """
     tokens = await auth_service.authenticate_user(db, login_in)
     
+    # Automatically bridge student credentials to the desktop phenotyping agent
+    clean_email = login_in.email.lower().strip() if login_in.email else ""
+    user = await user_service.get_user_by_email(db, clean_email)
+    if user and getattr(user.role, "value", str(user.role)).upper() == "STUDENT":
+        try:
+            from pathlib import Path
+            import json
+            cache_path = Path(__file__).resolve().parents[4] / ".mindguard_agent_auth.json"
+            auth_info = {
+                "access_token": tokens.access_token,
+                "id": str(user.id).replace("-", ""),
+                "email": user.email,
+                "role": "STUDENT"
+            }
+            with open(cache_path, "w", encoding="utf-8") as f:
+                json.dump(auth_info, f, indent=2)
+        except Exception:
+            pass
+
     # Set the refresh token as a secure HttpOnly cookie
     response.set_cookie(
         key="refresh_token",
@@ -104,6 +123,26 @@ async def refresh(
         )
 
     tokens = await auth_service.refresh_tokens(db, refresh_token)
+
+    try:
+        from pathlib import Path
+        import json
+        from app.core.security import decode_token
+        decoded = decode_token(tokens.access_token)
+        if decoded.get("role") == "STUDENT":
+            cache_path = Path(__file__).resolve().parents[4] / ".mindguard_agent_auth.json"
+            if cache_path.exists():
+                with open(cache_path, "r", encoding="utf-8") as f:
+                    cached_data = json.load(f)
+            else:
+                cached_data = {}
+            cached_data["access_token"] = tokens.access_token
+            cached_data["id"] = str(decoded.get("sub", "")).replace("-", "")
+            cached_data["role"] = "STUDENT"
+            with open(cache_path, "w", encoding="utf-8") as f:
+                json.dump(cached_data, f, indent=2)
+    except Exception:
+        pass
 
     # Rotate the refresh token by setting the new one in cookie
     response.set_cookie(
