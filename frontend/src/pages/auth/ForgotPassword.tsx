@@ -5,7 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label, FormItem } from "@/components/ui/label";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
-import { Loader2, ArrowLeft, Mail, KeyRound, CheckCircle2 } from "lucide-react";
+import { Loader2, ArrowLeft, Mail, KeyRound, CheckCircle2, ShieldCheck } from "lucide-react";
+import ThemeToggle from "@/components/layouts/ThemeToggle";
 import api from "@/services/api";
 
 export const ForgotPassword: React.FC = () => {
@@ -95,48 +96,65 @@ export const ForgotPassword: React.FC = () => {
   };
 
   return (
-    <div className="relative min-h-screen flex items-center justify-center bg-slate-950 p-4 overflow-hidden">
-      {/* Visual Excellence Backdrops */}
-      <div className="absolute top-1/4 left-1/4 w-[400px] h-[400px] rounded-full bg-violet-600/10 blur-[100px] pointer-events-none" />
-      <div className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] rounded-full bg-indigo-500/10 blur-[100px] pointer-events-none" />
+    <div className="relative min-h-screen flex items-center justify-center bg-background px-4 py-12 transition-colors duration-200">
+      {/* Top Controls */}
+      <div className="absolute top-6 left-6 right-6 flex items-center justify-between z-10 max-w-5xl mx-auto">
+        <Link
+          to="/login"
+          className="inline-flex items-center gap-2 text-xs font-semibold text-muted-foreground hover:text-foreground transition-colors px-3 py-1.5 rounded-xl border border-border/80 bg-card/80 backdrop-blur-md group"
+        >
+          <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-1 transition-transform" />
+          <span>Back to Sign In</span>
+        </Link>
+        <ThemeToggle />
+      </div>
 
-      <div className="w-full max-w-md z-10">
-        <div className="flex flex-col items-center mb-6 text-center">
-          <div className="h-12 w-12 rounded-2xl border border-slate-800 overflow-hidden shadow-lg shadow-violet-500/10 mb-3 bg-slate-900 flex items-center justify-center">
-            <img src="/favicon.jpg" alt="MindGuardAI Logo" className="h-full w-full object-cover" />
+      <div className="w-full max-w-md z-10 pt-4">
+        {/* Brand Header */}
+        <div className="flex flex-col items-center mb-7 text-center">
+          <div className="h-14 w-14 rounded-2xl bg-gradient-to-tr from-primary to-emerald-500 p-0.5 shadow-xl shadow-primary/15 mb-3.5 flex items-center justify-center">
+            <div className="w-full h-full rounded-[14px] bg-card overflow-hidden flex items-center justify-center">
+              <img src="/favicon.jpg" alt="MindGuardAI Logo" className="h-full w-full object-cover" />
+            </div>
           </div>
-          <h1 className="text-3xl font-extrabold tracking-tight bg-gradient-to-r from-white via-slate-200 to-slate-400 bg-clip-text text-transparent">
-            MindGuardAI
+          <h1 className="text-3xl font-extrabold tracking-tight text-foreground">
+            MindGuard<span className="text-primary">AI</span>
           </h1>
-          <p className="text-sm text-slate-400 mt-1">Self-Service Account Recovery</p>
+          <p className="text-xs text-muted-foreground mt-1.5 font-medium">Self-Service Account Recovery</p>
         </div>
 
-        <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-md shadow-2xl">
-          <CardHeader>
-            <CardTitle className="text-xl text-white flex items-center gap-2">
-              <KeyRound className="h-5 w-5 text-violet-400" />
-              Reset Password
-            </CardTitle>
-            <CardDescription className="text-slate-400">
+        <Card className="border-border/80 bg-card/95 dark:bg-card/90 backdrop-blur-xl shadow-xl shadow-black/5 dark:shadow-black/20 rounded-3xl">
+          <CardHeader className="space-y-1 pb-4">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-xl font-bold tracking-tight flex items-center gap-2">
+                <KeyRound className="h-5 w-5 text-primary" />
+                Reset Password
+              </CardTitle>
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                <ShieldCheck className="w-3 h-3" />
+                Secure
+              </span>
+            </div>
+            <CardDescription className="text-xs text-muted-foreground">
               {isDone
                 ? "Your credentials have been securely updated."
                 : resetToken
                 ? "Set a new secure password for your account."
-                : "Enter your registered university email address."}
+                : "Enter your registered university email or username."}
             </CardDescription>
           </CardHeader>
 
           {isDone ? (
             <CardContent className="space-y-4 py-4 text-center">
-              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-emerald-950/60 border border-emerald-700/50 text-emerald-400">
+              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400">
                 <CheckCircle2 className="h-8 w-8" />
               </div>
-              <p className="text-sm text-slate-300">
+              <p className="text-xs text-foreground/80 leading-relaxed">
                 Your password has been successfully updated. You can now log into your MindGuardAI portal.
               </p>
               <div className="pt-2">
                 <Link to="/login">
-                  <Button className="w-full bg-gradient-to-r from-violet-600 to-indigo-500 hover:from-violet-500 hover:to-indigo-400 text-white font-semibold">
+                  <Button className="w-full h-11 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground font-bold shadow-md shadow-primary/20">
                     Return to Sign In
                   </Button>
                 </Link>
@@ -145,41 +163,41 @@ export const ForgotPassword: React.FC = () => {
           ) : resetToken ? (
             <form onSubmit={handleResetPassword}>
               <CardContent className="space-y-4">
-                <div className="p-3 bg-emerald-950/30 border border-emerald-800/40 rounded-xl text-xs text-emerald-300 flex items-start gap-2">
-                  <CheckCircle2 className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                <div className="p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-xl text-xs text-emerald-600 dark:text-emerald-400 flex items-start gap-2">
+                  <CheckCircle2 className="h-4 w-4 mt-0.5 shrink-0" />
                   <span>Identity token verified for <strong>{email}</strong>. Enter your new password below.</span>
                 </div>
 
                 <FormItem>
-                  <Label className="text-slate-300">New Password</Label>
+                  <Label className="text-xs font-semibold text-foreground">New Password</Label>
                   <Input
                     type="password"
                     placeholder="Min. 8 characters"
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
-                    className="border-slate-800 bg-slate-950/50 text-white placeholder:text-slate-600 focus-visible:ring-violet-500"
+                    className="h-11 rounded-xl border-border/80 bg-background/60 text-sm focus-visible:ring-primary focus-visible:ring-1"
                     required
                   />
                 </FormItem>
 
                 <FormItem>
-                  <Label className="text-slate-300">Confirm New Password</Label>
+                  <Label className="text-xs font-semibold text-foreground">Confirm New Password</Label>
                   <Input
                     type="password"
                     placeholder="Repeat password"
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
-                    className="border-slate-800 bg-slate-950/50 text-white placeholder:text-slate-600 focus-visible:ring-violet-500"
+                    className="h-11 rounded-xl border-border/80 bg-background/60 text-sm focus-visible:ring-primary focus-visible:ring-1"
                     required
                   />
                 </FormItem>
               </CardContent>
 
-              <CardFooter className="flex flex-col gap-3">
+              <CardFooter className="flex flex-col gap-3 pt-2">
                 <Button
                   type="submit"
                   disabled={isResetting || !newPassword}
-                  className="w-full bg-gradient-to-r from-violet-600 to-indigo-500 hover:from-violet-500 hover:to-indigo-400 text-white font-semibold"
+                  className="w-full h-11 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground font-bold shadow-md shadow-primary/20"
                 >
                   {isResetting ? (
                     <>
@@ -196,44 +214,42 @@ export const ForgotPassword: React.FC = () => {
             <form onSubmit={handleRequestToken}>
               <CardContent className="space-y-4">
                 <FormItem>
-                  <Label htmlFor="email" className="text-slate-300">University Email</Label>
+                  <Label htmlFor="email" className="text-xs font-semibold text-foreground">Institutional Email</Label>
                   <div className="relative">
                     <Input
                       id="email"
                       type="email"
-                      placeholder="student@nmims.in"
+                      placeholder="e.g. your.name@nmims.in"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      className="border-slate-800 bg-slate-950/50 text-white placeholder:text-slate-600 pl-9 focus-visible:ring-violet-500"
+                      className="h-11 rounded-xl border-border/80 bg-background/60 text-sm pl-9 focus-visible:ring-primary focus-visible:ring-1"
                       required
                     />
-                    <Mail className="absolute left-3 top-3 h-4 w-4 text-slate-500" />
+                    <Mail className="absolute left-3 top-3.5 h-4 w-4 text-muted-foreground" />
                   </div>
                 </FormItem>
               </CardContent>
 
-              <CardFooter className="flex flex-col gap-3">
+              <CardFooter className="flex flex-col gap-3 pt-2">
                 <Button
                   type="submit"
                   disabled={isSubmitting || !email}
-                  className="w-full bg-gradient-to-r from-violet-600 to-indigo-500 hover:from-violet-500 hover:to-indigo-400 text-white shadow-md shadow-violet-600/10 font-semibold"
+                  className="w-full h-11 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground font-bold shadow-md shadow-primary/20"
                 >
                   {isSubmitting ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Verifying Account...
+                      Authorizing Reset...
                     </>
                   ) : (
-                    "Generate Recovery Token"
+                    "Send Reset Verification"
                   )}
                 </Button>
 
-                <div className="text-xs text-center text-slate-400 mt-2">
-                  <Link
-                    to="/login"
-                    className="text-violet-400 hover:text-violet-300 font-semibold transition-colors inline-flex items-center gap-1"
-                  >
-                    <ArrowLeft className="h-3.5 w-3.5" /> Back to Sign in
+                <div className="text-xs text-center text-muted-foreground mt-2">
+                  Remember your password?{" "}
+                  <Link to="/login" className="text-primary hover:underline font-bold">
+                    Sign In
                   </Link>
                 </div>
               </CardFooter>
