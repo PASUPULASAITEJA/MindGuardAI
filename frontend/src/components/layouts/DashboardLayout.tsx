@@ -13,9 +13,6 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ title, subtitle, chil
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-background text-foreground flex">
-      {/* Glow effects backdrop */}
-      <div className="absolute top-0 right-0 w-[500px] h-[500px] rounded-full bg-primary/5 blur-[120px] pointer-events-none" />
-      
       {/* Desktop Sidebar (hidden on mobile, fixed width on md screens) */}
       <Sidebar className="hidden md:flex md:w-72 shrink-0" />
 
@@ -44,7 +41,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ title, subtitle, chil
           onMenuClick={() => setIsMobileMenuOpen(true)} 
         />
         <div className="flex-1 overflow-y-auto px-4 py-6 md:px-8 md:py-8">
-          <div className="mx-auto w-full max-w-5xl animate-in fade-in duration-500">
+          <div className="mx-auto w-full max-w-7xl animate-in fade-in duration-300">
             {children}
           </div>
         </div>
