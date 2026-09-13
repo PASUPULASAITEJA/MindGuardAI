@@ -20,13 +20,13 @@ const TopNav: React.FC<TopNavProps> = ({ title, subtitle, onMenuClick }) => {
 
   return (
     <>
-      <header className="sticky top-0 z-20 h-16 shrink-0 border-b border-border bg-card/85 backdrop-blur-xl px-4 md:px-8 transition-all">
+      <header className="sticky top-0 z-20 h-16 shrink-0 border-b border-border/70 bg-card/80 dark:bg-card/75 backdrop-blur-2xl px-4 md:px-8 transition-all">
         <div className="flex h-full items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             {onMenuClick && (
               <button
                 onClick={onMenuClick}
-                className="p-2 rounded-xl border border-border bg-card hover:bg-accent text-muted-foreground hover:text-foreground transition-all duration-200 md:hidden"
+                className="p-2 rounded-xl border border-border/70 bg-card hover:bg-accent text-muted-foreground hover:text-foreground transition-all duration-200 md:hidden shadow-xs"
                 aria-label="Toggle navigation menu"
               >
                 <Menu className="h-4 w-4" />
@@ -34,13 +34,13 @@ const TopNav: React.FC<TopNavProps> = ({ title, subtitle, onMenuClick }) => {
             )}
             <div>
               <div className="flex items-center gap-2">
-                <h2 className="leading-tight text-sm md:text-base font-extrabold text-foreground tracking-tight">{title}</h2>
-                <span className="hidden sm:inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                <h2 className="leading-tight text-sm md:text-base font-bold text-foreground tracking-tight">{title}</h2>
+                <span className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 shadow-xs">
                   <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
                   Telemetry Active
                 </span>
               </div>
-              <p className="mt-0.5 hidden text-[11px] text-muted-foreground sm:block">{subtitle}</p>
+              <p className="mt-0.5 hidden text-[11px] text-muted-foreground sm:block font-normal">{subtitle}</p>
             </div>
           </div>
 
