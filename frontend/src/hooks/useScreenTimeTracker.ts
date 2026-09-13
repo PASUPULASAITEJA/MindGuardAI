@@ -55,25 +55,29 @@ export const useScreenTimeTracker = () => {
         const latest = res.data?.latest_log;
         if (latest && latest.date === todayStr) {
           const serverActive = (latest.total_screen_time_minutes || 0) * 60;
-          if (serverActive > activeSecondsRef.current) {
-            activeSecondsRef.current = serverActive;
-            academicSecondsRef.current = Math.max(academicSecondsRef.current, (latest.academic_usage_minutes || 0) * 60);
-            lateNightSecondsRef.current = Math.max(lateNightSecondsRef.current, (latest.late_night_usage_minutes || 0) * 60);
-            socialSecondsRef.current = Math.max(socialSecondsRef.current, (latest.social_usage_minutes || 0) * 60);
-            entertainmentSecondsRef.current = Math.max(entertainmentSecondsRef.current, (latest.entertainment_usage_minutes || 0) * 60);
-            try {
-              localStorage.setItem(
-                storageKey,
-                JSON.stringify({
-                  activeSeconds: activeSecondsRef.current,
-                  lateNightSeconds: lateNightSecondsRef.current,
-                  academicSeconds: academicSecondsRef.current,
-                  socialSeconds: socialSecondsRef.current,
-                  entertainmentSeconds: entertainmentSecondsRef.current,
-                })
-              );
-            } catch (e) {}
-          }
+          const serverAcademic = (latest.academic_usage_minutes || 0) * 60;
+          const serverLateNight = (latest.late_night_usage_minutes || 0) * 60;
+          const serverSocial = (latest.social_usage_minutes || 0) * 60;
+          const serverEntertainment = (latest.entertainment_usage_minutes || 0) * 60;
+
+          activeSecondsRef.current = Math.max(activeSecondsRef.current, serverActive);
+          academicSecondsRef.current = Math.max(academicSecondsRef.current, serverAcademic);
+          lateNightSecondsRef.current = Math.max(lateNightSecondsRef.current, serverLateNight);
+          socialSecondsRef.current = Math.max(socialSecondsRef.current, serverSocial);
+          entertainmentSecondsRef.current = Math.max(entertainmentSecondsRef.current, serverEntertainment);
+
+          try {
+            localStorage.setItem(
+              storageKey,
+              JSON.stringify({
+                activeSeconds: activeSecondsRef.current,
+                lateNightSeconds: lateNightSecondsRef.current,
+                academicSeconds: academicSecondsRef.current,
+                socialSeconds: socialSecondsRef.current,
+                entertainmentSeconds: entertainmentSecondsRef.current,
+              })
+            );
+          } catch (e) {}
         }
       })
       .catch(() => {});
@@ -161,8 +165,8 @@ export const useScreenTimeTracker = () => {
       }
     };
 
-    // Immediate initial sync 1.5 seconds after login/mount
-    const initialSyncTimeout = setTimeout(syncWithBackend, 1500);
+    // Initial sync 4 seconds after login/mount (giving time for server summary to populate baseline)
+    const initialSyncTimeout = setTimeout(syncWithBackend, 4000);
 
     // Periodic Background Sync every 15 seconds
     const syncInterval = setInterval(syncWithBackend, 15000);
