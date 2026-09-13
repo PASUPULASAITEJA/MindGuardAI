@@ -24,7 +24,7 @@
 - [2. Core Features](#2-core-features)
 - [3. System Architecture](#3-system-architecture)
   - [3.1 Component Architecture Diagram](#31-component-architecture-diagram)
-  - [3.2 Network Isolation and Subnet Security Diagram](#32-network-isolation-and-subnet-security-diagram)
+  - [3.2 Container Network & Service Isolation](#32-container-network--service-isolation)
 - [4. Platform Workflow (How it Works)](#4-platform-workflow-how-it-works)
   - [4.1 Daily Check-In and Evaluation Lifecycle](#41-daily-check-in-and-evaluation-lifecycle)
   - [4.2 Authentication Flow](#42-authentication-flow)
@@ -36,13 +36,14 @@
   - [5.4 Running Automated Verification Suites](#54-running-automated-verification-suites)
 - [6. Machine Learning Pipeline (In Depth)](#6-machine-learning-pipeline-in-depth)
   - [6.1 Data Preprocessing & PII Masking](#61-data-preprocessing--pii-masking)
-  - [6.2 Model Versioning & MLflow](#62-model-versioning--mlflow)
-- [7. Deployment & CI/CD Guidelines](#7-deployment--cicd-guidelines)
-  - [7.1 AWS Production Topology](#71-aws-production-topology)
-  - [7.2 CI/CD Pipeline Workflow (GitHub Actions)](#72-cicd-pipeline-workflow-github-actions)
+  - [6.2 Model Versioning & Registry](#62-model-versioning--registry)
+- [7. Deployment & Service Orchestration](#7-deployment--service-orchestration)
+  - [7.1 Multi-Container Architecture (Docker Compose)](#71-multi-container-architecture-docker-compose)
+  - [7.2 Production Container Builds](#72-production-container-builds)
 - [8. Project Structure](#8-project-structure)
 - [9. Documentation Index](#9-documentation-index)
-- [10. License](#10-license)
+- [10. Project Team & Contributors](#10-project-team--contributors)
+- [11. License](#11-license)
 
 ---
 
@@ -155,33 +156,29 @@ graph TD
     DB --> Dashboards
 ```
 
-### 3.2 Network Isolation and Subnet Security Diagram
+### 3.2 Container Network & Service Isolation
 
-To maintain strict compliance and prevent data leaks, MindGuardAI segregates communication into a dual-network configuration:
+MindGuardAI partitions client-facing interfaces, API routing, and backend persistence across isolated container boundaries and authenticated loopback endpoints:
 
 ```mermaid
 graph TD
-    subgraph PublicSubnet ["Public Subnet (Internet Facing)"]
-        ALB["Application Load Balancer (ALB)"]
-        WAF["AWS WAF - Rate Limiting & OWASP Rules"]
+    subgraph ClientHost ["Host / User Space"]
+        Browser["Student / Counselor / Admin Browser (Port 5173 / 80)"]
+        PCAgent["MindGuard PC Desktop Agent (Background Daemon)"]
     end
 
-    subgraph PrivateSubnet ["Private Subnet (Restricted Access)"]
-        API["FastAPI App Server (ECS Fargate)"]
-        Frontend["Vite / Nginx Container (ECS Fargate)"]
+    subgraph DockerBridge ["Isolated Docker Bridge Network (mindguard-network)"]
+        FrontendContainer["Vite / Nginx Frontend Container"]
+        APIGateway["FastAPI Backend Gateway (Port 8000)"]
+        DBContainer[("PostgreSQL Database / SQLite Engine (Port 5432)")]
+        MLCache[("Local Model Storage & Weights Cache")]
     end
 
-    subgraph SecureDataSubnet ["Secure Database Subnet (Isolated)"]
-        DBInstance[("PostgreSQL Multi-AZ Cluster")]
-        S3Cache[("Amazon S3 - Encrypted ML Cache")]
-    end
-
-    Client["Student / Counselor / Admin"] -->|HTTPS:443| WAF
-    WAF --> ALB
-    ALB -->|Port 80/443| Frontend
-    ALB -->|Port 8000| API
-    API -->|Port 5432| DBInstance
-    API -->|KMS Encrypted| S3Cache
+    Browser -->|HTTP / REST / SSE| FrontendContainer
+    FrontendContainer -->|Reverse Proxy / REST| APIGateway
+    PCAgent -->|Loopback Telemetry (Bearer Auth)| APIGateway
+    APIGateway -->|Async SQLAlchemy / asyncpg| DBContainer
+    APIGateway -->|Local Inference / PyTorch / Joblib| MLCache
 ```
 
 ---
@@ -223,7 +220,7 @@ sequenceDiagram
 
 ### 4.2 Authentication Flow
 
-Authentication is managed via JSON Web Tokens (JWT) using short-lived Access Tokens (15-30 minutes) and HttpOnly secure Refresh Cookies with complete Role-Based Access Control (RBAC).
+Authentication is managed via JSON Web Tokens (JWT) using cryptographically signed Access Tokens and HttpOnly secure Refresh Cookies with complete Role-Based Access Control (RBAC).
 
 ```mermaid
 sequenceDiagram
@@ -454,30 +451,27 @@ graph TD
 ### 6.1 Data Preprocessing & PII Masking
 To comply with health informatics regulations (e.g., HIPAA), all qualitative inputs are processed through a Named Entity Recognition (NER) masking regex. Identifiers like student names, email addresses, and phone numbers are mapped to redacted labels (e.g., `[EMAIL]`, `[PHONE]`) before text reaches the models.
 
-### 6.2 Model Versioning & MLflow
-- Models are trained using the PyTorch ecosystem (for NLP) and Scikit-learn/XGBoost (for risk assessment).
+### 6.2 Model Versioning & Registry
+- Models are trained using the PyTorch ecosystem (for NLP emotion detection) and Scikit-learn/XGBoost (for risk assessment).
 - Clinical dataset evaluation is backed by the DAIC-WOZ audio/transcript pipeline via `scripts/train_daicwoz.py`.
 - Saved model binary configurations (`.pt` and `.joblib`) are versioned and cached under `backend/app/ml/models`.
 
 ---
 
-## 7. Deployment & CI/CD Guidelines
+## 7. Deployment & Service Orchestration
 
-Production orchestration uses continuous integration and fully managed hosting services.
+MindGuardAI is engineered for high-availability local and server deployment via multi-container orchestration.
 
-### 7.1 AWS Production Topology
-- **Routing:** AWS Route 53 routes client DNS lookups to an Application Load Balancer (ALB).
-- **SSL Termination:** The ALB terminates SSL certificate handshakes and routes traffic internally.
-- **Compute:** The frontend (served via Nginx container) and api (served via FastAPI) run inside an **AWS ECS Fargate** cluster, utilizing serverless CPU/Memory scaling.
-- **Database:** A fully managed **AWS RDS PostgreSQL** multi-AZ cluster operates inside private subnets, restricting traffic only to authorized backend security groups.
-- **Storage:** Amazon EBS volumes persist database logs, and Amazon S3 acts as the cache repository for ML models and assets.
+### 7.1 Multi-Container Architecture (Docker Compose)
+- **Service Isolation:** Managed by `docker-compose.yml` linking three primary services across a dedicated bridge network (`mindguard-network`):
+  - `frontend`: Vite / Nginx client SPA served on host port `5173`.
+  - `api`: FastAPI asynchronous gateway served on host port `8000`.
+  - `db`: PostgreSQL database server operating on internal port `5432` with persistent host volume mapping (`postgres_data`).
+- **Data Persistence:** Relational state, surveys, mood logs, and emergency SOS alerts are persisted across container restarts.
 
-### 7.2 CI/CD Pipeline Workflow (GitHub Actions)
-- On code push or pull request merge:
-  1. **Lint & Test:** Runs unit and integration test blocks using `pytest` for backend and `tsc`/`vite build` for frontend.
-  2. **Dockerization:** Builds Docker images using multi-stage pipelines to minimize size.
-  3. **Registry:** Pushes production images to AWS Elastic Container Registry (ECR).
-  4. **Deploy:** Updates the ECS tasks, performing a rolling deployment without downtime.
+### 7.2 Production Container Builds
+- **Backend Image (`backend/Dockerfile`):** Multi-stage build utilizing `python:3.11-slim` with optimized layer caching for compiled scientific dependencies (`torch`, `scikit-learn`, `numpy`).
+- **Frontend Image (`frontend/Dockerfile`):** Multi-stage build compiling TypeScript/React with Vite and serving production static bundles via lightweight Nginx.
 
 ---
 
@@ -486,44 +480,46 @@ Production orchestration uses continuous integration and fully managed hosting s
 ```text
 mindguard-student-wellness-platform/
 ├── .agent/                 # Agent workspace utilities and skills
-├── .github/                # GitHub pipelines (CI/CD workflows)
 ├── backend/                # FastAPI Application and ML codebase
 │   ├── alembic/            # Database migration configurations
 │   ├── app/
-│   │   ├── api/            # API Gateway routes / REST endpoints (alerts, auth, chat, mood)
-│   │   ├── core/           # Security, configuration, and exception modules
+│   │   ├── api/            # API Gateway routes / REST endpoints (alerts, auth, chat, mood, predictions)
+│   │   ├── core/           # Security, configuration, and whitelist modules
 │   │   ├── db/             # SQLAlchemy configurations and database sessions
-│   │   ├── ml/             # Emotion engine, pipelines, and inference handlers
+│   │   ├── ml/             # Emotion engine, intent classification, safety engine, and response orchestrator
 │   │   ├── models/         # SQLAlchemy relational database entities
+│   │   ├── repositories/   # Database access layer
 │   │   ├── schemas/        # Pydantic validation classes
 │   │   └── services/       # Core business logic & clinical safety handlers
 │   ├── requirements.txt    # Python backend dependencies
 │   └── Dockerfile          # Production backend Docker image config
-├── datasets/               # Preloaded dataset CSV files
-│   ├── raw/
-│   │   ├── emotion/
-│   │   └── student_depression/
-│   └── processed/
+├── Dataset/                # Clinical & multimodal dataset files
+│   ├── daicwoz/            # DAIC-WOZ audio & transcript multimodal clinical data
+│   └── phq_gad/            # PHQ-9 & GAD-7 validation survey datasets
+├── desktop_agent/          # Non-invasive behavioral desktop telemetry agent
+│   ├── mindguard_pc_agent.py # Windows telemetry daemon (screen time, late-night usage)
+│   ├── setup_auto_start.bat  # Auto-start startup registry helper
+│   └── remove_auto_start.bat # Auto-start cleanup helper
 ├── docs/                   # Detailed architectural and clinical documentation
-├── frontend/               # React SPA client codebase (Vite + TypeScript)
+├── frontend/               # React SPA client codebase (Vite + TypeScript + Tailwind CSS)
 │   ├── src/
-│   │   ├── components/     # UI elements (EmergencySOSModal, shadcn/ui layout wrappers)
-│   │   ├── hooks/          # React Query API fetch calls
-│   │   ├── pages/          # Student (StudentChatbot, StudentDashboard), Counselor, Admin portals
-│   │   └── services/       # Axios API integration setups
+│   │   ├── components/     # UI elements (EmergencySOSModal, ClinicalDossier, ExplainableAIFactors)
+│   │   ├── hooks/          # Custom hooks (useMood, usePredictions, useScreenTimeTracker)
+│   │   ├── pages/          # Student, Counselor, Admin portals
+│   │   └── services/       # Axios API client integrations
 │   ├── Dockerfile          # Frontend container configurations
 │   ├── tailwind.config.js  # Tailwind CSS framework config
 │   └── package.json        # Frontend NPM configurations
-├── scripts/                # Verification and training execution scripts
-│   ├── seed_database.py    # Database cleanup and seeding script
+├── scripts/                # Verification, seed, and training execution scripts
+│   ├── seed_database.py    # Database cleanup and roster seeding script
 │   ├── test_all_features.py# Full system 23-step integration test suite
 │   ├── test_chatbot.py     # Companion chatbot & crisis triage test suite
 │   ├── test_behavioral_agent.py # Behavioral telemetry test suite
-│   └── train_daicwoz.py    # DAIC-WOZ multimodal depression pipeline
-├── desktop_agent/          # Non-invasive behavioral desktop telemetry agent
-│   └── mindguard_pc_agent.py
-├── docker-compose.yml      # Service orchestration config
-└── README.md               # Main project overview and run book
+│   └── train_daicwoz.py    # DAIC-WOZ multimodal depression training pipeline
+├── docker-compose.yml      # Multi-container orchestration config
+├── nmims emails.xlsx       # Institutional student and counselor roster spreadsheet
+├── LICENSE                 # MIT License
+└── README.md               # Main project overview and runbook
 ```
 
 ---
