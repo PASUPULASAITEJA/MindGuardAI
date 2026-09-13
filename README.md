@@ -380,18 +380,12 @@ python desktop_agent/mindguard_pc_agent.py
 
 ---
 
-### 5.3 Default Seeding Credentials
+### 5.3 Institutional Account Access & Roster Policy
 
-After running [scripts/seed_database.py](scripts/seed_database.py), the database will be preloaded with the following users for logging in:
-
-| Email Address | Role | Password | Description |
-| --- | --- | --- | --- |
-| `student@nmims.in` | Student | `password123` | Log in to check journals, see mood graphs, take PHQ-9, use CBT micro-tools, and chat. |
-| `counselor@nmims.edu` | Counselor | `password123` | Log in to manage triage lists, view alerts, and track outreach status. |
-| `admin@nmims.edu` | Admin | `password123` | Log in to view aggregated school analytics and institutional macro reports. |
-
-> [!NOTE]
-> Self-service account registration is strictly restricted to authorized institutional email domains: `@nmims.in`, `@nmims.edu.in`, and `@nmims.edu`. Any external emails (e.g. `@gmail.com`) are rejected with `403 Forbidden`.
+Account access is strictly governed by institutional identity verification:
+- **Self-Service Registration:** Eligible students, counselors, and administrative staff can create an account at `/register` using their authorized university email address or username.
+- **Domain Restriction:** Registration is restricted to official university domains (`@nmims.in`, `@nmims.edu.in`, and `@nmims.edu`). External domains (e.g. `@gmail.com`) are automatically rejected with `403 Forbidden`.
+- **Roster Role Mapping:** The platform cross-references the university roster to automatically assign the appropriate clinical or student role upon registration.
 
 ---
 
