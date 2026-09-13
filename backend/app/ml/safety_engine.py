@@ -11,21 +11,27 @@ class SafetyEvaluation:
     requires_human_review: bool = False
     trigger_type: Optional[str] = None
 
-# Critical Red Triggers (Suicide, Self-Harm, Life-Threatening Crisis)
+# Critical Red Triggers (Suicide, Self-Harm, Life-Threatening Crisis) - English & Hinglish
 RED_PATTERNS = [
     (r"\b(suicide|suicidal|kill myself|want to die|end my life|end it all|hang myself|slit my|cut my wrist)\b", "EXPLICIT_SUICIDAL_IDEATION"),
     (r"\b(overdose|drink bleach|jump off|jump in front of|shoot myself|take all my pills)\b", "LETHAL_SELF_HARM_PLAN"),
     (r"\b(no reason to live|better off dead|world is better without me|don't want to wake up)\b", "SEVERE_HOPELESSNESS_CRISIS"),
     (r"\b(goodbye forever|my final goodbye|leaving this world|farewell everyone)\b", "SUICIDAL_FAREWELL_SIGNAL"),
-    (r"\b(hurting myself|self-harm|self harm|burning myself|cutting myself)\b", "ACTIVE_SELF_HARM")
+    (r"\b(hurting myself|self-harm|self harm|burning myself|cutting myself)\b", "ACTIVE_SELF_HARM"),
+    # Hinglish Critical Red Triggers
+    (r"\b(marne ka man|jaan dena|suicide karna|zindagi khatam|khatam karna chahta|mar jaunga|khud ko maar|ab aur nahi jeena|haath kaat|zehar kha|marne ja raha)\b", "HINGLISH_EXPLICIT_SUICIDAL_IDEATION"),
+    (r"\b(sab bekar hai|jeene ka koi fayda nahi|zindagi bekar hai|sab khatam ho gaya|ab aur nahi jheela jaata|ab bas ho gaya)\b", "HINGLISH_SEVERE_HOPELESSNESS"),
+    (r"\b(alvida sabko|aakhri baar baat|ab kabhi nahi milunga|aakhri alvida)\b", "HINGLISH_SUICIDAL_FAREWELL")
 ]
 
-# Yellow Distress Triggers (Moderate Risk, Acute Anxiety, Depressive Feelings, Burnout)
+# Yellow Distress Triggers (Moderate Risk, Acute Anxiety, Depressive Feelings, Burnout) - English & Hinglish
 YELLOW_PATTERNS = [
     (r"\b(can'?t take this anymore|so overwhelmed|breaking down|having a panic attack|hyperventilating)\b", "ACUTE_PANIC_OR_OVERWHELM"),
     (r"\b(failing everything|ruined my life|worthless|hopeless|crying non stop|can'?t stop crying)\b", "ACUTE_EMOTIONAL_DISTRESS"),
     (r"\b(nobody cares|completely alone|isolated|drowning in stress|extreme burnout)\b", "SEVERE_ISOLATION_OR_BURNOUT"),
-    (r"\b(stressed|stress|freaking out|failing|scared of failing|cannot cope|can't cope|so worried|finals|midterm)\b", "ACADEMIC_OR_EMOTIONAL_STRESS")
+    (r"\b(stressed|stress|freaking out|failing|scared of failing|cannot cope|can't cope|so worried|finals|midterm)\b", "ACADEMIC_OR_EMOTIONAL_STRESS"),
+    # Hinglish Acute Distress Triggers
+    (r"\b(bohot zyada panic|bohot darr lag raha|ghabrahat ho rahi|bechaini|bohot tension|pareshan hoon|rona aa raha|bohot rona|dimag phat raha|kuch samajh nahi aa raha)\b", "HINGLISH_ACUTE_DISTRESS")
 ]
 
 class SafetyEngine:
