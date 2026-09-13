@@ -31,11 +31,38 @@ import { cn } from "@/utils/cn";
 import { useToast } from "@/components/ui/toast";
 import { EmergencySOSModal } from "@/components/EmergencySOSModal";
 
-const QUICK_PROMPTS = [
-  "I'm feeling stressed about my upcoming exams",
-  "Help me calm down, I feel overwhelmed",
-  "I'm feeling lonely and disconnected lately",
-  "Guide me through a 5-minute breathing exercise",
+interface QuickPrompt {
+  title: string;
+  desc: string;
+  prompt: string;
+  icon: string;
+}
+
+const QUICK_PROMPTS: QuickPrompt[] = [
+  {
+    title: "Exam & Academic Stress",
+    desc: "Manage heavy coursework and fear of failure",
+    prompt: "I'm feeling really overwhelmed with upcoming exams and deadlines. Can you help me organize my thoughts?",
+    icon: "🎓",
+  },
+  {
+    title: "Instant Panic & Anxiety Relief",
+    desc: "Gentle grounding when your heart feels overwhelmed",
+    prompt: "I feel panic and anxiety rising right now. Can you help ground me and calm my breathing?",
+    icon: "🌿",
+  },
+  {
+    title: "Burnout & Social Disconnection",
+    desc: "Talk through loneliness or academic exhaustion",
+    prompt: "I've been feeling deeply exhausted, lonely, and disconnected from campus life. I just need a safe space to vent.",
+    icon: "💬",
+  },
+  {
+    title: "5-Minute Guided Reset",
+    desc: "Guided mindfulness and cognitive breathing",
+    prompt: "Could you guide me through a quick, gentle 5-minute mindfulness breathing exercise?",
+    icon: "🧘",
+  },
 ];
 
 const emotionBadgeColor: Record<string, string> = {
@@ -459,9 +486,9 @@ export const StudentChatbot: React.FC = () => {
 
         <div className="mt-2 flex-1 space-y-1 overflow-y-auto pr-1">
           {isConversationsLoading ? (
-            <div className="p-4 text-center text-xs text-slate-400">Loading chats...</div>
+            <div className="p-4 text-center text-xs text-muted-foreground">Loading chats...</div>
           ) : conversations.length === 0 ? (
-            <div className="p-6 text-center text-xs text-slate-400">
+            <div className="p-6 text-center text-xs text-muted-foreground">
               No conversations yet. Start a new chat to begin!
             </div>
           ) : (
@@ -479,7 +506,7 @@ export const StudentChatbot: React.FC = () => {
                   )}
                 >
                   <div className="flex items-center gap-2.5 truncate">
-                    <MessageSquare className="h-4 w-4 shrink-0 text-indigo-500/70" />
+                    <MessageSquare className="h-4 w-4 shrink-0 text-primary/70" />
                     <span className="truncate">{conv.title}</span>
                   </div>
                   {conv.current_risk_level === "RED" && (
@@ -491,8 +518,8 @@ export const StudentChatbot: React.FC = () => {
           )}
         </div>
 
-        <div className="mt-auto border-t border-slate-200/60 pt-3 dark:border-slate-800">
-          <div className="flex items-center gap-2 px-2 text-[11px] text-slate-400 dark:text-slate-500">
+        <div className="mt-auto border-t border-border/60 pt-3">
+          <div className="flex items-center gap-2 px-2 text-[11px] text-muted-foreground">
             <ShieldCheck className="h-4 w-4 text-emerald-500" />
             <span>256-Bit Encrypted & Confidential</span>
           </div>
@@ -548,28 +575,35 @@ export const StudentChatbot: React.FC = () => {
         {/* Message Stream */}
         <div className="flex-1 space-y-4 overflow-y-auto p-4 sm:p-6">
           {messages.length === 0 ? (
-            <div className="flex h-full flex-col items-center justify-center text-center">
-              <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-indigo-50 text-indigo-600 shadow-inner dark:bg-indigo-950/60 dark:text-indigo-400">
-                <Sparkles className="h-8 w-8 animate-pulse" />
+            <div className="flex h-full flex-col items-center justify-center text-center py-6">
+              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary border border-primary/20 shadow-xs">
+                <Sparkles className="h-7 w-7 animate-pulse" />
               </div>
-              <h4 className="mt-4 text-base font-semibold text-slate-800 dark:text-slate-100">
-                Welcome to your Wellness Chat
+              <h4 className="mt-4 text-base font-extrabold text-foreground">
+                MindGuardAI Sanctuary Companion
               </h4>
-              <p className="mt-1 max-w-sm text-xs text-slate-400 dark:text-slate-500">
-                I'm here to support you with exam stress, anxiety, emotional check-ins, or just
-                having a listening ear in complete privacy.
+              <p className="mt-1 max-w-md text-xs text-muted-foreground leading-relaxed">
+                A private, confidential listening space for academic stress, emotional overwhelm, or gentle guided grounding exercises.
               </p>
 
               {/* Quick Prompts */}
-              <div className="mt-6 grid max-w-md grid-cols-1 gap-2 sm:grid-cols-2">
-                {QUICK_PROMPTS.map((prompt, idx) => (
+              <div className="mt-6 grid max-w-lg grid-cols-1 gap-2.5 sm:grid-cols-2">
+                {QUICK_PROMPTS.map((item, idx) => (
                   <button
                     key={idx}
-                    onClick={() => handleSendMessage(prompt)}
-                    className="flex items-center justify-between rounded-xl border border-slate-200/80 bg-white/80 p-3 text-left text-xs text-slate-600 shadow-sm transition-all hover:border-indigo-300 hover:bg-indigo-50/50 dark:border-slate-800 dark:bg-slate-900/60 dark:text-slate-300 dark:hover:border-indigo-700"
+                    onClick={() => handleSendMessage(item.prompt)}
+                    className="flex flex-col text-left p-3.5 rounded-2xl border border-border/80 bg-card hover:border-primary/40 hover:bg-primary/5 transition-all shadow-xs group"
                   >
-                    <span>{prompt}</span>
-                    <ChevronRight className="h-3.5 w-3.5 shrink-0 text-slate-400" />
+                    <div className="flex items-center justify-between mb-1.5">
+                      <span className="text-xl">{item.icon}</span>
+                      <ChevronRight className="h-3.5 w-3.5 text-muted-foreground group-hover:text-primary group-hover:translate-x-0.5 transition-transform" />
+                    </div>
+                    <span className="text-xs font-bold text-foreground group-hover:text-primary transition-colors">
+                      {item.title}
+                    </span>
+                    <span className="text-[11px] text-muted-foreground mt-0.5 leading-snug">
+                      {item.desc}
+                    </span>
                   </button>
                 ))}
               </div>
@@ -585,7 +619,7 @@ export const StudentChatbot: React.FC = () => {
                   className={cn("flex w-full gap-3", isStudent ? "justify-end" : "justify-start")}
                 >
                   {!isStudent && (
-                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-indigo-600 text-white shadow-sm shadow-indigo-500/20">
+                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-xs">
                       <Bot className="h-4 w-4" />
                     </div>
                   )}
@@ -594,12 +628,12 @@ export const StudentChatbot: React.FC = () => {
                     {/* Bubble */}
                     <div
                       className={cn(
-                        "rounded-2xl px-4 py-3 text-xs leading-relaxed shadow-sm transition-all",
+                        "rounded-2xl px-4 py-3 text-xs leading-relaxed shadow-xs transition-all",
                         isStudent
-                          ? "rounded-tr-none bg-gradient-to-r from-primary to-violet-600 text-primary-foreground shadow-primary/10"
+                          ? "rounded-tr-none bg-primary text-primary-foreground font-medium"
                           : isRed
-                          ? "rounded-tl-none border border-rose-400/40 bg-rose-500/10 text-foreground"
-                          : "rounded-tl-none border border-border/70 bg-card/90 text-foreground"
+                          ? "rounded-tl-none border border-rose-500/30 bg-rose-500/10 text-foreground"
+                          : "rounded-tl-none border border-border/80 bg-card text-foreground"
                       )}
                     >
                       <div className="whitespace-pre-wrap">{msg.message}</div>
@@ -611,7 +645,7 @@ export const StudentChatbot: React.FC = () => {
                         {msg.primary_emotion && (
                           <span
                             className={cn(
-                              "rounded-md border px-1.5 py-0.5 font-medium uppercase tracking-wide",
+                              "rounded-md border px-1.5 py-0.5 font-bold uppercase tracking-wide",
                               emotionBadgeColor[msg.primary_emotion.toLowerCase()] ||
                                 emotionBadgeColor.neutral
                             )}
@@ -620,11 +654,11 @@ export const StudentChatbot: React.FC = () => {
                           </span>
                         )}
                         {msg.intent && (
-                          <span className="rounded-md bg-slate-100 px-1.5 py-0.5 text-slate-500 dark:bg-slate-800 dark:text-slate-400">
+                          <span className="rounded-md bg-secondary px-1.5 py-0.5 text-muted-foreground font-medium">
                             {msg.intent.replace(/_/g, " ")}
                           </span>
                         )}
-                        <span className="text-slate-400">
+                        <span className="text-muted-foreground">
                           {new Date(msg.created_at).toLocaleTimeString([], {
                             hour: "2-digit",
                             minute: "2-digit",
@@ -635,9 +669,9 @@ export const StudentChatbot: React.FC = () => {
 
                     {/* RED Crisis Support Card */}
                     {isRed && !isStudent && (
-                      <div className="mt-2 rounded-xl border border-rose-200 bg-rose-50 p-3.5 shadow-sm dark:border-rose-900/60 dark:bg-rose-950/50">
+                      <div className="mt-2 rounded-2xl border border-rose-500/30 bg-rose-500/10 p-3.5 shadow-xs">
                         <div className="flex items-center justify-between gap-2">
-                          <div className="flex items-center gap-2 text-rose-700 dark:text-rose-400 font-semibold text-xs">
+                          <div className="flex items-center gap-2 text-rose-600 dark:text-rose-400 font-bold text-xs">
                             <AlertTriangle className="h-4 w-4 shrink-0" />
                             <span>Immediate Crisis Helplines (24/7 Free & Confidential)</span>
                           </div>
@@ -651,14 +685,14 @@ export const StudentChatbot: React.FC = () => {
                         <div className="mt-2.5 flex flex-wrap gap-2">
                           <a
                             href="tel:14416"
-                            className="flex items-center gap-1.5 rounded-lg bg-rose-600 px-3 py-1.5 text-xs font-semibold text-white shadow-sm hover:bg-rose-700"
+                            className="flex items-center gap-1.5 rounded-xl bg-rose-600 px-3 py-1.5 text-xs font-bold text-white shadow-xs hover:bg-rose-700"
                           >
                             <PhoneCall className="h-3.5 w-3.5" />
                             <span>Call Tele-MANAS (14416)</span>
                           </a>
                           <a
                             href="tel:18005990019"
-                            className="flex items-center gap-1.5 rounded-lg border border-rose-300 bg-white px-3 py-1.5 text-xs font-medium text-rose-700 shadow-sm hover:bg-rose-50 dark:border-rose-800 dark:bg-slate-900 dark:text-rose-300"
+                            className="flex items-center gap-1.5 rounded-xl border border-rose-500/30 bg-card px-3 py-1.5 text-xs font-bold text-rose-600 dark:text-rose-400 shadow-xs hover:bg-rose-500/10"
                           >
                             <PhoneCall className="h-3.5 w-3.5" />
                             <span>KIRAN (1800-599-0019)</span>
@@ -669,7 +703,7 @@ export const StudentChatbot: React.FC = () => {
                   </div>
 
                   {isStudent && (
-                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-200 text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-secondary border border-border text-foreground">
                       <UserIcon className="h-4 w-4" />
                     </div>
                   )}
@@ -681,13 +715,13 @@ export const StudentChatbot: React.FC = () => {
           {/* Live Streaming Response Bubble */}
           {isSending && streamingText && (
             <div className="flex w-full gap-3 justify-start">
-              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-indigo-600 text-white shadow-sm shadow-indigo-500/20">
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-xs">
                 <Bot className="h-4 w-4" />
               </div>
               <div className="max-w-xl space-y-2">
-                <div className="rounded-2xl rounded-tl-none border border-slate-200/80 bg-white px-4 py-3 text-xs leading-relaxed shadow-sm dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100">
+                <div className="rounded-2xl rounded-tl-none border border-border/80 bg-card px-4 py-3 text-xs leading-relaxed shadow-xs text-foreground">
                   <div className="whitespace-pre-wrap">{streamingText}</div>
-                  <span className="inline-block h-3 w-1.5 ml-1 bg-indigo-600 animate-pulse" />
+                  <span className="inline-block h-3 w-1.5 ml-1 bg-primary animate-pulse" />
                 </div>
               </div>
             </div>
@@ -696,14 +730,14 @@ export const StudentChatbot: React.FC = () => {
           {/* Typing Indicator */}
           {isSending && !streamingText && (
             <div className="flex items-center gap-3">
-              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-indigo-600 text-white">
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-xs">
                 <Bot className="h-4 w-4 animate-spin" />
               </div>
-              <div className="rounded-2xl rounded-tl-none border border-slate-200 bg-white px-4 py-2.5 text-xs text-slate-500 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-                <div className="flex items-center gap-1">
-                  <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-indigo-600 [animation-delay:-0.3s]" />
-                  <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-indigo-600 [animation-delay:-0.15s]" />
-                  <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-indigo-600" />
+              <div className="rounded-2xl rounded-tl-none border border-border bg-card px-4 py-3 text-xs text-muted-foreground shadow-xs">
+                <div className="flex items-center gap-1.5">
+                  <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-primary [animation-delay:-0.3s]" />
+                  <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-primary [animation-delay:-0.15s]" />
+                  <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-primary" />
                 </div>
               </div>
             </div>
