@@ -37,7 +37,7 @@ import { HabitRecoverySimulator } from "@/components/HabitRecoverySimulator";
 import { ClinicalDossierModal } from "@/components/ClinicalDossierModal";
 import { ModelBenchmarksModal } from "@/components/ModelBenchmarksModal";
 
-// Student-friendly, clearly articulated questions for PHQ-9 Depression screening
+// Clinically calibrated, student-centered questions for PHQ-9 Depression screening
 export interface SurveyQuestionItem {
   id: number;
   category: string;
@@ -50,126 +50,126 @@ const PHQ9_QUESTIONS: SurveyQuestionItem[] = [
   {
     id: 1,
     category: "Interest & Motivation",
-    shortTitle: "Loss of Interest",
-    prompt: "Little interest or pleasure in doing things",
-    studentContext: "Feeling unmotivated with hobbies, hanging out with friends, or campus activities you usually enjoy."
+    shortTitle: "Enjoyment & Drive",
+    prompt: "How often have you felt little to no interest or pleasure in doing things you normally enjoy?",
+    studentContext: "Feeling disconnected from your passions, hobbies, social circles, or campus activities."
   },
   {
     id: 2,
-    category: "Mood & Outlook",
-    shortTitle: "Feeling Down",
-    prompt: "Feeling down, depressed, or hopeless",
-    studentContext: "Carrying a heavy heart, feeling discouraged about college life, grades, or future prospects."
+    category: "Emotional State",
+    shortTitle: "Mood & Outlook",
+    prompt: "How often have you been feeling down, deeply discouraged, depressed, or hopeless?",
+    studentContext: "Carrying a persistent emotional weight or feeling pessimistic about your college journey and future."
   },
   {
     id: 3,
-    category: "Sleep Health",
-    shortTitle: "Sleep Disturbances",
-    prompt: "Trouble falling or staying asleep, or sleeping too much",
-    studentContext: "Racing thoughts at night, irregular study sleeping hours, insomnia, or finding it hard to get out of bed."
+    category: "Sleep Architecture",
+    shortTitle: "Sleep Regularity",
+    prompt: "How often have you had trouble falling asleep, staying asleep through the night, or sleeping way too much?",
+    studentContext: "Racing thoughts before bed, broken sleep cycles, insomnia during exam weeks, or struggling to wake up."
   },
   {
     id: 4,
-    category: "Vitality & Energy",
-    shortTitle: "Fatigue & Burnout",
-    prompt: "Feeling tired, drained, or having little energy",
-    studentContext: "Mental exhaustion from coursework, feeling physically worn out even after resting."
+    category: "Physical & Mental Energy",
+    shortTitle: "Energy & Fatigue",
+    prompt: "How often have you felt constantly tired, mentally exhausted, or lacking the energy to get through the day?",
+    studentContext: "Coursework burnout, feeling drained even after resting, or feeling like simple daily tasks take immense effort."
   },
   {
     id: 5,
-    category: "Appetite & Nutrition",
-    shortTitle: "Appetite Changes",
-    prompt: "Poor appetite or overeating",
-    studentContext: "Skipping meals due to academic pressure, loss of hunger, or stress-eating during late nights."
+    category: "Nutritional Habits",
+    shortTitle: "Appetite Balance",
+    prompt: "How often have you experienced a noticeable loss of appetite or found yourself stress-eating?",
+    studentContext: "Skipping meals due to tight schedules and anxiety, or using snacking to cope with study pressure."
   },
   {
     id: 6,
-    category: "Self-Esteem",
-    shortTitle: "Self-Doubt & Guilt",
-    prompt: "Feeling bad about yourself, or that you are a failure",
-    studentContext: "Imposter syndrome, feeling like you are falling behind your peers, or worrying about letting family down."
+    category: "Self-Worth",
+    shortTitle: "Self-Perception",
+    prompt: "How often have you felt disappointed in yourself, felt like a failure, or worried that you let your family or yourself down?",
+    studentContext: "Imposter syndrome in academics, harsh self-criticism, or feeling inadequate compared to your peers."
   },
   {
     id: 7,
     category: "Cognitive Focus",
-    shortTitle: "Trouble Concentrating",
-    prompt: "Trouble concentrating on things, such as reading or lectures",
-    studentContext: "Difficulty focusing on study materials, zoning out during class, or having trouble finishing assignments."
+    shortTitle: "Concentration",
+    prompt: "How often have you found it difficult to concentrate on your coursework, read assignments, or follow lectures?",
+    studentContext: "Easily distracted, brain fog, zoning out during class, or having trouble retaining study material."
   },
   {
     id: 8,
-    category: "Psychomotor Speed",
-    shortTitle: "Restlessness or Sluggishness",
-    prompt: "Moving or speaking slowly, or feeling unusually fidgety and restless",
-    studentContext: "Feeling sluggish throughout the day, or so agitated and anxious that sitting through lectures feels unbearable."
+    category: "Physical Pace",
+    shortTitle: "Agitation or Sluggishness",
+    prompt: "How often have you noticed yourself moving or speaking unusually slowly, or feeling so restless that it's hard to sit still?",
+    studentContext: "Feeling lethargic and slow-moving, or feeling so fidgety and agitated that sitting through class feels impossible."
   },
   {
     id: 9,
-    category: "Emotional Safety",
-    shortTitle: "Thoughts of Giving Up",
-    prompt: "Thoughts that you would be better off dead, or hurting yourself in some way",
-    studentContext: "Feeling overwhelmed to the point of wanting to give up. Confidential campus support is always available."
+    category: "Emotional Well-being & Safety",
+    shortTitle: "Overwhelm & Self-Care",
+    prompt: "How often have you felt so completely overwhelmed that you thought of giving up or harming yourself?",
+    studentContext: "Experiencing extreme emotional exhaustion. MindGuard AI and campus counselors are here to support you 24/7."
   }
 ];
 
-// Student-friendly, clearly articulated questions for GAD-7 Anxiety screening
+// Clinically calibrated, student-centered questions for GAD-7 Anxiety screening
 const GAD7_QUESTIONS: SurveyQuestionItem[] = [
   {
     id: 1,
-    category: "Nervous Tension",
-    shortTitle: "Nervousness & On-Edge",
-    prompt: "Feeling nervous, anxious, or on edge",
-    studentContext: "Persistent jittery feeling, stress regarding classes, upcoming deadlines, or campus exams."
+    category: "Nervous System",
+    shortTitle: "Inner Tension",
+    prompt: "How often have you felt nervous, anxious, irritable, or constantly on edge?",
+    studentContext: "A persistent feeling of nervousness, tight shoulders, or feeling wound up about deadlines and classes."
   },
   {
     id: 2,
-    category: "Worry Control",
-    shortTitle: "Uncontrollable Worry",
-    prompt: "Not being able to stop or control worrying",
-    studentContext: "Thoughts spiraling uncontrollably, repeatedly replaying worst-case scenarios about college or life."
+    category: "Mental Rest",
+    shortTitle: "Worry Control",
+    prompt: "How often have you found it difficult to control or stop worrying once you start thinking about something?",
+    studentContext: "Spiraling thoughts, mental loops, or being unable to turn off worries when trying to relax or study."
   },
   {
     id: 3,
-    category: "Worry Scope",
-    shortTitle: "Excessive Worrying",
-    prompt: "Worrying too much about different things",
-    studentContext: "Juggling worries across grades, future career, relationships, and day-to-day responsibilities."
+    category: "Cognitive Load",
+    shortTitle: "Overthinking Scope",
+    prompt: "How often have you worried excessively about multiple different things at the same time?",
+    studentContext: "Overthinking grades, career uncertainty, social dynamics, and family expectations all at once."
   },
   {
     id: 4,
-    category: "Relaxation",
-    shortTitle: "Trouble Relaxing",
-    prompt: "Trouble relaxing or unwinding",
-    studentContext: "Inability to slow down, feeling tense or guilty whenever taking a break from study sessions."
+    category: "Rest & Recovery",
+    shortTitle: "Ability to Relax",
+    prompt: "How often have you found it hard to truly relax and let your mind rest?",
+    studentContext: "Feeling guilty whenever you take a break, or feeling internal pressure even during leisure time."
   },
   {
     id: 5,
-    category: "Motor Agitation",
-    shortTitle: "Physical Restlessness",
-    prompt: "Being so restless that it's hard to sit still",
-    studentContext: "Constant fidgeting, racing pulse, or feeling keyed up during study hours or lectures."
+    category: "Physical Restlessness",
+    shortTitle: "Motor Agitation",
+    prompt: "How often have you felt so physically restless or fidgety that it was uncomfortable to sit still?",
+    studentContext: "Shaking legs, pacing, difficulty sitting through long lectures, or feeling an urge to move constantly."
   },
   {
     id: 6,
-    category: "Irritability",
-    shortTitle: "Irritability & Frustration",
-    prompt: "Becoming easily annoyed or irritable",
-    studentContext: "Low patience, snapping or feeling easily triggered by classmates, roommates, or routine pressures."
+    category: "Emotional Resilience",
+    shortTitle: "Irritability & Patience",
+    prompt: "How often have you felt easily annoyed, impatient, or irritated by small things?",
+    studentContext: "Short temper with classmates, roommates, or team project members when under academic pressure."
   },
   {
     id: 7,
-    category: "Anticipatory Fear",
-    shortTitle: "Dread & Fear",
-    prompt: "Feeling afraid as if something awful might happen",
-    studentContext: "A looming sense of dread or impending disaster about exams, evaluations, or daily uncertainty."
+    category: "Anticipatory Anxiety",
+    shortTitle: "Sense of Dread",
+    prompt: "How often have you felt a sudden sense of fear or dread, as if something terrible might happen?",
+    studentContext: "A sudden sinking feeling in your stomach or intense dread about exam results or upcoming situations."
   }
 ];
 
 const SURVEY_OPTIONS = [
-  { value: 0, label: "Not at all" },
-  { value: 1, label: "Several days" },
-  { value: 2, label: "More than half the days" },
-  { value: 3, label: "Nearly every day" }
+  { value: 0, label: "Not at all", helper: "Rarely or never felt this way" },
+  { value: 1, label: "Several days", helper: "A few times during the week" },
+  { value: 2, label: "More than half the days", helper: "Frequently, most of the week" },
+  { value: 3, label: "Nearly every day", helper: "Almost continuously every day" }
 ];
 
 export const StudentDashboard: React.FC = () => {
@@ -1001,11 +1001,11 @@ export const StudentDashboard: React.FC = () => {
                       </div>
 
                       {/* 4 Frequency Response Buttons */}
-                      <div className="space-y-1.5">
+                      <div className="space-y-2">
                         <label className="text-xs font-bold text-foreground block">
-                          How often have you experienced this over the last 2 weeks?
+                          Over the past 2 weeks, how often have you experienced this?
                         </label>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                           {SURVEY_OPTIONS.map((opt) => {
                             const isSelected = surveyResponses[currentQuestionIdx] === opt.value;
                             return (
@@ -1013,19 +1013,22 @@ export const StudentDashboard: React.FC = () => {
                                 key={opt.value}
                                 type="button"
                                 onClick={() => answerSurveyQuestion(opt.value)}
-                                className={`p-3 rounded-xl border text-left text-xs font-bold transition-all duration-200 flex items-center justify-between active:scale-[0.98] ${
+                                className={`p-3.5 rounded-2xl border text-left transition-all duration-200 flex items-center justify-between active:scale-[0.98] ${
                                   isSelected
-                                    ? "bg-primary border-primary text-primary-foreground shadow-sm shadow-primary/20 scale-[1.01]"
-                                    : "border-border/70 bg-card hover:bg-secondary/70 text-foreground"
+                                    ? "bg-primary border-primary text-primary-foreground shadow-sm shadow-primary/25 scale-[1.01]"
+                                    : "border-border/70 bg-card hover:bg-secondary/70 text-foreground hover:border-primary/40"
                                 }`}
                               >
-                                <span>{opt.label}</span>
-                                {isSelected ? (
-                                  <CheckCircle2 className="h-4 w-4 text-white" />
-                                ) : (
-                                  <span className="text-[10px] text-muted-foreground font-normal">
-                                    {opt.value === 0 ? "0 pts" : opt.value === 1 ? "1 pt" : opt.value === 2 ? "2 pts" : "3 pts"}
+                                <div className="space-y-0.5">
+                                  <span className="text-xs font-bold block">{opt.label}</span>
+                                  <span className={`text-[11px] block ${isSelected ? "text-primary-foreground/80" : "text-muted-foreground"}`}>
+                                    {opt.helper}
                                   </span>
+                                </div>
+                                {isSelected && (
+                                  <div className="h-6 w-6 rounded-full bg-white/20 flex items-center justify-center shrink-0 ml-2">
+                                    <CheckCircle2 className="h-4 w-4 text-white" />
+                                  </div>
                                 )}
                               </button>
                             );
