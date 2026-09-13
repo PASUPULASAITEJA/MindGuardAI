@@ -1303,12 +1303,12 @@ export const StudentDashboard: React.FC = () => {
                   <AlertCircle className="h-4.5 w-4.5 shrink-0 text-rose-500" />
                   <span className="text-xs font-extrabold tracking-wide uppercase">
                     {isCrisisDetected
-                      ? "High-Priority Crisis Distress Triggered"
+                      ? "Support & Care Needed"
                       : isAdultContentWarning
-                      ? "Compulsive / Adult Browsing Spike"
+                      ? "Unusual Late-Night Browsing"
                       : isExcessiveScreenTime
-                      ? "Excessive Continuous Screen Strain (6h+)"
-                      : "Circadian Sleep Disruption"}
+                      ? "High Continuous Screen Time (6h+)"
+                      : "Late-Night Screen Disruption"}
                   </span>
                 </div>
                 <Button
@@ -1322,12 +1322,12 @@ export const StudentDashboard: React.FC = () => {
 
               <p className="text-xs text-foreground/80 leading-relaxed">
                 {isCrisisDetected
-                  ? "Urgent emotional distress query was detected in your active browser window. University wellness counselors are available 24/7."
+                  ? "It looks like you might be going through a tough time. Campus counselors are always here to help you 24/7."
                   : isAdultContentWarning
-                  ? `Sensitive / adult browsing detected (${adultMins} mins). Compulsive avoidance coping can intensify isolation and anxiety. Take a mindful pause.`
+                  ? `Late-night browsing was noted (${adultMins} mins). Late-night browsing can sometimes be a sign of stress or loneliness. Remember to take a mindful break and get some rest.`
                   : isExcessiveScreenTime
-                  ? `You have spent over ${Math.floor(totalMins / 60)} hours actively on your screen today without sufficient breaks. Cognitive fatigue impairs learning efficiency.`
-                  : "Frequent computer usage after midnight disrupts melatonin production and worsens academic burnout."}
+                  ? `You have spent over ${Math.floor(totalMins / 60)} hours actively on your screen today. Taking regular short breaks helps reduce eye strain and keeps your mind fresh.`
+                  : "Using your computer late at night disrupts deep sleep and can leave you feeling tired tomorrow."}
               </p>
             </div>
           )}
@@ -1395,7 +1395,7 @@ export const StudentDashboard: React.FC = () => {
                   <span className={`h-1.5 w-1.5 rounded-full ${
                     lateNightMins === 0 ? "bg-emerald-500" : isLateNightWarning ? "bg-rose-500" : "bg-amber-500"
                   }`} />
-                  {lateNightMins === 0 ? "Optimal Rhythm" : isLateNightWarning ? "Circadian Delay" : "Late Activity"}
+                  {lateNightMins === 0 ? "Optimal Rhythm" : isLateNightWarning ? "Late Screen Use" : "Late Activity"}
                 </span>
               </div>
             </div>
@@ -1425,7 +1425,7 @@ export const StudentDashboard: React.FC = () => {
           {/* App Category Breakdown Bar */}
           <div className="rounded-xl border border-border/60 bg-background/40 p-3.5 space-y-2.5">
             <div className="text-xs font-bold text-foreground">
-              Application & Content Usage Distribution
+              Screen Time by Activity
             </div>
 
             <div className="h-2.5 w-full rounded-full bg-slate-200 dark:bg-slate-800 overflow-hidden flex">
@@ -1525,7 +1525,7 @@ export const StudentDashboard: React.FC = () => {
               <div className="flex items-center justify-between">
                 <span className="text-xs font-bold text-foreground flex items-center gap-1.5">
                   <Moon className="h-4 w-4 text-amber-500" />
-                  Sleep & Circadian Rhythm
+                  Sleep Schedule & Bedtime Habits
                 </span>
                 <span className={`text-[10px] font-extrabold px-2.5 py-0.5 rounded-full border ${
                   (circadianAnalysis?.sleep_consistency_badge === "Optimal" || lateNightMins < 45)
@@ -1541,7 +1541,7 @@ export const StudentDashboard: React.FC = () => {
               {/* 3 Clean Metric Pills */}
               <div className="grid grid-cols-3 gap-2 text-center">
                 <div className="rounded-lg bg-muted/30 p-2 border border-border/40">
-                  <span className="text-[10px] text-muted-foreground block font-medium">Inferred Sleep</span>
+                  <span className="text-[10px] text-muted-foreground block font-medium">Estimated Sleep</span>
                   <span className="text-sm font-bold text-foreground">
                     {circadianAnalysis?.sleep_duration_hours ? `${circadianAnalysis.sleep_duration_hours} hrs` : (lateNightMins >= 120 ? "5.2 hrs" : lateNightMins >= 45 ? "6.5 hrs" : "7.8 hrs")}
                   </span>
@@ -1553,7 +1553,7 @@ export const StudentDashboard: React.FC = () => {
                   </span>
                 </div>
                 <div className="rounded-lg bg-muted/30 p-2 border border-border/40">
-                  <span className="text-[10px] text-muted-foreground block font-medium">Regularity CRI</span>
+                  <span className="text-[10px] text-muted-foreground block font-medium">Consistency Score</span>
                   <span className="text-sm font-bold text-indigo-500">
                     {circadianAnalysis?.circadian_regularity_score ? `${circadianAnalysis.circadian_regularity_score}/100` : (lateNightMins >= 120 ? "42/100" : "88/100")}
                   </span>
@@ -1562,10 +1562,10 @@ export const StudentDashboard: React.FC = () => {
 
               <p className="text-xs text-muted-foreground leading-relaxed">
                 {circadianAnalysis?.actionable_wind_down_advice || (lateNightMins >= 120
-                  ? "Late-night screen exposure delayed melatonin. Expose eyes to 15m morning sunlight before 10 AM to reset cortisol."
+                  ? "Late-night screen time can make falling asleep harder. Try dimming screens 30 mins before bed and getting morning sunlight."
                   : lateNightMins >= 45
                   ? "Screen active after midnight. Dim screens 30 mins before bed tonight to restore natural sleep cycles."
-                  : "Excellent circadian alignment. Sleep architecture and recovery were well preserved.")}
+                  : "Great sleep habits! You kept a consistent sleep routine and preserved good rest.")}
               </p>
 
               {/* Wearable Sensor Integration Quick-Sync Bar */}
@@ -1592,10 +1592,10 @@ export const StudentDashboard: React.FC = () => {
               <div>
                 <div className="flex items-center gap-2">
                   <BarChart3 className="h-4 w-4 text-indigo-500" />
-                  <span className="text-xs font-bold text-foreground">7-Day Daily Screen Time & Late-Night Usage Graphic</span>
+                  <span className="text-xs font-bold text-foreground">7-Day Screen Time & Sleep History</span>
                 </div>
                 <p className="text-[11px] text-muted-foreground mt-0.5">
-                  100% live detected device telemetry: active daytime vs late-night (12 AM - 5 AM) circadian fatigue
+                  Daily screen activity: daytime study hours vs late-night screen time (12 AM - 5 AM)
                 </p>
               </div>
 
@@ -1611,7 +1611,7 @@ export const StudentDashboard: React.FC = () => {
                         : "text-muted-foreground hover:text-foreground"
                     }`}
                   >
-                    🌙 Circadian & Late-Night
+                    🌙 Day vs Night Screen Time
                   </button>
                   <button
                     type="button"
@@ -1787,7 +1787,7 @@ export const StudentDashboard: React.FC = () => {
               </div>
               <span className="text-[10px] text-muted-foreground italic flex items-center gap-1">
                 <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                Real Telemetry Only: {recordedDays.length} of 7 days logged
+                Activity Logged: {recordedDays.length} of 7 days recorded
               </span>
             </div>
           </div>
@@ -2377,7 +2377,7 @@ export const StudentDashboard: React.FC = () => {
               </button>
             </div>
 
-            {/* Clinical Dossier Quick Trigger */}
+            {/* Quick Action Buttons */}
             <div className="flex items-center gap-2">
               <Button
                 onClick={() => setIsDossierOpen(true)}
@@ -2386,7 +2386,7 @@ export const StudentDashboard: React.FC = () => {
                 className="h-8 px-3 text-xs font-bold border-primary/30 hover:bg-primary/10 hover:text-primary rounded-xl transition-all"
               >
                 <FileText className="h-3.5 w-3.5 mr-1.5 text-primary" />
-                Export Dossier
+                Download Report
               </Button>
               <Button
                 onClick={() => setIsBenchmarksOpen(true)}
@@ -2394,7 +2394,7 @@ export const StudentDashboard: React.FC = () => {
                 className="h-8 px-3 text-xs font-bold bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl shadow-xs transition-all"
               >
                 <Cpu className="h-3.5 w-3.5 mr-1.5" />
-                AI Benchmarks
+                AI Accuracy Stats
               </Button>
             </div>
           </div>
