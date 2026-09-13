@@ -88,52 +88,67 @@ export const AdminDashboard: React.FC = () => {
 
           {/* Quick Info Cards Row */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <Card className="border-border/50 bg-card/40 backdrop-blur-md p-5 flex flex-col justify-between rounded-xl">
-              <div>
-                <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Wellness Index</p>
-                <h4 className="text-3xl font-extrabold text-primary mt-1">
-                  {isReportLoading ? (
-                    <Loader2 className="h-6 w-6 animate-spin text-primary" />
-                  ) : (
-                    report?.average_wellness_score.toFixed(1) ?? "0.0"
-                  )}
-                </h4>
+            <Card className="border-t-2 border-t-primary p-5 flex flex-col justify-between shadow-sm hover:shadow-md transition-all">
+              <div className="flex items-start justify-between">
+                <div>
+                  <span className="text-[11px] font-extrabold text-muted-foreground uppercase tracking-wider">Campus Wellness Index</span>
+                  <h4 className="text-3xl font-black text-primary mt-1 tracking-tight">
+                    {isReportLoading ? (
+                      <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                    ) : (
+                      report?.average_wellness_score.toFixed(1) ?? "0.0"
+                    )}
+                  </h4>
+                </div>
+                <div className="p-2.5 rounded-xl bg-primary/10 text-primary border border-primary/20">
+                  <Activity className="h-5 w-5" />
+                </div>
               </div>
-              <p className="text-xs text-muted-foreground mt-3">Calculated macro score campus-wide</p>
+              <p className="text-xs text-muted-foreground mt-3 font-medium">Aggregated campus-wide continuous score</p>
             </Card>
 
-            <Card className="border-border/50 bg-card/40 backdrop-blur-md p-5 flex flex-col justify-between rounded-xl">
-              <div>
-                <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Active Alerts Queue</p>
-                <h4 className="text-3xl font-extrabold text-red-500 mt-1">
-                  {isAlertsLoading ? (
-                    <Loader2 className="h-6 w-6 animate-spin text-red-500" />
-                  ) : (
-                    pendingAlertCount
-                  )}
-                </h4>
+            <Card className="border-t-2 border-t-rose-500 p-5 flex flex-col justify-between shadow-sm hover:shadow-md transition-all">
+              <div className="flex items-start justify-between">
+                <div>
+                  <span className="text-[11px] font-extrabold text-muted-foreground uppercase tracking-wider">Active Alerts Queue</span>
+                  <h4 className="text-3xl font-black text-rose-500 mt-1 tracking-tight">
+                    {isAlertsLoading ? (
+                      <Loader2 className="h-6 w-6 animate-spin text-rose-500" />
+                    ) : (
+                      pendingAlertCount
+                    )}
+                  </h4>
+                </div>
+                <div className="p-2.5 rounded-xl bg-rose-500/10 text-rose-500 border border-rose-500/20">
+                  <AlertTriangle className="h-5 w-5 animate-pulse" />
+                </div>
               </div>
-              <p className="text-xs text-muted-foreground mt-3">High risk cases awaiting counselor claim</p>
+              <p className="text-xs text-muted-foreground mt-3 font-medium">Elevated risk cases awaiting counselor review</p>
             </Card>
 
-            <Card className="border-border/50 bg-card/40 backdrop-blur-md p-5 flex flex-col justify-between rounded-xl">
-              <div>
-                <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Total Monitored Base</p>
-                <h4 className="text-3xl font-extrabold text-foreground mt-1">
-                  {isReportLoading ? (
-                    <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-                  ) : (
-                    report?.total_students_monitored ?? 0
-                  )}
-                </h4>
+            <Card className="border-t-2 border-t-indigo-500 p-5 flex flex-col justify-between shadow-sm hover:shadow-md transition-all">
+              <div className="flex items-start justify-between">
+                <div>
+                  <span className="text-[11px] font-extrabold text-muted-foreground uppercase tracking-wider">Monitored Cohort Base</span>
+                  <h4 className="text-3xl font-black text-foreground mt-1 tracking-tight">
+                    {isReportLoading ? (
+                      <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                    ) : (
+                      report?.total_students_monitored ?? 0
+                    )}
+                  </h4>
+                </div>
+                <div className="p-2.5 rounded-xl bg-indigo-500/10 text-indigo-500 border border-indigo-500/20">
+                  <Users className="h-5 w-5" />
+                </div>
               </div>
-              <p className="text-xs text-muted-foreground mt-3">Active registered student accounts</p>
+              <p className="text-xs text-muted-foreground mt-3 font-medium">Active enrolled student cohort profiles</p>
             </Card>
           </div>
 
           {/* Risk distribution Breakdown */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <Card className="lg:col-span-1 border-border/50 bg-card/40 backdrop-blur-md p-6 flex flex-col justify-between">
+            <Card className="lg:col-span-1 p-6 flex flex-col justify-between">
               <div>
                 <h4 className="font-extrabold text-sm md:text-base text-foreground mb-3">Triage Instructions</h4>
                 <p className="text-muted-foreground text-xs md:text-sm leading-relaxed">
@@ -153,7 +168,7 @@ export const AdminDashboard: React.FC = () => {
               </div>
             </Card>
 
-            <Card className="lg:col-span-2 border-border/50 bg-card/40 backdrop-blur-md overflow-hidden rounded-xl">
+            <Card className="lg:col-span-2 overflow-hidden">
               <CardHeader>
                 <CardTitle className="text-foreground text-sm md:text-base font-extrabold">Clinical Risk Breakdown</CardTitle>
                 <CardDescription className="text-muted-foreground text-xs md:text-sm">Distribution of students based on assessed security risk levels.</CardDescription>
@@ -257,7 +272,7 @@ export const AdminDashboard: React.FC = () => {
           </div>
 
           {/* Bar Chart wellness scores monthly trends */}
-          <Card className="border-border/50 bg-card/40 backdrop-blur-md overflow-hidden rounded-xl">
+          <Card className="overflow-hidden">
             <CardHeader>
               <CardTitle className="text-foreground text-sm md:text-base font-extrabold">Aggregated Monthly Trendlines</CardTitle>
               <CardDescription className="text-muted-foreground text-xs md:text-sm">University aggregate index of mental wellness average score trajectory.</CardDescription>
@@ -326,7 +341,7 @@ export const AdminDashboard: React.FC = () => {
           </div>
 
           {/* User Table card */}
-          <Card className="border-border/50 bg-card/40 backdrop-blur-md overflow-hidden">
+          <Card className="overflow-hidden">
             <CardContent className="p-0">
               {isDirectoryLoading ? (
                 <div className="space-y-3 p-6">
