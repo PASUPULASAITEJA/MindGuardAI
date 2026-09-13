@@ -143,13 +143,13 @@ const Sidebar: React.FC<SidebarProps> = ({ className, onCloseMobile }) => {
           </a>
         )}
 
-        <div className="flex items-center gap-3 rounded-2xl border border-border/60 bg-background/50 p-3 shadow-sm">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500/10 to-purple-500/10 border border-primary/20 text-primary font-bold text-xs uppercase shrink-0">
-            {user.email.charAt(0)}
+        <div className="flex items-center gap-3 rounded-2xl border border-border/80 bg-background/50 p-3 shadow-xs">
+          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/10 border border-primary/20 text-primary font-bold text-xs uppercase shrink-0">
+            {user.full_name ? user.full_name.charAt(0) : user.email.charAt(0)}
           </div>
           <div className="min-w-0 flex-1">
             <p className="truncate text-xs font-bold text-foreground">
-              {user.email.split("@")[0]}
+              {user.full_name || user.email.split("@")[0]}
             </p>
             <p className="truncate text-[10px] text-muted-foreground">{user.email}</p>
           </div>
