@@ -16,6 +16,7 @@ import api from "@/services/api";
 // Registration validation schema
 const registerSchema = z
   .object({
+    full_name: z.string().min(2, "Please enter your full name or username."),
     email: z.string().email("Please enter a valid university email address."),
     password: z.string().min(8, "Password must be at least 8 characters long."),
     role: z.enum(["STUDENT", "COUNSELOR", "ADMIN"], {
@@ -59,6 +60,7 @@ export const Register: React.FC = () => {
     resolver: zodResolver(registerSchema),
     mode: "onChange",
     defaultValues: {
+      full_name: "",
       email: "",
       password: "",
       role: "STUDENT"
@@ -100,10 +102,10 @@ export const Register: React.FC = () => {
   const onSubmit = async (data: RegisterFormValues) => {
     setIsSubmitting(true);
     try {
-      await registerUser(data.email, data.password, data.role);
+      await registerUser(data.email, data.password, data.role, data.full_name);
       toast({
         title: "Account Created!",
-        description: "Registration completed successfully. You can now log in.",
+        description: `Welcome, ${data.full_name}! Registration completed successfully. You can now log in.`,
         variant: "success"
       });
       navigate("/login");
@@ -189,6 +191,22 @@ export const Register: React.FC = () => {
                 </div>
                 {errors.role && (
                   <p className="text-xs text-destructive font-medium mt-1">{errors.role.message}</p>
+                )}
+              </FormItem>
+
+              {/* Full Name / Username */}
+              <FormItem>
+                <Label htmlFor="full_name" className="text-xs font-semibold text-foreground">Full Name or Username</Label>
+                <Input
+                  id="full_name"
+                  type="text"
+                  autoComplete="name"
+                  placeholder="e.g. Alex Sharma or alex37"
+                  className="h-11 rounded-xl border-border/80 bg-background/60 text-sm focus-visible:ring-primary focus-visible:ring-1"
+                  {...register("full_name")}
+                />
+                {errors.full_name && (
+                  <p className="text-xs text-destructive font-medium mt-1">{errors.full_name.message}</p>
                 )}
               </FormItem>
 
