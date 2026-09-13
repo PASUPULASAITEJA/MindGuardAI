@@ -202,7 +202,7 @@ export const LandingPage: React.FC = () => {
 
           {/* Subheading */}
           <p className="max-w-3xl mx-auto text-lg sm:text-xl text-slate-600 dark:text-slate-300 mb-10 leading-relaxed font-normal">
-            MindGuardAI unifies daily emotional reflections, non-invasive study habit telemetry, and interactive CBT tools with closed-loop campus counselor support—100% private, respectful, and domain-protected.
+            MindGuardAI brings together daily mood check-ins, healthy study habit tracking, and student wellness tools with direct campus counselor support—100% private, respectful, and secure.
           </p>
 
           {/* Primary Action Row */}
@@ -221,7 +221,7 @@ export const LandingPage: React.FC = () => {
               className="inline-flex items-center gap-2 px-6 py-3.5 rounded-2xl text-base font-semibold border border-border/80 bg-card/80 backdrop-blur-md text-foreground hover:border-primary/40 hover:bg-primary/5 transition shadow-xs"
             >
               <HeartHandshake className="w-5 h-5 text-primary" />
-              Counselor Triage Board
+              Counselor Portal
             </Link>
 
             <Link
@@ -242,7 +242,7 @@ export const LandingPage: React.FC = () => {
                 <div className="w-3 h-3 rounded-full bg-amber-500" />
                 <div className="w-3 h-3 rounded-full bg-emerald-500" />
                 <span className="text-xs font-semibold text-muted-foreground ml-2">
-                  MindGuard Live Student Telemetry Simulator
+                  MindGuard Student Wellness Preview
                 </span>
               </div>
               <div className="flex items-center gap-2">
@@ -392,7 +392,7 @@ export const LandingPage: React.FC = () => {
                   Intelligent Screen & Habit Harmony
                 </h3>
                 <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed mb-6">
-                  Passively understands active work sessions. Rewards high coursework focus in IDEs while gently alerting against prolonged unbroken screen strain and 3:00 AM circadian disruptions.
+                  Automatically tracks active study sessions, encourages healthy breaks during long hours, and gently warns against staying up late past midnight.
                 </p>
               </div>
 
@@ -678,7 +678,7 @@ export const LandingPage: React.FC = () => {
                   <div className="mt-4 space-y-3 text-xs">
                     <div className="p-3 rounded-xl bg-white dark:bg-slate-900 border border-rose-500/30 flex justify-between items-center">
                       <div>
-                        <span className="font-bold text-rose-600 dark:text-rose-400">High Circadian Disruption</span>
+                        <span className="font-bold text-rose-600 dark:text-rose-400">Late-Night Screen Use</span>
                         <p className="text-[10px] text-slate-400">Student ID: #9842 &bull; 3:15 AM Spike</p>
                       </div>
                       <span className="px-2 py-1 rounded bg-rose-500 text-white text-[10px] font-bold">Needs Review</span>
