@@ -37,7 +37,7 @@ import { HabitRecoverySimulator } from "@/components/HabitRecoverySimulator";
 import { ClinicalDossierModal } from "@/components/ClinicalDossierModal";
 import { ModelBenchmarksModal } from "@/components/ModelBenchmarksModal";
 
-// Clinically calibrated, student-centered questions for PHQ-9 Depression screening
+// Holistic, whole-life well-being assessment questions for PHQ-9 Depression screening
 export interface SurveyQuestionItem {
   id: number;
   category: string;
@@ -49,119 +49,119 @@ export interface SurveyQuestionItem {
 const PHQ9_QUESTIONS: SurveyQuestionItem[] = [
   {
     id: 1,
-    category: "Interest & Motivation",
-    shortTitle: "Enjoyment & Drive",
-    prompt: "How often have you felt little to no interest or pleasure in doing things you normally enjoy?",
-    studentContext: "Feeling disconnected from your passions, hobbies, social circles, or campus activities."
+    category: "Life Enthusiasm & Hobbies",
+    shortTitle: "Joy & Interest",
+    prompt: "How often have you felt little to no interest or joy in things you normally love doing in your everyday life?",
+    studentContext: "Feeling disconnected from your hobbies, music, games, socializing, personal creative projects, or daily passions."
   },
   {
     id: 2,
-    category: "Emotional State",
-    shortTitle: "Mood & Outlook",
-    prompt: "How often have you been feeling down, deeply discouraged, depressed, or hopeless?",
-    studentContext: "Carrying a persistent emotional weight or feeling pessimistic about your college journey and future."
+    category: "Inner Mood & Emotional Health",
+    shortTitle: "Emotional State",
+    prompt: "How often have you been feeling down, deeply sad, empty inside, or hopeless about life in general?",
+    studentContext: "Carrying emotional numbness, heaviness in your chest, or feeling pessimistic about where your life is heading."
   },
   {
     id: 3,
-    category: "Sleep Architecture",
-    shortTitle: "Sleep Regularity",
-    prompt: "How often have you had trouble falling asleep, staying asleep through the night, or sleeping way too much?",
-    studentContext: "Racing thoughts before bed, broken sleep cycles, insomnia during exam weeks, or struggling to wake up."
+    category: "Sleep & Circadian Rhythm",
+    shortTitle: "Sleep Quality",
+    prompt: "How often have you struggled with falling asleep, waking up in the middle of the night, or oversleeping to escape the day?",
+    studentContext: "Irregular sleep patterns, insomnia, overthinking late at night, or waking up feeling unrefreshed and sluggish."
   },
   {
     id: 4,
-    category: "Physical & Mental Energy",
-    shortTitle: "Energy & Fatigue",
-    prompt: "How often have you felt constantly tired, mentally exhausted, or lacking the energy to get through the day?",
-    studentContext: "Coursework burnout, feeling drained even after resting, or feeling like simple daily tasks take immense effort."
+    category: "Vitality & Daily Energy",
+    shortTitle: "Physical & Mental Energy",
+    prompt: "How often have you felt physically drained, chronically exhausted, or lacking the energy to do basic daily tasks?",
+    studentContext: "Lacking the drive to get out of bed, feeling low stamina, or feeling like even simple self-care takes heavy effort."
   },
   {
     id: 5,
-    category: "Nutritional Habits",
-    shortTitle: "Appetite Balance",
-    prompt: "How often have you experienced a noticeable loss of appetite or found yourself stress-eating?",
-    studentContext: "Skipping meals due to tight schedules and anxiety, or using snacking to cope with study pressure."
+    category: "Nourishment & Body Care",
+    shortTitle: "Appetite & Body Balance",
+    prompt: "How often have you experienced a noticeable loss of appetite, skipping meals, or stress-eating when emotional?",
+    studentContext: "Forgetting or having no desire to eat, losing the joy of food, or turning to junk food to soothe emotional stress."
   },
   {
     id: 6,
-    category: "Self-Worth",
-    shortTitle: "Self-Perception",
-    prompt: "How often have you felt disappointed in yourself, felt like a failure, or worried that you let your family or yourself down?",
-    studentContext: "Imposter syndrome in academics, harsh self-criticism, or feeling inadequate compared to your peers."
+    category: "Self-Worth & Confidence",
+    shortTitle: "Self-Image & Self-Love",
+    prompt: "How often have you felt deeply disappointed in yourself, felt like a failure, or felt that you are not good enough?",
+    studentContext: "Harsh inner self-criticism, comparing yourself unfavorably to others, or feeling like a disappointment to your family or friends."
   },
   {
     id: 7,
-    category: "Cognitive Focus",
-    shortTitle: "Concentration",
-    prompt: "How often have you found it difficult to concentrate on your coursework, read assignments, or follow lectures?",
-    studentContext: "Easily distracted, brain fog, zoning out during class, or having trouble retaining study material."
+    category: "Mental Clarity & Presence",
+    shortTitle: "Focus & Daily Attention",
+    prompt: "How often have you found it hard to concentrate, stay present in conversations, or focus on things you want to do?",
+    studentContext: "Brain fog, mind wandering constantly, struggling to pay attention to books/movies, or feeling spaced out."
   },
   {
     id: 8,
-    category: "Physical Pace",
-    shortTitle: "Agitation or Sluggishness",
-    prompt: "How often have you noticed yourself moving or speaking unusually slowly, or feeling so restless that it's hard to sit still?",
-    studentContext: "Feeling lethargic and slow-moving, or feeling so fidgety and agitated that sitting through class feels impossible."
+    category: "Physical Pace & Temperament",
+    shortTitle: "Body Restlessness or Slowness",
+    prompt: "How often have others or you noticed yourself moving and speaking noticeably slower, or feeling too restless to be still?",
+    studentContext: "Feeling physically bogged down and heavy, or constantly on edge, pacing, fidgeting, and unable to find calm."
   },
   {
     id: 9,
-    category: "Emotional Well-being & Safety",
-    shortTitle: "Overwhelm & Self-Care",
-    prompt: "How often have you felt so completely overwhelmed that you thought of giving up or harming yourself?",
-    studentContext: "Experiencing extreme emotional exhaustion. MindGuard AI and campus counselors are here to support you 24/7."
+    category: "Emotional Safety & Support",
+    shortTitle: "Coping & Emotional Relief",
+    prompt: "How often have you felt so overwhelmed by life that you wished you could disappear, give up, or felt thoughts of self-harm?",
+    studentContext: "Experiencing extreme life overload. You matter, and confidential campus mental health support is available 24/7."
   }
 ];
 
-// Clinically calibrated, student-centered questions for GAD-7 Anxiety screening
+// Holistic, whole-life well-being assessment questions for GAD-7 Anxiety screening
 const GAD7_QUESTIONS: SurveyQuestionItem[] = [
   {
     id: 1,
-    category: "Nervous System",
-    shortTitle: "Inner Tension",
-    prompt: "How often have you felt nervous, anxious, irritable, or constantly on edge?",
-    studentContext: "A persistent feeling of nervousness, tight shoulders, or feeling wound up about deadlines and classes."
+    category: "Nervous System & Calmness",
+    shortTitle: "Inner Restlessness",
+    prompt: "How often have you felt nervous, anxious, irritable, or constantly on edge in your day-to-day life?",
+    studentContext: "A background feeling of tension in your body, jitteriness, rapid heartbeat, or feeling like you cannot let your guard down."
   },
   {
     id: 2,
-    category: "Mental Rest",
-    shortTitle: "Worry Control",
-    prompt: "How often have you found it difficult to control or stop worrying once you start thinking about something?",
-    studentContext: "Spiraling thoughts, mental loops, or being unable to turn off worries when trying to relax or study."
+    category: "Mental Rest & Thought Loops",
+    shortTitle: "Controlling Worries",
+    prompt: "How often have you found it difficult to stop worrying or switch off racing thoughts once they start?",
+    studentContext: "Mental spirals, replay loops about past events, or being unable to quiet your thoughts when you try to rest."
   },
   {
     id: 3,
-    category: "Cognitive Load",
-    shortTitle: "Overthinking Scope",
-    prompt: "How often have you worried excessively about multiple different things at the same time?",
-    studentContext: "Overthinking grades, career uncertainty, social dynamics, and family expectations all at once."
+    category: "Life Uncertainty & Scope",
+    shortTitle: "Everyday Worries",
+    prompt: "How often have you felt overwhelmed by worrying too much about multiple different areas of your life at once?",
+    studentContext: "Overthinking personal health, friendships, family dynamics, future uncertainty, and daily responsibilities simultaneously."
   },
   {
     id: 4,
-    category: "Rest & Recovery",
-    shortTitle: "Ability to Relax",
-    prompt: "How often have you found it hard to truly relax and let your mind rest?",
-    studentContext: "Feeling guilty whenever you take a break, or feeling internal pressure even during leisure time."
+    category: "Relaxation & Downtime",
+    shortTitle: "True Relaxation",
+    prompt: "How often have you found it difficult to genuinely relax, unwind, and enjoy quiet moments without feeling uneasy?",
+    studentContext: "Feeling guilty or on edge whenever you take a break, or feeling an urge to be busy even when you need rest."
   },
   {
     id: 5,
     category: "Physical Restlessness",
-    shortTitle: "Motor Agitation",
-    prompt: "How often have you felt so physically restless or fidgety that it was uncomfortable to sit still?",
-    studentContext: "Shaking legs, pacing, difficulty sitting through long lectures, or feeling an urge to move constantly."
+    shortTitle: "Motor Tension",
+    prompt: "How often have you felt so restless, fidgety, or keyed up inside that it was hard to sit still peacefully?",
+    studentContext: "Shaking legs, inability to sit comfortably, tense jaw or shoulders, or feeling an uncontrollable urge to move around."
   },
   {
     id: 6,
-    category: "Emotional Resilience",
-    shortTitle: "Irritability & Patience",
-    prompt: "How often have you felt easily annoyed, impatient, or irritated by small things?",
-    studentContext: "Short temper with classmates, roommates, or team project members when under academic pressure."
+    category: "Emotional Temperament & Patience",
+    shortTitle: "Irritability & Tolerance",
+    prompt: "How often have you felt easily annoyed, snappy, or frustrated by small everyday inconveniences or interactions?",
+    studentContext: "Having a short fuse with friends, roommates, family, or strangers, feeling emotionally depleted and reactive."
   },
   {
     id: 7,
-    category: "Anticipatory Anxiety",
-    shortTitle: "Sense of Dread",
-    prompt: "How often have you felt a sudden sense of fear or dread, as if something terrible might happen?",
-    studentContext: "A sudden sinking feeling in your stomach or intense dread about exam results or upcoming situations."
+    category: "Anticipatory Sense of Dread",
+    shortTitle: "Sense of Foreboding",
+    prompt: "How often have you experienced an intense feeling of fear or dread, as if something terrible is about to happen?",
+    studentContext: "A sudden wave of panic, stomach knots, or irrational anxiety about the future even when there is no immediate danger."
   }
 ];
 
