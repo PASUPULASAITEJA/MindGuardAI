@@ -377,18 +377,30 @@ class BehavioralService:
         """
         Retrieves live PC digital phenotyping metrics for the student dashboard.
         """
+        # Fetch recent behavioral logs to gather accurate distinct daily records across the week
         stmt = (
             select(BehavioralLog)
             .where(BehavioralLog.student_id == student_id)
-            .order_by(desc(BehavioralLog.synced_at))
-            .limit(7)
+            .order_by(desc(BehavioralLog.date), desc(BehavioralLog.total_screen_time_minutes), desc(BehavioralLog.synced_at))
+            .limit(100)
         )
         res = await db.execute(stmt)
-        recent_logs: List[BehavioralLog] = res.scalars().all()
+        all_logs: List[BehavioralLog] = res.scalars().all()
+
+        # Deduplicate to pick the most representative/peak log for each distinct date (up to 7 days)
+        seen_dates = set()
+        recent_logs: List[BehavioralLog] = []
+        for log in all_logs:
+            if log.date not in seen_dates:
+                seen_dates.add(log.date)
+                recent_logs.append(log)
+            if len(recent_logs) >= 7:
+                break
 
         today_str = datetime.now(timezone.utc).date().isoformat()
 
-        if not recent_logs or recent_logs[0].date != today_str:
+        today_log = next((l for l in recent_logs if l.date == today_str), None)
+        if not today_log:
             default_log = BehavioralLog(
                 id=uuid4(),
                 student_id=student_id,
@@ -408,8 +420,13 @@ class BehavioralService:
             await db.commit()
             await db.refresh(default_log)
             recent_logs.insert(0, default_log)
-
-        latest = recent_logs[0]
+            latest = default_log
+        else:
+            # Ensure today's log is at index 0 for current metrics calculation
+            if recent_logs[0] != today_log:
+                recent_logs.remove(today_log)
+                recent_logs.insert(0, today_log)
+            latest = today_log
 
         # Authoritative machine-level screen time sync (from system boot):
         machine_metrics = get_machine_screen_metrics_today()
@@ -571,7 +588,7 @@ class BehavioralService:
                     "late_night_usage_minutes": log.late_night_usage_minutes,
                     "risk_level": log.risk_level
                 }
-                for log in reversed(recent_logs)
+                for log in sorted(recent_logs, key=lambda x: x.date)
             ]
         }
 
