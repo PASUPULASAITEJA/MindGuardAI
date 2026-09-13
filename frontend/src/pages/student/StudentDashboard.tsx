@@ -1770,7 +1770,7 @@ export const StudentDashboard: React.FC = () => {
     if (hour < 17) return "Good afternoon";
     return "Good evening";
   };
-  const studentDisplayName = user?.email ? user.email.split("@")[0] : "Student";
+  const studentDisplayName = user?.full_name || (user?.email ? user.email.split("@")[0] : "Student");
 
   return (
     <div className="space-y-6">
@@ -1778,9 +1778,9 @@ export const StudentDashboard: React.FC = () => {
       {isOverview && (
         <>
           {/* Friendly Student Hero Greeting & Quick Action Pills */}
-          <div className="relative overflow-hidden rounded-3xl border border-border bg-card p-6 md:p-8 shadow-sm">
+          <div className="relative overflow-hidden rounded-3xl border border-border bg-gradient-to-br from-card via-card to-primary/5 p-6 md:p-8 shadow-xs">
             <div className="absolute top-0 right-0 -mt-10 -mr-10 h-48 w-48 rounded-full bg-primary/10 blur-3xl pointer-events-none" />
-            <div className="absolute bottom-0 left-1/3 -mb-10 h-36 w-36 rounded-full bg-violet-500/10 blur-2xl pointer-events-none" />
+            <div className="absolute bottom-0 left-1/3 -mb-10 h-36 w-36 rounded-full bg-emerald-500/10 blur-2xl pointer-events-none" />
             
             <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
               <div className="space-y-1.5">
