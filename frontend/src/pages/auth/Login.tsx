@@ -12,9 +12,9 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter }
 import { Eye, EyeOff, Loader2, Sparkles, ArrowLeft, ShieldCheck, HeartHandshake, Lock } from "lucide-react";
 import ThemeToggle from "@/components/layouts/ThemeToggle";
 
-// Form validation schema
+// Form validation schema - supports username or institutional email
 const loginSchema = z.object({
-  email: z.string().email("Please enter a valid university email address."),
+  email: z.string().min(2, "Please enter your username or university email address."),
   password: z.string().min(1, "Password is required."),
 });
 
@@ -124,13 +124,14 @@ export const Login: React.FC = () => {
 
           <form onSubmit={handleSubmit(onSubmit)}>
             <CardContent className="space-y-4">
-              {/* Email Address */}
+              {/* Username or Email Address */}
               <FormItem>
-                <Label htmlFor="email" className="text-xs font-semibold text-foreground">University Email</Label>
+                <Label htmlFor="email" className="text-xs font-semibold text-foreground">Username or Institutional Email</Label>
                 <Input
                   id="email"
-                  type="email"
-                  placeholder="student@nmims.in"
+                  type="text"
+                  autoComplete="username"
+                  placeholder="e.g. username or student@nmims.in"
                   className="h-11 rounded-xl border-border/80 bg-background/60 text-sm focus-visible:ring-primary focus-visible:ring-1"
                   {...register("email")}
                 />
