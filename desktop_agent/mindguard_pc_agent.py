@@ -100,6 +100,21 @@ ACADEMIC_KEYWORDS = [
     "algorithm", "data structure", "compiler", "lecture", "textbook", "notes"
 ]
 
+# Universal Code & Academic File Extensions (Any editor displaying these files is Academic)
+CODE_AND_STUDY_EXTENSIONS = (
+    ".py", ".ts", ".tsx", ".js", ".jsx", ".java", ".cpp", ".c", ".h", ".hpp",
+    ".cs", ".go", ".rs", ".php", ".rb", ".swift", ".kt", ".scala", ".html",
+    ".css", ".scss", ".sql", ".sh", ".bash", ".zsh", ".json", ".xml", ".yaml",
+    ".yml", ".md", ".ipynb", ".tex", ".pdf", ".epub", ".docx", ".pptx", ".xlsx"
+)
+
+# Generic Academic & Development Process / Window Indicators
+DEVELOPMENT_GENERIC_PATTERNS = [
+    "ide", "editor", "compiler", "terminal", "powershell", "cmd.exe", "bash",
+    "wsl", "debugger", "workspace", "workbench", "studio", "developer", "localhost",
+    "127.0.0.1", "git ", "docker", "postman"
+]
+
 ENTERTAINMENT_KEYWORDS = [
     "youtube", "netflix", "anime", "twitch", "prime video", "spotify", "crunchyroll",
     "hulu", "disney+", "9gag", "memes", "gameplay", "stream"
@@ -196,7 +211,16 @@ def get_active_window_details() -> Tuple[str, str, str, bool]:
     if any(keyword in window_title for keyword in ADULT_KEYWORDS):
         return proc_name, window_title, "ADULT", False
 
-    # 3. Window Title / Search Intent Semantic Categorization (especially for Chrome, Edge, Firefox)
+    # 3. Universal Academic & Coding Heuristics (Extension & Generic Tool Tokens)
+    # A. Window title displays code/study file extensions (e.g., "StudentDashboard.tsx", "main.py", "thesis.pdf")
+    if any(ext in window_title for ext in CODE_AND_STUDY_EXTENSIONS):
+        return proc_name, window_title, "ACADEMIC", False
+
+    # B. Generic developer environment / terminal / workspace tokens in process or title
+    if any(token in proc_name or token in window_title for token in DEVELOPMENT_GENERIC_PATTERNS):
+        return proc_name, window_title, "ACADEMIC", False
+
+    # 4. Window Title / Search Intent Semantic Categorization (especially for Chrome, Edge, Firefox)
     if any(keyword in window_title for keyword in ACADEMIC_KEYWORDS):
         return proc_name, window_title, "ACADEMIC", False
 
@@ -206,7 +230,7 @@ def get_active_window_details() -> Tuple[str, str, str, bool]:
     if any(keyword in window_title for keyword in SOCIAL_KEYWORDS):
         return proc_name, window_title, "SOCIAL", False
 
-    # 3. Process-level Categorization
+    # 5. Process-level Categorization from Known Taxonomy
     for cat, app_list in APP_CATEGORIES.items():
         if any(app == proc_name or proc_name.startswith(app.replace(".exe", "")) for app in app_list):
             return proc_name, window_title, cat, False
@@ -280,7 +304,7 @@ def get_system_first_wake_time_today() -> Optional[datetime.datetime]:
             "powershell",
             "-NoProfile",
             "-Command",
-            "([string](Get-WinEvent -FilterHashtable @{LogName='System'; StartTime=(Get-Date).Date.AddHours(5); EndTime=(Get-Date).Date.AddHours(12); Id=@(507, 1)} -Oldest -MaxEvents 1 -ErrorAction SilentlyContinue).TimeCreated.ToString('o'))"
+            "$e = Get-WinEvent -FilterHashtable @{LogName='System'; StartTime=(Get-Date).Date.AddHours(5); EndTime=(Get-Date).Date.AddHours(12); Id=@(507, 1)} -Oldest -MaxEvents 1 -ErrorAction SilentlyContinue; if ($e) { $e.TimeCreated.ToString('o') }"
         ]
         out = subprocess.check_output(cmd, text=True, timeout=6).strip()
         if out:
