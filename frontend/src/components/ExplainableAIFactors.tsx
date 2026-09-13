@@ -9,6 +9,7 @@ interface ExplainableAIFactorsProps {
   totalScreenMins?: number;
   sentimentScore?: number;
   hasAssessment?: boolean;
+  surveyScore?: number;
 }
 
 export const ExplainableAIFactors: React.FC<ExplainableAIFactorsProps> = ({
@@ -18,15 +19,24 @@ export const ExplainableAIFactors: React.FC<ExplainableAIFactorsProps> = ({
   totalScreenMins = 0,
   sentimentScore = 0,
   hasAssessment = false,
+  surveyScore,
 }) => {
-  // Calculate dynamic XAI contribution weights
+  // 1. Circadian Risk: Strictly telemetry-driven (late-night screen exposure)
   const circadianRisk = lateNightMins > 60 ? 32 : lateNightMins > 15 ? 18 : 6;
-  const linguisticRisk = sentimentScore < -0.2 ? 36 : sentimentScore < 0.2 ? 24 : 10;
-  const surveyRisk = riskLevel === "HIGH" ? 34 : riskLevel === "MEDIUM" ? 22 : 8;
+
+  // 2. Linguistic Affect: The ONLY factor driven by journal NLP sentiment analysis
+  const linguisticRisk = sentimentScore < -0.3 ? 38 : sentimentScore < 0.1 ? 22 : 8;
+
+  // 3. Psychometric Survey: Decoupled from journal entries (stable medical cutoff baseline)
+  const surveyRisk = surveyScore !== undefined 
+    ? (surveyScore > 14 ? 34 : surveyScore > 9 ? 22 : 12)
+    : 16;
+
+  // 4. Protective Behavioral Buffer: Strictly daytime focus vs late-night burnout
   const protectiveBuffer = (totalScreenMins > 0 && lateNightMins < 60) ? 16 : 8;
 
   return (
-    <Card className="border-border/50 bg-card/50 backdrop-blur-md shadow-sm">
+    <Card className="shadow-sm">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -49,7 +59,7 @@ export const ExplainableAIFactors: React.FC<ExplainableAIFactorsProps> = ({
       </CardHeader>
 
       <CardContent className="space-y-3.5">
-        {/* Factor 1: Circadian Disruption */}
+        {/* Factor 1: Circadian Disruption (Telemetry-driven) */}
         <div className="space-y-1.5">
           <div className="flex justify-between items-center text-xs">
             <span className="font-semibold text-foreground flex items-center gap-1.5">
@@ -77,34 +87,36 @@ export const ExplainableAIFactors: React.FC<ExplainableAIFactorsProps> = ({
           </p>
         </div>
 
-        {/* Factor 2: Linguistic Affect */}
+        {/* Factor 2: Linguistic Affect (Journal NLP driven) */}
         <div className="space-y-1.5">
           <div className="flex justify-between items-center text-xs">
             <span className="font-semibold text-foreground flex items-center gap-1.5">
               <Sparkles className="h-3.5 w-3.5 text-amber-400" />
               Linguistic Sentiment & Emotional Despair Markers
             </span>
-            <span className={`font-bold ${linguisticRisk > 25 ? "text-rose-500" : "text-amber-500"}`}>
+            <span className={`font-bold ${linguisticRisk > 25 ? "text-rose-500" : "text-emerald-500"}`}>
               +{linguisticRisk}% Sentiment Weight
             </span>
           </div>
           <div className="w-full h-2 rounded-full bg-secondary overflow-hidden">
             <div
               className={`h-full rounded-full transition-all duration-500 ${
-                linguisticRisk > 25 ? "bg-rose-500" : "bg-amber-500"
+                linguisticRisk > 25 ? "bg-rose-500" : "bg-emerald-500"
               }`}
               style={{ width: `${linguisticRisk * 2.2}%` }}
             />
           </div>
           <p className="text-[11px] text-muted-foreground">
             Semantic transformer evaluated recent journal affect at {(typeof sentimentScore === "number" && !isNaN(sentimentScore) ? sentimentScore : 0.15).toFixed(2)}.{" "}
-            {sentimentScore < -0.2
-              ? "Elevated despair cues flagged in natural language."
-              : "Affect is balanced with mild academic fatigue."}
+            {sentimentScore < -0.3
+              ? "Elevated despair or negative affect flagged in recent journal text."
+              : sentimentScore < 0.1
+              ? "Journal affect reflects moderate academic pressure and transient stress."
+              : "Journal affect reflects positive emotional valence, optimism, and healthy perspective."}
           </p>
         </div>
 
-        {/* Factor 3: Psychometric Survey Inputs */}
+        {/* Factor 3: Psychometric Survey Inputs (Clinical cutoff benchmark) */}
         <div className="space-y-1.5">
           <div className="flex justify-between items-center text-xs">
             <span className="font-semibold text-foreground flex items-center gap-1.5">
@@ -122,11 +134,13 @@ export const ExplainableAIFactors: React.FC<ExplainableAIFactorsProps> = ({
             />
           </div>
           <p className="text-[11px] text-muted-foreground">
-            Validated medical questionnaire thresholds contextualized for university stress patterns.
+            {surveyScore !== undefined
+              ? "Completed psychometric survey evaluated against university clinical cutoffs."
+              : "Standardized medical questionnaire baseline (PHQ-9 / GAD-7 normative campus cutoff)."}
           </p>
         </div>
 
-        {/* Factor 4: Protective Behavioral Buffer */}
+        {/* Factor 4: Protective Behavioral Buffer (Daytime productivity) */}
         <div className="space-y-1.5">
           <div className="flex justify-between items-center text-xs">
             <span className="font-semibold text-foreground flex items-center gap-1.5">
@@ -144,7 +158,9 @@ export const ExplainableAIFactors: React.FC<ExplainableAIFactorsProps> = ({
             />
           </div>
           <p className="text-[11px] text-muted-foreground">
-            Active daytime academic focus sessions and self-care engagement act as a protective stabilizer.
+            {totalScreenMins > 0 && lateNightMins < 60
+              ? "Active daytime academic focus sessions and self-care engagement act as a protective stabilizer."
+              : "Maintain consistent daytime focus blocks and periodic breaks to maximize cognitive resilience."}
           </p>
         </div>
 
