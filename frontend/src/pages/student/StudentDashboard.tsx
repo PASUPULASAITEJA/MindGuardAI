@@ -37,28 +37,132 @@ import { HabitRecoverySimulator } from "@/components/HabitRecoverySimulator";
 import { ClinicalDossierModal } from "@/components/ClinicalDossierModal";
 import { ModelBenchmarksModal } from "@/components/ModelBenchmarksModal";
 
-// Student-contextualized questions for PHQ-9 Depression survey
-const PHQ9_QUESTIONS = [
-  "Little interest or pleasure in doing things (hobbies, socializing, or hanging out with friends)",
-  "Feeling down, depressed, or hopeless about your studies, college life, or future",
-  "Trouble falling or staying asleep (racing thoughts, irregular study hours, or oversleeping)",
-  "Feeling tired, mentally drained, or burned out from coursework",
-  "Poor appetite (skipping meals due to stress) or stress-eating",
-  "Feeling bad about yourself — or feeling like an imposter, doubting your abilities, or letting family down",
-  "Trouble concentrating on things, such as studying, attending lectures, reading, or finishing assignments",
-  "Moving or speaking sluggishly, or feeling so restless and fidgety that you can't sit through class",
-  "Thoughts that you would be better off dead, or thoughts of self-harm or wanting to give up"
+// Student-friendly, clearly articulated questions for PHQ-9 Depression screening
+export interface SurveyQuestionItem {
+  id: number;
+  category: string;
+  shortTitle: string;
+  prompt: string;
+  studentContext: string;
+}
+
+const PHQ9_QUESTIONS: SurveyQuestionItem[] = [
+  {
+    id: 1,
+    category: "Interest & Motivation",
+    shortTitle: "Loss of Interest",
+    prompt: "Little interest or pleasure in doing things",
+    studentContext: "Feeling unmotivated with hobbies, hanging out with friends, or campus activities you usually enjoy."
+  },
+  {
+    id: 2,
+    category: "Mood & Outlook",
+    shortTitle: "Feeling Down",
+    prompt: "Feeling down, depressed, or hopeless",
+    studentContext: "Carrying a heavy heart, feeling discouraged about college life, grades, or future prospects."
+  },
+  {
+    id: 3,
+    category: "Sleep Health",
+    shortTitle: "Sleep Disturbances",
+    prompt: "Trouble falling or staying asleep, or sleeping too much",
+    studentContext: "Racing thoughts at night, irregular study sleeping hours, insomnia, or finding it hard to get out of bed."
+  },
+  {
+    id: 4,
+    category: "Vitality & Energy",
+    shortTitle: "Fatigue & Burnout",
+    prompt: "Feeling tired, drained, or having little energy",
+    studentContext: "Mental exhaustion from coursework, feeling physically worn out even after resting."
+  },
+  {
+    id: 5,
+    category: "Appetite & Nutrition",
+    shortTitle: "Appetite Changes",
+    prompt: "Poor appetite or overeating",
+    studentContext: "Skipping meals due to academic pressure, loss of hunger, or stress-eating during late nights."
+  },
+  {
+    id: 6,
+    category: "Self-Esteem",
+    shortTitle: "Self-Doubt & Guilt",
+    prompt: "Feeling bad about yourself, or that you are a failure",
+    studentContext: "Imposter syndrome, feeling like you are falling behind your peers, or worrying about letting family down."
+  },
+  {
+    id: 7,
+    category: "Cognitive Focus",
+    shortTitle: "Trouble Concentrating",
+    prompt: "Trouble concentrating on things, such as reading or lectures",
+    studentContext: "Difficulty focusing on study materials, zoning out during class, or having trouble finishing assignments."
+  },
+  {
+    id: 8,
+    category: "Psychomotor Speed",
+    shortTitle: "Restlessness or Sluggishness",
+    prompt: "Moving or speaking slowly, or feeling unusually fidgety and restless",
+    studentContext: "Feeling sluggish throughout the day, or so agitated and anxious that sitting through lectures feels unbearable."
+  },
+  {
+    id: 9,
+    category: "Emotional Safety",
+    shortTitle: "Thoughts of Giving Up",
+    prompt: "Thoughts that you would be better off dead, or hurting yourself in some way",
+    studentContext: "Feeling overwhelmed to the point of wanting to give up. Confidential campus support is always available."
+  }
 ];
 
-// Student-contextualized questions for GAD-7 Anxiety survey
-const GAD7_QUESTIONS = [
-  "Feeling nervous, anxious, or constantly on edge about classes, exams, or daily life",
-  "Not being able to stop or control worrying, or having spiraling thoughts",
-  "Worrying too much about multiple things (grades, career, finances, or relationships)",
-  "Trouble relaxing or taking breaks without feeling guilty",
-  "Being so restless that it is hard to sit still during study sessions or lectures",
-  "Becoming easily annoyed, frustrated, or irritable with classmates or roommates",
-  "Feeling afraid as if something awful, disastrous, or catastrophic might happen"
+// Student-friendly, clearly articulated questions for GAD-7 Anxiety screening
+const GAD7_QUESTIONS: SurveyQuestionItem[] = [
+  {
+    id: 1,
+    category: "Nervous Tension",
+    shortTitle: "Nervousness & On-Edge",
+    prompt: "Feeling nervous, anxious, or on edge",
+    studentContext: "Persistent jittery feeling, stress regarding classes, upcoming deadlines, or campus exams."
+  },
+  {
+    id: 2,
+    category: "Worry Control",
+    shortTitle: "Uncontrollable Worry",
+    prompt: "Not being able to stop or control worrying",
+    studentContext: "Thoughts spiraling uncontrollably, repeatedly replaying worst-case scenarios about college or life."
+  },
+  {
+    id: 3,
+    category: "Worry Scope",
+    shortTitle: "Excessive Worrying",
+    prompt: "Worrying too much about different things",
+    studentContext: "Juggling worries across grades, future career, relationships, and day-to-day responsibilities."
+  },
+  {
+    id: 4,
+    category: "Relaxation",
+    shortTitle: "Trouble Relaxing",
+    prompt: "Trouble relaxing or unwinding",
+    studentContext: "Inability to slow down, feeling tense or guilty whenever taking a break from study sessions."
+  },
+  {
+    id: 5,
+    category: "Motor Agitation",
+    shortTitle: "Physical Restlessness",
+    prompt: "Being so restless that it's hard to sit still",
+    studentContext: "Constant fidgeting, racing pulse, or feeling keyed up during study hours or lectures."
+  },
+  {
+    id: 6,
+    category: "Irritability",
+    shortTitle: "Irritability & Frustration",
+    prompt: "Becoming easily annoyed or irritable",
+    studentContext: "Low patience, snapping or feeling easily triggered by classmates, roommates, or routine pressures."
+  },
+  {
+    id: 7,
+    category: "Anticipatory Fear",
+    shortTitle: "Dread & Fear",
+    prompt: "Feeling afraid as if something awful might happen",
+    studentContext: "A looming sense of dread or impending disaster about exams, evaluations, or daily uncertainty."
+  }
 ];
 
 const SURVEY_OPTIONS = [
@@ -825,72 +929,146 @@ export const StudentDashboard: React.FC = () => {
             ) : (
               // Survey Wizard Active View
               <div className="space-y-4 py-2">
-                <div className="flex items-center justify-between border-b border-border/70 pb-2">
-                  <h4 className="text-xs font-extrabold text-foreground uppercase tracking-wider">
-                    {activeSurvey} Question {currentQuestionIdx + 1} of {activeSurvey === "phq-9" ? 9 : 7}
-                  </h4>
-                  <Button 
-                    onClick={() => setActiveSurvey(null)}
-                    variant="ghost" 
-                    size="sm" 
-                    className="text-xs text-muted-foreground hover:text-foreground h-8 px-2"
-                  >
-                    Cancel
-                  </Button>
-                </div>
+                {(() => {
+                  const currentList = activeSurvey === "phq-9" ? PHQ9_QUESTIONS : GAD7_QUESTIONS;
+                  const totalQuestions = currentList.length;
+                  const currentItem = currentList[currentQuestionIdx];
+                  const progressPct = Math.round(((currentQuestionIdx + 1) / totalQuestions) * 100);
+                  const isPHQ = activeSurvey === "phq-9";
 
-                <p className="text-foreground text-sm py-2 min-h-[48px] font-medium leading-relaxed">
-                  {activeSurvey === "phq-9" ? PHQ9_QUESTIONS[currentQuestionIdx] : GAD7_QUESTIONS[currentQuestionIdx]}
-                </p>
+                  return (
+                    <>
+                      {/* Wizard Header with Progress Bar & Context Badge */}
+                      <div className="space-y-2 border-b border-border/70 pb-3">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-extrabold uppercase tracking-wide border ${
+                              isPHQ 
+                                ? "bg-violet-500/10 text-violet-600 dark:text-violet-400 border-violet-500/20" 
+                                : "bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border-cyan-500/20"
+                            }`}>
+                              {isPHQ ? "PHQ-9 Depression Check" : "GAD-7 Anxiety Check"}
+                            </span>
+                            <span className="text-xs font-semibold text-muted-foreground">
+                              Question {currentQuestionIdx + 1} of {totalQuestions}
+                            </span>
+                          </div>
 
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                  {SURVEY_OPTIONS.map((opt) => (
-                    <button
-                      key={opt.value}
-                      type="button"
-                      onClick={() => answerSurveyQuestion(opt.value)}
-                      className={`p-3 rounded-xl border text-xs font-semibold transition-all duration-200 ${
-                        surveyResponses[currentQuestionIdx] === opt.value
-                          ? "bg-primary border-primary text-primary-foreground shadow"
-                          : "border-border/70 bg-background/30 text-muted-foreground hover:bg-accent/40 hover:text-foreground"
-                      }`}
-                    >
-                      {opt.label}
-                    </button>
-                  ))}
-                </div>
+                          <Button 
+                            onClick={() => setActiveSurvey(null)}
+                            variant="ghost" 
+                            size="sm" 
+                            className="text-xs text-muted-foreground hover:text-foreground h-7 px-2 rounded-lg"
+                          >
+                            <X className="h-3.5 w-3.5 mr-1" />
+                            Exit
+                          </Button>
+                        </div>
 
-                <div className="flex justify-between items-center pt-2">
-                  <Button
-                    disabled={currentQuestionIdx === 0}
-                    onClick={() => setCurrentQuestionIdx(currentQuestionIdx - 1)}
-                    variant="outline"
-                    size="sm"
-                    className="text-muted-foreground hover:text-foreground h-8 px-3 rounded-lg"
-                  >
-                    Previous
-                  </Button>
-                  
-                  {currentQuestionIdx < (activeSurvey === "phq-9" ? 8 : 6) ? (
-                    <Button
-                      disabled={surveyResponses[currentQuestionIdx] === -1}
-                      onClick={() => setCurrentQuestionIdx(currentQuestionIdx + 1)}
-                      size="sm"
-                      className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold h-8 px-3 rounded-lg"
-                    >
-                      Next
-                    </Button>
-                  ) : (
-                    <Button
-                      disabled={surveyResponses.includes(-1)}
-                      onClick={submitSurvey}
-                      size="sm"
-                      className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold h-8 px-3 rounded-lg"
-                    >
-                      Finish & Evaluate
-                    </Button>
-                  )}
-                </div>
+                        {/* Progress Bar */}
+                        <div className="w-full bg-secondary rounded-full h-1.5 overflow-hidden">
+                          <div 
+                            className={`h-full transition-all duration-300 rounded-full ${
+                              isPHQ ? "bg-violet-500" : "bg-cyan-500"
+                            }`}
+                            style={{ width: `${progressPct}%` }}
+                          />
+                        </div>
+                      </div>
+
+                      {/* Question Presentation Card */}
+                      <div className="p-4 rounded-2xl bg-secondary/40 border border-border/70 space-y-2.5">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[11px] font-bold tracking-wider uppercase text-primary">
+                            Category: {currentItem.category}
+                          </span>
+                          <span className="text-[11px] font-medium text-muted-foreground">
+                            Over the last 2 weeks
+                          </span>
+                        </div>
+
+                        <h4 className="text-sm md:text-base font-extrabold text-foreground leading-snug">
+                          {currentItem.prompt}
+                        </h4>
+
+                        <div className="p-3 rounded-xl bg-card border border-border/60 text-xs text-muted-foreground leading-relaxed flex items-start gap-2">
+                          <HelpCircle className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                          <div>
+                            <span className="font-bold text-foreground">What this means for students: </span>
+                            {currentItem.studentContext}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* 4 Frequency Response Buttons */}
+                      <div className="space-y-1.5">
+                        <label className="text-xs font-bold text-foreground block">
+                          How often have you experienced this over the last 2 weeks?
+                        </label>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                          {SURVEY_OPTIONS.map((opt) => {
+                            const isSelected = surveyResponses[currentQuestionIdx] === opt.value;
+                            return (
+                              <button
+                                key={opt.value}
+                                type="button"
+                                onClick={() => answerSurveyQuestion(opt.value)}
+                                className={`p-3 rounded-xl border text-left text-xs font-bold transition-all duration-200 flex items-center justify-between active:scale-[0.98] ${
+                                  isSelected
+                                    ? "bg-primary border-primary text-primary-foreground shadow-sm shadow-primary/20 scale-[1.01]"
+                                    : "border-border/70 bg-card hover:bg-secondary/70 text-foreground"
+                                }`}
+                              >
+                                <span>{opt.label}</span>
+                                {isSelected ? (
+                                  <CheckCircle2 className="h-4 w-4 text-white" />
+                                ) : (
+                                  <span className="text-[10px] text-muted-foreground font-normal">
+                                    {opt.value === 0 ? "0 pts" : opt.value === 1 ? "1 pt" : opt.value === 2 ? "2 pts" : "3 pts"}
+                                  </span>
+                                )}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+
+                      {/* Navigation Controls */}
+                      <div className="flex justify-between items-center pt-2 border-t border-border/50">
+                        <Button
+                          disabled={currentQuestionIdx === 0}
+                          onClick={() => setCurrentQuestionIdx(currentQuestionIdx - 1)}
+                          variant="outline"
+                          size="sm"
+                          className="text-muted-foreground hover:text-foreground h-8 px-3 rounded-lg text-xs"
+                        >
+                          Previous
+                        </Button>
+                        
+                        {currentQuestionIdx < totalQuestions - 1 ? (
+                          <Button
+                            disabled={surveyResponses[currentQuestionIdx] === -1}
+                            onClick={() => setCurrentQuestionIdx(currentQuestionIdx + 1)}
+                            size="sm"
+                            className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold h-8 px-4 rounded-lg text-xs"
+                          >
+                            Next Question →
+                          </Button>
+                        ) : (
+                          <Button
+                            disabled={surveyResponses.includes(-1)}
+                            onClick={submitSurvey}
+                            size="sm"
+                            className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold h-8 px-4 rounded-lg text-xs shadow-sm flex items-center gap-1.5"
+                          >
+                            <CheckCircle2 className="h-3.5 w-3.5" />
+                            Submit & Calculate Wellness Score
+                          </Button>
+                        )}
+                      </div>
+                    </>
+                  );
+                })()}
               </div>
             )}
           </div>
