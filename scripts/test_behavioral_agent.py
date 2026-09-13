@@ -161,6 +161,15 @@ async def run_behavioral_tests():
         assert len(summary['weekly_history']) >= 3
         print("  --> PASS: Dashboard summary API verified.")
 
+        # Teardown mock test student and logs to maintain clean database
+        from sqlalchemy import delete
+        await db.execute(delete(BehavioralLog).where(BehavioralLog.student_id == student.id))
+        await db.execute(delete(Alert).where(Alert.student_id == student.id))
+        await db.execute(delete(Assessment).where(Assessment.student_id == student.id))
+        await db.execute(delete(User).where(User.id == student.id))
+        await db.commit()
+        print("  [TEARDOWN] Purged temporary mock student from database.")
+
     print("\n=================================================================")
     print("  ALL BEHAVIORAL AGENT TESTS PASSED 100% SUCCESSFULLY!           ")
     print("=================================================================")
