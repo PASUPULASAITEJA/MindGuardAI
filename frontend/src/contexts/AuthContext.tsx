@@ -7,6 +7,7 @@ export interface User {
   id: string;
   email: string;
   role: UserRole;
+  full_name?: string;
 }
 
 interface AuthContextType {
@@ -14,7 +15,7 @@ interface AuthContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
   login: (email: string, password: string, rememberMe?: boolean) => Promise<User>;
-  register: (email: string, password: string, role: UserRole) => Promise<void>;
+  register: (email: string, password: string, role: UserRole, full_name?: string) => Promise<void>;
   logout: () => Promise<void>;
 }
 
@@ -61,7 +62,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         setUser({
           id: payload.sub,
           email: payload.email || "",
-          role: payload.role as UserRole
+          role: payload.role as UserRole,
+          full_name: payload.full_name || ""
         });
       }
     } catch (e) {
@@ -73,7 +75,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           setUser({
             id: payload.sub,
             email: payload.email || "",
-            role: payload.role as UserRole
+            role: payload.role as UserRole,
+            full_name: payload.full_name || ""
           });
           setIsLoading(false);
           return;
@@ -107,8 +110,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       if (payload) {
         const loggedUser: User = {
           id: payload.sub,
-          email: email,
-          role: payload.role as UserRole
+          email: payload.email || email,
+          role: payload.role as UserRole,
+          full_name: payload.full_name || ""
         };
         setUser(loggedUser);
         return loggedUser;
@@ -123,10 +127,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   };
 
-
-  const register = async (email: string, password: string, role: UserRole) => {
+  const register = async (email: string, password: string, role: UserRole, full_name?: string) => {
     try {
-      await api.post("/auth/register", { email, password, role });
+      await api.post("/auth/register", { email, password, role, full_name: full_name?.trim() });
     } catch (error) {
       throw error;
     }
