@@ -2,7 +2,7 @@
 
 ## 1. High-Level Architecture
 
-MindGuard follows a modular, micro-monolith architectural pattern. The system relies on an API Gateway pattern to manage routing between the client interfaces (Web App / Mobile App)  and backend micro-services. This design ensures that the Processing Layer (AI/ML)  operates asynchronously without blocking standard CRUD operations, optimizing for both high-throughput student check-ins and computationally heavy NLP tasks.
+MindGuard follows a modular, micro-monolith architectural pattern. The system relies on an API Gateway pattern to manage routing between client interfaces (Web App / Desktop Telemetry Agent) and backend micro-services. This design ensures that the Processing Layer (AI/ML) operates asynchronously without blocking standard CRUD operations, optimizing for both high-throughput student check-ins and computationally heavy NLP tasks.
 
 ---
 
@@ -14,8 +14,8 @@ The system is divided into three primary layers: the Client Layer, the API Gatew
 graph TD
     %% Client Layer
     subgraph Client Layer
-        Web[Web App - React/Tailwind]
-        Mobile[Mobile App - PWA/Flutter]
+        Web[Web App - React/Tailwind/TypeScript]
+        Agent[Desktop Agent - Python Background Telemetry]
     end
 
     %% Gateway Layer
@@ -39,7 +39,7 @@ graph TD
 
     %% Database
     subgraph Data Layer
-        DB[(PostgreSQL)]
+        DB[(PostgreSQL / SQLite)]
     end
 
     %% Dashboard Outputs
@@ -50,8 +50,8 @@ graph TD
     end
 
     %% Flow
-    Web -->|HTTPS/REST| Gateway
-    Mobile -->|HTTPS/REST| Gateway
+    Web -->|HTTPS/REST/SSE| Gateway
+    Agent -->|REST Telemetry / Bearer Auth| Gateway
 
     Gateway --> Auth
     Gateway --> Mood
