@@ -74,14 +74,14 @@ export const EmergencySOSModal: React.FC<EmergencySOSModalProps> = ({ isOpen, on
             <div>
               <div className="flex items-center gap-2">
                 <h3 className="text-base md:text-lg font-black text-rose-600 dark:text-rose-400">
-                  Emergency Crisis Gateway
+                  Emergency Help & Support
                 </h3>
                 <span className="px-2 py-0.5 rounded-full bg-rose-500/10 text-[10px] font-extrabold text-rose-500 uppercase tracking-widest border border-rose-500/20">
-                  SOS Live
+                  24/7 Helplines
                 </span>
               </div>
               <p className="text-xs text-muted-foreground mt-0.5">
-                Immediate 24/7 psychological support and campus emergency contact
+                Immediate 24/7 student support and emergency helpline contacts
               </p>
             </div>
           </div>
@@ -97,7 +97,7 @@ export const EmergencySOSModal: React.FC<EmergencySOSModalProps> = ({ isOpen, on
         <div className="p-3.5 rounded-xl border border-rose-200/60 bg-gradient-to-r from-rose-50/80 to-amber-50/80 dark:border-rose-900/40 dark:bg-rose-950/30 text-xs text-rose-900 dark:text-rose-200 flex items-center gap-3">
           <HeartHandshake className="h-5 w-5 text-rose-600 shrink-0" />
           <p className="leading-relaxed">
-            <strong>You don't have to carry this alone.</strong> If you feel overwhelmed, in acute pain, or unsafe, please reach out to one of the verified crisis resources below immediately.
+            <strong>You don't have to carry this alone.</strong> If you feel overwhelmed, in deep pain, or unsafe, please reach out to one of the verified support numbers below right away.
           </p>
         </div>
 
@@ -107,20 +107,20 @@ export const EmergencySOSModal: React.FC<EmergencySOSModalProps> = ({ isOpen, on
             <div className="flex items-center gap-2">
               <ShieldCheck className="h-4 w-4 text-primary" />
               <span className="text-xs font-bold text-foreground uppercase tracking-wider">
-                Direct Campus Counselor Dispatch
+                Contact Campus Counselor Urgently
               </span>
             </div>
-            <span className="text-[10px] text-muted-foreground">High-Priority</span>
+            <span className="text-[10px] text-muted-foreground font-semibold">Priority Support</span>
           </div>
 
           <p className="text-xs text-muted-foreground leading-relaxed">
-            Tapping this button flags your file in the university counselor triage queue with <strong className="text-rose-500">CRITICAL PRIORITY</strong> for immediate staff outreach.
+            Tapping this button notifies the campus counseling team immediately so they can reach out and support you.
           </p>
 
           {isDispatched ? (
             <div className="p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/30 flex items-center gap-2 text-xs font-bold text-emerald-600 dark:text-emerald-400">
               <CheckCircle2 className="h-4 w-4 shrink-0" />
-              <span>Counselor Alert Logged. On-duty clinical staff have been notified.</span>
+              <span>Counselor alert sent. The campus support team has been notified.</span>
             </div>
           ) : (
             <Button
