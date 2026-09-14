@@ -32,6 +32,7 @@ export const Login: React.FC = () => {
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors, isValid },
   } = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -41,6 +42,12 @@ export const Login: React.FC = () => {
       password: "",
     }
   });
+
+  const fillAndSubmitDemo = (email: string, pass: string) => {
+    setValue("email", email, { shouldValidate: true });
+    setValue("password", pass, { shouldValidate: true });
+    onSubmit({ email, password: pass });
+  };
 
   const onSubmit = async (data: LoginFormValues) => {
     setIsSubmitting(true);
@@ -203,60 +210,30 @@ export const Login: React.FC = () => {
                 )}
               </Button>
 
-              {/* Quick 1-Click Demo Logins for Evaluators */}
+              {/* Quick 1-Click Demo Evaluation Portals */}
               <div className="w-full pt-1 space-y-2 border-t border-border/60">
-                <div className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider text-center">
-                  Quick Demo Accounts (1-Click)
+                <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider text-center">
+                  Quick Demo Access (1-Click)
                 </div>
                 <div className="grid grid-cols-3 gap-2">
                   <button
                     type="button"
-                    onClick={() => {
-                      const emailInput = document.getElementById("email") as HTMLInputElement;
-                      const passwordInput = document.getElementById("password") as HTMLInputElement;
-                      if (emailInput && passwordInput) {
-                        emailInput.value = "pasupulasai.teja37@nmims.in";
-                        passwordInput.value = "Student@123";
-                        emailInput.dispatchEvent(new Event('input', { bubbles: true }));
-                        passwordInput.dispatchEvent(new Event('input', { bubbles: true }));
-                      }
-                      onSubmit({ email: "pasupulasai.teja37@nmims.in", password: "Student@123" });
-                    }}
-                    className="p-2 rounded-xl border border-indigo-500/30 bg-indigo-500/5 hover:bg-indigo-500/10 text-[11px] font-bold text-indigo-600 dark:text-indigo-400 text-center transition-all"
+                    onClick={() => fillAndSubmitDemo("student@nmims.in", "password123")}
+                    className="p-2 rounded-xl border border-indigo-500/30 bg-indigo-500/5 hover:bg-indigo-500/10 text-[11px] font-bold text-indigo-600 dark:text-indigo-400 text-center transition-all active:scale-95"
                   >
                     🎓 Student
                   </button>
                   <button
                     type="button"
-                    onClick={() => {
-                      const emailInput = document.getElementById("email") as HTMLInputElement;
-                      const passwordInput = document.getElementById("password") as HTMLInputElement;
-                      if (emailInput && passwordInput) {
-                        emailInput.value = "counselor@mindguard.ai";
-                        passwordInput.value = "Counselor@123";
-                        emailInput.dispatchEvent(new Event('input', { bubbles: true }));
-                        passwordInput.dispatchEvent(new Event('input', { bubbles: true }));
-                      }
-                      onSubmit({ email: "counselor@mindguard.ai", password: "Counselor@123" });
-                    }}
-                    className="p-2 rounded-xl border border-emerald-500/30 bg-emerald-500/5 hover:bg-emerald-500/10 text-[11px] font-bold text-emerald-600 dark:text-emerald-400 text-center transition-all"
+                    onClick={() => fillAndSubmitDemo("counselor@nmims.edu", "password123")}
+                    className="p-2 rounded-xl border border-emerald-500/30 bg-emerald-500/5 hover:bg-emerald-500/10 text-[11px] font-bold text-emerald-600 dark:text-emerald-400 text-center transition-all active:scale-95"
                   >
                     🩺 Counselor
                   </button>
                   <button
                     type="button"
-                    onClick={() => {
-                      const emailInput = document.getElementById("email") as HTMLInputElement;
-                      const passwordInput = document.getElementById("password") as HTMLInputElement;
-                      if (emailInput && passwordInput) {
-                        emailInput.value = "admin@mindguard.ai";
-                        passwordInput.value = "Admin@123";
-                        emailInput.dispatchEvent(new Event('input', { bubbles: true }));
-                        passwordInput.dispatchEvent(new Event('input', { bubbles: true }));
-                      }
-                      onSubmit({ email: "admin@mindguard.ai", password: "Admin@123" });
-                    }}
-                    className="p-2 rounded-xl border border-violet-500/30 bg-violet-500/5 hover:bg-violet-500/10 text-[11px] font-bold text-violet-600 dark:text-violet-400 text-center transition-all"
+                    onClick={() => fillAndSubmitDemo("admin@nmims.edu", "password123")}
+                    className="p-2 rounded-xl border border-purple-500/30 bg-purple-500/5 hover:bg-purple-500/10 text-[11px] font-bold text-purple-600 dark:text-purple-400 text-center transition-all active:scale-95"
                   >
                     🛡️ Admin
                   </button>
