@@ -29,7 +29,8 @@ import {
   ReferenceLine,
   XAxis, 
   YAxis, 
-  Tooltip 
+  Tooltip,
+  LabelList
 } from "recharts";
 import { 
   Smile, 
@@ -75,7 +76,7 @@ export const StudentDashboard: React.FC = () => {
   const [surveyType, setSurveyType] = useState<"phq-9" | "gad-7">("phq-9");
   const [isBookingOpen, setIsBookingOpen] = useState(false);
   const [isExplainOpen, setIsExplainOpen] = useState(false);
-  const [screenChartMode, setScreenChartMode] = useState<"circadian" | "purpose">("circadian");
+  const [screenChartMode, setScreenChartMode] = useState<"total" | "circadian" | "purpose">("total");
 
   // Queries
   const { data: latestAssessment, isLoading: isAssessmentLoading } = useLatestAssessment();
@@ -136,7 +137,9 @@ export const StudentDashboard: React.FC = () => {
     const dateStr = `${year}-${month}-${day}`;
     const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
     const isToday = i === 6;
-    const dayLabel = isToday ? `Today (${dayNames[d.getDay()]})` : dayNames[d.getDay()];
+    const dayLabel = isToday
+      ? `Today (${dayNames[d.getDay()]})`
+      : `${dayNames[d.getDay()]} (${d.getMonth() + 1}/${d.getDate()})`;
 
     const matched = weeklyLogs.find((w) => w.date === dateStr);
 
@@ -150,14 +153,14 @@ export const StudentDashboard: React.FC = () => {
     let hasData = false;
 
     if (isToday) {
-      hasData = totalMins > 0;
-      totalM = totalMins;
-      acadM = academicMins;
-      socM = socialMins;
-      entM = entertainmentMins;
-      adultM = adultMins;
-      lateM = lateNightMins;
-      risk = "LOW";
+      hasData = totalMins > 0 || (matched?.total_screen_time_minutes || 0) > 0;
+      totalM = Math.max(totalMins, matched?.total_screen_time_minutes || 0);
+      acadM = Math.max(academicMins, matched?.academic_usage_minutes || 0);
+      socM = Math.max(socialMins, matched?.social_usage_minutes || 0);
+      entM = Math.max(entertainmentMins, matched?.entertainment_usage_minutes || 0);
+      adultM = Math.max(adultMins, matched?.adult_usage_minutes || 0);
+      lateM = Math.max(lateNightMins, matched?.late_night_usage_minutes || 0);
+      risk = matched?.risk_level || "LOW";
     } else if (matched) {
       hasData = true;
       totalM = matched.total_screen_time_minutes || 0;
@@ -330,27 +333,27 @@ export const StudentDashboard: React.FC = () => {
           </div>
         </Card>
 
-        {/* Metric 2: Academic & Coding Focus */}
+        {/* Metric 2: Active Screen Time */}
         <Card className="shadow-xs border-border/80 flex flex-col justify-between p-4">
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
-              Study Focus
+              Active Screen Time
             </span>
-            <BookOpen className="h-4 w-4 text-indigo-500" />
+            <Clock className="h-4 w-4 text-indigo-500" />
           </div>
 
           <div className="my-3 flex items-baseline gap-2">
             <span className="text-3xl font-black text-foreground">
-              {academicPct}%
+              {Math.floor(totalMins / 60)}h {totalMins % 60}m
             </span>
             <span className="text-xs text-muted-foreground">
-              {Math.floor(academicMins / 60)}h {academicMins % 60}m active
+              today
             </span>
           </div>
 
           <div className="flex items-center gap-1.5 text-[11px] font-semibold text-indigo-600 dark:text-indigo-400">
             <span className="h-1.5 w-1.5 rounded-full bg-indigo-500" />
-            <span>{academicPct >= 65 ? "High Coursework Focus" : "Balanced Daily Use"}</span>
+            <span>{academicPct}% study focus ({Math.floor(academicMins / 60)}h {academicMins % 60}m)</span>
           </div>
         </Card>
 
@@ -365,15 +368,15 @@ export const StudentDashboard: React.FC = () => {
 
           <div className="my-3 flex items-baseline gap-2">
             <span className={`text-3xl font-black ${lateNightMins > 60 ? "text-rose-500" : "text-foreground"}`}>
-              {lateNightMins}m
+              {lateNightMins > 60 ? `${Math.floor(lateNightMins / 60)}h ${lateNightMins % 60}m` : `${lateNightMins}m`}
             </span>
-            <span className="text-xs text-muted-foreground">after 12:00 AM</span>
+            <span className="text-xs text-muted-foreground">past 12:00 AM</span>
           </div>
 
           <div className="flex items-center gap-1.5 text-[11px] font-semibold">
             <span className={`h-1.5 w-1.5 rounded-full ${lateNightMins === 0 ? "bg-emerald-500" : lateNightMins > 60 ? "bg-rose-500" : "bg-amber-500"}`} />
             <span className={lateNightMins === 0 ? "text-emerald-600 dark:text-emerald-400" : lateNightMins > 60 ? "text-rose-500" : "text-amber-500"}>
-              {lateNightMins === 0 ? "Optimal Rhythm" : lateNightMins > 60 ? "Late Screen Strain" : "Mild Late Activity"}
+              {lateNightMins === 0 ? "Optimal Sleep Rhythm" : lateNightMins > 60 ? "Circadian Strain" : "Mild Late Use"}
             </span>
           </div>
         </Card>
@@ -425,6 +428,17 @@ export const StudentDashboard: React.FC = () => {
           <div className="flex items-center gap-2 self-start sm:self-auto">
             {/* View Mode Toggle */}
             <div className="flex bg-muted/50 p-0.5 rounded-lg border border-border/60 text-[10px]">
+              <button
+                type="button"
+                onClick={() => setScreenChartMode("total")}
+                className={`px-2.5 py-1 rounded-md font-semibold transition-all ${
+                  screenChartMode === "total"
+                    ? "bg-primary text-primary-foreground shadow-xs"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                📊 Daily Total
+              </button>
               <button
                 type="button"
                 onClick={() => setScreenChartMode("circadian")}
@@ -576,7 +590,7 @@ export const StudentDashboard: React.FC = () => {
                 </span>
               </div>
               <span className="text-[11px] text-muted-foreground hidden sm:inline">
-                {screenChartMode === "circadian" ? "Daytime vs Late-Night" : "Coursework vs Leisure"}
+                {screenChartMode === "total" ? "Daily Total Active Hours" : screenChartMode === "circadian" ? "Daytime vs Late-Night" : "Coursework vs Leisure"}
               </span>
             </div>
 
@@ -672,17 +686,25 @@ export const StudentDashboard: React.FC = () => {
                     strokeDasharray="4 4" 
                     label={{ value: "Healthy Guideline (6h)", fill: "#10b981", fontSize: 10, position: "top" }} 
                   />
-                  {screenChartMode === "circadian" ? (
+                  {screenChartMode === "total" ? (
+                    <Bar dataKey="totalHours" name="Total Daily Screen Time" fill="#6366f1" radius={[6, 6, 0, 0]}>
+                      <LabelList dataKey="totalHours" position="top" fill="currentColor" className="text-foreground" fontSize={11} fontWeight={700} formatter={(val: any) => val > 0 ? `${val}h` : ""} />
+                    </Bar>
+                  ) : screenChartMode === "circadian" ? (
                     <>
                       <Bar dataKey="daytimeHours" name="Daytime Screen Time" stackId="screen" fill="#6366f1" radius={[0, 0, 0, 0]} />
-                      <Bar dataKey="lateNightHours" name="Late-Night (12AM-5AM)" stackId="screen" fill="#f43f5e" radius={[4, 4, 0, 0]} />
+                      <Bar dataKey="lateNightHours" name="Late-Night (12AM-5AM)" stackId="screen" fill="#f43f5e" radius={[4, 4, 0, 0]}>
+                        <LabelList dataKey="totalHours" position="top" fill="currentColor" className="text-foreground" fontSize={11} fontWeight={700} formatter={(val: any) => val > 0 ? `${val}h` : ""} />
+                      </Bar>
                     </>
                   ) : (
                     <>
                       <Bar dataKey="academicHours" name="Academic & Coding" stackId="screen" fill="#6366f1" radius={[0, 0, 0, 0]} />
                       <Bar dataKey="socialHours" name="Social & Chat" stackId="screen" fill="#10b981" radius={[0, 0, 0, 0]} />
                       <Bar dataKey="entertainmentHours" name="Entertainment & Media" stackId="screen" fill="#a855f7" radius={[0, 0, 0, 0]} />
-                      <Bar dataKey="otherHours" name="General / Other" stackId="screen" fill="#64748b" radius={[4, 4, 0, 0]} />
+                      <Bar dataKey="otherHours" name="General / Other" stackId="screen" fill="#64748b" radius={[4, 4, 0, 0]}>
+                        <LabelList dataKey="totalHours" position="top" fill="currentColor" className="text-foreground" fontSize={11} fontWeight={700} formatter={(val: any) => val > 0 ? `${val}h` : ""} />
+                      </Bar>
                     </>
                   )}
                 </BarChart>
@@ -692,7 +714,18 @@ export const StudentDashboard: React.FC = () => {
             {/* Chart Legend & Status Footer */}
             <div className="flex flex-wrap items-center justify-between text-[11px] text-muted-foreground pt-1 border-t border-border/40 gap-2">
               <div className="flex flex-wrap items-center gap-3">
-                {screenChartMode === "circadian" ? (
+                {screenChartMode === "total" ? (
+                  <>
+                    <span className="flex items-center gap-1.5">
+                      <span className="h-2.5 w-2.5 rounded-sm bg-indigo-500" />
+                      Active Daily Screen Time (Hours)
+                    </span>
+                    <span className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 font-semibold">
+                      <span className="h-0.5 w-3 border-t-2 border-dashed border-emerald-500" />
+                      Healthy Guideline (≤ 6.0h)
+                    </span>
+                  </>
+                ) : screenChartMode === "circadian" ? (
                   <>
                     <span className="flex items-center gap-1.5">
                       <span className="h-2.5 w-2.5 rounded-sm bg-indigo-500" />
@@ -728,6 +761,68 @@ export const StudentDashboard: React.FC = () => {
                 <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
                 Live Logged: {recordedDays.length} of 7 days recorded
               </span>
+            </div>
+
+            {/* 7-Day Daily Breakdown Cards Grid */}
+            <div className="pt-3 border-t border-border/40">
+              <div className="flex items-center justify-between pb-2">
+                <span className="text-xs font-bold text-foreground">
+                  Daily Screen Time Breakdown (Past 7 Days)
+                </span>
+                <span className="text-[11px] text-muted-foreground hidden sm:inline">
+                  System telemetry from physical boot & active window tracking
+                </span>
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-7 gap-2">
+                {screenChartData.map((d, idx) => (
+                  <div 
+                    key={idx}
+                    className={`p-2.5 rounded-xl border flex flex-col justify-between transition-all ${
+                      d.isToday 
+                        ? "bg-indigo-500/10 border-indigo-500/40 ring-1 ring-indigo-500/30" 
+                        : "bg-card/60 border-border/60 hover:border-border"
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className={`text-[11px] font-bold ${d.isToday ? "text-indigo-500 dark:text-indigo-400" : "text-muted-foreground"}`}>
+                        {d.isToday ? "Today" : d.dayLabel.split(" ")[0]}
+                      </span>
+                      {d.isToday ? (
+                        <span className="flex items-center gap-1">
+                          <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                          <span className="text-[9px] font-extrabold text-emerald-500">LIVE</span>
+                        </span>
+                      ) : (
+                        <span className="text-[9px] text-muted-foreground font-medium">
+                          {d.date.split("-").slice(1).join("/")}
+                        </span>
+                      )}
+                    </div>
+                    <div className="my-2">
+                      <div className="text-base sm:text-lg font-black text-foreground tracking-tight">
+                        {d.totalMins > 0 ? `${Math.floor(d.totalMins / 60)}h ${d.totalMins % 60}m` : "0h 0m"}
+                      </div>
+                      <div className={`text-[10px] font-semibold ${
+                        d.totalHours >= 8.0 ? "text-rose-500" : d.totalHours >= 6.0 ? "text-amber-500" : "text-emerald-500"
+                      }`}>
+                        {d.totalHours} hrs {d.totalHours >= 6.0 ? "• High" : "• Healthy"}
+                      </div>
+                    </div>
+                    <div className="space-y-1 text-[10px] pt-1.5 border-t border-border/30">
+                      <div className="flex items-center justify-between text-indigo-500 font-medium">
+                        <span>📚 Study:</span>
+                        <span>{Math.floor(d.academicMins / 60)}h {d.academicMins % 60}m</span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className={d.lateNightMins > 0 ? "text-rose-500 font-bold" : "text-muted-foreground"}>🌙 Late:</span>
+                        <span className={d.lateNightMins > 0 ? "text-rose-500 font-bold" : "text-muted-foreground"}>
+                          {d.lateNightMins > 0 ? `${d.lateNightMins}m` : "0m"}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </CardContent>
