@@ -719,8 +719,8 @@ def start_agent():
                                 f"Context: {category} ({display_title}) | "
                                 f"Risk: {risk_level}"
                             )
-                        elif res.status_code == 401:
-                            log_agent("[!] Token expired or rejected. Clearing cached token and awaiting student re-login...")
+                        elif res.status_code in (401, 403, 404):
+                            log_agent("[!] Token expired, invalid, or user removed. Clearing cached token and awaiting student re-login...")
                             try:
                                 if TOKEN_CACHE_FILE.exists():
                                     TOKEN_CACHE_FILE.unlink()
