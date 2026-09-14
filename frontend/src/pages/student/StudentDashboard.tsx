@@ -128,6 +128,16 @@ export const StudentDashboard: React.FC = () => {
     risk_level?: string;
   }>;
 
+  const yesterdayStr = (() => {
+    const yd = new Date();
+    yd.setDate(yd.getDate() - 1);
+    const yYear = yd.getFullYear();
+    const yMonth = String(yd.getMonth() + 1).padStart(2, "0");
+    const yDay = String(yd.getDate()).padStart(2, "0");
+    return `${yYear}-${yMonth}-${yDay}`;
+  })();
+  const yesterdayLog = weeklyLogs.find((w) => w.date === yesterdayStr);
+
   const screenChartData = Array.from({ length: 7 }).map((_, i) => {
     const d = new Date();
     d.setDate(d.getDate() - (6 - i));
@@ -351,9 +361,16 @@ export const StudentDashboard: React.FC = () => {
             </span>
           </div>
 
-          <div className="flex items-center gap-1.5 text-[11px] font-semibold text-indigo-600 dark:text-indigo-400">
-            <span className="h-1.5 w-1.5 rounded-full bg-indigo-500" />
-            <span>{academicPct}% study focus ({Math.floor(academicMins / 60)}h {academicMins % 60}m)</span>
+          <div className="flex items-center justify-between text-[11px] font-semibold text-indigo-600 dark:text-indigo-400">
+            <span className="flex items-center gap-1.5">
+              <span className="h-1.5 w-1.5 rounded-full bg-indigo-500" />
+              <span>{academicPct}% study focus</span>
+            </span>
+            {yesterdayLog && (
+              <span className="text-muted-foreground font-medium text-[10px]">
+                Yesterday: {Math.floor(yesterdayLog.total_screen_time_minutes / 60)}h {yesterdayLog.total_screen_time_minutes % 60}m
+              </span>
+            )}
           </div>
         </Card>
 
@@ -485,7 +502,7 @@ export const StudentDashboard: React.FC = () => {
                 {Math.floor(totalMins / 60)}h {totalMins % 60}m
               </span>
               <span className="text-[10px] text-muted-foreground block">
-                {totalMins >= 360 ? "⚠️ High Screen Strain" : "Normal Usage"}
+                {yesterdayLog ? `Yesterday: ${Math.floor(yesterdayLog.total_screen_time_minutes / 60)}h ${yesterdayLog.total_screen_time_minutes % 60}m` : (totalMins >= 360 ? "⚠️ High Screen Strain" : "Normal Usage")}
               </span>
             </div>
 
