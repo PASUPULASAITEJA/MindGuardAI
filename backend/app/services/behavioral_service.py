@@ -397,9 +397,15 @@ class BehavioralService:
             if len(recent_logs) >= 7:
                 break
 
-        today_str = datetime.now(timezone.utc).date().isoformat()
-
-        today_log = next((l for l in recent_logs if l.date == today_str), None)
+        # Align with machine/browser local date, falling back to UTC if needed
+        local_today = datetime.now().date().isoformat()
+        utc_today = datetime.now(timezone.utc).date().isoformat()
+        today_log = next((l for l in recent_logs if l.date == local_today), None)
+        if today_log:
+            today_str = local_today
+        else:
+            today_log = next((l for l in recent_logs if l.date == utc_today), None)
+            today_str = utc_today if today_log else local_today
         if not today_log:
             default_log = BehavioralLog(
                 id=uuid4(),
@@ -434,13 +440,28 @@ class BehavioralService:
 
         # 1. Authoritative machine-level screen time sync (from desktop agent):
         if machine_metrics.get("total_screen_time_minutes", 0) > 0:
-            latest.total_screen_time_minutes = machine_metrics["total_screen_time_minutes"]
-            latest.academic_usage_minutes = machine_metrics["academic_usage_minutes"]
-            latest.social_usage_minutes = machine_metrics["social_usage_minutes"]
-            latest.entertainment_usage_minutes = machine_metrics["entertainment_usage_minutes"]
-            latest.adult_usage_minutes = machine_metrics["adult_usage_minutes"]
-            latest.late_night_usage_minutes = machine_metrics["late_night_usage_minutes"]
-            latest.continuous_screen_minutes = machine_metrics["continuous_screen_minutes"]
+            target_screen = max(latest.total_screen_time_minutes or 0, machine_metrics["total_screen_time_minutes"])
+            latest.total_screen_time_minutes = min(target_screen, uptime_cap)
+            latest.academic_usage_minutes = max(latest.academic_usage_minutes or 0, machine_metrics.get("academic_usage_minutes", 0))
+            latest.social_usage_minutes = max(latest.social_usage_minutes or 0, machine_metrics.get("social_usage_minutes", 0))
+            latest.entertainment_usage_minutes = max(latest.entertainment_usage_minutes or 0, machine_metrics.get("entertainment_usage_minutes", 0))
+            latest.adult_usage_minutes = max(getattr(latest, "adult_usage_minutes", 0) or 0, machine_metrics.get("adult_usage_minutes", 0))
+            latest.late_night_usage_minutes = max(latest.late_night_usage_minutes or 0, machine_metrics.get("late_night_usage_minutes", 0))
+            latest.continuous_screen_minutes = max(getattr(latest, "continuous_screen_minutes", 0) or 0, machine_metrics.get("continuous_screen_minutes", 0))
+
+            # Bound categories by total screen time so components sum logically
+            cat_sum = (
+                (latest.academic_usage_minutes or 0) +
+                (latest.social_usage_minutes or 0) +
+                (latest.entertainment_usage_minutes or 0) +
+                (getattr(latest, "adult_usage_minutes", 0) or 0)
+            )
+            if cat_sum > latest.total_screen_time_minutes and latest.total_screen_time_minutes > 0:
+                cat_ratio = latest.total_screen_time_minutes / cat_sum
+                latest.academic_usage_minutes = int((latest.academic_usage_minutes or 0) * cat_ratio)
+                latest.social_usage_minutes = int((latest.social_usage_minutes or 0) * cat_ratio)
+                latest.entertainment_usage_minutes = int((latest.entertainment_usage_minutes or 0) * cat_ratio)
+
             latest.synced_at = datetime.now(timezone.utc)
             await db.commit()
             await db.refresh(latest)
