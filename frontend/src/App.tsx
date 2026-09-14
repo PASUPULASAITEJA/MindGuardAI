@@ -49,7 +49,7 @@ function App() {
                 <ProtectedRoute allowedRoles={["STUDENT"]}>
                   <DashboardLayout
                     title="Student Wellness Hub"
-                    subtitle="Your secure, private space to track mental wellness indices and journal check-ins."
+                    subtitle="Your secure, private space to track mental wellness indices and study-rest balance."
                   >
                     <StudentDashboard />
                   </DashboardLayout>
