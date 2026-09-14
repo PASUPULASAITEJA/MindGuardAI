@@ -229,26 +229,15 @@ export const StudentDashboard: React.FC = () => {
   // Mental wellness score & classification
   const rawScore = latestAssessment?.mental_wellness_score;
   const hasAssessment = typeof rawScore === "number" && !isNaN(rawScore);
-  const wellnessScore = hasAssessment ? rawScore : 78;
-  const wellnessClass = classifyMentalWellness(wellnessScore);
+  const wellnessScore = hasAssessment ? rawScore : null;
+  const wellnessClass = wellnessScore !== null ? classifyMentalWellness(wellnessScore) : null;
 
-  // Sparkline data for 7-day mood trend
-  const chartData = moodHistory.slice(-7).map((item, idx) => ({
+  // Sparkline data for 7-day mood trend from real user check-ins
+  const chartData = moodHistory.slice(-7).map((item) => ({
     name: new Date(item.logged_at).toLocaleDateString("en-US", { weekday: "short" }),
-    score: (item.self_reported_score || 7) * 10,
+    score: (item.self_reported_score || 0) * 10,
     date: item.logged_at
   }));
-
-  // If no history yet, supply gentle baseline preview
-  const previewChartData = chartData.length > 0 ? chartData : [
-    { name: "Mon", score: 72 },
-    { name: "Tue", score: 75 },
-    { name: "Wed", score: 70 },
-    { name: "Thu", score: 82 },
-    { name: "Fri", score: 78 },
-    { name: "Sat", score: 84 },
-    { name: "Today", score: wellnessScore },
-  ];
 
   return (
     <div className="max-w-6xl mx-auto space-y-6 pb-12">
@@ -323,23 +312,36 @@ export const StudentDashboard: React.FC = () => {
           </div>
 
           <div className="my-3 flex items-baseline gap-2">
-            <span className="text-3xl font-black text-foreground">
-              {wellnessScore.toFixed(0)}
-              <span className="text-sm font-normal text-muted-foreground">/100</span>
-            </span>
-            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-              wellnessScore >= 65 ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20" :
-              wellnessScore >= 40 ? "bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20" :
-              "bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20"
-            }`}>
-              {wellnessScore >= 65 ? "Stable & Balanced" : wellnessScore >= 40 ? "Needs Rest" : "High Strain"}
-            </span>
+            {wellnessScore !== null ? (
+              <>
+                <span className="text-3xl font-black text-foreground">
+                  {wellnessScore.toFixed(0)}
+                  <span className="text-sm font-normal text-muted-foreground">/100</span>
+                </span>
+                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                  wellnessScore >= 65 ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20" :
+                  wellnessScore >= 40 ? "bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20" :
+                  "bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20"
+                }`}>
+                  {wellnessScore >= 65 ? "Stable & Balanced" : wellnessScore >= 40 ? "Needs Rest" : "High Strain"}
+                </span>
+              </>
+            ) : (
+              <>
+                <span className="text-3xl font-black text-muted-foreground">--</span>
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-muted text-muted-foreground border border-border">
+                  Pending Check-In
+                </span>
+              </>
+            )}
           </div>
 
           <div className="text-[11px] text-muted-foreground leading-tight">
-            {wellnessScore >= 65
-              ? "Your recent check-ins reflect steady focus and positive emotional balance."
-              : "Mild fatigue noted. Remember to pace your coursework and take mindful breaks."}
+            {wellnessScore !== null
+              ? (wellnessScore >= 65
+                  ? "Your recent check-ins reflect steady focus and positive emotional balance."
+                  : "Mild fatigue noted. Remember to pace your coursework and take mindful breaks.")
+              : "Complete your first check-in or clinical survey to compute your wellness index."}
           </div>
         </Card>
 
@@ -409,14 +411,17 @@ export const StudentDashboard: React.FC = () => {
 
           <div className="my-3 flex items-baseline gap-2">
             <span className="text-3xl font-black text-foreground">
-              92<span className="text-sm font-normal text-muted-foreground">/100</span>
+              {lateNightMins === 0 ? 100 : Math.max(20, Math.round(100 - (lateNightMins / 2.5)))}
+              <span className="text-sm font-normal text-muted-foreground">/100</span>
             </span>
-            <span className="text-xs text-muted-foreground">Consistency</span>
+            <span className="text-xs text-muted-foreground">Circadian Score</span>
           </div>
 
-          <div className="flex items-center gap-1.5 text-[11px] font-semibold text-emerald-600 dark:text-emerald-400">
-            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-            <span>Optimal Regularity</span>
+          <div className="flex items-center gap-1.5 text-[11px] font-semibold">
+            <span className={`h-1.5 w-1.5 rounded-full ${lateNightMins === 0 ? "bg-emerald-500" : lateNightMins > 60 ? "bg-rose-500" : "bg-amber-500"}`} />
+            <span className={lateNightMins === 0 ? "text-emerald-600 dark:text-emerald-400" : lateNightMins > 60 ? "text-rose-500" : "text-amber-500"}>
+              {lateNightMins === 0 ? "Optimal Regularity" : lateNightMins > 60 ? "Circadian Strain" : "Mild Late Activity"}
+            </span>
           </div>
         </Card>
       </div>
@@ -937,37 +942,59 @@ export const StudentDashboard: React.FC = () => {
         </CardHeader>
 
         <CardContent className="pt-2">
-          <div className="h-56 w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={previewChartData} margin={{ top: 10, right: 10, left: -25, bottom: 0 }}>
-                <defs>
-                  <linearGradient id="wellnessGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3} />
-                    <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0.0} />
-                  </linearGradient>
-                </defs>
-                <XAxis dataKey="name" tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
-                <YAxis domain={[0, 100]} tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
-                <Tooltip 
-                  contentStyle={{ 
-                    borderRadius: "12px", 
-                    fontSize: "12px", 
-                    backgroundColor: "hsl(var(--card))", 
-                    borderColor: "hsl(var(--border))" 
-                  }} 
-                  formatter={(value: any) => [`${value}/100`, "Wellness Index"]}
-                />
-                <Area 
-                  type="monotone" 
-                  dataKey="score" 
-                  stroke="hsl(var(--primary))" 
-                  strokeWidth={2.5} 
-                  fillOpacity={1} 
-                  fill="url(#wellnessGradient)" 
-                />
-              </AreaChart>
-            </ResponsiveContainer>
-          </div>
+          {chartData.length > 0 ? (
+            <div className="h-56 w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -25, bottom: 0 }}>
+                  <defs>
+                    <linearGradient id="wellnessGradient" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3} />
+                      <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0.0} />
+                    </linearGradient>
+                  </defs>
+                  <XAxis dataKey="name" tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
+                  <YAxis domain={[0, 100]} tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
+                  <Tooltip 
+                    contentStyle={{ 
+                      borderRadius: "12px", 
+                      fontSize: "12px", 
+                      backgroundColor: "hsl(var(--card))", 
+                      borderColor: "hsl(var(--border))" 
+                    }} 
+                    formatter={(value: any) => [`${value}/100`, "Wellness Index"]}
+                  />
+                  <Area 
+                    type="monotone" 
+                    dataKey="score" 
+                    stroke="hsl(var(--primary))" 
+                    strokeWidth={2.5} 
+                    fillOpacity={1} 
+                    fill="url(#wellnessGradient)" 
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+          ) : (
+            <div className="h-56 w-full rounded-2xl border border-dashed border-border/80 flex flex-col items-center justify-center text-center p-6 space-y-3 bg-muted/10">
+              <div className="h-10 w-10 rounded-full bg-primary/10 text-primary flex items-center justify-center">
+                <Smile className="h-5 w-5" />
+              </div>
+              <div className="space-y-1">
+                <h4 className="text-sm font-bold text-foreground">No Check-Ins Logged Yet</h4>
+                <p className="text-xs text-muted-foreground max-w-sm">
+                  Complete your first 1-minute daily check-in to start graphing your emotional wellness trajectory.
+                </p>
+              </div>
+              <Button
+                size="sm"
+                onClick={() => navigate("/student/check-in")}
+                className="rounded-xl text-xs font-bold gap-1.5 h-8 px-4"
+              >
+                <Smile className="h-3.5 w-3.5" />
+                <span>Log Daily Check-In</span>
+              </Button>
+            </div>
+          )}
         </CardContent>
       </Card>
 
@@ -982,7 +1009,7 @@ export const StudentDashboard: React.FC = () => {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm animate-in fade-in duration-200">
           <div className="relative w-full max-w-lg rounded-3xl bg-card border border-border shadow-2xl overflow-hidden p-6 space-y-4">
             <ExplainableAIFactors
-              wellnessScore={wellnessScore}
+              wellnessScore={wellnessScore ?? 0}
               riskLevel={latestAssessment?.risk_level || "LOW"}
               lateNightMins={lateNightMins}
               totalScreenMins={totalMins}
