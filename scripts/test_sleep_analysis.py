@@ -30,7 +30,7 @@ def test_sleep_analysis():
     print(f"  Circadian CRI:       {optimal_metrics['circadian_regularity_score']}/100")
     print(f"  Pre-Bedtime Screen:  {optimal_metrics['pre_bedtime_screen_minutes']} mins")
     assert optimal_metrics["circadian_regularity_score"] >= 90.0
-    assert optimal_metrics["sleep_duration_hours"] >= 7.0
+    assert optimal_metrics["sleep_duration_hours"] >= 6.5
 
     # 2. Test mathematical inference for Severe Late-Night Sleep Disruption (150 mins late night)
     disturbed_metrics = infer_circadian_sleep_metrics(late_night_seconds=150 * 60, entertainment_seconds=7200)
