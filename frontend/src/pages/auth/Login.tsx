@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label, FormItem } from "@/components/ui/label";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
-import { Eye, EyeOff, Loader2, Sparkles, ArrowLeft, ShieldCheck, HeartHandshake, Lock } from "lucide-react";
+import { Eye, EyeOff, Loader2, ArrowLeft } from "lucide-react";
 import ThemeToggle from "@/components/layouts/ThemeToggle";
 
 // Form validation schema - supports username or institutional email
@@ -32,7 +32,6 @@ export const Login: React.FC = () => {
   const {
     register,
     handleSubmit,
-    setValue,
     formState: { errors, isValid },
   } = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -42,12 +41,6 @@ export const Login: React.FC = () => {
       password: "",
     }
   });
-
-  const fillAndSubmitDemo = (email: string, pass: string) => {
-    setValue("email", email, { shouldValidate: true });
-    setValue("password", pass, { shouldValidate: true });
-    onSubmit({ email, password: pass });
-  };
 
   const onSubmit = async (data: LoginFormValues) => {
     setIsSubmitting(true);
@@ -117,13 +110,7 @@ export const Login: React.FC = () => {
         {/* Auth Glass Card */}
         <Card className="border-border/80 bg-card/85 dark:bg-card/80 backdrop-blur-2xl shadow-xl shadow-black/5 dark:shadow-black/20 rounded-3xl">
           <CardHeader className="space-y-1 pb-4">
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-xl font-bold tracking-tight">Sign In</CardTitle>
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
-                <ShieldCheck className="w-3 h-3" />
-                256-Bit Encrypted
-              </span>
-            </div>
+            <CardTitle className="text-xl font-bold tracking-tight">Sign In</CardTitle>
             <CardDescription className="text-xs text-muted-foreground">
               Enter your university credentials to access your wellness dashboard
             </CardDescription>
@@ -209,42 +196,6 @@ export const Login: React.FC = () => {
                   "Sign In to Portal"
                 )}
               </Button>
-
-              {/* Quick 1-Click Demo Evaluation Portals */}
-              <div className="w-full pt-1 space-y-2 border-t border-border/60">
-                <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider text-center">
-                  Quick Demo Access (1-Click)
-                </div>
-                <div className="grid grid-cols-3 gap-2">
-                  <button
-                    type="button"
-                    onClick={() => fillAndSubmitDemo("student@nmims.in", "password123")}
-                    className="p-2 rounded-xl border border-indigo-500/30 bg-indigo-500/5 hover:bg-indigo-500/10 text-[11px] font-bold text-indigo-600 dark:text-indigo-400 text-center transition-all active:scale-95"
-                  >
-                    🎓 Student
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => fillAndSubmitDemo("counselor@nmims.edu", "password123")}
-                    className="p-2 rounded-xl border border-emerald-500/30 bg-emerald-500/5 hover:bg-emerald-500/10 text-[11px] font-bold text-emerald-600 dark:text-emerald-400 text-center transition-all active:scale-95"
-                  >
-                    🩺 Counselor
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => fillAndSubmitDemo("admin@nmims.edu", "password123")}
-                    className="p-2 rounded-xl border border-purple-500/30 bg-purple-500/5 hover:bg-purple-500/10 text-[11px] font-bold text-purple-600 dark:text-purple-400 text-center transition-all active:scale-95"
-                  >
-                    🛡️ Admin
-                  </button>
-                </div>
-              </div>
-
-              {/* Calm Reassurance Banner */}
-              <div className="w-full p-3 rounded-xl bg-muted/40 border border-border/60 text-[11px] text-muted-foreground flex items-center gap-2.5">
-                <Lock className="w-4 h-4 text-primary shrink-0" />
-                <span>Your identity and reflections are private & never shared without explicit consent.</span>
-              </div>
 
               <div className="text-xs text-center text-muted-foreground">
                 Don't have an account?{" "}
