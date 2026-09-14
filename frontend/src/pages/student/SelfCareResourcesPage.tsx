@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "../../components/ui/card";
 import { Button } from "../../components/ui/button";
+import { HabitRecoverySimulator } from "../../components/HabitRecoverySimulator";
 
 export const SelfCareResourcesPage: React.FC = () => {
   const navigate = useNavigate();
@@ -224,6 +225,9 @@ export const SelfCareResourcesPage: React.FC = () => {
         </Card>
       </div>
 
+      {/* Habit Recovery Interactive Simulator */}
+      <HabitRecoverySimulator currentScore={78} />
+
       {/* Sleep & Exam Stress Guidance */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <Card className="border-border/60 shadow-sm p-5 space-y-3">
@@ -258,16 +262,16 @@ export const SelfCareResourcesPage: React.FC = () => {
           </p>
           <div className="space-y-2 pt-1">
             <div className="flex items-center justify-between p-2.5 rounded-xl bg-background/80 border border-border text-xs">
-              <span className="font-semibold text-foreground">National Crisis Lifeline</span>
-              <a href="tel:988" className="font-black text-rose-500 hover:underline">Call 988</a>
+              <span className="font-semibold text-foreground">Tele-MANAS (Govt. of India)</span>
+              <a href="tel:14416" className="font-black text-rose-500 hover:underline">Call 14416 (Toll-Free)</a>
             </div>
             <div className="flex items-center justify-between p-2.5 rounded-xl bg-background/80 border border-border text-xs">
-              <span className="font-semibold text-foreground">Crisis Text Line</span>
-              <span className="font-bold text-foreground">Text <strong className="text-rose-500">HOME</strong> to 741741</span>
+              <span className="font-semibold text-foreground">KIRAN Mental Health Helpline</span>
+              <a href="tel:18005990019" className="font-black text-rose-500 hover:underline">1800-599-0019</a>
             </div>
             <div className="flex items-center justify-between p-2.5 rounded-xl bg-background/80 border border-border text-xs">
               <span className="font-semibold text-foreground">Campus Counseling Center</span>
-              <a href="tel:+15854753333" className="font-black text-primary hover:underline">+1 (585) 475-3333</a>
+              <a href="tel:02242355555" className="font-black text-primary hover:underline">+91 22 4235 5555</a>
             </div>
           </div>
         </Card>
