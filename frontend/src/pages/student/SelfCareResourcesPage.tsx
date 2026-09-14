@@ -31,7 +31,7 @@ export const SelfCareResourcesPage: React.FC = () => {
   const [groundingChecks, setGroundingChecks] = useState<Record<number, boolean>>({});
 
   useEffect(() => {
-    let interval: NodeJS.Timeout | null = null;
+    let interval: any = null;
     if (isBreathingActive) {
       interval = setInterval(() => {
         setBreathingSeconds((prev) => {
