@@ -26,7 +26,7 @@ export const MoodHistoryPage: React.FC = () => {
   const validScores = history.filter((h) => typeof h.self_reported_score === "number");
   const avgScore = validScores.length > 0
     ? (validScores.reduce((acc, h) => acc + h.self_reported_score, 0) / validScores.length).toFixed(1)
-    : "8.0";
+    : "--";
 
   return (
     <div className="max-w-4xl mx-auto space-y-6 pb-12">
