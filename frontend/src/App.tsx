@@ -11,6 +11,9 @@ import { ThemeProvider } from "./contexts/ThemeContext";
 
 import StudentDashboard from "./pages/student/StudentDashboard";
 import StudentChatbot from "./pages/student/StudentChatbot";
+import DailyCheckInPage from "./pages/student/DailyCheckInPage";
+import MoodHistoryPage from "./pages/student/MoodHistoryPage";
+import SelfCareResourcesPage from "./pages/student/SelfCareResourcesPage";
 import CounselorDashboard from "./pages/counselor/CounselorDashboard";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import Settings from "./pages/settings/Settings";
@@ -74,7 +77,7 @@ function App() {
                     title="Daily Mood Check-In"
                     subtitle="Log your emotional check-in via text, voice, or standard clinical survey."
                   >
-                    <StudentDashboard />
+                    <DailyCheckInPage />
                   </DashboardLayout>
                 </ProtectedRoute>
               }
@@ -87,7 +90,7 @@ function App() {
                     title="Mood Logs & Trajectory"
                     subtitle="Review your historical mood entries, wellness scores, and risk analysis."
                   >
-                    <StudentDashboard />
+                    <MoodHistoryPage />
                   </DashboardLayout>
                 </ProtectedRoute>
               }
@@ -100,7 +103,7 @@ function App() {
                     title="Self-Care Recommendations"
                     subtitle="Access clinical exercises, meditation techniques, and customized pathways."
                   >
-                    <StudentDashboard />
+                    <SelfCareResourcesPage />
                   </DashboardLayout>
                 </ProtectedRoute>
               }
