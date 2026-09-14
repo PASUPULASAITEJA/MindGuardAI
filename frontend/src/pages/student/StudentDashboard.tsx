@@ -23,6 +23,10 @@ import {
   ResponsiveContainer, 
   AreaChart, 
   Area, 
+  BarChart,
+  Bar,
+  CartesianGrid,
+  ReferenceLine,
   XAxis, 
   YAxis, 
   Tooltip 
@@ -45,7 +49,8 @@ import {
   HelpCircle,
   Zap,
   CheckCircle2,
-  AlertCircle
+  AlertCircle,
+  BarChart3
 } from "lucide-react";
 
 // Modals
@@ -70,6 +75,7 @@ export const StudentDashboard: React.FC = () => {
   const [surveyType, setSurveyType] = useState<"phq-9" | "gad-7">("phq-9");
   const [isBookingOpen, setIsBookingOpen] = useState(false);
   const [isExplainOpen, setIsExplainOpen] = useState(false);
+  const [screenChartMode, setScreenChartMode] = useState<"circadian" | "purpose">("circadian");
 
   // Queries
   const { data: latestAssessment, isLoading: isAssessmentLoading } = useLatestAssessment();
@@ -108,6 +114,104 @@ export const StudentDashboard: React.FC = () => {
   const entertainmentPct = Math.min(100 - academicPct - socialPct, Math.round(((entertainmentMins || 0) / catBase) * 100));
   const adultPct = Math.min(100 - academicPct - socialPct - entertainmentPct, Math.round(((adultMins || 0) / catBase) * 100));
   const otherPct = Math.max(0, 100 - academicPct - socialPct - entertainmentPct - adultPct);
+
+  // 7-Day Rolling Screen Time Telemetry Data for System Graph
+  const weeklyLogs = (behavioralSummary?.weekly_history || []) as Array<{
+    date: string;
+    total_screen_time_minutes: number;
+    academic_usage_minutes?: number;
+    social_usage_minutes?: number;
+    entertainment_usage_minutes?: number;
+    adult_usage_minutes?: number;
+    late_night_usage_minutes?: number;
+    risk_level?: string;
+  }>;
+
+  const screenChartData = Array.from({ length: 7 }).map((_, i) => {
+    const d = new Date();
+    d.setDate(d.getDate() - (6 - i));
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    const dateStr = `${year}-${month}-${day}`;
+    const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+    const isToday = i === 6;
+    const dayLabel = isToday ? `Today (${dayNames[d.getDay()]})` : dayNames[d.getDay()];
+
+    const matched = weeklyLogs.find((w) => w.date === dateStr);
+
+    let totalM = 0;
+    let acadM = 0;
+    let socM = 0;
+    let entM = 0;
+    let adultM = 0;
+    let lateM = 0;
+    let risk = "LOW";
+    let hasData = false;
+
+    if (isToday) {
+      hasData = totalMins > 0;
+      totalM = totalMins;
+      acadM = academicMins;
+      socM = socialMins;
+      entM = entertainmentMins;
+      adultM = adultMins;
+      lateM = lateNightMins;
+      risk = "LOW";
+    } else if (matched) {
+      hasData = true;
+      totalM = matched.total_screen_time_minutes || 0;
+      acadM = matched.academic_usage_minutes || 0;
+      socM = matched.social_usage_minutes || 0;
+      entM = matched.entertainment_usage_minutes || 0;
+      adultM = matched.adult_usage_minutes || 0;
+      lateM = matched.late_night_usage_minutes || 0;
+      risk = matched.risk_level || "LOW";
+    }
+
+    const dayCatSum = acadM + socM + entM + adultM;
+    if (dayCatSum > totalM && totalM > 0) {
+      const ratio = totalM / dayCatSum;
+      acadM = Math.round(acadM * ratio);
+      socM = Math.round(socM * ratio);
+      entM = Math.round(entM * ratio);
+      adultM = Math.round(adultM * ratio);
+    }
+
+    const daytimeMins = Math.max(0, totalM - lateM);
+    const otherMins = Math.max(0, totalM - acadM - socM - entM - adultM);
+
+    return {
+      date: dateStr,
+      dayLabel,
+      isToday,
+      hasData,
+      totalHours: +(totalM / 60).toFixed(1),
+      daytimeHours: +(daytimeMins / 60).toFixed(1),
+      lateNightHours: +(lateM / 60).toFixed(1),
+      academicHours: +(acadM / 60).toFixed(1),
+      socialHours: +(socM / 60).toFixed(1),
+      entertainmentHours: +(entM / 60).toFixed(1),
+      otherHours: +(otherMins / 60).toFixed(1),
+      totalMins: totalM,
+      daytimeMins,
+      academicMins: acadM,
+      socialMins: socM,
+      entertainmentMins: entM,
+      adultMins,
+      lateNightMins: lateM,
+      riskLevel: risk,
+    };
+  });
+
+  const recordedDays = screenChartData.filter((c) => c.hasData && c.totalMins > 0);
+  const avgDailyHours =
+    recordedDays.length > 0
+      ? (
+          recordedDays.reduce((acc, c) => acc + c.totalHours, 0) /
+          recordedDays.length
+        ).toFixed(1)
+      : "0.0";
 
   // Mental wellness score & classification
   const rawScore = latestAssessment?.mental_wellness_score;
@@ -297,88 +401,334 @@ export const StudentDashboard: React.FC = () => {
         </Card>
       </div>
 
-      {/* 3. Daily Screen Habits & Study Balance Card */}
-      <Card className="border-border/80 shadow-xs">
-        <CardHeader className="flex flex-row items-center justify-between pb-3">
+      {/* 3. Daily Screen Habits & Study Balance Card (with 7-Day Screen Time Graph) */}
+      <Card className="border-border/80 shadow-xs overflow-hidden">
+        <CardHeader className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 gap-3">
           <div className="flex items-center gap-2.5">
             <div className="h-9 w-9 rounded-xl bg-indigo-500/10 flex items-center justify-center text-indigo-500 border border-indigo-500/20">
               <Laptop className="h-4 w-4" />
             </div>
             <div>
-              <CardTitle className="text-sm font-bold text-foreground">
-                Daily Screen Habits & Study Balance
+              <CardTitle className="text-sm font-bold text-foreground flex items-center gap-2">
+                <span>Daily Screen Habits & 7-Day Graph</span>
+                <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                  {isConnected && isLive ? "Live Telemetry" : "Agent Active"}
+                </span>
               </CardTitle>
               <CardDescription className="text-xs text-muted-foreground">
-                Real-time active window telemetry (privacy-preserving, zero keystrokes captured)
+                Continuous non-invasive PC telemetry: how much time you spend on your computer each day
               </CardDescription>
             </div>
           </div>
 
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => refetchBehavioral()}
-            disabled={isRefetchingBehavioral}
-            className="h-8 px-2.5 text-xs text-muted-foreground hover:text-foreground gap-1.5"
-          >
-            <RefreshCw className={`h-3.5 w-3.5 ${isRefetchingBehavioral ? "animate-spin" : ""}`} />
-            <span className="hidden sm:inline">Refresh</span>
-          </Button>
+          <div className="flex items-center gap-2 self-start sm:self-auto">
+            {/* View Mode Toggle */}
+            <div className="flex bg-muted/50 p-0.5 rounded-lg border border-border/60 text-[10px]">
+              <button
+                type="button"
+                onClick={() => setScreenChartMode("circadian")}
+                className={`px-2.5 py-1 rounded-md font-semibold transition-all ${
+                  screenChartMode === "circadian"
+                    ? "bg-primary text-primary-foreground shadow-xs"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                🌙 Day vs Night
+              </button>
+              <button
+                type="button"
+                onClick={() => setScreenChartMode("purpose")}
+                className={`px-2.5 py-1 rounded-md font-semibold transition-all ${
+                  screenChartMode === "purpose"
+                    ? "bg-primary text-primary-foreground shadow-xs"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                📚 Study vs Leisure
+              </button>
+            </div>
+
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => refetchBehavioral()}
+              disabled={isRefetchingBehavioral}
+              className="h-8 px-2.5 text-xs text-muted-foreground hover:text-foreground gap-1.5"
+            >
+              <RefreshCw className={`h-3.5 w-3.5 ${isRefetchingBehavioral ? "animate-spin" : ""}`} />
+              <span className="hidden sm:inline">Refresh</span>
+            </Button>
+          </div>
         </CardHeader>
 
-        <CardContent className="space-y-4 pt-1">
-          {/* Stacked Progress Bar */}
-          <div className="h-3 w-full rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden flex shadow-inner">
-            {academicPct > 0 && (
-              <div 
-                className="bg-indigo-500 h-full transition-all duration-500" 
-                style={{ width: `${academicPct}%` }} 
-                title={`Academic/Coding: ${academicPct}%`} 
-              />
-            )}
-            {entertainmentPct > 0 && (
-              <div 
-                className="bg-purple-500 h-full transition-all duration-500" 
-                style={{ width: `${entertainmentPct}%` }} 
-                title={`Entertainment: ${entertainmentPct}%`} 
-              />
-            )}
-            {socialPct > 0 && (
-              <div 
-                className="bg-emerald-500 h-full transition-all duration-500" 
-                style={{ width: `${socialPct}%` }} 
-                title={`Social: ${socialPct}%`} 
-              />
-            )}
-            {otherPct > 0 && totalMins > 0 && (
-              <div 
-                className="bg-slate-400 dark:bg-slate-600 h-full transition-all duration-500" 
-                style={{ width: `${otherPct}%` }} 
-                title={`General / System: ${otherPct}%`} 
-              />
-            )}
+        <CardContent className="space-y-5 pt-1">
+          {/* Quick Metrics Bar */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <div className="rounded-xl border border-border/60 bg-muted/20 p-3">
+              <span className="text-[10px] uppercase font-bold text-muted-foreground block">Today's Active Screen</span>
+              <span className="text-lg font-black text-foreground">
+                {Math.floor(totalMins / 60)}h {totalMins % 60}m
+              </span>
+              <span className="text-[10px] text-muted-foreground block">
+                {totalMins >= 360 ? "⚠️ High Screen Strain" : "Normal Usage"}
+              </span>
+            </div>
+
+            <div className="rounded-xl border border-border/60 bg-muted/20 p-3">
+              <span className="text-[10px] uppercase font-bold text-muted-foreground block">Academic & Coding</span>
+              <span className="text-lg font-black text-indigo-500">
+                {academicPct}%
+              </span>
+              <span className="text-[10px] text-muted-foreground block">
+                {Math.floor(academicMins / 60)}h {academicMins % 60}m coursework
+              </span>
+            </div>
+
+            <div className="rounded-xl border border-border/60 bg-muted/20 p-3">
+              <span className="text-[10px] uppercase font-bold text-muted-foreground block">Late-Night (12AM-5AM)</span>
+              <span className={`text-lg font-black ${lateNightMins > 60 ? "text-rose-500" : "text-foreground"}`}>
+                {lateNightMins}m
+              </span>
+              <span className="text-[10px] text-muted-foreground block">
+                {lateNightMins === 0 ? "Zero late-night fatigue" : lateNightMins > 60 ? "Circadian strain" : "Mild late activity"}
+              </span>
+            </div>
+
+            <div className="rounded-xl border border-border/60 bg-muted/20 p-3">
+              <span className="text-[10px] uppercase font-bold text-muted-foreground block">7-Day Daily Avg</span>
+              <span className="text-lg font-black text-foreground">
+                {avgDailyHours} <span className="text-xs font-normal text-muted-foreground">hrs/day</span>
+              </span>
+              <span className="text-[10px] text-emerald-600 dark:text-emerald-400 block font-semibold">
+                Guideline: ≤ 6.0 hrs
+              </span>
+            </div>
           </div>
 
-          {/* Legend */}
-          <div className="flex flex-wrap items-center justify-between text-xs text-muted-foreground gap-3 pt-1">
-            <div className="flex items-center gap-1.5">
-              <span className="h-2.5 w-2.5 rounded-full bg-indigo-500" />
-              <span className="font-medium text-foreground">Academic & Coding ({academicPct}%)</span>
+          {/* Today's Distribution Stacked Progress Bar */}
+          <div className="space-y-2">
+            <div className="flex items-center justify-between text-xs font-semibold text-muted-foreground">
+              <span>Today's Screen Time Distribution</span>
+              <span>{Math.floor(totalMins / 60)}h {totalMins % 60}m total</span>
             </div>
-            <div className="flex items-center gap-1.5">
-              <span className="h-2.5 w-2.5 rounded-full bg-purple-500" />
-              <span>Entertainment & Media ({entertainmentPct}%)</span>
+            <div className="h-3 w-full rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden flex shadow-inner">
+              {academicPct > 0 && (
+                <div 
+                  className="bg-indigo-500 h-full transition-all duration-500" 
+                  style={{ width: `${academicPct}%` }} 
+                  title={`Academic/Coding: ${academicPct}%`} 
+                />
+              )}
+              {entertainmentPct > 0 && (
+                <div 
+                  className="bg-purple-500 h-full transition-all duration-500" 
+                  style={{ width: `${entertainmentPct}%` }} 
+                  title={`Entertainment: ${entertainmentPct}%`} 
+                />
+              )}
+              {socialPct > 0 && (
+                <div 
+                  className="bg-emerald-500 h-full transition-all duration-500" 
+                  style={{ width: `${socialPct}%` }} 
+                  title={`Social: ${socialPct}%`} 
+                />
+              )}
+              {otherPct > 0 && totalMins > 0 && (
+                <div 
+                  className="bg-slate-400 dark:bg-slate-600 h-full transition-all duration-500" 
+                  style={{ width: `${otherPct}%` }} 
+                  title={`General / System: ${otherPct}%`} 
+                />
+              )}
             </div>
-            <div className="flex items-center gap-1.5">
-              <span className="h-2.5 w-2.5 rounded-full bg-emerald-500" />
-              <span>Social & Chat ({socialPct}%)</span>
-            </div>
-            {otherPct > 0 && totalMins > 0 && (
+
+            {/* Legend */}
+            <div className="flex flex-wrap items-center justify-between text-[11px] text-muted-foreground gap-2 pt-0.5">
               <div className="flex items-center gap-1.5">
-                <span className="h-2.5 w-2.5 rounded-full bg-slate-400 dark:bg-slate-600" />
-                <span>General / System ({otherPct}%)</span>
+                <span className="h-2 w-2 rounded-full bg-indigo-500" />
+                <span className="font-medium text-foreground">Academic & Coding ({academicPct}%)</span>
               </div>
-            )}
+              <div className="flex items-center gap-1.5">
+                <span className="h-2 w-2 rounded-full bg-purple-500" />
+                <span>Entertainment ({entertainmentPct}%)</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className="h-2 w-2 rounded-full bg-emerald-500" />
+                <span>Social ({socialPct}%)</span>
+              </div>
+              {otherPct > 0 && totalMins > 0 && (
+                <div className="flex items-center gap-1.5">
+                  <span className="h-2 w-2 rounded-full bg-slate-400 dark:bg-slate-600" />
+                  <span>General ({otherPct}%)</span>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* 7-Day Screen Time Bar Chart */}
+          <div className="space-y-3 pt-2 border-t border-border/60">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <BarChart3 className="h-4 w-4 text-indigo-500" />
+                <span className="text-xs font-bold text-foreground">
+                  7-Day Screen Time Usage Graph (Daily Total & Breakdown)
+                </span>
+              </div>
+              <span className="text-[11px] text-muted-foreground hidden sm:inline">
+                {screenChartMode === "circadian" ? "Daytime vs Late-Night" : "Coursework vs Leisure"}
+              </span>
+            </div>
+
+            <div className="h-[260px] w-full pt-1">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={screenChartData} margin={{ top: 20, right: 15, left: -15, bottom: 25 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" vertical={false} />
+                  <XAxis 
+                    dataKey="dayLabel" 
+                    stroke="#94a3b8" 
+                    fontSize={11} 
+                    tickLine={false} 
+                    axisLine={{ stroke: "rgba(255,255,255,0.1)" }} 
+                  />
+                  <YAxis 
+                    stroke="#94a3b8" 
+                    fontSize={11} 
+                    tickLine={false} 
+                    axisLine={{ stroke: "rgba(255,255,255,0.1)" }} 
+                    unit="h" 
+                    domain={[0, "auto"]} 
+                  />
+                  <Tooltip
+                    content={({ active, payload }) => {
+                      if (active && payload && payload.length) {
+                        const d = payload[0].payload;
+                        if (!d.hasData || d.totalMins === 0) {
+                          return (
+                            <div className="rounded-xl border border-border/80 bg-popover/95 p-3 shadow-xl backdrop-blur-md text-xs space-y-1 min-w-[190px]">
+                              <div className="flex items-center justify-between border-b border-border/50 pb-1 font-bold text-foreground">
+                                <span>{d.dayLabel}</span>
+                                <span className="text-[10px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground font-semibold">
+                                  0 hrs
+                                </span>
+                              </div>
+                              <p className="text-[11px] text-muted-foreground pt-1 italic">
+                                No PC activity detected on this day.
+                              </p>
+                            </div>
+                          );
+                        }
+                        return (
+                          <div className="rounded-xl border border-border/80 bg-popover/95 p-3 shadow-xl backdrop-blur-md text-xs space-y-1.5 min-w-[210px]">
+                            <div className="flex items-center justify-between border-b border-border/50 pb-1 font-bold text-foreground">
+                              <span>{d.dayLabel}</span>
+                              <span className={`text-[10px] px-1.5 py-0.5 rounded font-extrabold ${
+                                d.totalHours >= 6.0 ? "bg-rose-500/20 text-rose-400" : "bg-emerald-500/20 text-emerald-400"
+                              }`}>
+                                {d.totalHours} hrs total
+                              </span>
+                            </div>
+                            <div className="space-y-1 text-[11px]">
+                              <div className="flex justify-between items-center text-foreground">
+                                <span>☀️ Daytime (5AM-12AM):</span>
+                                <span className="font-semibold">{Math.floor(d.daytimeMins / 60)}h {d.daytimeMins % 60}m</span>
+                              </div>
+                              <div className={`flex justify-between items-center ${d.lateNightMins > 0 ? "text-rose-400 font-bold" : "text-emerald-400"}`}>
+                                <span>🌙 Late-Night (12AM-5AM):</span>
+                                <span className="font-semibold">
+                                  {d.lateNightMins > 0 ? `${d.lateNightMins}m (Late fatigue)` : "0m (Optimal)"}
+                                </span>
+                              </div>
+                              <div className="pt-1 border-t border-border/30 space-y-0.5 text-muted-foreground">
+                                <div className="flex justify-between text-indigo-400">
+                                  <span>📚 Academic / Coding:</span>
+                                  <span>{Math.floor(d.academicMins / 60)}h {d.academicMins % 60}m</span>
+                                </div>
+                                <div className="flex justify-between text-purple-400">
+                                  <span>🎮 Entertainment:</span>
+                                  <span>{Math.floor(d.entertainmentMins / 60)}h {d.entertainmentMins % 60}m</span>
+                                </div>
+                                <div className="flex justify-between text-emerald-400">
+                                  <span>💬 Social & Chat:</span>
+                                  <span>{Math.floor(d.socialMins / 60)}h {d.socialMins % 60}m</span>
+                                </div>
+                              </div>
+                            </div>
+                            <div className="pt-1 border-t border-border/40 flex items-center justify-between text-[10px] text-muted-foreground">
+                              <span>Risk Status:</span>
+                              <span className={`font-bold ${d.riskLevel === "HIGH" || d.totalHours >= 8.0 ? "text-rose-400" : d.totalHours >= 6.0 ? "text-amber-400" : "text-emerald-400"}`}>
+                                {d.riskLevel || "LOW"}
+                              </span>
+                            </div>
+                          </div>
+                        );
+                      }
+                      return null;
+                    }}
+                  />
+                  <ReferenceLine 
+                    y={6.0} 
+                    stroke="#10b981" 
+                    strokeDasharray="4 4" 
+                    label={{ value: "Healthy Guideline (6h)", fill: "#10b981", fontSize: 10, position: "top" }} 
+                  />
+                  {screenChartMode === "circadian" ? (
+                    <>
+                      <Bar dataKey="daytimeHours" name="Daytime Screen Time" stackId="screen" fill="#6366f1" radius={[0, 0, 0, 0]} />
+                      <Bar dataKey="lateNightHours" name="Late-Night (12AM-5AM)" stackId="screen" fill="#f43f5e" radius={[4, 4, 0, 0]} />
+                    </>
+                  ) : (
+                    <>
+                      <Bar dataKey="academicHours" name="Academic & Coding" stackId="screen" fill="#6366f1" radius={[0, 0, 0, 0]} />
+                      <Bar dataKey="socialHours" name="Social & Chat" stackId="screen" fill="#10b981" radius={[0, 0, 0, 0]} />
+                      <Bar dataKey="entertainmentHours" name="Entertainment & Media" stackId="screen" fill="#a855f7" radius={[0, 0, 0, 0]} />
+                      <Bar dataKey="otherHours" name="General / Other" stackId="screen" fill="#64748b" radius={[4, 4, 0, 0]} />
+                    </>
+                  )}
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+
+            {/* Chart Legend & Status Footer */}
+            <div className="flex flex-wrap items-center justify-between text-[11px] text-muted-foreground pt-1 border-t border-border/40 gap-2">
+              <div className="flex flex-wrap items-center gap-3">
+                {screenChartMode === "circadian" ? (
+                  <>
+                    <span className="flex items-center gap-1.5">
+                      <span className="h-2.5 w-2.5 rounded-sm bg-indigo-500" />
+                      Daytime Screen (5 AM - 12 AM)
+                    </span>
+                    <span className="flex items-center gap-1.5 font-semibold text-rose-500">
+                      <span className="h-2.5 w-2.5 rounded-sm bg-rose-500" />
+                      Late-Night Screen (12 AM - 5 AM)
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    <span className="flex items-center gap-1.5">
+                      <span className="h-2.5 w-2.5 rounded-sm bg-indigo-500" />
+                      Academic / Coding
+                    </span>
+                    <span className="flex items-center gap-1.5">
+                      <span className="h-2.5 w-2.5 rounded-sm bg-emerald-500" />
+                      Social
+                    </span>
+                    <span className="flex items-center gap-1.5">
+                      <span className="h-2.5 w-2.5 rounded-sm bg-purple-500" />
+                      Entertainment
+                    </span>
+                    <span className="flex items-center gap-1.5">
+                      <span className="h-2.5 w-2.5 rounded-sm bg-slate-500" />
+                      General
+                    </span>
+                  </>
+                )}
+              </div>
+              <span className="text-[10px] text-muted-foreground italic flex items-center gap-1">
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                Live Logged: {recordedDays.length} of 7 days recorded
+              </span>
+            </div>
           </div>
         </CardContent>
       </Card>
