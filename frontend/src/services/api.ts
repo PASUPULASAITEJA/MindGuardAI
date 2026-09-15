@@ -301,13 +301,42 @@ api.interceptors.response.use(
     helplines: SOSHelpline[];
   }
 
-  export const sosAPI = {
-    triggerSOS: async () => {
-      const res = await api.post<SOSResponse>("/alerts/sos");
+  export interface ConsentRecord {
+    id: string;
+    student_id: string;
+    consent_type: string;
+    status: "GRANTED" | "REVOKED";
+    granted_at: string | null;
+    revoked_at: string | null;
+    created_at: string;
+  }
+
+  export interface ConsentActionResponse {
+    status: string;
+    message: string;
+    consent: ConsentRecord;
+  }
+
+  export const consentAPI = {
+    getMyConsent: async () => {
+      const res = await api.get<ConsentRecord>("/consent/me");
+      return res.data;
+    },
+    grantConsent: async () => {
+      const res = await api.post<ConsentActionResponse>("/consent/me/grant");
+      return res.data;
+    },
+    revokeConsent: async () => {
+      const res = await api.post<ConsentActionResponse>("/consent/me/revoke");
+      return res.data;
+    },
+    checkStudentConsent: async (studentId: string) => {
+      const res = await api.get<ConsentRecord>(`/consent/status/${studentId}`);
       return res.data;
     }
   };
 
   export default api;
+
 
 

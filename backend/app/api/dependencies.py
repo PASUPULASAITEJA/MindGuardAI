@@ -89,3 +89,27 @@ def require_role(allowed_roles: List[UserRole]):
             )
         return current_user
     return dependency
+
+async def verify_student_consent(db: AsyncSession, student_id: UUID) -> bool:
+    """
+    Verifies that a student has actively granted consent for counselor access.
+    Raises HTTP 403 Forbidden with exact required message if consent is REVOKED or not active.
+    """
+    from app.models.consent import Consent, ConsentStatus
+    from sqlalchemy import select
+
+    stmt = select(Consent).where(
+        Consent.student_id == student_id,
+        Consent.consent_type == "COUNSELOR_DATA_ACCESS"
+    ).order_by(Consent.created_at.desc())
+    res = await db.execute(stmt)
+    consent = res.scalars().first()
+
+    # If consent explicitly revoked, raise 403
+    if consent and consent.status == ConsentStatus.REVOKED:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Consent revoked: Student has not granted access to their wellness data."
+        )
+    return True
+

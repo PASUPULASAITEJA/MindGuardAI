@@ -3,7 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from typing import Optional
 
 from app.db.session import get_db
-from app.api.dependencies import require_role
+from app.api.dependencies import require_role, verify_student_consent
 from app.models.users import User, UserRole
 from app.schemas.mood import JournalSubmissionRequest, JournalSubmissionResponse, MoodHistoryResponse
 from app.services.mood import mood_service, process_journal_entry_background
@@ -33,6 +33,7 @@ async def get_mood_history(
     if current_user.role == UserRole.COUNSELOR and student_id:
         try:
             target_id = UUID(str(student_id).strip())
+            await verify_student_consent(db, target_id)
         except (ValueError, TypeError):
             target_id = current_user.id
 

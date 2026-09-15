@@ -5,7 +5,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.session import get_db
-from app.api.dependencies import get_current_user
+from app.api.dependencies import get_current_user, verify_student_consent
 from app.models.users import User, UserRole
 from app.models.assessments import Assessment
 from app.models.mood_logs import MoodLog
@@ -42,6 +42,7 @@ async def get_latest_assessment(
                 }
             )
         target_student_id = student_id
+        await verify_student_consent(db, target_student_id)
     elif current_user.role == UserRole.STUDENT:
         target_student_id = current_user.id
     else:

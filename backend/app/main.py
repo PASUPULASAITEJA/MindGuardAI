@@ -20,6 +20,7 @@ from app.api.v1.notifications import router as notifications_router
 from app.api.v1.analytics import router as analytics_router
 from app.api.v1.chatbot import router as chatbot_router
 from app.api.v1.appointments import router as appointments_router
+from app.api.v1.consent import consent_router
 
 from contextlib import asynccontextmanager
 from app.ml.inference import ml_service
@@ -171,4 +172,6 @@ app.include_router(notifications_router, prefix="/api/v1/notifications", tags=["
 app.include_router(analytics_router, prefix="/api/v1/analytics", tags=["Campus Analytics"])
 app.include_router(chatbot_router, prefix="/api/v1", tags=["AI Wellness Chatbot"])
 app.include_router(appointments_router, prefix="/api/v1/appointments", tags=["Counselor Appointments"])
+app.include_router(consent_router, prefix="/api/v1/consent", tags=["Student Consent"])
+
 
