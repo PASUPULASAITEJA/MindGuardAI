@@ -1,4 +1,4 @@
-from typing import Any, List, Union
+from typing import Any, List, Union, Optional
 import json
 from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -25,6 +25,20 @@ class Settings(BaseSettings):
     CORS_ORIGINS: Union[List[str], str] = Field(
         default=["http://localhost:5173"],
         description="Authorized origin whitelist for FastAPI CORS middleware"
+    )
+
+    # SMTP Emergency Alert Notification Settings
+    SMTP_HOST: str = Field(default="smtp.gmail.com", description="SMTP server host")
+    SMTP_PORT: int = Field(default=587, description="SMTP server port (587 for TLS)")
+    SMTP_USER: Optional[str] = Field(default=None, description="SMTP authentication username")
+    SMTP_PASSWORD: Optional[str] = Field(default=None, description="SMTP authentication password")
+    SMTP_FROM_EMAIL: str = Field(default="alerts@mindguard.ai", description="Outbound sender email address")
+    SMTP_FROM_NAME: str = Field(default="MindGuard Clinical Emergency System", description="Sender display name")
+    SMTP_TLS: bool = Field(default=True, description="Enable STARTTLS on port 587")
+    SMTP_ENABLED: bool = Field(default=False, description="Whether live SMTP delivery is enabled or simulated")
+    DEFAULT_COUNSELOR_EMAILS: List[str] = Field(
+        default=["counseling-center@campus.edu", "mentalhealth-triage@campus.edu"],
+        description="Fallback counselor emails when no active counselors are registered"
     )
 
     @field_validator("CORS_ORIGINS", mode="before")
