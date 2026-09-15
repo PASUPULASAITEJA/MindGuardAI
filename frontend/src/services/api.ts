@@ -374,7 +374,37 @@ api.interceptors.response.use(
     }
   };
 
+  export interface CounselorNoteItem {
+    id: string;
+    alert_id?: string | null;
+    student_id: string;
+    counselor_id: string;
+    counselor_name?: string | null;
+    note: string;
+    created_at: string;
+  }
+
+  export const notesAPI = {
+    addAlertNote: async (alertId: string, note: string) => {
+      const res = await api.post<CounselorNoteItem>(`/counselors/alerts/${alertId}/notes`, { note });
+      return res.data;
+    },
+    getAlertNotes: async (alertId: string) => {
+      const res = await api.get<{ notes: CounselorNoteItem[]; total: number }>(`/counselors/alerts/${alertId}/notes`);
+      return res.data;
+    },
+    getStudentNotes: async (studentId: string) => {
+      const res = await api.get<{ notes: CounselorNoteItem[]; total: number }>(`/counselors/students/${studentId}/notes`);
+      return res.data;
+    },
+    addStudentNote: async (studentId: string, note: string) => {
+      const res = await api.post<CounselorNoteItem>(`/counselors/students/${studentId}/notes`, { note });
+      return res.data;
+    }
+  };
+
   export default api;
+
 
 
 

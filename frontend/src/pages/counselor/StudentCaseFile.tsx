@@ -3,12 +3,12 @@ import { useParams, useNavigate, Link } from "react-router-dom";
 import { 
   ArrowLeft, Shield, ShieldAlert, BarChart3, Calendar, AlertTriangle, 
   HeartPulse, Activity, User, Clock, FileText, ChevronDown, ChevronUp,
-  RefreshCw, CheckCircle2, Lock
+  RefreshCw, CheckCircle2, Lock, FileEdit, Plus
 } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/toast";
-import { casefileAPI, StudentCasefile, CasefileTimelineEvent } from "@/services/api";
+import { casefileAPI, notesAPI, StudentCasefile, CasefileTimelineEvent } from "@/services/api";
 
 export const StudentCaseFile: React.FC = () => {
   const { studentId } = useParams<{ studentId: string }>();
@@ -21,6 +21,11 @@ export const StudentCaseFile: React.FC = () => {
   const [timeframe, setTimeframe] = useState<string>("90");
   const [typeFilter, setTypeFilter] = useState<string>("ALL");
   const [expandedEvents, setExpandedEvents] = useState<Record<string, boolean>>({});
+
+  // Note Modal state
+  const [isNoteModalOpen, setIsNoteModalOpen] = useState(false);
+  const [newNoteText, setNewNoteText] = useState("");
+  const [isSubmittingNote, setIsSubmittingNote] = useState(false);
 
   const fetchCasefile = async () => {
     if (!studentId) return;
@@ -44,6 +49,31 @@ export const StudentCaseFile: React.FC = () => {
       }
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleAddNote = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!studentId || !newNoteText.trim()) return;
+    setIsSubmittingNote(true);
+    try {
+      await notesAPI.addStudentNote(studentId, newNoteText.trim());
+      toast({
+        title: "Clinical Note Recorded",
+        description: "Your observation was logged to the student's longitudinal case file.",
+        variant: "success",
+      });
+      setNewNoteText("");
+      setIsNoteModalOpen(false);
+      fetchCasefile();
+    } catch (err: any) {
+      toast({
+        title: "Failed to Add Note",
+        description: err.response?.data?.message || "Could not save clinical note.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmittingNote(false);
     }
   };
 
@@ -74,6 +104,8 @@ export const StudentCaseFile: React.FC = () => {
         return <ShieldAlert className="w-4 h-4 text-rose-500" />;
       case "BEHAVIORAL":
         return <Activity className="w-4 h-4 text-purple-500" />;
+      case "COUNSELOR_NOTE":
+        return <FileEdit className="w-4 h-4 text-violet-500" />;
       default:
         return <FileText className="w-4 h-4 text-slate-500" />;
     }
@@ -114,16 +146,28 @@ export const StudentCaseFile: React.FC = () => {
               Student Case File & Longitudinal Timeline
             </span>
           </div>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={fetchCasefile}
-            disabled={isLoading}
-            className="h-8 px-2.5 text-xs text-muted-foreground hover:text-foreground"
-          >
-            <RefreshCw className={`w-3.5 h-3.5 mr-1.5 ${isLoading ? "animate-spin" : ""}`} />
-            Refresh
-          </Button>
+          <div className="flex items-center gap-2">
+            {!isConsentRevoked && (
+              <Button
+                size="sm"
+                onClick={() => setIsNoteModalOpen(true)}
+                className="h-8 px-3 text-xs bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-lg flex items-center gap-1.5 shadow-sm"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                Add Clinical Note
+              </Button>
+            )}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={fetchCasefile}
+              disabled={isLoading}
+              className="h-8 px-2.5 text-xs text-muted-foreground hover:text-foreground"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 mr-1.5 ${isLoading ? "animate-spin" : ""}`} />
+              Refresh
+            </Button>
+          </div>
         </div>
       </div>
 
@@ -315,6 +359,7 @@ export const StudentCaseFile: React.FC = () => {
                 { id: "ALL", label: "All Events" },
                 { id: "ASSESSMENT", label: "Assessments" },
                 { id: "EMOTION_ANALYSIS", label: "Emotions & Journals" },
+                { id: "COUNSELOR_NOTE", label: "Counselor Notes" },
                 { id: "ALERT", label: "Alerts" },
                 { id: "APPOINTMENT", label: "Appointments" },
                 { id: "SAFETY_EVENT", label: "Safety / SOS" },
@@ -438,6 +483,67 @@ export const StudentCaseFile: React.FC = () => {
           </>
         )}
       </div>
+
+      {/* Add Clinical Note Modal */}
+      {isNoteModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+          <div className="bg-card border border-border/80 rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-4">
+            <div className="flex items-center justify-between border-b border-border/60 pb-3">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-lg bg-primary/15 text-primary flex items-center justify-center">
+                  <FileEdit className="w-4 h-4" />
+                </div>
+                <h3 className="text-base font-bold text-foreground">Record Clinical Note</h3>
+              </div>
+              <button 
+                onClick={() => setIsNoteModalOpen(false)}
+                className="text-muted-foreground hover:text-foreground text-xs"
+              >
+                ✕
+              </button>
+            </div>
+
+            <form onSubmit={handleAddNote} className="space-y-4">
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-muted-foreground">
+                  Clinical Observations & Intervention Action Plan:
+                </label>
+                <textarea
+                  rows={4}
+                  value={newNoteText}
+                  onChange={(e) => setNewNoteText(e.target.value)}
+                  placeholder="Record confidential notes regarding student check-in, phone outreach, referral recommendations, or academic accommodation follow-ups..."
+                  className="w-full rounded-xl border border-border/70 bg-background/50 p-3 text-xs md:text-sm text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-1 focus:ring-primary resize-none"
+                  required
+                />
+              </div>
+
+              <div className="p-3 rounded-xl bg-accent/20 border border-border/60 text-[11px] text-muted-foreground">
+                ℹ️ This note is permanently appended to the student's unified longitudinal clinical dossier and will be visible to authorized campus counseling staff.
+              </div>
+
+              <div className="flex items-center justify-end gap-2 pt-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setIsNoteModalOpen(false)}
+                  disabled={isSubmittingNote}
+                  className="h-9 text-xs px-4 rounded-lg"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={isSubmittingNote || !newNoteText.trim()}
+                  className="h-9 text-xs px-4 rounded-lg bg-primary hover:bg-primary/90 text-primary-foreground font-semibold"
+                >
+                  {isSubmittingNote ? "Recording Note..." : "Save Note"}
+                </Button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

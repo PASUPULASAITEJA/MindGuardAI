@@ -13,6 +13,7 @@ from app.models.appointments import Appointment
 from app.models.chat import SafetyEvent
 from app.models.behavioral import BehavioralLog
 from app.models.consent import Consent, ConsentStatus
+from app.models.counselor_notes import CounselorNote
 
 class CaseFileService:
     async def get_student_casefile(
@@ -205,7 +206,37 @@ class CaseFileService:
         except Exception:
             pass
 
-        # 10. Sort Timeline Events Descending by Timestamp
+        # 10. Fetch Clinical Counselor Notes
+        try:
+            notes_q = (
+                select(CounselorNote, User.full_name, User.email)
+                .join(User, CounselorNote.counselor_id == User.id)
+                .where(CounselorNote.student_id == student_id)
+            )
+            if cutoff_dt:
+                notes_q = notes_q.where(CounselorNote.created_at >= cutoff_dt)
+            notes_q = notes_q.order_by(desc(CounselorNote.created_at))
+            notes_res = await db.execute(notes_q)
+            for note_obj, c_name, c_email in notes_res.all():
+                n_time = note_obj.created_at.isoformat() if note_obj.created_at else now.isoformat()
+                timeline_events.append({
+                    "id": str(note_obj.id),
+                    "event_type": "COUNSELOR_NOTE",
+                    "timestamp": n_time,
+                    "title": f"Counselor Note by {c_name or c_email}",
+                    "summary": note_obj.note,
+                    "severity": "NORMAL",
+                    "details": {
+                        "counselor_id": str(note_obj.counselor_id),
+                        "counselor_name": c_name or c_email,
+                        "alert_id": str(note_obj.alert_id) if note_obj.alert_id else None,
+                        "note": note_obj.note
+                    }
+                })
+        except Exception:
+            pass
+
+        # 11. Sort Timeline Events Descending by Timestamp
         timeline_events.sort(key=lambda x: x["timestamp"], reverse=True)
 
         # 11. Compute Summary Aggregates

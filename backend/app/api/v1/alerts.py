@@ -8,8 +8,10 @@ from app.api.dependencies import require_role, verify_student_consent
 from app.models.users import User, UserRole
 from app.models.alerts import AlertStatus
 from app.schemas.alerts import ActiveAlertsResponse, AlertUpdateRequest, AlertUpdateResponse
+from app.schemas.notes import CreateCounselorNoteRequest, CounselorNoteResponse, CounselorNotesListResponse
 from app.services.alerts import alert_service
 from app.services.casefile_service import casefile_service
+from app.services.notes_service import notes_service
 
 router = APIRouter()
 
@@ -85,6 +87,80 @@ async def get_student_casefile(
             }
         )
     return casefile
+
+@router.post(
+    "/alerts/{alert_id}/notes",
+    response_model=CounselorNoteResponse,
+    status_code=status.HTTP_201_CREATED,
+    summary="Record clinical counselor note on an alert"
+)
+async def add_alert_note(
+    alert_id: UUID,
+    payload: CreateCounselorNoteRequest,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_role([UserRole.COUNSELOR]))
+):
+    """
+    Appends a timestamped clinical case note to the target alert and student history.
+    """
+    return await notes_service.create_alert_note(
+        db, alert_id=alert_id, counselor=current_user, note_text=payload.note
+    )
+
+@router.get(
+    "/alerts/{alert_id}/notes",
+    response_model=CounselorNotesListResponse,
+    status_code=status.HTTP_200_OK,
+    summary="List all counselor notes for a specific alert"
+)
+async def get_alert_notes(
+    alert_id: UUID,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_role([UserRole.COUNSELOR, UserRole.ADMIN]))
+):
+    """
+    Retrieves chronological notes recorded for this specific alert incident.
+    """
+    notes = await notes_service.get_notes_for_alert(db, alert_id=alert_id)
+    return CounselorNotesListResponse(notes=notes, total=len(notes))
+
+@router.get(
+    "/students/{student_id}/notes",
+    response_model=CounselorNotesListResponse,
+    status_code=status.HTTP_200_OK,
+    summary="List all historical counselor notes for a student across all alerts"
+)
+async def get_student_notes(
+    student_id: UUID,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_role([UserRole.COUNSELOR, UserRole.ADMIN]))
+):
+    """
+    Retrieves complete counselor note log for this student. Requires active student consent.
+    """
+    await verify_student_consent(db, student_id)
+    notes = await notes_service.get_notes_for_student(db, student_id=student_id)
+    return CounselorNotesListResponse(notes=notes, total=len(notes))
+
+@router.post(
+    "/students/{student_id}/notes",
+    response_model=CounselorNoteResponse,
+    status_code=status.HTTP_201_CREATED,
+    summary="Record clinical counselor note directly to a student casefile"
+)
+async def post_student_note(
+    student_id: UUID,
+    payload: CreateCounselorNoteRequest,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_role([UserRole.COUNSELOR]))
+):
+    """
+    Appends a direct clinical case note to the student file. Requires active student consent.
+    """
+    await verify_student_consent(db, student_id)
+    return await notes_service.create_student_note(
+        db, student_id=student_id, counselor=current_user, note_text=payload.note
+    )
 
 @router.post(
     "/sos",
