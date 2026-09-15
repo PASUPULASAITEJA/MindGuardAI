@@ -301,6 +301,13 @@ api.interceptors.response.use(
     helplines: SOSHelpline[];
   }
 
+  export const sosAPI = {
+    triggerSOS: async () => {
+      const res = await api.post<SOSResponse>("/alerts/sos");
+      return res.data;
+    }
+  };
+
   export interface ConsentRecord {
     id: string;
     student_id: string;
