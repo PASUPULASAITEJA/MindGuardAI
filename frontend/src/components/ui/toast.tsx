@@ -2,7 +2,7 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import { cn } from "@/utils/cn";
 import { X } from "lucide-react";
 
-export type ToastVariant = "default" | "destructive" | "success";
+export type ToastVariant = "default" | "destructive" | "success" | "warning";
 
 export interface ToastMessage {
   id: string;
@@ -44,6 +44,8 @@ export const ToastProvider: React.FC<{ children: ReactNode }> = ({ children }) =
                 ? "bg-destructive border-destructive text-destructive-foreground"
                 : t.variant === "success"
                 ? "bg-emerald-600 border-emerald-700 text-white"
+                : t.variant === "warning"
+                ? "bg-amber-600 border-amber-700 text-white"
                 : "bg-card border-border text-card-foreground"
             )}
           >
