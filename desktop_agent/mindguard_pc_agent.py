@@ -618,7 +618,7 @@ def start_agent():
                         "You have been working on your screen for 50+ minutes continuously. Take 20 seconds to look at an object 20 feet away to relax your eyes and reset your posture."
                     )
 
-                if 0 <= current_hour < 5:
+                if 0 <= current_hour < 4:
                     late_night_seconds += SAMPLE_INTERVAL_SECONDS
 
                 proc_name, title, category, is_crisis = get_active_window_details()
