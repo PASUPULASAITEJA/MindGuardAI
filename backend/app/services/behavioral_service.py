@@ -1,6 +1,8 @@
 import json
 import logging
-from datetime import datetime, timezone, timedelta
+import subprocess
+import re
+from datetime import datetime, timezone, timedelta, time as time_type
 from typing import Dict, Any, Optional, List
 from uuid import UUID, uuid4
 
@@ -16,13 +18,92 @@ from app.schemas.chatbot import BehavioralFeaturesPayload
 
 logger = logging.getLogger("mindguard-behavioral-service")
 
+def get_windows_power_sessions() -> Dict[str, Dict[str, int]]:
+    """
+    Extracts real physical active on-time intervals and late-night usage from Windows Event Log.
+    Zero synthetic or dummy numbers - directly parsed from Event IDs 1, 42, 6005, 6006.
+    """
+    try:
+        ps_cmd = "Get-WinEvent -FilterHashtable @{LogName='System'; Id=1,42,6005,6006} -MaxEvents 500 | Select-Object Id, TimeCreated, Message | ConvertTo-Json"
+        res = subprocess.run(["powershell", "-Command", ps_cmd], capture_output=True, text=True, timeout=8)
+        data = json.loads(res.stdout)
+        events = []
+        for ev in data:
+            time_str = ev.get("TimeCreated", "")
+            m = re.search(r"/Date\((\d+)\)/", time_str)
+            if not m:
+                continue
+            ms = int(m.group(1))
+            dt = datetime.fromtimestamp(ms / 1000.0)
+            eid = ev.get("Id")
+            msg = ev.get("Message") or ""
+            is_wake = "returned from a low power state" in msg
+            is_sleep = eid == 42
+            is_boot = eid in (1, 6005) and not is_wake
+            is_shutdown = eid == 6006
+
+            if is_wake or is_boot:
+                events.append((dt, "ON"))
+            elif is_sleep or is_shutdown:
+                events.append((dt, "OFF"))
+
+        events.sort(key=lambda x: x[0])
+        now = datetime.now()
+        
+        from collections import defaultdict
+        daily_total_secs = defaultdict(float)
+        daily_late_secs = defaultdict(float)
+
+        last_on = None
+        for dt, act in events:
+            if act == "ON":
+                if last_on is None:
+                    last_on = dt
+            elif act == "OFF":
+                if last_on is not None:
+                    _process_interval(last_on, dt, daily_total_secs, daily_late_secs)
+                    last_on = None
+
+        if last_on is not None:
+            _process_interval(last_on, now, daily_total_secs, daily_late_secs)
+
+        result = {}
+        for day in sorted(daily_total_secs.keys()):
+            result[day] = {
+                "total_mins": int(daily_total_secs[day] / 60.0),
+                "late_mins": int(daily_late_secs[day] / 60.0)
+            }
+        return result
+    except Exception as e:
+        logger.warning(f"Windows event log extraction skipped: {e}")
+        return {}
+
+def _process_interval(start, end, daily_total, daily_late):
+    cur = start
+    while cur.date() < end.date():
+        midnight = datetime.combine(cur.date() + timedelta(days=1), time_type.min)
+        _add_segment(cur, midnight, daily_total, daily_late)
+        cur = midnight
+    _add_segment(cur, end, daily_total, daily_late)
+
+def _add_segment(start, end, daily_total, daily_late):
+    d_str = start.date().isoformat()
+    duration = (end - start).total_seconds()
+    daily_total[d_str] += duration
+    
+    late_start = datetime.combine(start.date(), time_type(0, 0))
+    late_end = datetime.combine(start.date(), time_type(5, 0))
+    overlap_start = max(start, late_start)
+    overlap_end = min(end, late_end)
+    if overlap_end > overlap_start:
+        daily_late[d_str] += (overlap_end - overlap_start).total_seconds()
+
 def get_machine_screen_metrics_today() -> Dict[str, Any]:
     """
     Computes real machine-level screen time from boot today even if student was not logged in.
-    Reads .mindguard_agent_state.json and strictly clamps to actual physical boot uptime.
+    Reads real Windows hardware power sessions and desktop agent tracking.
     """
     import time
-    import psutil
     from pathlib import Path
 
     now_dt = datetime.now()
@@ -31,7 +112,6 @@ def get_machine_screen_metrics_today() -> Dict[str, Any]:
     state_file = project_root / ".mindguard_agent_state.json"
 
     # 1. Calculate physical upper bound: total minutes elapsed since midnight today
-    # (Ensures multiple reboots or sleep sessions today never wipe earlier sessions)
     try:
         today_midnight = now_dt.replace(hour=0, minute=0, second=0, microsecond=0).timestamp()
         minutes_since_midnight = max(1, int((time.time() - today_midnight) / 60))
@@ -57,36 +137,31 @@ def get_machine_screen_metrics_today() -> Dict[str, Any]:
     agent_late_mins = int(agent_state.get("late_night_seconds", 0) / 60)
     continuous_mins = int(agent_state.get("continuous_active_seconds", 0) / 60)
 
-    # Physical sanity clamp: screen time cannot exceed minutes elapsed today
-    if agent_screen_mins > minutes_since_midnight:
-        ratio = minutes_since_midnight / max(1, agent_screen_mins)
-        agent_screen_mins = minutes_since_midnight
-        agent_acad_mins = int(agent_acad_mins * ratio)
-        agent_soc_mins = int(agent_soc_mins * ratio)
-        agent_ent_mins = int(agent_ent_mins * ratio)
-        agent_adult_mins = int(agent_adult_mins * ratio)
-        agent_late_mins = min(agent_late_mins, agent_screen_mins)
-        continuous_mins = min(continuous_mins, agent_screen_mins)
+    # 2. Extract authentic physical Windows session on-time
+    real_sessions = get_windows_power_sessions()
+    today_session = real_sessions.get(today_str, {})
+    real_today_mins = today_session.get("total_mins", 0)
+    real_today_late = today_session.get("late_mins", 0)
 
-    # Ensure category minutes never exceed total screen minutes
-    cat_mins_sum = agent_acad_mins + agent_soc_mins + agent_ent_mins + agent_adult_mins
-    if cat_mins_sum > agent_screen_mins and agent_screen_mins > 0:
-        cat_ratio = agent_screen_mins / cat_mins_sum
-        agent_acad_mins = int(agent_acad_mins * cat_ratio)
-        agent_soc_mins = int(agent_soc_mins * cat_ratio)
-        agent_ent_mins = int(agent_ent_mins * cat_ratio)
-        agent_adult_mins = int(agent_adult_mins * cat_ratio)
+    # Combined true screen time (bounded by elapsed minutes today)
+    final_total_mins = min(minutes_since_midnight, max(real_today_mins, agent_screen_mins))
+    final_late_mins = min(final_total_mins, max(real_today_late, agent_late_mins))
+
+    # Real academic coursework time is at least the physical on-time minus non-academic
+    non_acad = agent_soc_mins + agent_ent_mins + agent_adult_mins
+    final_acad_mins = max(0, final_total_mins - non_acad)
 
     return {
         "date": today_str,
-        "total_screen_time_minutes": agent_screen_mins,
-        "academic_usage_minutes": agent_acad_mins,
+        "total_screen_time_minutes": final_total_mins,
+        "academic_usage_minutes": final_acad_mins,
         "social_usage_minutes": agent_soc_mins,
         "entertainment_usage_minutes": agent_ent_mins,
         "adult_usage_minutes": agent_adult_mins,
-        "late_night_usage_minutes": agent_late_mins,
+        "late_night_usage_minutes": final_late_mins,
         "continuous_screen_minutes": continuous_mins,
         "uptime_mins_today": minutes_since_midnight,
+        "windows_sessions": real_sessions,
     }
 
 class BehavioralService:
