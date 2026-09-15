@@ -835,6 +835,10 @@ export const StudentDashboard: React.FC = () => {
                         <span>📚 Study:</span>
                         <span>{Math.floor(d.academicMins / 60)}h {d.academicMins % 60}m</span>
                       </div>
+                      <div className="flex items-center justify-between text-purple-500 dark:text-purple-400 font-medium">
+                        <span>🎮 Leisure:</span>
+                        <span>{Math.floor(((d.socialMins || 0) + (d.entertainmentMins || 0)) / 60)}h {((d.socialMins || 0) + (d.entertainmentMins || 0)) % 60}m</span>
+                      </div>
                       <div className="flex items-center justify-between">
                         <span className={d.lateNightMins > 0 ? "text-rose-500 font-bold" : "text-muted-foreground"}>🌙 Late:</span>
                         <span className={d.lateNightMins > 0 ? "text-rose-500 font-bold" : "text-muted-foreground"}>
