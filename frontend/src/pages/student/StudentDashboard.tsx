@@ -380,7 +380,7 @@ export const StudentDashboard: React.FC = () => {
         <Card className="shadow-xs border-border/80 flex flex-col justify-between p-4">
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
-              Late-Night Screen
+              Late-Night Screen (12 AM - 4 AM)
             </span>
             <Moon className="h-4 w-4 text-violet-500" />
           </div>
@@ -389,7 +389,7 @@ export const StudentDashboard: React.FC = () => {
             <span className={`text-3xl font-black ${lateNightMins > 60 ? "text-rose-500" : "text-foreground"}`}>
               {lateNightMins > 60 ? `${Math.floor(lateNightMins / 60)}h ${lateNightMins % 60}m` : `${lateNightMins}m`}
             </span>
-            <span className="text-xs text-muted-foreground">past 12:00 AM</span>
+            <span className="text-xs text-muted-foreground">12:00 AM – 4:00 AM</span>
           </div>
 
           <div className="flex items-center gap-1.5 text-[11px] font-semibold">
@@ -751,11 +751,11 @@ export const StudentDashboard: React.FC = () => {
                   <>
                     <span className="flex items-center gap-1.5">
                       <span className="h-2.5 w-2.5 rounded-sm bg-indigo-500" />
-                      Daytime Screen (5 AM - 12 AM)
+                      Daytime Screen (4 AM – 12 AM)
                     </span>
                     <span className="flex items-center gap-1.5 font-semibold text-rose-500">
                       <span className="h-2.5 w-2.5 rounded-sm bg-rose-500" />
-                      Late-Night Screen (12 AM - 5 AM)
+                      Late-Night Screen (12 AM – 4 AM)
                     </span>
                   </>
                 ) : (
@@ -840,9 +840,9 @@ export const StudentDashboard: React.FC = () => {
                         <span>{Math.floor(((d.socialMins || 0) + (d.entertainmentMins || 0)) / 60)}h {((d.socialMins || 0) + (d.entertainmentMins || 0)) % 60}m</span>
                       </div>
                       <div className="flex items-center justify-between">
-                        <span className={d.lateNightMins > 0 ? "text-rose-500 font-bold" : "text-muted-foreground"}>🌙 Late:</span>
+                        <span className={d.lateNightMins > 0 ? "text-rose-500 font-bold" : "text-muted-foreground"}>🌙 Late (12–4 AM):</span>
                         <span className={d.lateNightMins > 0 ? "text-rose-500 font-bold" : "text-muted-foreground"}>
-                          {d.lateNightMins > 0 ? `${d.lateNightMins}m` : "0m"}
+                          {d.lateNightMins > 0 ? `${Math.floor(d.lateNightMins / 60)}h ${d.lateNightMins % 60}m` : "0m"}
                         </span>
                       </div>
                     </div>
