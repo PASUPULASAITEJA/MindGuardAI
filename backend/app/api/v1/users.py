@@ -7,6 +7,7 @@ from app.api.dependencies import require_role
 from app.models.users import User, UserRole
 from app.schemas.users import UserProfileResponse, UserDirectoryResponse
 from app.schemas.audit import AuditLogListResponse
+from app.schemas.notification_deliveries import NotificationDeliveriesListResponse
 from app.services.user import user_service
 from app.services.audit_service import audit_service
 
@@ -112,6 +113,34 @@ async def get_audit_logs(
     )
     return AuditLogListResponse(
         logs=logs,
+        total=total,
+        page=page,
+        page_size=page_size
+    )
+
+@admin_router.get(
+    "/notifications/deliveries",
+    response_model=NotificationDeliveriesListResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Get notification deliveries log"
+)
+async def get_notification_deliveries(
+    event_type: Optional[str] = Query(None, description="Filter by event type"),
+    delivery_status: Optional[str] = Query(None, alias="status", description="Filter by delivery status: SENT, FAILED"),
+    page: int = Query(1, ge=1, description="Page number"),
+    page_size: int = Query(25, ge=1, le=100, description="Items per page"),
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_role([UserRole.ADMIN, UserRole.COUNSELOR]))
+):
+    """
+    Retrieves history of dispatched email alert notifications for administrative compliance and delivery auditing.
+    """
+    from app.services.email_service import email_service
+    deliveries, total = await email_service.get_deliveries_log(
+        db, page=page, page_size=page_size, event_type=event_type, status=delivery_status
+    )
+    return NotificationDeliveriesListResponse(
+        deliveries=deliveries,
         total=total,
         page=page,
         page_size=page_size
