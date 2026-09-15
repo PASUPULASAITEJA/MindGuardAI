@@ -555,7 +555,7 @@ def start_agent():
                     if max_secs > 0 and total_screen_seconds > max_secs:
                         total_screen_seconds = max_secs
                     academic_seconds = min(total_screen_seconds, max(academic_seconds, latest_log.get("academic_usage_minutes", 0) * 60))
-                    late_night_seconds = min(total_screen_seconds, max(late_night_seconds, latest_log.get("late_night_usage_minutes", 0) * 60))
+                    late_night_seconds = min(total_screen_seconds, 18000, latest_log.get("late_night_usage_minutes", 0) * 60)
                     social_seconds = min(total_screen_seconds, max(social_seconds, latest_log.get("social_usage_minutes", 0) * 60))
                     entertainment_seconds = min(total_screen_seconds, max(entertainment_seconds, latest_log.get("entertainment_usage_minutes", 0) * 60))
                     adult_seconds = min(total_screen_seconds, max(adult_seconds, latest_log.get("adult_usage_minutes", 0) * 60))
