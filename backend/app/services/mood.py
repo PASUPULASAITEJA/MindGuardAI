@@ -75,6 +75,24 @@ async def process_journal_entry_background(
                     status=AlertStatus.PENDING
                 )
                 db.add(alert_obj)
+                await db.flush()
+
+                # Dispatch asynchronous email notification to campus counselors
+                try:
+                    from app.models.users import User
+                    from app.services.email_service import email_service
+                    student_user = await db.get(User, student_id)
+                    if student_user:
+                        await email_service.notify_counselors_on_high_risk(
+                            db,
+                            student=student_user,
+                            assessment_id=assessment_obj.id,
+                            alert_id=alert_obj.id,
+                            event_type="HIGH_RISK_ALERT",
+                            custom_message=f"Student submitted journal entry evaluating to HIGH clinical risk (Wellness Score: {mental_wellness_score:.1f}/100)."
+                        )
+                except Exception as notify_err:
+                    logger.error(f"Failed to dispatch counselor email notification: {str(notify_err)}", exc_info=True)
             
             await db.commit()
             logger.info(f"Asynchronous analysis successfully committed for mood log ID {mood_log_id}.")
