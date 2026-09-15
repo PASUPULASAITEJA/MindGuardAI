@@ -12,6 +12,7 @@ from app.schemas.notes import CreateCounselorNoteRequest, CounselorNoteResponse,
 from app.services.alerts import alert_service
 from app.services.casefile_service import casefile_service
 from app.services.notes_service import notes_service
+from app.services.audit_service import audit_service
 
 router = APIRouter()
 
@@ -57,6 +58,17 @@ async def update_alert_status(
         status_update=payload.status,
         counselor=current_user
     )
+    await audit_service.log_event(
+        db,
+        action="UPDATE_ALERT_STATUS",
+        actor_user_id=current_user.id,
+        actor_role=current_user.role.value,
+        target_user_id=updated_alert.student_id,
+        target_resource_type="ALERT",
+        target_resource_id=str(alert_id),
+        metadata={"new_status": payload.status.value if hasattr(payload.status, "value") else str(payload.status)}
+    )
+    return updated_alert
     
 @router.get(
     "/students/{student_id}/casefile",
@@ -86,6 +98,19 @@ async def get_student_casefile(
                 "details": {}
             }
         )
+    
+    # Audit log access to sensitive student casefile
+    await audit_service.log_event(
+        db,
+        action="VIEW_STUDENT_CASEFILE",
+        actor_user_id=current_user.id,
+        actor_role=current_user.role.value,
+        target_user_id=student_id,
+        target_resource_type="CASEFILE",
+        target_resource_id=str(student_id),
+        metadata={"timeframe_days": days}
+    )
+
     return casefile
 
 @router.post(
@@ -103,9 +128,20 @@ async def add_alert_note(
     """
     Appends a timestamped clinical case note to the target alert and student history.
     """
-    return await notes_service.create_alert_note(
+    res = await notes_service.create_alert_note(
         db, alert_id=alert_id, counselor=current_user, note_text=payload.note
     )
+    await audit_service.log_event(
+        db,
+        action="CREATE_COUNSELOR_NOTE",
+        actor_user_id=current_user.id,
+        actor_role=current_user.role.value,
+        target_user_id=res.student_id,
+        target_resource_type="NOTE",
+        target_resource_id=str(res.id),
+        metadata={"alert_id": str(alert_id)}
+    )
+    return res
 
 @router.get(
     "/alerts/{alert_id}/notes",
@@ -215,6 +251,18 @@ async def trigger_emergency_sos(
     )
     db.add(safety_event)
     await db.commit()
+
+    # Log high-priority audit event
+    await audit_service.log_event(
+        db,
+        action="DISPATCH_EMERGENCY_SOS",
+        actor_user_id=current_user.id,
+        actor_role=current_user.role.value,
+        target_user_id=current_user.id,
+        target_resource_type="SOS",
+        target_resource_id=str(alert.id),
+        metadata={"trigger_type": "EMERGENCY_SOS_BUTTON", "alert_id": str(alert.id)}
+    )
 
     return {
         "status": "success",

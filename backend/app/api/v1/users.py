@@ -6,7 +6,9 @@ from app.db.session import get_db
 from app.api.dependencies import require_role
 from app.models.users import User, UserRole
 from app.schemas.users import UserProfileResponse, UserDirectoryResponse
+from app.schemas.audit import AuditLogListResponse
 from app.services.user import user_service
+from app.services.audit_service import audit_service
 
 # Define separate routers to mount under different paths as per API.md paths
 students_router = APIRouter()
@@ -86,4 +88,31 @@ async def get_user_directory(
         users=users,
         page=page,
         total_pages=total_pages
+    )
+
+@admin_router.get(
+    "/audit-logs",
+    response_model=AuditLogListResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Get institutional security and clinical access audit logs"
+)
+async def get_audit_logs(
+    action: Optional[str] = Query(None, description="Filter by action code"),
+    actor_role: Optional[str] = Query(None, description="Filter by actor role"),
+    page: int = Query(1, ge=1, description="Page number"),
+    page_size: int = Query(25, ge=1, le=100, description="Items per page"),
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_role([UserRole.ADMIN]))
+):
+    """
+    Retrieves immutable audit records for regulatory compliance, forensics, and privacy governance.
+    """
+    logs, total = await audit_service.get_audit_logs(
+        db, page=page, page_size=page_size, action=action, actor_role=actor_role
+    )
+    return AuditLogListResponse(
+        logs=logs,
+        total=total,
+        page=page,
+        page_size=page_size
     )

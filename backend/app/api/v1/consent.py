@@ -8,6 +8,7 @@ from app.models.users import User, UserRole
 from app.models.consent import ConsentStatus
 from app.schemas.consent import ConsentResponse, ConsentActionResponse
 from app.services.consent_service import consent_service
+from app.services.audit_service import audit_service
 
 consent_router = APIRouter()
 
@@ -42,6 +43,16 @@ async def grant_consent(
     Grants or re-enables counselor access to wellness logs, trend data, and timeline history.
     """
     consent = await consent_service.grant_consent(db, current_user.id)
+    await audit_service.log_event(
+        db,
+        action="GRANT_CONSENT",
+        actor_user_id=current_user.id,
+        actor_role=current_user.role.value,
+        target_user_id=current_user.id,
+        target_resource_type="CONSENT",
+        target_resource_id=str(consent.id),
+        metadata={"consent_type": consent.consent_type, "status": "GRANTED"}
+    )
     return ConsentActionResponse(
         status="success",
         message="Consent granted. Counselors can view your wellness trends and case file.",
@@ -63,6 +74,16 @@ async def revoke_consent(
     casefiles or detailed trends will receive HTTP 403 Forbidden.
     """
     consent = await consent_service.revoke_consent(db, current_user.id)
+    await audit_service.log_event(
+        db,
+        action="REVOKE_CONSENT",
+        actor_user_id=current_user.id,
+        actor_role=current_user.role.value,
+        target_user_id=current_user.id,
+        target_resource_type="CONSENT",
+        target_resource_id=str(consent.id),
+        metadata={"consent_type": consent.consent_type, "status": "REVOKED"}
+    )
     return ConsentActionResponse(
         status="success",
         message="Consent revoked. Counselors can no longer access your wellness data or timeline.",

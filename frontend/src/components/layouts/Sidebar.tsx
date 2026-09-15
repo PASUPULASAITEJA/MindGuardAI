@@ -13,6 +13,7 @@ import {
   X,
   Settings,
   MessageSquare,
+  ShieldCheck,
 } from "lucide-react";
 import { useAuth, UserRole } from "@/contexts/AuthContext";
 import { cn } from "@/utils/cn";
@@ -42,6 +43,7 @@ const roleNavigation: Record<UserRole, SidebarItem[]> = {
     { label: "Overview", to: "/admin/dashboard", icon: LayoutDashboard },
     { label: "Wellness Reports", to: "/admin/reports", icon: BarChart3 },
     { label: "User Directory", to: "/admin/directory", icon: Users },
+    { label: "Audit Logs", to: "/admin/audit-logs", icon: ShieldCheck },
     { label: "Settings", to: "/settings", icon: Settings },
   ],
 };

@@ -403,6 +403,30 @@ api.interceptors.response.use(
     }
   };
 
+  export interface AuditLogItem {
+    id: string;
+    actor_user_id?: string | null;
+    actor_name?: string | null;
+    actor_role: string;
+    action: string;
+    target_user_id?: string | null;
+    target_user_name?: string | null;
+    target_resource_type: string;
+    target_resource_id?: string | null;
+    request_id?: string | null;
+    ip_address?: string | null;
+    user_agent?: string | null;
+    metadata_json?: Record<string, any> | null;
+    created_at: string;
+  }
+
+  export const auditAPI = {
+    getAuditLogs: async (params?: { action?: string; actor_role?: string; page?: number; page_size?: number }) => {
+      const res = await api.get<{ logs: AuditLogItem[]; total: number; page: number; page_size: number }>("/admin/audit-logs", { params });
+      return res.data;
+    }
+  };
+
   export default api;
 
 

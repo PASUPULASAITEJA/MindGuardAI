@@ -17,6 +17,7 @@ import SelfCareResourcesPage from "./pages/student/SelfCareResourcesPage";
 import CounselorDashboard from "./pages/counselor/CounselorDashboard";
 import { StudentCaseFile } from "./pages/counselor/StudentCaseFile";
 import AdminDashboard from "./pages/admin/AdminDashboard";
+import { AdminAuditLogs } from "./pages/admin/AdminAuditLogs";
 import Settings from "./pages/settings/Settings";
 
 // Setup global React Query client with standard stale time (5 minutes)
@@ -200,6 +201,19 @@ function App() {
                     subtitle="Audit and manage all registered student, counselor, and admin accounts."
                   >
                     <AdminDashboard />
+                  </DashboardLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/audit-logs"
+              element={
+                <ProtectedRoute allowedRoles={["ADMIN"]}>
+                  <DashboardLayout
+                    title="Security Audit Trail"
+                    subtitle="Immutable compliance logs for clinical record access and crisis escalations."
+                  >
+                    <AdminAuditLogs />
                   </DashboardLayout>
                 </ProtectedRoute>
               }
