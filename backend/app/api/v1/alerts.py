@@ -264,6 +264,20 @@ async def trigger_emergency_sos(
         metadata={"trigger_type": "EMERGENCY_SOS_BUTTON", "alert_id": str(alert.id)}
     )
 
+    # Dispatch emergency email alert to campus counseling staff
+    try:
+        from app.services.email_service import email_service
+        await email_service.notify_counselors_on_high_risk(
+            db,
+            student=current_user,
+            assessment_id=assessment.id,
+            alert_id=alert.id,
+            event_type="EMERGENCY_SOS",
+            custom_message=f"CRITICAL 1-CLICK SOS DISTRESS SIGNAL triggered by student ({current_user.full_name or current_user.email}). Immediate counselor contact and welfare check required."
+        )
+    except Exception as notify_err:
+        pass
+
     return {
         "status": "success",
         "message": "Emergency SOS alert dispatched to campus counseling staff.",
