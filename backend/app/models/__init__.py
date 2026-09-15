@@ -10,6 +10,7 @@ from app.models.appointments import Appointment, AppointmentStatus, AppointmentT
 from app.models.consent import Consent, ConsentStatus
 from app.models.counselor_notes import CounselorNote
 from app.models.audit_logs import AuditLog
+from app.models.notification_deliveries import NotificationDelivery
 
 __all__ = [
     "Base",
@@ -34,5 +35,6 @@ __all__ = [
     "ConsentStatus",
     "CounselorNote",
     "AuditLog",
+    "NotificationDelivery",
 ]
 
