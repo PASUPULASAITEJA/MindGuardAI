@@ -105,9 +105,9 @@ export const useScreenTimeTracker = () => {
 
       activeSecondsRef.current += 1;
 
-      // Check late-night circadian hours (12:00 AM - 5:00 AM)
+      // Check late-night circadian hours (12:00 AM - 4:00 AM)
       const currentHour = new Date().getHours();
-      if (currentHour >= 0 && currentHour < 5) {
+      if (currentHour >= 0 && currentHour < 4) {
         lateNightSecondsRef.current += 1;
       }
 
