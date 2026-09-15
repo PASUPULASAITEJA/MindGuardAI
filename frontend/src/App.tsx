@@ -15,6 +15,7 @@ import DailyCheckInPage from "./pages/student/DailyCheckInPage";
 import MoodHistoryPage from "./pages/student/MoodHistoryPage";
 import SelfCareResourcesPage from "./pages/student/SelfCareResourcesPage";
 import CounselorDashboard from "./pages/counselor/CounselorDashboard";
+import { StudentCaseFile } from "./pages/counselor/StudentCaseFile";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import Settings from "./pages/settings/Settings";
 
@@ -145,6 +146,19 @@ function App() {
                     subtitle="Access historical wellness charts, extracted NLP emotions, and user dossiers."
                   >
                     <CounselorDashboard />
+                  </DashboardLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/counselor/students/:studentId/casefile"
+              element={
+                <ProtectedRoute allowedRoles={["COUNSELOR", "ADMIN"]}>
+                  <DashboardLayout
+                    title="Student Case File & Timeline"
+                    subtitle="Longitudinal multi-modal clinical history, emotional trends, and incident timeline."
+                  >
+                    <StudentCaseFile />
                   </DashboardLayout>
                 </ProtectedRoute>
               }

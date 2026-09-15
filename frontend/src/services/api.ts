@@ -336,7 +336,46 @@ api.interceptors.response.use(
     }
   };
 
+  export interface CasefileTimelineEvent {
+    id: string;
+    event_type: "ASSESSMENT" | "EMOTION_ANALYSIS" | "ALERT" | "APPOINTMENT" | "SAFETY_EVENT" | "BEHAVIORAL";
+    timestamp: string;
+    title: string;
+    summary: string;
+    severity: "NORMAL" | "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
+    details: Record<string, any>;
+  }
+
+  export interface StudentCasefile {
+    student: {
+      id: string;
+      full_name: string;
+      email: string;
+      academic_department?: string;
+      current_risk_level: string;
+      consent_status: "GRANTED" | "REVOKED";
+    };
+    summary: {
+      total_assessments: number;
+      latest_wellness_score: number;
+      current_risk_level: string;
+      active_alerts_count: number;
+      total_appointments: number;
+      timeline_events_count: number;
+    };
+    timeline: CasefileTimelineEvent[];
+    timeframe_days: string;
+  }
+
+  export const casefileAPI = {
+    getStudentCasefile: async (studentId: string, days: string = "90") => {
+      const res = await api.get<StudentCasefile>(`/counselors/students/${studentId}/casefile?days=${days}`);
+      return res.data;
+    }
+  };
+
   export default api;
+
 
 
 

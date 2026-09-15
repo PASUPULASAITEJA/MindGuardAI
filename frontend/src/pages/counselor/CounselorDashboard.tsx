@@ -458,6 +458,12 @@ export const CounselorDashboard: React.FC = () => {
                                   Close Alert
                                 </Button>
                               )}
+                              <NavLink
+                                to={`/counselor/students/${alert.student_id}/casefile`}
+                                className="inline-flex items-center gap-1 bg-primary/10 hover:bg-primary/20 text-primary border border-primary/30 font-semibold text-xs h-8 px-2.5 rounded-lg transition-colors"
+                              >
+                                Case File
+                              </NavLink>
                               <Button
                                 size="sm"
                                 variant="ghost"
@@ -680,12 +686,18 @@ const StudentDetailSheet: React.FC<StudentDetailSheetProps> = ({ studentId, onCl
       </div>
 
       {/* Footer */}
-      <div className="p-6 border-t border-border bg-background/20 text-center">
+      <div className="p-6 border-t border-border bg-background/20 space-y-2">
+        <NavLink
+          to={`/counselor/students/${studentId}/casefile`}
+          className="w-full inline-flex items-center justify-center gap-1.5 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold text-xs md:text-sm py-2.5 rounded-xl transition-all shadow-sm"
+        >
+          Open Longitudinal Timeline & Full Case File →
+        </NavLink>
         <Button 
           onClick={onClose}
           className="w-full bg-muted hover:bg-muted/80 text-foreground font-semibold text-xs md:text-sm py-2.5 rounded-xl transition-all duration-300"
         >
-          Close Case File
+          Close Drawer
         </Button>
       </div>
     </div>

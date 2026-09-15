@@ -1,14 +1,15 @@
-from fastapi import APIRouter, Depends, Query, status
+from fastapi import APIRouter, Depends, Query, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import Optional
 from uuid import UUID
 
 from app.db.session import get_db
-from app.api.dependencies import require_role
+from app.api.dependencies import require_role, verify_student_consent
 from app.models.users import User, UserRole
 from app.models.alerts import AlertStatus
 from app.schemas.alerts import ActiveAlertsResponse, AlertUpdateRequest, AlertUpdateResponse
 from app.services.alerts import alert_service
+from app.services.casefile_service import casefile_service
 
 router = APIRouter()
 
@@ -55,7 +56,35 @@ async def update_alert_status(
         counselor=current_user
     )
     
-    return updated_alert
+@router.get(
+    "/students/{student_id}/casefile",
+    status_code=status.HTTP_200_OK,
+    summary="Get unified student clinical casefile and longitudinal timeline"
+)
+async def get_student_casefile(
+    student_id: UUID,
+    days: Optional[str] = Query("90", description="Timeframe filter: 30, 90, or all"),
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_role([UserRole.COUNSELOR, UserRole.ADMIN]))
+):
+    """
+    Retrieves aggregated clinical casefile for the designated student.
+    Strictly verifies active student consent before returning timeline records.
+    """
+    # Enforce active consent check
+    await verify_student_consent(db, student_id)
+
+    casefile = await casefile_service.get_student_casefile(db, student_id=student_id, days=days)
+    if not casefile:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail={
+                "error_code": "STUDENT_NOT_FOUND",
+                "message": "Student record not found.",
+                "details": {}
+            }
+        )
+    return casefile
 
 @router.post(
     "/sos",
