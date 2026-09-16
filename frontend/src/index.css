@@ -124,6 +124,10 @@
     @apply bg-rose-500/10 text-rose-700 dark:text-rose-400 border border-rose-500/20 font-bold;
   }
 
+  .badge-critical-risk {
+    @apply bg-rose-600 text-white border border-rose-700 font-black animate-pulse shadow-xs shadow-rose-600/50;
+  }
+
   /* Finch / Notion Companion Surfaces */
   .finch-card {
     @apply bg-card border border-border/80 rounded-2xl shadow-xs transition-all duration-200 hover:shadow-sm hover:border-primary/40;
