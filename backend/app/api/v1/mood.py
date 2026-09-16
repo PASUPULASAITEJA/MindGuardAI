@@ -30,12 +30,20 @@ async def get_mood_history(
     Counselors can query any student by ID; students access their own history.
     """
     target_id = current_user.id
-    if current_user.role == UserRole.COUNSELOR and student_id:
+    if current_user.role == UserRole.COUNSELOR:
+        if not student_id:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Student ID is required for counselor mood history query."
+            )
         try:
             target_id = UUID(str(student_id).strip())
-            await verify_student_consent(db, target_id)
         except (ValueError, TypeError):
-            target_id = current_user.id
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid student ID format."
+            )
+        await verify_student_consent(db, target_id)
 
     history = await mood_service.get_history(db, student_id=target_id, timeframe=timeframe)
     return MoodHistoryResponse(history=history)
@@ -54,7 +62,11 @@ async def submit_journal_entry(
     """
     Ingests raw student journal text. Persists details to the database, executes
     the NLP sentiment mapping and clinical assessment task, and returns evaluation status.
+    Requires active student consent.
     """
+    # Enforce active student consent for journal analysis
+    await verify_student_consent(db, current_user.id)
+
     # 1. Persist raw mood log
     mood_log = await mood_service.create_journal_entry(
         db,
