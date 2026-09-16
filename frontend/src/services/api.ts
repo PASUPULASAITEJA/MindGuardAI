@@ -473,6 +473,51 @@ api.interceptors.response.use(
     }
   };
 
+  export interface RiskFactorItem {
+    id: string;
+    name: string;
+    category: string;
+    severity: "CRITICAL" | "HIGH" | "MEDIUM" | "LOW" | "POSITIVE";
+    impact_pct: number;
+    description: string;
+    source_metric?: string | null;
+  }
+
+  export interface TrendPeriodSummary {
+    period_days: number;
+    direction: "IMPROVING" | "DECLINING" | "STABLE" | "INSUFFICIENT_DATA" | string;
+    wellness_delta: number;
+    average_wellness: number;
+    assessments_count: number;
+    mood_logs_count: number;
+    average_mood_score?: number | null;
+    average_sentiment?: number | null;
+    crisis_flags_count: number;
+  }
+
+  export interface TrendSummary {
+    summary_7d: TrendPeriodSummary;
+    summary_30d: TrendPeriodSummary;
+    primary_direction: "IMPROVING" | "DECLINING" | "STABLE" | "CRITICAL" | string;
+    headline: string;
+  }
+
+  export interface PredictionExplanationResponse {
+    student_id: string;
+    current_risk_tier: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
+    current_wellness_score: number;
+    evaluated_at: string;
+    trend_summary: TrendSummary;
+    top_factors: RiskFactorItem[];
+  }
+
+  export const predictionsAPI = {
+    getRiskExplanation: async (studentId: string) => {
+      const res = await api.get<PredictionExplanationResponse>(`/predictions/explain/${studentId}`);
+      return res.data;
+    }
+  };
+
   export default api;
 
 
