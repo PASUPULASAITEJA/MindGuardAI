@@ -691,6 +691,52 @@ api.interceptors.response.use(
     }
   };
 
+  export interface DepartmentRiskItem {
+    department: string;
+    student_count: number;
+    average_wellness_score: number;
+    low_risk_count: number;
+    medium_risk_count: number;
+    high_risk_count: number;
+  }
+
+  export interface DepartmentRiskResponse {
+    departments: DepartmentRiskItem[];
+    total_departments: number;
+  }
+
+  export interface AdminUserItem {
+    id: string;
+    email: string;
+    role: "STUDENT" | "COUNSELOR" | "ADMIN" | string;
+    is_active: boolean;
+  }
+
+  export interface AdminUserDirectoryResponse {
+    users: AdminUserItem[];
+    page: number;
+    total_pages: number;
+  }
+
+  export const adminAPI = {
+    getDepartmentRisk: async () => {
+      const res = await api.get<DepartmentRiskResponse>("/analytics/department-risk");
+      return res.data;
+    },
+    getUsers: async (page: number = 1, role?: string) => {
+      const params: Record<string, any> = { page };
+      if (role) params.role = role;
+      const res = await api.get<AdminUserDirectoryResponse>("/admin/users", { params });
+      return res.data;
+    },
+    updateUserStatus: async (userId: string, isActive: boolean) => {
+      const res = await api.patch<AdminUserItem>(`/admin/users/${userId}/status`, {
+        is_active: isActive
+      });
+      return res.data;
+    }
+  };
+
   export default api;
 
 
