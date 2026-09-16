@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { profileAPI, consentAPI, ConsentRecord } from "@/services/api";
 import { ConsentBanner } from "@/components/ConsentBanner";
+import { ConsentSettingsManager } from "@/components/ConsentSettingsManager";
 
 export const Settings: React.FC = () => {
   const { user } = useAuth();
@@ -417,6 +418,9 @@ export const Settings: React.FC = () => {
               </CardContent>
             </Card>
           )}
+
+          {/* Feature 1: Granular 4-Surface Consent & Privacy Controls (Student Only) */}
+          {user.role === "STUDENT" && <ConsentSettingsManager />}
 
           {/* Clinical Consent & Privacy Enforcement Card (Student Only) */}
           {user.role === "STUDENT" && (
