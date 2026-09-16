@@ -47,16 +47,29 @@ export const EmergencySOSModal: React.FC<EmergencySOSModalProps> = ({ isOpen, on
       }
       setIsDispatched(true);
       toast({
-        title: "Counselor Alert Dispatched",
-        description: "Campus counseling staff have been notified with high priority.",
+        title: "CRITICAL Alert Dispatched",
+        description: "Campus counseling staff have been alerted with CRITICAL priority. Help is on the way.",
         variant: "destructive",
       });
-    } catch (err) {
-      toast({
-        title: "Alert Failed",
-        description: "Could not reach emergency dispatch server. Please dial the numbers directly.",
-        variant: "destructive",
-      });
+    } catch (err: any) {
+      const is429 = err?.response?.status === 429;
+      const detail = err?.response?.data?.detail;
+      const msg = typeof detail === "string" ? detail : detail?.message || "Emergency alert recently dispatched. Help is on the way.";
+      
+      if (is429) {
+        setIsDispatched(true);
+        toast({
+          title: "Alert Already Active",
+          description: msg,
+          variant: "warning",
+        });
+      } else {
+        toast({
+          title: "Alert Dispatch Notice",
+          description: "Could not reach dispatch server. Please call one of the verified helplines below directly.",
+          variant: "destructive",
+        });
+      }
     } finally {
       setIsDispatching(false);
     }
