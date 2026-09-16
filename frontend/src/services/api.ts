@@ -511,9 +511,36 @@ api.interceptors.response.use(
     top_factors: RiskFactorItem[];
   }
 
+  export type ExplanationDirection = "increasing_risk" | "decreasing_risk";
+
+  export interface RiskExplanationItem {
+    id: string;
+    prediction_id: string;
+    feature_name: string;
+    shap_value: number;
+    direction: ExplanationDirection;
+    rank: number;
+    impact_symbol: string;
+    is_protective: boolean;
+    description: string;
+  }
+
+  export interface PredictionShapExplanationResponse {
+    prediction_id: string;
+    wellness_score: number;
+    risk_tier: string;
+    heading: string;
+    disclaimer: string;
+    top_factors: RiskExplanationItem[];
+  }
+
   export const predictionsAPI = {
     getRiskExplanation: async (studentId: string) => {
       const res = await api.get<PredictionExplanationResponse>(`/predictions/explain/${studentId}`);
+      return res.data;
+    },
+    getShapExplanation: async (predictionId: string) => {
+      const res = await api.get<PredictionShapExplanationResponse>(`/predictions/${predictionId}/explanation`);
       return res.data;
     }
   };
