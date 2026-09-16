@@ -1,3 +1,5 @@
+import os
+os.environ.setdefault("OPENBLAS_NUM_THREADS", "1")
 import logging
 import time
 import uuid
@@ -188,6 +190,9 @@ app.include_router(recommendations_router, prefix="/api/v1/recommendations", tag
 app.include_router(alerts_router, prefix="/api/v1/counselors", tags=["Counselor Warning Queues"])
 app.include_router(alerts_router, prefix="/api/v1/alerts", tags=["Emergency Alerts & SOS"])
 app.include_router(notifications_router, prefix="/api/v1/notifications", tags=["User Notifications"])
+app.include_router(notifications_router, prefix="/api/notifications", tags=["User Notifications"])
+from app.api.v1.notifications import websocket_notifications
+app.add_api_websocket_route("/ws/notifications", websocket_notifications)
 app.include_router(analytics_router, prefix="/api/v1/analytics", tags=["Campus Analytics"])
 app.include_router(chatbot_router, prefix="/api/v1", tags=["AI Wellness Chatbot"])
 app.include_router(appointments_router, prefix="/api/v1/appointments", tags=["Counselor Appointments"])
