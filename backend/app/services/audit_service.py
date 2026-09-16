@@ -50,8 +50,14 @@ class AuditService:
         page_size: int = 50,
         action: Optional[str] = None,
         actor_role: Optional[str] = None,
-        target_user_id: Optional[UUID] = None
+        target_user_id: Optional[UUID] = None,
+        user_id: Optional[UUID] = None,
+        resource_type: Optional[str] = None,
+        start_date: Optional[datetime] = None,
+        end_date: Optional[datetime] = None
     ) -> Tuple[List[AuditLogResponse], int]:
+        from sqlalchemy import or_
+
         ActorUser = aliased(User)
         TargetUser = aliased(User)
 
@@ -70,14 +76,27 @@ class AuditService:
         count_query = select(func.count(AuditLog.id))
 
         if action:
-            query = query.where(AuditLog.action == action)
-            count_query = count_query.where(AuditLog.action == action)
+            query = query.where(AuditLog.action.ilike(f"%{action}%"))
+            count_query = count_query.where(AuditLog.action.ilike(f"%{action}%"))
         if actor_role:
             query = query.where(AuditLog.actor_role == actor_role)
             count_query = count_query.where(AuditLog.actor_role == actor_role)
         if target_user_id:
             query = query.where(AuditLog.target_user_id == target_user_id)
             count_query = count_query.where(AuditLog.target_user_id == target_user_id)
+        if user_id:
+            user_condition = or_(AuditLog.actor_user_id == user_id, AuditLog.target_user_id == user_id)
+            query = query.where(user_condition)
+            count_query = count_query.where(user_condition)
+        if resource_type:
+            query = query.where(AuditLog.target_resource_type.ilike(f"%{resource_type}%"))
+            count_query = count_query.where(AuditLog.target_resource_type.ilike(f"%{resource_type}%"))
+        if start_date:
+            query = query.where(AuditLog.created_at >= start_date)
+            count_query = count_query.where(AuditLog.created_at >= start_date)
+        if end_date:
+            query = query.where(AuditLog.created_at <= end_date)
+            count_query = count_query.where(AuditLog.created_at <= end_date)
 
         # Count total
         count_res = await db.execute(count_query)
