@@ -464,10 +464,26 @@ api.interceptors.response.use(
     user_agent?: string | null;
     metadata_json?: Record<string, any> | null;
     created_at: string;
+    // Feature 2 aliases
+    user_id?: string | null;
+    resource_type?: string;
+    resource_id?: string | null;
+    details?: Record<string, any> | null;
+    timestamp?: string;
   }
 
   export const auditAPI = {
-    getAuditLogs: async (params?: { action?: string; actor_role?: string; page?: number; page_size?: number }) => {
+    getAuditLogs: async (params?: { 
+      action?: string; 
+      actor_role?: string; 
+      user_id?: string;
+      resource_type?: string;
+      date_range?: string;
+      start_date?: string;
+      end_date?: string;
+      page?: number; 
+      page_size?: number;
+    }) => {
       const res = await api.get<{ logs: AuditLogItem[]; total: number; page: number; page_size: number }>("/admin/audit-logs", { params });
       return res.data;
     }
