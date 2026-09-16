@@ -9,6 +9,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/com
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/toast";
 import { casefileAPI, notesAPI, alertsAPI, StudentCasefile, CasefileTimelineEvent } from "@/services/api";
+import { ExplainableAIFactors } from "@/components/ExplainableAIFactors";
 
 export const StudentCaseFile: React.FC = () => {
   const { studentId } = useParams<{ studentId: string }>();
@@ -394,6 +395,9 @@ export const StudentCaseFile: React.FC = () => {
                 </p>
               </Card>
             </div>
+
+            {/* Unified Explainable AI Diagnostic Factors & Longitudinal Trajectory */}
+            <ExplainableAIFactors studentId={studentId} className="border-border/80 bg-card/60 backdrop-blur-md" />
 
             {/* Active Case Alerts & Clinical Triage */}
             {casefile.timeline.filter(e => e.event_type === "ALERT").length > 0 && (
