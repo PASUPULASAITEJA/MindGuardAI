@@ -18,6 +18,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "../../components/ui/card";
 import { Button } from "../../components/ui/button";
 import { HabitRecoverySimulator } from "../../components/HabitRecoverySimulator";
+import { PersonalizedRecommendations } from "../../components/PersonalizedRecommendations";
 
 export const SelfCareResourcesPage: React.FC = () => {
   const navigate = useNavigate();
@@ -86,6 +87,9 @@ export const SelfCareResourcesPage: React.FC = () => {
           Clinically backed relaxation protocols to ground your autonomic nervous system, reduce cognitive fatigue, and restore mental focus.
         </p>
       </div>
+
+      {/* AI Personalized Recommendation Engine */}
+      <PersonalizedRecommendations />
 
       {/* Grid of tools */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
