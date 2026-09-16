@@ -1,4 +1,6 @@
 from typing import Optional
+from uuid import UUID
+from datetime import datetime
 from fastapi import APIRouter, Depends, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -100,6 +102,11 @@ async def get_user_directory(
 async def get_audit_logs(
     action: Optional[str] = Query(None, description="Filter by action code"),
     actor_role: Optional[str] = Query(None, description="Filter by actor role"),
+    user_id: Optional[UUID] = Query(None, description="Filter by actor or target user ID"),
+    resource_type: Optional[str] = Query(None, description="Filter by resource classification"),
+    start_date: Optional[datetime] = Query(None, description="Start timestamp filter"),
+    end_date: Optional[datetime] = Query(None, description="End timestamp filter"),
+    date_range: Optional[str] = Query(None, description="Relative date range (e.g., 24h, 7d, 30d, 90d)"),
     page: int = Query(1, ge=1, description="Page number"),
     page_size: int = Query(25, ge=1, le=100, description="Items per page"),
     db: AsyncSession = Depends(get_db),
@@ -107,9 +114,32 @@ async def get_audit_logs(
 ):
     """
     Retrieves immutable audit records for regulatory compliance, forensics, and privacy governance.
+    Supports filtering by action, user_id, resource_type, and date_range.
     """
+    from datetime import datetime, timezone, timedelta
+
+    calc_start_date = start_date
+    if date_range and not calc_start_date:
+        now = datetime.now(timezone.utc)
+        if date_range == "24h":
+            calc_start_date = now - timedelta(hours=24)
+        elif date_range == "7d":
+            calc_start_date = now - timedelta(days=7)
+        elif date_range == "30d":
+            calc_start_date = now - timedelta(days=30)
+        elif date_range == "90d":
+            calc_start_date = now - timedelta(days=90)
+
     logs, total = await audit_service.get_audit_logs(
-        db, page=page, page_size=page_size, action=action, actor_role=actor_role
+        db,
+        page=page,
+        page_size=page_size,
+        action=action,
+        actor_role=actor_role,
+        user_id=user_id,
+        resource_type=resource_type,
+        start_date=calc_start_date,
+        end_date=end_date
     )
     return AuditLogListResponse(
         logs=logs,
