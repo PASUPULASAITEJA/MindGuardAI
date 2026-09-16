@@ -2,7 +2,7 @@ import enum
 from datetime import datetime
 from typing import TYPE_CHECKING, Optional
 from uuid import UUID, uuid4
-from sqlalchemy import Enum, DateTime, ForeignKey, Index, func
+from sqlalchemy import Enum, DateTime, ForeignKey, Index, String, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.db.session import Base
 
@@ -48,6 +48,13 @@ class Alert(Base):
         default=AlertStatus.PENDING,
         nullable=False,
         comment="Current workflow status of the alert ('PENDING', 'REVIEWED', 'RESOLVED')."
+    )
+    severity: Mapped[str] = mapped_column(
+        String(50),
+        default="HIGH",
+        nullable=False,
+        server_default="HIGH",
+        comment="Alert severity priority ('HIGH', 'CRITICAL')."
     )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
