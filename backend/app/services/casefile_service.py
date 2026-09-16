@@ -34,7 +34,7 @@ class CaseFileService:
         ).order_by(desc(Consent.created_at)).limit(1)
         consent_res = await db.execute(consent_stmt)
         consent = consent_res.scalars().first()
-        consent_status = consent.status.value if consent else "GRANTED"
+        consent_status = consent.status.value if consent else ConsentStatus.PENDING.value
 
         # 3. Calculate Cutoff Timestamp
         now = datetime.now(timezone.utc)
