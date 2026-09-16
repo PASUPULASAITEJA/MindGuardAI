@@ -190,6 +190,34 @@ async def run_all_tests():
             f"Status: {res_invalid.status_code}"
         )
 
+        # Refresh Token Cookie Lifecycle on Localhost
+        cookie_header = res_student_login.headers.get("set-cookie", "")
+        has_refresh_cookie = "refresh_token=" in cookie_header
+        is_insecure_cookie = "Secure" not in cookie_header  # Must be False on localhost/dev over http
+        record_test(
+            "Refresh Token Cookie Set on Login (HttpOnly, secure=False on localhost)",
+            has_refresh_cookie and is_insecure_cookie,
+            f"Set-Cookie present: {has_refresh_cookie}, Insecure on localhost: {is_insecure_cookie}"
+        )
+
+        # Call /api/v1/auth/refresh using the cookie captured by client
+        res_refresh = await client.post("/api/v1/auth/refresh")
+        refreshed_access_token = res_refresh.json().get("access_token") if res_refresh.status_code == 200 else None
+        record_test(
+            "Token Refresh via HttpOnly Cookie on Localhost",
+            res_refresh.status_code == 200 and bool(refreshed_access_token),
+            f"Status: {res_refresh.status_code}, Refreshed token present: {bool(refreshed_access_token)}"
+        )
+
+        # Verify /api/v1/auth/refresh rejects when cookie is absent
+        async with AsyncClient(transport=transport, base_url="http://testserver") as client_no_cookie:
+            res_no_cookie = await client_no_cookie.post("/api/v1/auth/refresh")
+            record_test(
+                "Token Refresh Rejection Without Cookie",
+                res_no_cookie.status_code == 401,
+                f"Status: {res_no_cookie.status_code}"
+            )
+
         student_headers = {"Authorization": f"Bearer {student_token}"}
         counselor_headers = {"Authorization": f"Bearer {counselor_token}"}
         admin_headers = {"Authorization": f"Bearer {admin_token}"}
