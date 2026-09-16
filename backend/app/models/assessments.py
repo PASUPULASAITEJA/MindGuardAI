@@ -14,6 +14,7 @@ class RiskLevel(str, enum.Enum):
     LOW = "LOW"
     MEDIUM = "MEDIUM"
     HIGH = "HIGH"
+    CRITICAL = "CRITICAL"
 
 class Assessment(Base):
     __tablename__ = "assessments"
