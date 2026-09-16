@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useLocation, NavLink } from "react-router-dom";
 import { useTheme } from "@/contexts/ThemeContext";
-import { useCounselorAlerts, useUpdateAlertStatus } from "@/hooks/useAlerts";
+import { useCounselorAlerts, useUpdateAlertStatus, useAssignAlert, useAddAlertNote, AlertItem } from "@/hooks/useAlerts";
 import { useMoodHistory } from "@/hooks/useMood";
 import { useLatestAssessment } from "@/hooks/usePredictions";
 import { useToast } from "@/components/ui/toast";
@@ -11,7 +11,7 @@ import {
   LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer 
 } from "recharts";
 import { 
-  AlertCircle, CheckCircle2, Clock, X, ChevronRight, User as UserIcon, Loader2, Users, Calendar 
+  AlertCircle, CheckCircle2, Clock, X, ChevronRight, User as UserIcon, Loader2, Users, Calendar, FileEdit 
 } from "lucide-react";
 import { appointmentsAPI, AppointmentItem } from "@/services/api";
 
@@ -29,6 +29,13 @@ export const CounselorDashboard: React.FC = () => {
   const { data: alertsData, isLoading: isAlertsLoading } = useCounselorAlerts(statusFilter);
   const { data: allAlertsData } = useCounselorAlerts("");
   const updateStatusMutation = useUpdateAlertStatus(statusFilter);
+  const assignAlertMutation = useAssignAlert(statusFilter);
+  const addNoteMutation = useAddAlertNote();
+
+  // Alert Note Modal state
+  const [activeNoteAlert, setActiveNoteAlert] = useState<AlertItem | null>(null);
+  const [alertNoteText, setAlertNoteText] = useState("");
+  const [isSubmittingAlertNote, setIsSubmittingAlertNote] = useState(false);
 
   const [appointmentsList, setAppointmentsList] = useState<AppointmentItem[]>([]);
   const [isAppointmentsLoading, setIsAppointmentsLoading] = useState(false);
@@ -105,6 +112,50 @@ export const CounselorDashboard: React.FC = () => {
         description: "Failed to sync status changes to the database.",
         variant: "destructive",
       });
+    }
+  };
+
+  const handleAssignAlert = async (alertId: string, counselorId?: string) => {
+    try {
+      await assignAlertMutation.mutateAsync({ id: alertId, counselorId });
+      toast({
+        title: "Case Assigned",
+        description: "Alert assigned to counselor for clinical triage.",
+        variant: "success",
+      });
+    } catch (err: any) {
+      toast({
+        title: "Assignment Failed",
+        description: err?.response?.data?.message || "Failed to assign case.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleSaveAlertNote = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!activeNoteAlert || !alertNoteText.trim()) return;
+    setIsSubmittingAlertNote(true);
+    try {
+      await addNoteMutation.mutateAsync({
+        alertId: activeNoteAlert.id,
+        note: alertNoteText.trim(),
+      });
+      toast({
+        title: "Case Note Recorded",
+        description: "Observation saved to case file and audit log.",
+        variant: "success",
+      });
+      setAlertNoteText("");
+      setActiveNoteAlert(null);
+    } catch (err: any) {
+      toast({
+        title: "Failed to Save Note",
+        description: err?.response?.data?.message || "Could not record clinical note.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmittingAlertNote(false);
     }
   };
 
@@ -292,13 +343,37 @@ export const CounselorDashboard: React.FC = () => {
                               )}
                             </td>
                             <td className="p-4 text-right" onClick={(e) => e.stopPropagation()}>
-                              <Button
-                                size="sm"
-                                onClick={() => handleStatusChange(alert.id, "REVIEWED")}
-                                className="bg-amber-600 hover:bg-amber-500 text-white font-semibold text-xs h-8 px-3 rounded-lg"
-                              >
-                                Claim Case
-                              </Button>
+                              <div className="flex items-center gap-1.5 justify-end">
+                                {!alert.counselor_id && (
+                                  <Button
+                                    size="sm"
+                                    onClick={() => handleAssignAlert(alert.id)}
+                                    className="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs h-8 px-2.5 rounded-lg"
+                                    title="Assign to me"
+                                  >
+                                    Assign
+                                  </Button>
+                                )}
+                                <Button
+                                  size="sm"
+                                  onClick={() => handleStatusChange(alert.id, "REVIEWED")}
+                                  className="bg-amber-600 hover:bg-amber-500 text-white font-semibold text-xs h-8 px-2.5 rounded-lg"
+                                >
+                                  Claim Case
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => {
+                                    setActiveNoteAlert(alert);
+                                    setAlertNoteText("");
+                                  }}
+                                  className="border-border text-foreground hover:bg-accent font-semibold text-xs h-8 px-2 rounded-lg"
+                                  title="Add Clinical Note"
+                                >
+                                  <FileEdit className="h-3.5 w-3.5" />
+                                </Button>
+                              </div>
                             </td>
                           </tr>
                         ))}
@@ -464,6 +539,7 @@ export const CounselorDashboard: React.FC = () => {
                         <th className="p-4 uppercase tracking-wider">Created At</th>
                         <th className="p-4 uppercase tracking-wider">Student Reference</th>
                         <th className="p-4 uppercase tracking-wider">Risk Severity</th>
+                        <th className="p-4 uppercase tracking-wider">Assignment</th>
                         <th className="p-4 uppercase tracking-wider">Assessment ID</th>
                         <th className="p-4 uppercase tracking-wider">Workflow Status</th>
                         <th className="p-4 uppercase tracking-wider text-right">Actions</th>
@@ -496,6 +572,18 @@ export const CounselorDashboard: React.FC = () => {
                               </span>
                             )}
                           </td>
+                          <td className="p-4">
+                            {alert.counselor_id ? (
+                              <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-primary px-2 py-0.5 rounded-md bg-primary/10 border border-primary/20">
+                                <UserIcon className="h-3 w-3" />
+                                Assigned
+                              </span>
+                            ) : (
+                              <span className="inline-flex items-center text-[11px] font-medium text-muted-foreground px-2 py-0.5 rounded-md bg-muted border border-border">
+                                Unassigned
+                              </span>
+                            )}
+                          </td>
                           <td className="p-4 text-muted-foreground">{alert.assessment_id.substring(0, 12)}...</td>
                           <td className="p-4">
                             <span className={`inline-flex items-center gap-1 font-bold ${
@@ -512,39 +600,53 @@ export const CounselorDashboard: React.FC = () => {
                             </span>
                           </td>
                           <td className="p-4 text-right" onClick={(e) => e.stopPropagation()}>
-                            <div className="flex gap-2 justify-end">
+                            <div className="flex gap-1.5 justify-end items-center flex-wrap">
+                              {!alert.counselor_id && (
+                                <Button
+                                  size="sm"
+                                  onClick={() => handleAssignAlert(alert.id)}
+                                  className="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs h-8 px-2.5 rounded-lg"
+                                  title="Assign to me"
+                                >
+                                  Assign
+                                </Button>
+                              )}
                               {alert.status === "PENDING" && (
                                 <Button
                                   size="sm"
                                   onClick={() => handleStatusChange(alert.id, "REVIEWED")}
-                                  className="bg-amber-600 hover:bg-amber-500 text-white font-semibold text-xs h-8 px-3 rounded-lg"
+                                  className="bg-amber-600 hover:bg-amber-500 text-white font-semibold text-xs h-8 px-2.5 rounded-lg"
                                 >
-                                  Claim Alert
+                                  Claim
                                 </Button>
                               )}
                               {alert.status !== "RESOLVED" && (
                                 <Button
                                   size="sm"
                                   onClick={() => handleStatusChange(alert.id, "RESOLVED")}
-                                  className="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs h-8 px-3 rounded-lg"
+                                  className="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs h-8 px-2.5 rounded-lg"
                                 >
-                                  Close Alert
+                                  Resolve
                                 </Button>
                               )}
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => {
+                                  setActiveNoteAlert(alert);
+                                  setAlertNoteText("");
+                                }}
+                                className="border-border text-foreground hover:bg-accent font-semibold text-xs h-8 px-2 rounded-lg flex items-center gap-1"
+                                title="Add Clinical Note"
+                              >
+                                <FileEdit className="h-3.5 w-3.5" />
+                              </Button>
                               <NavLink
                                 to={`/counselor/students/${alert.student_id}/casefile`}
-                                className="inline-flex items-center gap-1 bg-primary/10 hover:bg-primary/20 text-primary border border-primary/30 font-semibold text-xs h-8 px-2.5 rounded-lg transition-colors"
+                                className="inline-flex items-center gap-1 bg-primary/10 hover:bg-primary/20 text-primary border border-primary/30 font-semibold text-xs h-8 px-2 rounded-lg transition-colors"
                               >
                                 Case File
                               </NavLink>
-                              <Button
-                                size="sm"
-                                variant="ghost"
-                                onClick={() => setSelectedStudentId(alert.student_id)}
-                                className="text-muted-foreground hover:text-foreground h-8 px-2 text-xs flex items-center"
-                              >
-                                Profile <ChevronRight className="h-3.5 w-3.5 ml-0.5" />
-                              </Button>
                             </div>
                           </td>
                         </tr>
@@ -632,6 +734,72 @@ export const CounselorDashboard: React.FC = () => {
           studentId={selectedStudentId} 
           onClose={() => setSelectedStudentId(null)} 
         />
+      )}
+
+      {/* Alert Clinical Case Note Modal */}
+      {activeNoteAlert && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+          <div className="bg-card border border-border/80 rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-4">
+            <div className="flex items-center justify-between border-b border-border/60 pb-3">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-lg bg-primary/15 text-primary flex items-center justify-center">
+                  <FileEdit className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-foreground">Record Alert Case Note</h3>
+                  <p className="text-xs text-muted-foreground">
+                    Alert ID: {activeNoteAlert.id.substring(0, 8)}... • Student: {activeNoteAlert.student_id.substring(0, 8)}...
+                  </p>
+                </div>
+              </div>
+              <button 
+                onClick={() => setActiveNoteAlert(null)}
+                className="text-muted-foreground hover:text-foreground text-xs"
+              >
+                ✕
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveAlertNote} className="space-y-4">
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-muted-foreground">
+                  Clinical Triage Observations & Actions Taken:
+                </label>
+                <textarea
+                  rows={4}
+                  value={alertNoteText}
+                  onChange={(e) => setAlertNoteText(e.target.value)}
+                  placeholder="Record confidential case notes, contact attempts, welfare check outcomes, or safety plans..."
+                  className="w-full rounded-xl border border-border/70 bg-background/50 p-3 text-xs md:text-sm text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-1 focus:ring-primary resize-none"
+                  required
+                />
+              </div>
+
+              <div className="p-3 rounded-xl bg-accent/20 border border-border/60 text-[11px] text-muted-foreground">
+                🔒 This note is securely stored in clinical case notes and logged into the compliance audit trail.
+              </div>
+
+              <div className="flex items-center justify-end gap-2 pt-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setActiveNoteAlert(null)}
+                  disabled={isSubmittingAlertNote}
+                  className="h-9 text-xs px-4 rounded-lg"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={isSubmittingAlertNote || !alertNoteText.trim()}
+                  className="h-9 text-xs px-4 rounded-lg bg-primary hover:bg-primary/90 text-primary-foreground font-semibold"
+                >
+                  {isSubmittingAlertNote ? "Saving Note..." : "Save Case Note"}
+                </Button>
+              </div>
+            </form>
+          </div>
+        </div>
       )}
     </div>
   );
