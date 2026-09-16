@@ -606,6 +606,52 @@ api.interceptors.response.use(
     }
   };
 
+  export interface NotificationItem {
+    id: string;
+    user_id: string;
+    type: "risk_alert" | "session_reminder" | "system" | "counselor_message" | string;
+    title: string;
+    message: string;
+    channel: "in_app" | "email" | "both" | string;
+    is_read: boolean;
+    created_at: string;
+    read_at?: string | null;
+  }
+
+  export interface NotificationListResponse {
+    items: NotificationItem[];
+    total: number;
+    unread_count: number;
+    notifications?: NotificationItem[];
+  }
+
+  export interface NotificationMarkReadResponse {
+    success: boolean;
+    marked_count: number;
+    unread_count: number;
+  }
+
+  export const notificationsAPI = {
+    getNotifications: async (limit: number = 50, unreadOnly: boolean = false) => {
+      const res = await api.get<NotificationListResponse>("/notifications", {
+        params: { limit, unread_only: unreadOnly }
+      });
+      return res.data;
+    },
+    markRead: async (notificationId: string) => {
+      const res = await api.patch<NotificationItem>(`/notifications/${notificationId}/read`);
+      return res.data;
+    },
+    markAllRead: async () => {
+      const res = await api.post<NotificationMarkReadResponse>("/notifications/mark-all-read");
+      return res.data;
+    },
+    createTestNotification: async (payload: { title: string; message: string; type?: string; channel?: string }) => {
+      const res = await api.post<NotificationItem>("/notifications/test", payload);
+      return res.data;
+    }
+  };
+
   export default api;
 
 
