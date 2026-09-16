@@ -9,6 +9,7 @@ from app.models.behavioral import BehavioralLog
 from app.models.appointments import Appointment, AppointmentStatus, AppointmentType
 from app.models.consent import Consent, ConsentStatus
 from app.models.counselor_notes import CounselorNote
+from app.models.case_notes import CaseNote
 from app.models.audit_logs import AuditLog
 from app.models.notification_deliveries import NotificationDelivery
 
@@ -34,6 +35,7 @@ __all__ = [
     "Consent",
     "ConsentStatus",
     "CounselorNote",
+    "CaseNote",
     "AuditLog",
     "NotificationDelivery",
 ]
