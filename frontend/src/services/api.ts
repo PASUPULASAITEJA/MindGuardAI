@@ -652,6 +652,45 @@ api.interceptors.response.use(
     }
   };
 
+  export interface WellnessTrendPoint {
+    date: string;
+    wellness_score: number;
+    phq9_score?: number | null;
+    gad7_score?: number | null;
+    nlp_sentiment?: number | null;
+    primary_emotion?: string | null;
+    risk_level: string;
+    rolling_avg: number;
+  }
+
+  export interface WellnessTrendSummary {
+    average_wellness_score: number;
+    wellness_delta: number;
+    direction: "IMPROVING" | "STABLE" | "DECLINING" | string;
+    dominant_emotion: string;
+    emotion_distribution: Record<string, number>;
+    total_checkins: number;
+    volatility_score: number;
+    highest_score: number;
+    lowest_score: number;
+  }
+
+  export interface WellnessTrendResponse {
+    student_id: string;
+    timeframe: string;
+    summary: WellnessTrendSummary;
+    points: WellnessTrendPoint[];
+  }
+
+  export const trendsAPI = {
+    getWellnessTrends: async (timeframe: string = "30d", studentId?: string) => {
+      const res = await api.get<WellnessTrendResponse>("/predictions/trends", {
+        params: { timeframe, student_id: studentId }
+      });
+      return res.data;
+    }
+  };
+
   export default api;
 
 
