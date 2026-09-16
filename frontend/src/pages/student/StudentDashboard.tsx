@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import { 
@@ -61,6 +61,8 @@ import { ClinicalSurveyModal } from "@/components/ClinicalSurveyModal";
 import { CounselorBookingModal } from "@/components/CounselorBookingModal";
 import { EmergencySOSModal } from "@/components/EmergencySOSModal";
 import { ConsentBanner } from "@/components/ConsentBanner";
+import { OnboardingConsentModal } from "@/components/OnboardingConsentModal";
+import { consentRecordsAPI } from "@/services/api";
 
 export const StudentDashboard: React.FC = () => {
   const { user } = useAuth();
@@ -77,7 +79,19 @@ export const StudentDashboard: React.FC = () => {
   const [surveyType, setSurveyType] = useState<"phq-9" | "gad-7">("phq-9");
   const [isBookingOpen, setIsBookingOpen] = useState(false);
   const [isExplainOpen, setIsExplainOpen] = useState(false);
+  const [isOnboardingConsentOpen, setIsOnboardingConsentOpen] = useState(false);
   const [screenChartMode, setScreenChartMode] = useState<"total" | "circadian" | "purpose">("total");
+
+  // Onboarding Consent Check on first student login
+  useEffect(() => {
+    if (user?.role === "STUDENT") {
+      consentRecordsAPI.getConsents().then((res) => {
+        if (!res.onboarding_completed) {
+          setIsOnboardingConsentOpen(true);
+        }
+      }).catch(() => {});
+    }
+  }, [user]);
 
   // Queries
   const { data: latestAssessment, isLoading: isAssessmentLoading } = useLatestAssessment();
@@ -1011,6 +1025,7 @@ export const StudentDashboard: React.FC = () => {
       <BoxBreathingModal isOpen={isBreathOpen} onClose={() => setIsBreathOpen(false)} />
       <ClinicalSurveyModal isOpen={isSurveyOpen} surveyType={surveyType} onClose={() => setIsSurveyOpen(false)} />
       <CounselorBookingModal isOpen={isBookingOpen} onClose={() => setIsBookingOpen(false)} />
+      <OnboardingConsentModal isOpen={isOnboardingConsentOpen} onCompleted={() => setIsOnboardingConsentOpen(false)} />
 
       {/* Explainable AI Factors Modal */}
       {isExplainOpen && (
