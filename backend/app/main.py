@@ -22,6 +22,7 @@ from app.api.v1.chatbot import router as chatbot_router
 from app.api.v1.appointments import router as appointments_router
 from app.api.v1.consent import consent_router
 from app.api.v1.consent_records import consent_records_router
+from app.middleware.audit_logging import AuditLoggingMiddleware
 
 from contextlib import asynccontextmanager
 from app.ml.inference import ml_service
@@ -79,6 +80,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+app.add_middleware(AuditLoggingMiddleware)
 
 # 2. Configure Request ID and Timing Middleware
 @app.middleware("http")
@@ -176,6 +178,7 @@ async def catch_all_exception_handler(request: Request, exc: Exception):
 app.include_router(auth_router, prefix="/api/v1/auth", tags=["Authentication"])
 app.include_router(students_router, prefix="/api/v1/students", tags=["Students"])
 app.include_router(admin_router, prefix="/api/v1/admin", tags=["Institution Administration"])
+app.include_router(admin_router, prefix="/api/admin", tags=["Institution Administration"])
 app.include_router(mood_router, prefix="/api/v1/mood", tags=["Mood Tracking"])
 app.include_router(journal_router, prefix="/api/v1/journal", tags=["Journal Entries"])
 app.include_router(surveys_router, prefix="/api/v1/surveys", tags=["Clinical Surveys"])
