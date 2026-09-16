@@ -24,10 +24,23 @@ async def get_my_consent(
 ):
     """
     Returns the student's consent record for clinical data sharing.
-    If no record exists yet, automatically provisions the default GRANTED state.
+    If no record exists yet, automatically provisions the default PENDING state.
     """
-    consent = await consent_service.get_or_create_default(db, current_user.id)
-    return consent
+    existing = await consent_service.get_consent(db, current_user.id)
+    if not existing:
+        consent = await consent_service.get_or_create_default(db, current_user.id)
+        await audit_service.log_event(
+            db,
+            action="INIT_CONSENT_PENDING",
+            actor_user_id=current_user.id,
+            actor_role=current_user.role.value,
+            target_user_id=current_user.id,
+            target_resource_type="CONSENT",
+            target_resource_id=str(consent.id),
+            metadata={"consent_type": consent.consent_type, "status": "PENDING"}
+        )
+        return consent
+    return existing
 
 @consent_router.post(
     "/me/grant",
@@ -87,6 +100,36 @@ async def revoke_consent(
     return ConsentActionResponse(
         status="success",
         message="Consent revoked. Counselors can no longer access your wellness data or timeline.",
+        consent=ConsentResponse.model_validate(consent)
+    )
+
+@consent_router.post(
+    "/me/decline",
+    response_model=ConsentActionResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Explicitly decline consent to share wellness insights with counselors"
+)
+async def decline_consent(
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_role([UserRole.STUDENT, UserRole.COUNSELOR, UserRole.ADMIN]))
+):
+    """
+    Explicitly declines counselor access, persisting REVOKED state.
+    """
+    consent = await consent_service.revoke_consent(db, current_user.id)
+    await audit_service.log_event(
+        db,
+        action="DECLINE_CONSENT",
+        actor_user_id=current_user.id,
+        actor_role=current_user.role.value,
+        target_user_id=current_user.id,
+        target_resource_type="CONSENT",
+        target_resource_id=str(consent.id),
+        metadata={"consent_type": consent.consent_type, "status": "REVOKED"}
+    )
+    return ConsentActionResponse(
+        status="success",
+        message="Consent declined. Counselors cannot access your wellness data.",
         consent=ConsentResponse.model_validate(consent)
     )
 
