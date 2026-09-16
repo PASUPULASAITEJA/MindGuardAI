@@ -11,6 +11,7 @@ from app.models.consent import Consent, ConsentStatus
 from app.models.consent_records import ConsentRecord, ConsentType
 from app.models.counselor_notes import CounselorNote
 from app.models.case_notes import CaseNote
+from app.models.risk_explanations import RiskExplanation, ExplanationDirection
 from app.models.audit_logs import AuditLog
 from app.models.notification_deliveries import NotificationDelivery
 
@@ -39,6 +40,8 @@ __all__ = [
     "ConsentType",
     "CounselorNote",
     "CaseNote",
+    "RiskExplanation",
+    "ExplanationDirection",
     "AuditLog",
     "NotificationDelivery",
 ]
