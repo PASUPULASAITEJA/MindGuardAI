@@ -63,6 +63,7 @@ import { CounselorBookingModal } from "@/components/CounselorBookingModal";
 import { EmergencySOSModal } from "@/components/EmergencySOSModal";
 import { ConsentBanner } from "@/components/ConsentBanner";
 import { OnboardingConsentModal } from "@/components/OnboardingConsentModal";
+import { MoodMicroCheckin } from "@/components/MoodMicroCheckin";
 import { consentRecordsAPI } from "@/services/api";
 
 export const StudentDashboard: React.FC = () => {
@@ -312,6 +313,9 @@ export const StudentDashboard: React.FC = () => {
 
       {/* Consent-First Enforcement Banner */}
       <ConsentBanner />
+
+      {/* 30-Second Micro Check-In (EMA) */}
+      <MoodMicroCheckin />
 
       {/* 2. Top 4 Key Metric Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
