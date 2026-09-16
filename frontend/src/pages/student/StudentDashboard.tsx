@@ -60,6 +60,7 @@ import { BoxBreathingModal } from "@/components/BoxBreathingModal";
 import { ClinicalSurveyModal } from "@/components/ClinicalSurveyModal";
 import { CounselorBookingModal } from "@/components/CounselorBookingModal";
 import { EmergencySOSModal } from "@/components/EmergencySOSModal";
+import { ConsentBanner } from "@/components/ConsentBanner";
 
 export const StudentDashboard: React.FC = () => {
   const { user } = useAuth();
@@ -293,6 +294,9 @@ export const StudentDashboard: React.FC = () => {
           </Button>
         </div>
       </div>
+
+      {/* Consent-First Enforcement Banner */}
+      <ConsentBanner />
 
       {/* 2. Top 4 Key Metric Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
