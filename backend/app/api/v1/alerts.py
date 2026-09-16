@@ -7,7 +7,7 @@ from app.db.session import get_db
 from app.api.dependencies import require_role, verify_student_consent
 from app.models.users import User, UserRole
 from app.models.alerts import AlertStatus
-from app.schemas.alerts import ActiveAlertsResponse, AlertUpdateRequest, AlertUpdateResponse
+from app.schemas.alerts import ActiveAlertsResponse, AlertUpdateRequest, AlertUpdateResponse, SOSResponse
 from app.schemas.notes import CreateCounselorNoteRequest, CounselorNoteResponse, CounselorNotesListResponse
 from app.services.alerts import alert_service
 from app.services.casefile_service import casefile_service
@@ -15,6 +15,7 @@ from app.services.notes_service import notes_service
 from app.services.audit_service import audit_service
 
 router = APIRouter()
+_sos_cooldown_tracker = {}
 
 @router.get(
     "/alerts",
@@ -200,6 +201,7 @@ async def post_student_note(
 
 @router.post(
     "/sos",
+    response_model=SOSResponse,
     status_code=status.HTTP_201_CREATED,
     summary="Dispatch emergency SOS alert from distressed student"
 )
@@ -209,50 +211,88 @@ async def trigger_emergency_sos(
 ):
     """
     Immediate crisis distress escalation. Instantly alerts designated campus counselors,
-    generates a high-priority safety event, and returns immediate 24x7 verified emergency helplines.
+    generates a CRITICAL alert, writes in-app notifications and audit logs, with per-user rate limiting.
     """
     from uuid import uuid4
     from datetime import datetime, timezone
+    from sqlalchemy import select
     from app.models.assessments import Assessment, RiskLevel
     from app.models.alerts import Alert
     from app.models.chat import SafetyEvent
+    from app.models.notification_deliveries import NotificationDelivery
 
-    # 1. Create immediate high-risk clinical assessment
+    now = datetime.now(timezone.utc)
+
+    # 1. Enforce Per-User Cooldown Rate Limiting (60 seconds)
+    last_trigger = _sos_cooldown_tracker.get(current_user.id)
+    if last_trigger:
+        elapsed = (now - last_trigger).total_seconds()
+        if elapsed < 60:
+            remaining = int(60 - elapsed)
+            raise HTTPException(
+                status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+                detail=f"Emergency SOS alert was recently dispatched. Cooldown active for {remaining} seconds."
+            )
+
+    _sos_cooldown_tracker[current_user.id] = now
+
+    # 2. Create immediate CRITICAL clinical assessment
     assessment = Assessment(
         id=uuid4(),
         student_id=current_user.id,
         mental_wellness_score=5.0,
-        risk_level=RiskLevel.HIGH,
-        evaluated_at=datetime.now(timezone.utc)
+        risk_level=RiskLevel.CRITICAL,
+        evaluated_at=now
     )
     db.add(assessment)
     await db.flush()
 
-    # 2. Dispatch high-priority pending counselor alert
+    # 3. Dispatch CRITICAL pending counselor alert
     alert = Alert(
         id=uuid4(),
         assessment_id=assessment.id,
         student_id=current_user.id,
         counselor_id=None,
         status=AlertStatus.PENDING,
-        created_at=datetime.now(timezone.utc)
+        severity="CRITICAL",
+        created_at=now
     )
     db.add(alert)
 
-    # 3. Log urgent SafetyEvent in audit log
+    # 4. Log urgent SafetyEvent in database
     safety_event = SafetyEvent(
         id=str(uuid4()),
         student_id=str(current_user.id),
-        severity="RED",
+        severity="CRITICAL",
         trigger_type="EMERGENCY_SOS_BUTTON",
         status="OPEN",
-        details=f"Urgent 1-Click SOS distress signal triggered by student ({current_user.full_name or current_user.email}). Immediate counselor outreach required.",
-        created_at=datetime.now(timezone.utc)
+        details=f"CRITICAL 1-Click SOS distress signal triggered by student ({current_user.full_name or current_user.email}). Immediate counselor outreach required.",
+        created_at=now
     )
     db.add(safety_event)
+
+    # 5. Create in-app notifications for counselors & administrators
+    staff_stmt = select(User).where(User.role.in_([UserRole.COUNSELOR, UserRole.ADMIN]))
+    staff_res = await db.execute(staff_stmt)
+    staff_members = staff_res.scalars().all()
+    for staff in staff_members:
+        delivery = NotificationDelivery(
+            id=uuid4(),
+            event_type="EMERGENCY_SOS",
+            recipient_user_id=staff.id,
+            recipient_email=staff.email,
+            channel="IN_APP",
+            status="SENT",
+            subject="CRITICAL: Emergency SOS Triggered",
+            body_preview=f"Student ({current_user.full_name or current_user.email}) triggered an urgent Emergency SOS signal.",
+            sent_at=now,
+            created_at=now
+        )
+        db.add(delivery)
+
     await db.commit()
 
-    # Log high-priority audit event
+    # 6. Log high-priority audit event
     await audit_service.log_event(
         db,
         action="DISPATCH_EMERGENCY_SOS",
@@ -261,10 +301,14 @@ async def trigger_emergency_sos(
         target_user_id=current_user.id,
         target_resource_type="SOS",
         target_resource_id=str(alert.id),
-        metadata={"trigger_type": "EMERGENCY_SOS_BUTTON", "alert_id": str(alert.id)}
+        metadata={
+            "trigger_type": "EMERGENCY_SOS_BUTTON",
+            "alert_id": str(alert.id),
+            "severity": "CRITICAL"
+        }
     )
 
-    # Dispatch emergency email alert to campus counseling staff
+    # 7. Dispatch emergency email alert to campus counseling staff
     try:
         from app.services.email_service import email_service
         await email_service.notify_counselors_on_high_risk(
@@ -275,13 +319,15 @@ async def trigger_emergency_sos(
             event_type="EMERGENCY_SOS",
             custom_message=f"CRITICAL 1-CLICK SOS DISTRESS SIGNAL triggered by student ({current_user.full_name or current_user.email}). Immediate counselor contact and welfare check required."
         )
-    except Exception as notify_err:
+    except Exception:
         pass
 
     return {
         "status": "success",
         "message": "Emergency SOS alert dispatched to campus counseling staff.",
         "alert_id": str(alert.id),
+        "severity": "CRITICAL",
+        "created_at": now.isoformat(),
         "helplines": [
             {
                 "name": "Tele-MANAS (Govt of India)",
