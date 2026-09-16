@@ -25,6 +25,7 @@ from app.api.v1.appointments import router as appointments_router
 from app.api.v1.consent import consent_router
 from app.api.v1.consent_records import consent_records_router
 from app.api.v1.checkins import router as checkins_router, counselor_checkins_router
+from app.api.v1.sleep import router as sleep_router, counselor_sleep_router
 from app.middleware.audit_logging import AuditLoggingMiddleware
 
 from contextlib import asynccontextmanager
@@ -207,5 +208,11 @@ app.include_router(counselor_checkins_router, prefix="/api/counsellor", tags=["C
 app.include_router(counselor_checkins_router, prefix="/api/counselor", tags=["Counselor Student EMA Check-Ins"])
 app.include_router(counselor_checkins_router, prefix="/api/v1/counselor", tags=["Counselor Student EMA Check-Ins"])
 app.include_router(counselor_checkins_router, prefix="/api/v1/counselors", tags=["Counselor Student EMA Check-Ins"])
+app.include_router(sleep_router, prefix="/api/v1/sleep", tags=["Sleep Tracking"])
+app.include_router(sleep_router, prefix="/api/sleep", tags=["Sleep Tracking"])
+app.include_router(counselor_sleep_router, prefix="/api/counselor", tags=["Counselor Student Sleep Profiles"])
+app.include_router(counselor_sleep_router, prefix="/api/counsellor", tags=["Counselor Student Sleep Profiles"])
+app.include_router(counselor_sleep_router, prefix="/api/v1/counselors", tags=["Counselor Student Sleep Profiles"])
+app.include_router(counselor_sleep_router, prefix="/api/v1/counselor", tags=["Counselor Student Sleep Profiles"])
 
 
