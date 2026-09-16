@@ -17,6 +17,7 @@ from app.models.notification_deliveries import NotificationDelivery
 from app.models.notifications import Notification, NotificationType, NotificationChannel
 from app.models.recommendations import RecommendationRecord
 from app.models.mood_checkins import MoodCheckin
+from app.models.sleep_logs import SleepLog
 
 __all__ = [
     "Base",
@@ -52,5 +53,6 @@ __all__ = [
     "NotificationChannel",
     "RecommendationRecord",
     "MoodCheckin",
+    "SleepLog",
 ]
 
