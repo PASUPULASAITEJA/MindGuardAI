@@ -22,6 +22,8 @@ from app.schemas.predictions import (
     TrendPeriodSummary
 )
 from app.services.audit_service import audit_service
+from app.schemas.risk_explanations import ShapPredictionExplanationResponse
+from app.services.shap_service import shap_service
 
 router = APIRouter()
 
@@ -532,3 +534,52 @@ async def explain_student_risk(
         trend_summary=trend_summary,
         top_factors=top_5_factors
     )
+
+
+@router.get(
+    "/{prediction_id}/explanation",
+    response_model=ShapPredictionExplanationResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Get SHAP TreeExplainer factors for a prediction"
+)
+async def get_prediction_shap_explanation(
+    prediction_id: UUID,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Returns SHAP-based feature attribution for a specific assessment prediction.
+    Strictly explains factors that influenced the mental wellness score (non-diagnostic).
+    """
+    stmt = select(Assessment).where(Assessment.id == prediction_id)
+    res = await db.execute(stmt)
+    assessment = res.scalars().first()
+    if not assessment:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Assessment/Prediction record not found"
+        )
+
+    # RBAC & Consent Check
+    if current_user.role == UserRole.STUDENT:
+        if assessment.student_id != current_user.id:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Students can only access their own risk explanations."
+            )
+    elif current_user.role in (UserRole.COUNSELOR, UserRole.ADMIN):
+        await verify_student_consent(db, assessment.student_id)
+    else:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Access restricted."
+        )
+
+    try:
+        explanation = await shap_service.get_prediction_explanation(db, prediction_id)
+        return explanation
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to generate SHAP explanation: {str(e)}"
+        )
