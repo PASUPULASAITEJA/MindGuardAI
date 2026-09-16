@@ -117,8 +117,66 @@ export const CounselorDashboard: React.FC = () => {
     s.studentId.toLowerCase().includes(studentSearchQuery.toLowerCase())
   );
 
+  const criticalAlertsCount = React.useMemo(() => {
+    return (allAlertsData?.alerts || []).filter(
+      (a) => a.severity === "CRITICAL" && a.status === "PENDING"
+    ).length;
+  }, [allAlertsData]);
+
+  const overviewPendingAlerts = React.useMemo(() => {
+    if (!allAlertsData?.alerts) return [];
+    return allAlertsData.alerts
+      .filter((a) => a.status === "PENDING")
+      .sort((a, b) => {
+        if (a.severity === "CRITICAL" && b.severity !== "CRITICAL") return -1;
+        if (a.severity !== "CRITICAL" && b.severity === "CRITICAL") return 1;
+        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+      });
+  }, [allAlertsData]);
+
+  const sortedAlerts = React.useMemo(() => {
+    if (!alertsData?.alerts) return [];
+    return [...alertsData.alerts].sort((a, b) => {
+      if (a.severity === "CRITICAL" && b.severity !== "CRITICAL") return -1;
+      if (a.severity !== "CRITICAL" && b.severity === "CRITICAL") return 1;
+      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+    });
+  }, [alertsData]);
+
   return (
     <div className="relative space-y-6 min-h-[calc(100vh-80px)] text-foreground">
+      {/* 0. CRITICAL EMERGENCY SOS BANNER */}
+      {criticalAlertsCount > 0 && (
+        <div className="p-4 rounded-xl bg-rose-950/40 border-2 border-rose-500/80 text-rose-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-lg shadow-rose-950/40 animate-pulse">
+          <div className="flex items-center gap-3.5">
+            <div className="p-2.5 bg-rose-600 text-white rounded-xl shadow-xs">
+              <AlertCircle className="h-6 w-6" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-[11px] font-black uppercase tracking-widest px-2.5 py-0.5 rounded-full bg-rose-600 text-white shadow-xs">
+                  CRITICAL SOS ALERT
+                </span>
+                <span className="text-sm font-bold text-white">
+                  {criticalAlertsCount} {criticalAlertsCount === 1 ? "Active Student Emergency Signal" : "Active Student Emergency Signals"}
+                </span>
+              </div>
+              <p className="text-xs text-rose-200/90 mt-1">
+                Student triggered immediate SOS distress alert. Requires urgent clinical intervention and contact.
+              </p>
+            </div>
+          </div>
+          {!isAlertsPage && (
+            <NavLink
+              to="/counselor/alerts"
+              className="whitespace-nowrap px-3.5 py-2 rounded-lg bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold transition-all shadow hover:shadow-rose-600/40"
+            >
+              Open Critical Queue →
+            </NavLink>
+          )}
+        </div>
+      )}
+
       {/* 1. OVERVIEW VIEW */}
       {isOverviewPage && (
         <div className="space-y-6">
@@ -206,13 +264,14 @@ export const CounselorDashboard: React.FC = () => {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-border/40">
-                      {allAlertsData.alerts
-                        .filter((a) => a.status === "PENDING")
+                      {overviewPendingAlerts
                         .slice(0, 5)
                         .map((alert) => (
                           <tr 
                             key={alert.id}
-                            className="hover:bg-accent/20 cursor-pointer group transition-colors"
+                            className={`hover:bg-accent/20 cursor-pointer group transition-colors ${
+                              alert.severity === "CRITICAL" ? "bg-rose-500/10 border-l-4 border-l-rose-600" : ""
+                            }`}
                             onClick={() => setSelectedStudentId(alert.student_id)}
                           >
                             <td className="p-4 text-muted-foreground">
@@ -222,9 +281,15 @@ export const CounselorDashboard: React.FC = () => {
                               {alert.student_id.substring(0, 8)}...
                             </td>
                             <td className="p-4">
-                              <span className="badge-high-risk px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wide">
-                                HIGH RISK
-                              </span>
+                              {alert.severity === "CRITICAL" ? (
+                                <span className="badge-critical-risk px-2.5 py-0.5 rounded-full text-[10px] uppercase tracking-wide">
+                                  CRITICAL SOS
+                                </span>
+                              ) : (
+                                <span className="badge-high-risk px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wide">
+                                  HIGH RISK
+                                </span>
+                              )}
                             </td>
                             <td className="p-4 text-right" onClick={(e) => e.stopPropagation()}>
                               <Button
@@ -405,10 +470,12 @@ export const CounselorDashboard: React.FC = () => {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-border/40">
-                      {alertsData.alerts.map((alert) => (
+                      {sortedAlerts.map((alert) => (
                         <tr 
                           key={alert.id}
-                          className="hover:bg-accent/20 cursor-pointer group transition-colors"
+                          className={`hover:bg-accent/20 cursor-pointer group transition-colors ${
+                            alert.severity === "CRITICAL" ? "bg-rose-500/10 border-l-4 border-l-rose-600" : ""
+                          }`}
                           onClick={() => setSelectedStudentId(alert.student_id)}
                         >
                           <td className="p-4 text-muted-foreground">
@@ -419,9 +486,15 @@ export const CounselorDashboard: React.FC = () => {
                             {alert.student_id.substring(0, 8)}...
                           </td>
                           <td className="p-4">
-                            <span className="badge-high-risk px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wide">
-                              HIGH RISK
-                            </span>
+                            {alert.severity === "CRITICAL" ? (
+                              <span className="badge-critical-risk px-2.5 py-0.5 rounded-full text-[10px] uppercase tracking-wide">
+                                CRITICAL SOS
+                              </span>
+                            ) : (
+                              <span className="badge-high-risk px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wide">
+                                HIGH RISK
+                              </span>
+                            )}
                           </td>
                           <td className="p-4 text-muted-foreground">{alert.assessment_id.substring(0, 12)}...</td>
                           <td className="p-4">
