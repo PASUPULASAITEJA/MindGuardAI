@@ -518,6 +518,51 @@ api.interceptors.response.use(
     }
   };
 
+  export interface UserConsentsSummary {
+    user_id: string;
+    journal_sharing: boolean;
+    behavioral_tracking: boolean;
+    anonymous_analytics: boolean;
+    counselor_access: boolean;
+    last_updated?: string | null;
+    onboarding_completed: boolean;
+  }
+
+  export interface ConsentRecordHistoryItem {
+    id: string;
+    user_id: string;
+    consent_type: "journal_sharing" | "behavioral_tracking" | "anonymous_analytics" | "counselor_access" | string;
+    granted: boolean;
+    granted_at?: string | null;
+    revoked_at?: string | null;
+    ip_address?: string | null;
+    created_at: string;
+  }
+
+  export interface ConsentHistoryResponse {
+    history: ConsentRecordHistoryItem[];
+    total: number;
+  }
+
+  export const consentRecordsAPI = {
+    getConsents: async () => {
+      const res = await api.get<UserConsentsSummary>("/consent");
+      return res.data;
+    },
+    updateConsent: async (consent_type: string, granted: boolean) => {
+      const res = await api.post<UserConsentsSummary>("/consent", { consent_type, granted });
+      return res.data;
+    },
+    batchUpdateConsents: async (consents: Record<string, boolean>) => {
+      const res = await api.post<UserConsentsSummary>("/consent/batch", { consents });
+      return res.data;
+    },
+    getHistory: async (limit: number = 100) => {
+      const res = await api.get<ConsentHistoryResponse>("/consent/history", { params: { limit } });
+      return res.data;
+    }
+  };
+
   export default api;
 
 
