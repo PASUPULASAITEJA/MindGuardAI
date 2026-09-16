@@ -771,6 +771,73 @@ api.interceptors.response.use(
     }
   };
 
+  export interface MoodCheckinItem {
+    id: number;
+    user_id: string;
+    checkin_type: "morning" | "evening" | string;
+    mood_score: number;
+    energy_level: number;
+    anxiety_level: number;
+    sleep_quality: "poor" | "fair" | "good" | "great" | string;
+    sleep_hours: number;
+    primary_emotion: string;
+    one_word_feeling?: string | null;
+    stress_source?: string | null;
+    created_at: string;
+  }
+
+  export interface MoodCheckinCreatePayload {
+    checkin_type: "morning" | "evening";
+    mood_score: number;
+    energy_level: number;
+    anxiety_level: number;
+    sleep_quality: "poor" | "fair" | "good" | "great";
+    sleep_hours: number;
+    primary_emotion: string;
+    one_word_feeling?: string;
+    stress_source?: string;
+  }
+
+  export interface MoodCheckinListResponse {
+    items: MoodCheckinItem[];
+    total: number;
+    range: string;
+  }
+
+  export interface MoodCheckinSummaryResponse {
+    total_checkins: number;
+    streak_days: number;
+    avg_mood_score: number;
+    avg_energy_level: number;
+    avg_anxiety_level: number;
+    avg_sleep_hours: number;
+    sleep_quality_breakdown: Record<string, number>;
+    common_emotions: Record<string, number>;
+    common_stress_sources: Record<string, number>;
+    latest_checkin?: MoodCheckinItem | null;
+  }
+
+  export const checkinsAPI = {
+    create: async (payload: MoodCheckinCreatePayload) => {
+      const res = await api.post<MoodCheckinItem>("/checkins", payload);
+      return res.data;
+    },
+    getMyCheckins: async (range: string = "7d") => {
+      const res = await api.get<MoodCheckinListResponse>("/checkins", { params: { range } });
+      return res.data;
+    },
+    getSummary: async () => {
+      const res = await api.get<MoodCheckinSummaryResponse>("/checkins/summary");
+      return res.data;
+    },
+    getStudentCheckinsForCounselor: async (studentId: string, range: string = "30d") => {
+      const res = await api.get<MoodCheckinListResponse>(`/counselor/students/${studentId}/checkins`, {
+        params: { range }
+      });
+      return res.data;
+    }
+  };
+
   export default api;
 
 
