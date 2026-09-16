@@ -5,7 +5,10 @@ from uuid import UUID, uuid4
 from datetime import datetime, timezone
 import numpy as np
 import joblib
-import shap
+try:
+    import shap
+except ImportError:
+    shap = None
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
@@ -79,10 +82,13 @@ class ShapExplanationService:
             model_path = os.path.abspath(
                 os.path.join(os.path.dirname(__file__), "..", "ml", "models", "risk_rf_v2.joblib")
             )
-            if os.path.exists(model_path):
+            if os.path.exists(model_path) and shap is not None:
                 self.model = joblib.load(model_path)
                 self.explainer = shap.TreeExplainer(self.model)
                 logger.info("SHAP TreeExplainer initialized successfully with risk Random Forest model.")
+            elif os.path.exists(model_path):
+                self.model = joblib.load(model_path)
+                logger.info("Model loaded; shap package omitted, utilizing calibrated surrogate explainer.")
         except Exception as e:
             logger.warning(f"Could not initialize TreeExplainer from disk: {e}. Will use calibrated surrogate.")
 
