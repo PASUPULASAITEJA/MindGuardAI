@@ -16,6 +16,7 @@ from app.models.audit_logs import AuditLog
 from app.models.notification_deliveries import NotificationDelivery
 from app.models.notifications import Notification, NotificationType, NotificationChannel
 from app.models.recommendations import RecommendationRecord
+from app.models.mood_checkins import MoodCheckin
 
 __all__ = [
     "Base",
@@ -50,5 +51,6 @@ __all__ = [
     "NotificationType",
     "NotificationChannel",
     "RecommendationRecord",
+    "MoodCheckin",
 ]
 
