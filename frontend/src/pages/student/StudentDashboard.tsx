@@ -55,6 +55,7 @@ import {
 } from "lucide-react";
 
 // Modals
+import { ShapExplanationCard } from "@/components/ShapExplanationCard";
 import { ExplainableAIFactors } from "@/components/ExplainableAIFactors";
 import { BoxBreathingModal } from "@/components/BoxBreathingModal";
 import { ClinicalSurveyModal } from "@/components/ClinicalSurveyModal";
@@ -940,7 +941,10 @@ export const StudentDashboard: React.FC = () => {
         </Card>
       </div>
 
-      {/* 5. Recent Mood Trajectory Chart & Longitudinal History */}
+      {/* 5. SHAP Machine Learning Explainability Card */}
+      <ShapExplanationCard predictionId={latestAssessment?.assessment_id} />
+
+      {/* 6. Recent Mood Trajectory Chart & Longitudinal History */}
       <Card className="border-border/80 shadow-xs">
         <CardHeader className="flex flex-row items-center justify-between pb-2">
           <div>
@@ -1031,6 +1035,7 @@ export const StudentDashboard: React.FC = () => {
       {isExplainOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm animate-in fade-in duration-200">
           <div className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-3xl bg-card border border-border shadow-2xl p-6 space-y-4">
+            <ShapExplanationCard predictionId={latestAssessment?.assessment_id} />
             <ExplainableAIFactors
               studentId={user?.id}
               wellnessScore={wellnessScore ?? 0}
