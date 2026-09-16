@@ -10,7 +10,9 @@ class AlertItem(BaseModel):
     assessment_id: UUID
     status: AlertStatus
     severity: str = "HIGH"
+    counselor_id: Optional[UUID] = None
     created_at: datetime
+    resolved_at: Optional[datetime] = None
 
     class Config:
         from_attributes = True
@@ -36,10 +38,16 @@ class ActiveAlertsResponse(BaseModel):
 class AlertUpdateRequest(BaseModel):
     status: AlertStatus
 
+class AssignAlertRequest(BaseModel):
+    counselor_id: Optional[UUID] = None
+
 class AlertUpdateResponse(BaseModel):
     id: UUID
     status: AlertStatus
     counselor_id: Optional[UUID] = None
+    severity: Optional[str] = "HIGH"
+    resolved_at: Optional[datetime] = None
+    message: Optional[str] = "Alert updated successfully."
 
     class Config:
         from_attributes = True
