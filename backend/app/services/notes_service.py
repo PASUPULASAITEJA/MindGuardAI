@@ -6,6 +6,7 @@ from sqlalchemy import select, desc
 from fastapi import HTTPException, status
 
 from app.models.counselor_notes import CounselorNote
+from app.models.case_notes import CaseNote
 from app.models.alerts import Alert
 from app.models.users import User
 from app.schemas.notes import CounselorNoteResponse
@@ -30,15 +31,26 @@ class NotesService:
                 }
             )
 
+        now = datetime.now(timezone.utc)
+        note_id = uuid4()
         note_obj = CounselorNote(
-            id=uuid4(),
+            id=note_id,
             alert_id=alert.id,
             student_id=alert.student_id,
             counselor_id=counselor.id,
             note=note_text.strip(),
-            created_at=datetime.now(timezone.utc)
+            created_at=now
+        )
+        case_note_obj = CaseNote(
+            id=note_id,
+            alert_id=alert.id,
+            student_id=alert.student_id,
+            counselor_id=counselor.id,
+            note=note_text.strip(),
+            created_at=now
         )
         db.add(note_obj)
+        db.add(case_note_obj)
         await db.commit()
         await db.refresh(note_obj)
 
@@ -70,15 +82,26 @@ class NotesService:
                 }
             )
 
+        now = datetime.now(timezone.utc)
+        note_id = uuid4()
         note_obj = CounselorNote(
-            id=uuid4(),
+            id=note_id,
             alert_id=None,
             student_id=student_id,
             counselor_id=counselor.id,
             note=note_text.strip(),
-            created_at=datetime.now(timezone.utc)
+            created_at=now
+        )
+        case_note_obj = CaseNote(
+            id=note_id,
+            alert_id=None,
+            student_id=student_id,
+            counselor_id=counselor.id,
+            note=note_text.strip(),
+            created_at=now
         )
         db.add(note_obj)
+        db.add(case_note_obj)
         await db.commit()
         await db.refresh(note_obj)
 
