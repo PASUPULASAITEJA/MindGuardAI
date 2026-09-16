@@ -310,6 +310,39 @@ api.interceptors.response.use(
     }
   };
 
+  export interface AlertRecordItem {
+    id: string;
+    student_id: string;
+    assessment_id: string;
+    status: "PENDING" | "REVIEWED" | "RESOLVED";
+    severity?: "CRITICAL" | "HIGH" | string;
+    counselor_id?: string | null;
+    created_at: string;
+    resolved_at?: string | null;
+  }
+
+  export const alertsAPI = {
+    getAlerts: async (status?: string, limit: number = 50) => {
+      const url = status ? `/counselors/alerts?status=${status}&limit=${limit}` : `/counselors/alerts?limit=${limit}`;
+      const res = await api.get<{ alerts: AlertRecordItem[]; total: number }>(url);
+      return res.data;
+    },
+    assignAlert: async (alertId: string, counselorId?: string) => {
+      const res = await api.patch<AlertRecordItem>(`/counselors/alerts/${alertId}/assign`, {
+        counselor_id: counselorId || null,
+      });
+      return res.data;
+    },
+    updateAlertStatus: async (alertId: string, status: "PENDING" | "REVIEWED" | "RESOLVED") => {
+      const res = await api.patch<AlertRecordItem>(`/counselors/alerts/${alertId}/status`, { status });
+      return res.data;
+    },
+    addAlertNote: async (alertId: string, note: string) => {
+      const res = await api.post<CounselorNoteItem>(`/counselors/alerts/${alertId}/notes`, { note });
+      return res.data;
+    },
+  };
+
   export interface ConsentRecord {
     id: string;
     student_id: string;
