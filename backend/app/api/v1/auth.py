@@ -1,6 +1,7 @@
 from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, Response, Cookie, status
 from sqlalchemy.ext.asyncio import AsyncSession
+from app.core.config import settings
 from app.db.session import get_db
 from app.schemas.auth import LoginRequest, TokenResponse, ForgotPasswordRequest, ResetPasswordRequest
 from app.schemas.users import UserCreate, UserRegisterResponse
@@ -8,6 +9,22 @@ from app.services.auth import auth_service
 from app.services.user import user_service
 
 router = APIRouter()
+
+def _set_refresh_cookie(response: Response, refresh_token: str) -> None:
+    """
+    Configures the refresh token HttpOnly cookie.
+    Sets secure=False in development over HTTP so localhost works seamlessly.
+    Sets secure=True and samesite='strict' in production.
+    """
+    is_dev = settings.ENVIRONMENT.lower() == "development"
+    response.set_cookie(
+        key="refresh_token",
+        value=refresh_token,
+        httponly=True,
+        secure=not is_dev,
+        samesite="lax" if is_dev else "strict",
+        max_age=7 * 24 * 3600  # 7 days in seconds
+    )
 
 @router.get(
     "/roster-info",
@@ -85,15 +102,8 @@ async def login(
         except Exception:
             pass
 
-    # Set the refresh token as a secure HttpOnly cookie
-    response.set_cookie(
-        key="refresh_token",
-        value=tokens.refresh_token,
-        httponly=True,
-        secure=True,  # In production, forces HTTPS transmission
-        samesite="strict",
-        max_age=7 * 24 * 3600  # 7 days in seconds
-    )
+    # Set the refresh token as HttpOnly cookie (secure=False in dev for localhost http)
+    _set_refresh_cookie(response, tokens.refresh_token)
     
     return tokens
 
@@ -145,14 +155,7 @@ async def refresh(
         pass
 
     # Rotate the refresh token by setting the new one in cookie
-    response.set_cookie(
-        key="refresh_token",
-        value=tokens.refresh_token,
-        httponly=True,
-        secure=True,
-        samesite="strict",
-        max_age=7 * 24 * 3600
-    )
+    _set_refresh_cookie(response, tokens.refresh_token)
 
     return tokens
 
