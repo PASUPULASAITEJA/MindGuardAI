@@ -6,6 +6,7 @@ export interface AlertItem {
   student_id: string;
   assessment_id: string;
   status: "PENDING" | "REVIEWED" | "RESOLVED";
+  severity?: "CRITICAL" | "HIGH" | string;
   created_at: string;
 }
 
