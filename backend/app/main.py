@@ -24,6 +24,7 @@ from app.api.v1.chatbot import router as chatbot_router
 from app.api.v1.appointments import router as appointments_router
 from app.api.v1.consent import consent_router
 from app.api.v1.consent_records import consent_records_router
+from app.api.v1.checkins import router as checkins_router, counselor_checkins_router
 from app.middleware.audit_logging import AuditLoggingMiddleware
 
 from contextlib import asynccontextmanager
@@ -200,5 +201,11 @@ app.include_router(appointments_router, prefix="/api/v1/appointments", tags=["Co
 app.include_router(consent_router, prefix="/api/v1/consent", tags=["Student Consent"])
 app.include_router(consent_records_router, prefix="/api/consent", tags=["Consent Records"])
 app.include_router(consent_records_router, prefix="/api/v1/consent-records", tags=["Consent Records"])
+app.include_router(checkins_router, prefix="/api/v1/checkins", tags=["Mood Check-Ins (EMA)"])
+app.include_router(checkins_router, prefix="/api/checkins", tags=["Mood Check-Ins (EMA)"])
+app.include_router(counselor_checkins_router, prefix="/api/counsellor", tags=["Counselor Student EMA Check-Ins"])
+app.include_router(counselor_checkins_router, prefix="/api/counselor", tags=["Counselor Student EMA Check-Ins"])
+app.include_router(counselor_checkins_router, prefix="/api/v1/counselor", tags=["Counselor Student EMA Check-Ins"])
+app.include_router(counselor_checkins_router, prefix="/api/v1/counselors", tags=["Counselor Student EMA Check-Ins"])
 
 
