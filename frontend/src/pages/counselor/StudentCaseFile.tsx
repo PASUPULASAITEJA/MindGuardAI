@@ -8,7 +8,7 @@ import {
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/toast";
-import { casefileAPI, notesAPI, StudentCasefile, CasefileTimelineEvent } from "@/services/api";
+import { casefileAPI, notesAPI, alertsAPI, StudentCasefile, CasefileTimelineEvent } from "@/services/api";
 
 export const StudentCaseFile: React.FC = () => {
   const { studentId } = useParams<{ studentId: string }>();
@@ -24,6 +24,7 @@ export const StudentCaseFile: React.FC = () => {
 
   // Note Modal state
   const [isNoteModalOpen, setIsNoteModalOpen] = useState(false);
+  const [activeAlertForNote, setActiveAlertForNote] = useState<string | null>(null);
   const [newNoteText, setNewNoteText] = useState("");
   const [isSubmittingNote, setIsSubmittingNote] = useState(false);
 
@@ -52,18 +53,59 @@ export const StudentCaseFile: React.FC = () => {
     }
   };
 
+  const handleAssignAlert = async (alertId: string) => {
+    try {
+      await alertsAPI.assignAlert(alertId);
+      toast({
+        title: "Alert Assigned",
+        description: "Case successfully assigned to you.",
+        variant: "success",
+      });
+      fetchCasefile();
+    } catch (err: any) {
+      toast({
+        title: "Assignment Failed",
+        description: err.response?.data?.message || "Could not assign case.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleUpdateAlertStatus = async (alertId: string, status: "PENDING" | "REVIEWED" | "RESOLVED") => {
+    try {
+      await alertsAPI.updateAlertStatus(alertId, status);
+      toast({
+        title: "Status Updated",
+        description: `Alert marked as ${status}.`,
+        variant: "success",
+      });
+      fetchCasefile();
+    } catch (err: any) {
+      toast({
+        title: "Update Failed",
+        description: err.response?.data?.message || "Could not update alert status.",
+        variant: "destructive",
+      });
+    }
+  };
+
   const handleAddNote = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!studentId || !newNoteText.trim()) return;
     setIsSubmittingNote(true);
     try {
-      await notesAPI.addStudentNote(studentId, newNoteText.trim());
+      if (activeAlertForNote) {
+        await alertsAPI.addAlertNote(activeAlertForNote, newNoteText.trim());
+      } else {
+        await notesAPI.addStudentNote(studentId, newNoteText.trim());
+      }
       toast({
         title: "Clinical Note Recorded",
         description: "Your observation was logged to the student's longitudinal case file.",
         variant: "success",
       });
       setNewNoteText("");
+      setActiveAlertForNote(null);
       setIsNoteModalOpen(false);
       fetchCasefile();
     } catch (err: any) {
@@ -352,6 +394,84 @@ export const StudentCaseFile: React.FC = () => {
                 </p>
               </Card>
             </div>
+
+            {/* Active Case Alerts & Clinical Triage */}
+            {casefile.timeline.filter(e => e.event_type === "ALERT").length > 0 && (
+              <Card className="border-border/80 bg-card/60 backdrop-blur-md overflow-hidden">
+                <CardHeader className="p-4 sm:p-5 border-b border-border/60 bg-muted/20">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <AlertTriangle className="w-5 h-5 text-rose-500" />
+                      <CardTitle className="text-sm sm:text-base font-bold text-foreground">
+                        Case Incident Alerts & Clinical Triage
+                      </CardTitle>
+                    </div>
+                    <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20">
+                      {casefile.timeline.filter(e => e.event_type === "ALERT").length} Alert Incident(s)
+                    </span>
+                  </div>
+                  <CardDescription className="text-xs text-muted-foreground mt-0.5">
+                    Manage alert assignments, transition workflow statuses, and record incident case notes.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="p-0 divide-y divide-border/40">
+                  {casefile.timeline
+                    .filter(e => e.event_type === "ALERT")
+                    .map(alertEvent => (
+                      <div key={alertEvent.id} className="p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 hover:bg-accent/10 transition-colors">
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider border ${getSeverityBadge(alertEvent.severity)}`}>
+                              {alertEvent.severity}
+                            </span>
+                            <span className="text-xs font-bold text-foreground">{alertEvent.title}</span>
+                            <span className="text-[11px] text-muted-foreground">
+                              {new Date(alertEvent.timestamp).toLocaleString([], { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}
+                            </span>
+                          </div>
+                          <p className="text-xs text-muted-foreground">{alertEvent.summary}</p>
+                        </div>
+                        <div className="flex items-center gap-2 flex-wrap self-stretch sm:self-auto justify-end">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleAssignAlert(alertEvent.id)}
+                            className="h-8 text-xs px-2.5 rounded-lg border-border hover:bg-accent"
+                          >
+                            Assign to Me
+                          </Button>
+                          <Button
+                            size="sm"
+                            onClick={() => handleUpdateAlertStatus(alertEvent.id, "REVIEWED")}
+                            className="h-8 text-xs px-2.5 rounded-lg bg-amber-600 hover:bg-amber-500 text-white font-semibold"
+                          >
+                            Claim / Review
+                          </Button>
+                          <Button
+                            size="sm"
+                            onClick={() => handleUpdateAlertStatus(alertEvent.id, "RESOLVED")}
+                            className="h-8 text-xs px-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-semibold"
+                          >
+                            Resolve Case
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => {
+                              setActiveAlertForNote(alertEvent.id);
+                              setIsNoteModalOpen(true);
+                            }}
+                            className="h-8 text-xs px-2.5 rounded-lg border-primary/40 text-primary hover:bg-primary/10 font-semibold flex items-center gap-1"
+                          >
+                            <FileEdit className="w-3.5 h-3.5" />
+                            Alert Note
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                </CardContent>
+              </Card>
+            )}
 
             {/* Timeline Filter Pills */}
             <div className="flex items-center gap-2 overflow-x-auto pb-1">
