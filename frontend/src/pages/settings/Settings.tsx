@@ -7,9 +7,10 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { 
-  User as UserIcon, Shield, Bell, Moon, Sun, Lock, CheckCircle, FileDown, ShieldAlert, AlertTriangle
+  User as UserIcon, Shield, Bell, Moon, Sun, Lock, CheckCircle, FileDown, ShieldAlert, AlertTriangle, Check, X
 } from "lucide-react";
 import { profileAPI, consentAPI, ConsentRecord } from "@/services/api";
+import { ConsentBanner } from "@/components/ConsentBanner";
 
 export const Settings: React.FC = () => {
   const { user } = useAuth();
@@ -67,6 +68,27 @@ export const Settings: React.FC = () => {
       toast({
         title: "Action Failed",
         description: "Could not update consent status.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoadingConsent(false);
+    }
+  };
+
+  const handleDeclineConsent = async () => {
+    setIsLoadingConsent(true);
+    try {
+      const res = await consentAPI.declineConsent();
+      setConsentData(res.consent);
+      toast({
+        title: "Consent Declined",
+        description: "Counselors remain blocked from accessing your clinical insights.",
+        variant: "warning",
+      });
+    } catch (err) {
+      toast({
+        title: "Action Failed",
+        description: "Could not decline consent.",
         variant: "destructive",
       });
     } finally {
@@ -197,6 +219,11 @@ export const Settings: React.FC = () => {
         <h3 className="text-foreground text-lg md:text-xl font-extrabold">Account Settings</h3>
         <p className="text-muted-foreground text-xs md:text-sm mt-1">Manage your preferences, security settings, and styling choices.</p>
       </div>
+
+      {/* Top Banner when Consent is Pending */}
+      {user.role === "STUDENT" && (
+        <ConsentBanner onConsentChange={(newConsent) => setConsentData(newConsent)} />
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         
@@ -405,12 +432,22 @@ export const Settings: React.FC = () => {
                     <span className={`px-2.5 py-1 rounded-full text-xs font-semibold uppercase tracking-wider flex items-center gap-1.5 ${
                       consentData.status === "GRANTED"
                         ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30"
+                        : consentData.status === "PENDING"
+                        ? "bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30"
                         : "bg-rose-500/15 text-rose-600 dark:text-rose-400 border border-rose-500/30"
                     }`}>
                       <span className={`w-1.5 h-1.5 rounded-full ${
-                        consentData.status === "GRANTED" ? "bg-emerald-500 animate-pulse" : "bg-rose-500"
+                        consentData.status === "GRANTED"
+                          ? "bg-emerald-500 animate-pulse"
+                          : consentData.status === "PENDING"
+                          ? "bg-amber-500 animate-bounce"
+                          : "bg-rose-500"
                       }`} />
-                      {consentData.status === "GRANTED" ? "Access Granted" : "Access Revoked"}
+                      {consentData.status === "GRANTED"
+                        ? "Access Granted"
+                        : consentData.status === "PENDING"
+                        ? "Pending (Action Required)"
+                        : "Access Revoked"}
                     </span>
                   )}
                 </div>
@@ -425,7 +462,7 @@ export const Settings: React.FC = () => {
                       Share Wellness Insights with Counselor
                     </p>
                     <p className="text-xs text-muted-foreground leading-relaxed">
-                      Allow certified university counselors to view your wellness assessments, emotional mapping, and longitudinal case timeline. When turned off, counselor access is instantly blocked (HTTP 403).
+                      Allow certified university counselors to view your wellness assessments, emotional mapping, and longitudinal case timeline. When turned off or pending, counselor access is strictly blocked (HTTP 403).
                     </p>
                     {consentData && (
                       <p className="text-[11px] text-muted-foreground/80 font-mono mt-1">
@@ -433,27 +470,51 @@ export const Settings: React.FC = () => {
                       </p>
                     )}
                   </div>
-                  <div className="flex items-center gap-3 shrink-0">
-                    <button
-                      type="button"
-                      disabled={isLoadingConsent}
-                      onClick={() => {
-                        if (consentData?.status === "GRANTED") {
-                          setShowRevokeModal(true);
-                        } else {
-                          handleGrantConsent();
-                        }
-                      }}
-                      className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 ${
-                        consentData?.status === "GRANTED" ? "bg-primary" : "bg-muted"
-                      }`}
-                    >
-                      <span
-                        className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out ${
-                          consentData?.status === "GRANTED" ? "translate-x-5" : "translate-x-0"
-                        }`}
-                      />
-                    </button>
+                  <div className="flex items-center gap-2.5 shrink-0">
+                    {consentData?.status === "PENDING" ? (
+                      <div className="flex items-center gap-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          disabled={isLoadingConsent}
+                          onClick={handleDeclineConsent}
+                          className="h-8 text-xs px-3 border-border hover:bg-rose-500/10 hover:text-rose-600 gap-1"
+                        >
+                          <X className="h-3.5 w-3.5" />
+                          Decline
+                        </Button>
+                        <Button
+                          size="sm"
+                          disabled={isLoadingConsent}
+                          onClick={handleGrantConsent}
+                          className="h-8 text-xs px-3.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold gap-1"
+                        >
+                          <Check className="h-3.5 w-3.5" />
+                          Grant Access
+                        </Button>
+                      </div>
+                    ) : consentData?.status === "GRANTED" ? (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        disabled={isLoadingConsent}
+                        onClick={() => setShowRevokeModal(true)}
+                        className="h-8 text-xs px-3 border-rose-500/30 text-rose-600 hover:bg-rose-500/10 gap-1.5"
+                      >
+                        <Lock className="h-3.5 w-3.5" />
+                        Revoke Access
+                      </Button>
+                    ) : (
+                      <Button
+                        size="sm"
+                        disabled={isLoadingConsent}
+                        onClick={handleGrantConsent}
+                        className="h-8 text-xs px-3.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold gap-1.5"
+                      >
+                        <Check className="h-3.5 w-3.5" />
+                        Grant Access
+                      </Button>
+                    )}
                   </div>
                 </div>
 
