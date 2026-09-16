@@ -32,8 +32,8 @@ class ConsentService:
                 id=uuid4(),
                 student_id=student_id,
                 consent_type=consent_type,
-                status=ConsentStatus.GRANTED,
-                granted_at=now,
+                status=ConsentStatus.PENDING,
+                granted_at=None,
                 revoked_at=None,
                 created_at=now
             )
@@ -105,8 +105,7 @@ class ConsentService:
     ) -> bool:
         consent = await self.get_consent(db, student_id, consent_type)
         if not consent:
-            # Default to granted for existing student baseline or require explicit check
-            return True
+            return False
         return consent.status == ConsentStatus.GRANTED
 
 consent_service = ConsentService()
