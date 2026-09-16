@@ -16,6 +16,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "../../components/ui/card";
 import { Button } from "../../components/ui/button";
 import { useMoodHistory, MoodHistoryItem } from "../../hooks/useMood";
+import WellnessTrendDashboard from "../../components/WellnessTrendDashboard";
 
 export const MoodHistoryPage: React.FC = () => {
   const navigate = useNavigate();
@@ -113,6 +114,9 @@ export const MoodHistoryPage: React.FC = () => {
           </div>
         </Card>
       </div>
+      
+      {/* Wellness Trend Visualizer */}
+      <WellnessTrendDashboard />
 
       {/* Timeline of Entries */}
       <Card className="border-border/60 shadow-sm">
