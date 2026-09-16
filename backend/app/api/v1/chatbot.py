@@ -4,7 +4,7 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.dependencies import get_current_user, get_db
+from app.api.dependencies import get_current_user, get_db, verify_student_consent
 from app.models.users import User, UserRole
 from app.models.chat import Conversation, ChatMessage
 from app.schemas.chatbot import (
@@ -68,6 +68,9 @@ async def list_conversations(
             detail="Access restricted to student accounts."
         )
 
+    # Enforce active consent for chat memory retrieval
+    await verify_student_consent(db, current_user.id)
+
     records = await conversation_service.get_student_conversations(db, student_id=current_user.id)
     summaries = []
     for conv, count in records:
@@ -94,6 +97,9 @@ async def get_conversation_details(
     """
     Retrieves a conversation thread and its complete chronological message history.
     """
+    # Enforce active consent for chat memory retrieval
+    await verify_student_consent(db, current_user.id)
+
     conversation = await conversation_service.get_conversation(
         db, conversation_id=conversation_id, student_id=current_user.id
     )
@@ -225,6 +231,9 @@ async def get_messages(
     """
     Retrieves message history for a specific conversation.
     """
+    # Enforce active consent for chat memory retrieval
+    await verify_student_consent(db, current_user.id)
+
     conversation = await conversation_service.get_conversation(
         db, conversation_id=conversation_id, student_id=current_user.id
     )
@@ -276,6 +285,9 @@ async def ingest_behavioral_features(
             detail="Behavioral telemetry is exclusively available for student accounts."
         )
 
+    # Enforce active consent for behavioral telemetry ingestion
+    await verify_student_consent(db, current_user.id)
+
     return await behavioral_service.ingest_and_evaluate(
         db=db,
         student=current_user,
@@ -315,6 +327,9 @@ async def sync_wearable_sleep_metrics(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Wearable sensor integration is restricted to student accounts."
         )
+
+    # Enforce active consent for wearable sleep ingestion
+    await verify_student_consent(db, current_user.id)
 
     return await behavioral_service.sync_wearable_sleep(
         db=db,
