@@ -37,9 +37,15 @@ async def lifespan(app: FastAPI):
     
     try:
         from app.db.session import async_engine, Base
+        from sqlalchemy import text
         import app.models
         async with async_engine.begin() as conn:
             await conn.run_sync(Base.metadata.create_all)
+            # Ensure severity column exists in alerts table for SQLite
+            try:
+                await conn.execute(text("ALTER TABLE alerts ADD COLUMN severity VARCHAR(50) DEFAULT 'HIGH'"))
+            except Exception:
+                pass
         logger.info("Database schema initialized and verified.")
     except Exception as e:
         logger.error(f"Database initialization error: {e}")
