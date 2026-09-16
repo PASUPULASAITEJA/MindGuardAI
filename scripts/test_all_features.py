@@ -235,11 +235,35 @@ async def run_all_tests():
             f"Email: {res_profile.json().get('email')}"
         )
 
-        # Submit Journal Entry (Triggering Emotion Inference)
+        # Consent-First Enforcement: Initial status must be PENDING
+        res_consent_init = await client.get("/api/v1/consent/me", headers=student_headers)
+        record_test(
+            "Initial Student Consent is PENDING (/api/v1/consent/me)",
+            res_consent_init.status_code == 200 and res_consent_init.json().get("status") == "PENDING",
+            f"Status: {res_consent_init.json().get('status')}"
+        )
+
+        # Sensitive Journal Analysis blocked before granting consent
         journal_payload = {
             "content": "I am feeling extremely overwhelmed with my upcoming midterms and struggling to focus or sleep.",
             "self_reported_score": 3
         }
+        res_journal_blocked = await client.post("/api/v1/journal/entries", json=journal_payload, headers=student_headers)
+        record_test(
+            "Sensitive Endpoint Blocked While Consent is PENDING (403 Forbidden)",
+            res_journal_blocked.status_code == 403,
+            f"Status: {res_journal_blocked.status_code}"
+        )
+
+        # Explicitly Grant Consent
+        res_grant = await client.post("/api/v1/consent/me/grant", headers=student_headers)
+        record_test(
+            "Student Explicitly Grants Consent (/api/v1/consent/me/grant)",
+            res_grant.status_code == 200 and res_grant.json().get("consent", {}).get("status") == "GRANTED",
+            f"Status: {res_grant.json().get('consent', {}).get('status')}"
+        )
+
+        # Submit Journal Entry (Triggering Emotion Inference now that consent is GRANTED)
         res_journal = await client.post("/api/v1/journal/entries", json=journal_payload, headers=student_headers)
         record_test(
             "Submit Journal Entry with NLP Evaluation (/api/v1/journal/entries)",
