@@ -737,6 +737,40 @@ api.interceptors.response.use(
     }
   };
 
+  export interface PersonalizedRecommendationItem {
+    id: string;
+    category: string;
+    title: string;
+    description: string;
+    reason?: string | null;
+    action_type: "INTERNAL_ROUTE" | "EXTERNAL_URL" | string;
+    action_url: string;
+    risk_tier?: string | null;
+    status: "ACTIVE" | "COMPLETED" | "DISMISSED" | string;
+    feedback?: "HELPFUL" | "NOT_HELPFUL" | null;
+    created_at: string;
+    completed_at?: string | null;
+  }
+
+  export interface PersonalizedRecommendationsResponse {
+    risk_tier: string;
+    primary_emotion: string;
+    wellness_score?: number | null;
+    rationale: string;
+    recommendations: PersonalizedRecommendationItem[];
+  }
+
+  export const recommendationsAPI = {
+    getPersonalized: async () => {
+      const res = await api.get<PersonalizedRecommendationsResponse>("/recommendations/personalized");
+      return res.data;
+    },
+    recordFeedback: async (recId: string, payload: { feedback?: string; status?: string }) => {
+      const res = await api.post<PersonalizedRecommendationItem>(`/recommendations/${recId}/feedback`, payload);
+      return res.data;
+    }
+  };
+
   export default api;
 
 
