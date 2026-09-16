@@ -312,7 +312,7 @@ api.interceptors.response.use(
     id: string;
     student_id: string;
     consent_type: string;
-    status: "GRANTED" | "REVOKED";
+    status: "GRANTED" | "REVOKED" | "PENDING";
     granted_at: string | null;
     revoked_at: string | null;
     created_at: string;
@@ -335,6 +335,10 @@ api.interceptors.response.use(
     },
     revokeConsent: async () => {
       const res = await api.post<ConsentActionResponse>("/consent/me/revoke");
+      return res.data;
+    },
+    declineConsent: async () => {
+      const res = await api.post<ConsentActionResponse>("/consent/me/decline");
       return res.data;
     },
     checkStudentConsent: async (studentId: string) => {
