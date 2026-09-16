@@ -187,6 +187,7 @@ app.include_router(surveys_router, prefix="/api/v1/surveys", tags=["Clinical Sur
 app.include_router(predictions_router, prefix="/api/v1/predictions", tags=["Clinical Predictions"])
 app.include_router(predictions_router, prefix="/api/predictions", tags=["Clinical Predictions"])
 app.include_router(recommendations_router, prefix="/api/v1/recommendations", tags=["Wellness Recommendations"])
+app.include_router(recommendations_router, prefix="/api/recommendations", tags=["Wellness Recommendations"])
 app.include_router(alerts_router, prefix="/api/v1/counselors", tags=["Counselor Warning Queues"])
 app.include_router(alerts_router, prefix="/api/v1/alerts", tags=["Emergency Alerts & SOS"])
 app.include_router(notifications_router, prefix="/api/v1/notifications", tags=["User Notifications"])
