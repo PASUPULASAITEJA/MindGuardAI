@@ -10,6 +10,7 @@ if TYPE_CHECKING:
     from app.models.users import User
 
 class ConsentStatus(str, enum.Enum):
+    PENDING = "PENDING"
     GRANTED = "GRANTED"
     REVOKED = "REVOKED"
 
@@ -41,8 +42,8 @@ class Consent(Base):
     status: Mapped[ConsentStatus] = mapped_column(
         Enum(ConsentStatus, name="consent_status_enum", native_enum=False),
         nullable=False,
-        default=ConsentStatus.GRANTED,
-        comment="Current consent state (GRANTED | REVOKED)."
+        default=ConsentStatus.PENDING,
+        comment="Current consent state (PENDING | GRANTED | REVOKED)."
     )
     granted_at: Mapped[Optional[datetime]] = mapped_column(
         DateTime(timezone=True),
