@@ -64,6 +64,7 @@ import { EmergencySOSModal } from "@/components/EmergencySOSModal";
 import { ConsentBanner } from "@/components/ConsentBanner";
 import { OnboardingConsentModal } from "@/components/OnboardingConsentModal";
 import { MoodMicroCheckin } from "@/components/MoodMicroCheckin";
+import { SleepTrackerCard } from "@/components/SleepTrackerCard";
 import { consentRecordsAPI } from "@/services/api";
 
 export const StudentDashboard: React.FC = () => {
@@ -316,6 +317,9 @@ export const StudentDashboard: React.FC = () => {
 
       {/* 30-Second Micro Check-In (EMA) */}
       <MoodMicroCheckin />
+
+      {/* Sleep & Circadian Rhythm Telemetry Tracker */}
+      <SleepTrackerCard />
 
       {/* 2. Top 4 Key Metric Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
