@@ -65,6 +65,23 @@ async def process_journal_entry_background(
             # We flush to get assessment_obj.id for Alert mapping
             await db.flush()
 
+            # 4b. Generate SHAP TreeExplainer Feature Attributions
+            try:
+                from app.services.shap_service import shap_service
+                await shap_service.explain_and_store(
+                    db=db,
+                    prediction_id=assessment_obj.id,
+                    features={
+                        "anxiety": detected_emotions.get("anxiety", 0.3),
+                        "sadness": detected_emotions.get("sadness", 0.3),
+                        "joy": detected_emotions.get("joy", 0.2),
+                        "sentiment_score": sentiment_score,
+                        "self_reported_score": float(self_reported_score) if self_reported_score else 5.0
+                    }
+                )
+            except Exception as shap_err:
+                logger.warning(f"Could not compute SHAP explanations for assessment {assessment_obj.id}: {shap_err}")
+
             # 5. Decision Diamond: Trigger Alert if risk_level is HIGH
             if risk_level == "HIGH":
                 logger.warning(f"HIGH risk level flagged for student {student_id}. Triggering active alert.")
