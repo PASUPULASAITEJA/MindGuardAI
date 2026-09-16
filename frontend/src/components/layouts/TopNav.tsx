@@ -3,6 +3,7 @@ import { LogOut, Menu, AlertTriangle, ShieldCheck, Activity, User as UserIcon } 
 import { useAuth } from "@/contexts/AuthContext";
 import ThemeToggle from "@/components/layouts/ThemeToggle";
 import { EmergencySOSModal } from "@/components/EmergencySOSModal";
+import NotificationBell from "@/components/NotificationBell";
 
 interface TopNavProps {
   title: string;
@@ -52,6 +53,7 @@ const TopNav: React.FC<TopNavProps> = ({ title, subtitle, onMenuClick }) => {
               </button>
             )}
 
+            <NotificationBell />
             <ThemeToggle />
 
 
