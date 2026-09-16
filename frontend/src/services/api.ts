@@ -838,6 +838,73 @@ api.interceptors.response.use(
     }
   };
 
+  export interface SleepLogItem {
+    id: number;
+    user_id: string;
+    log_date: string;
+    bedtime: string;
+    wake_time: string;
+    sleep_hours: number;
+    sleep_quality: number;
+    nap_taken: boolean;
+    nap_duration_minutes: number;
+    sleep_disruptions: number;
+    source: string;
+    created_at: string;
+  }
+
+  export interface SleepLogCreatePayload {
+    log_date: string;
+    bedtime: string;
+    wake_time: string;
+    sleep_hours?: number;
+    sleep_quality: number;
+    nap_taken?: boolean;
+    nap_duration_minutes?: number;
+    sleep_disruptions?: number;
+    source?: string;
+  }
+
+  export interface SleepLogListResponse {
+    items: SleepLogItem[];
+    total: number;
+    range: string;
+  }
+
+  export interface SleepAnalysisResponse {
+    days_analyzed: number;
+    avg_sleep_hours: number;
+    sleep_consistency_7d: number;
+    avg_quality_score: number;
+    avg_disruptions: number;
+    total_naps_count: number;
+    is_flagged_risk: boolean;
+    risk_reasons: string[];
+    circadian_insight: string;
+    sleep_hygiene_recommendations: string[];
+  }
+
+  export const sleepAPI = {
+    create: async (payload: SleepLogCreatePayload) => {
+      const res = await api.post<SleepLogItem>("/sleep", payload);
+      return res.data;
+    },
+    getMyLogs: async (range: string = "7d") => {
+      const res = await api.get<SleepLogListResponse>("/sleep", { params: { range } });
+      return res.data;
+    },
+    getAnalysis: async (days: number = 7) => {
+      const res = await api.get<SleepAnalysisResponse>("/sleep/analysis", { params: { days } });
+      return res.data;
+    },
+    getStudentSleepForCounselor: async (studentId: string, days: number = 7) => {
+      const res = await api.get<SleepAnalysisResponse>(`/counselor/students/${studentId}/sleep`, {
+        params: { days }
+      });
+      return res.data;
+    }
+  };
+
   export default api;
 
 
