@@ -298,6 +298,8 @@ api.interceptors.response.use(
     status: string;
     message: string;
     alert_id: string;
+    severity: string;
+    created_at?: string;
     helplines: SOSHelpline[];
   }
 
