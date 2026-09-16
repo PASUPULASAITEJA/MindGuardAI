@@ -1,23 +1,21 @@
 from typing import Optional
 from uuid import UUID
 from datetime import datetime
-from fastapi import APIRouter, Depends, Query, status
+from fastapi import APIRouter, Depends, Query, status, HTTPException
+from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.session import get_db
 from app.api.dependencies import require_role
 from app.models.users import User, UserRole
-from app.schemas.users import UserProfileResponse, UserDirectoryResponse
+from app.schemas.users import UserProfileResponse, UserProfileUpdateRequest, UserDirectoryResponse, UserResponse
 from app.schemas.audit import AuditLogListResponse
 from app.schemas.notification_deliveries import NotificationDeliveriesListResponse
 from app.services.user import user_service
 from app.services.audit_service import audit_service
 
-# Define separate routers to mount under different paths as per API.md paths
 students_router = APIRouter()
 admin_router = APIRouter()
-
-from app.schemas.users import UserProfileResponse, UserProfileUpdateRequest, UserDirectoryResponse
 
 @students_router.get(
     "/me",
@@ -175,3 +173,56 @@ async def get_notification_deliveries(
         page=page,
         page_size=page_size
     )
+
+
+class UserStatusUpdateRequest(BaseModel):
+    is_active: bool
+
+
+@admin_router.patch(
+    "/users/{user_id}/status",
+    response_model=UserResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Activate or deactivate a user account"
+)
+async def update_user_status(
+    user_id: UUID,
+    payload: UserStatusUpdateRequest,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_role([UserRole.ADMIN]))
+):
+    """
+    Updates the active state of a user account.
+    Prevents an admin from deactivating their own account.
+    """
+    if current_user.id == user_id and not payload.is_active:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail={"error_code": "CANNOT_DEACTIVATE_SELF", "message": "Administrators cannot deactivate their own account.", "details": {}}
+        )
+
+    target_user = await db.get(User, user_id)
+    if not target_user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail={"error_code": "USER_NOT_FOUND", "message": "User not found.", "details": {}}
+        )
+
+    target_user.is_active = payload.is_active
+    db.add(target_user)
+    await db.commit()
+    await db.refresh(target_user)
+
+    await audit_service.log_event(
+        db,
+        action="UPDATE_USER_STATUS",
+        actor_user_id=current_user.id,
+        actor_role=current_user.role.value,
+        target_user_id=target_user.id,
+        target_resource_type="USER",
+        target_resource_id=str(target_user.id),
+        metadata={"is_active": payload.is_active}
+    )
+
+    return target_user
+
