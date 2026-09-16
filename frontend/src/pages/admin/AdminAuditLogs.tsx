@@ -16,6 +16,9 @@ export const AdminAuditLogs: React.FC = () => {
   const [pageSize, setPageSize] = useState<number>(25);
   const [actionFilter, setActionFilter] = useState<string>("");
   const [roleFilter, setRoleFilter] = useState<string>("");
+  const [resourceTypeFilter, setResourceTypeFilter] = useState<string>("");
+  const [userIdFilter, setUserIdFilter] = useState<string>("");
+  const [dateRangeFilter, setDateRangeFilter] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [selectedMeta, setSelectedMeta] = useState<Record<string, any> | null>(null);
 
@@ -27,6 +30,9 @@ export const AdminAuditLogs: React.FC = () => {
         page_size: pageSize,
         action: actionFilter || undefined,
         actor_role: roleFilter || undefined,
+        user_id: userIdFilter.trim() || undefined,
+        resource_type: resourceTypeFilter || undefined,
+        date_range: dateRangeFilter || undefined,
       });
       setLogs(data.logs);
       setTotal(data.total);
@@ -43,23 +49,45 @@ export const AdminAuditLogs: React.FC = () => {
 
   useEffect(() => {
     fetchLogs();
-  }, [page, pageSize, actionFilter, roleFilter]);
+  }, [page, pageSize, actionFilter, roleFilter, resourceTypeFilter, dateRangeFilter]);
+
+  const handleUserSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    setPage(1);
+    fetchLogs();
+  };
 
   const totalPages = Math.ceil(total / pageSize) || 1;
 
   const getActionBadge = (action: string) => {
-    switch (action) {
-      case "VIEW_STUDENT_CASEFILE":
-        return "bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 border-indigo-500/30";
-      case "GRANT_CONSENT":
+    switch (action.toLowerCase()) {
+      case "login":
         return "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30";
-      case "REVOKE_CONSENT":
-        return "bg-rose-500/15 text-rose-600 dark:text-rose-400 border-rose-500/30";
-      case "DISPATCH_EMERGENCY_SOS":
-        return "bg-red-500/20 text-red-600 dark:text-red-400 border-red-500/40 font-black animate-pulse";
-      case "UPDATE_ALERT_STATUS":
+      case "logout":
+        return "bg-slate-500/15 text-slate-600 dark:text-slate-400 border-slate-500/30";
+      case "journal_create":
+        return "bg-cyan-500/15 text-cyan-600 dark:text-cyan-400 border-cyan-500/30";
+      case "journal_view":
+        return "bg-blue-500/15 text-blue-600 dark:text-blue-400 border-blue-500/30";
+      case "prediction_view":
+        return "bg-purple-500/15 text-purple-600 dark:text-purple-400 border-purple-500/30";
+      case "alert_view":
         return "bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/30";
-      case "CREATE_COUNSELOR_NOTE":
+      case "consent_change":
+        return "bg-teal-500/15 text-teal-600 dark:text-teal-400 border-teal-500/30";
+      case "admin_action":
+        return "bg-rose-500/15 text-rose-600 dark:text-rose-400 border-rose-500/30 font-bold";
+      case "view_student_casefile":
+        return "bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 border-indigo-500/30";
+      case "grant_consent":
+        return "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30";
+      case "revoke_consent":
+        return "bg-rose-500/15 text-rose-600 dark:text-rose-400 border-rose-500/30";
+      case "dispatch_emergency_sos":
+        return "bg-red-500/20 text-red-600 dark:text-red-400 border-red-500/40 font-black animate-pulse";
+      case "update_alert_status":
+        return "bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/30";
+      case "create_counselor_note":
         return "bg-purple-500/15 text-purple-600 dark:text-purple-400 border-purple-500/30";
       default:
         return "bg-muted text-muted-foreground border-border/70";
@@ -92,26 +120,28 @@ export const AdminAuditLogs: React.FC = () => {
               </h1>
             </div>
             <p className="text-xs text-muted-foreground mt-0.5">
-              Immutable forensic trail of clinical case reads, consent modifications, and crisis alerts.
+              Append-only tamper-evident record of clinical record accesses, authentication, and state modifications.
             </p>
           </div>
 
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={fetchLogs}
-            disabled={isLoading}
-            className="h-9 px-3 text-xs border-border/70 hover:bg-accent flex items-center gap-1.5 self-end sm:self-auto"
-          >
-            <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? "animate-spin" : ""}`} />
-            Refresh Audit Feed
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={fetchLogs}
+              disabled={isLoading}
+              className="rounded-xl border-border/80 text-xs font-semibold gap-1.5 h-8"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? "animate-spin" : ""}`} />
+              <span>Refresh Audit Feed</span>
+            </Button>
+          </div>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 space-y-6">
-        {/* KPI Summary Cards */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 space-y-5">
+        {/* Compliance Header Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <Card className="border-border/70 bg-card/50 backdrop-blur-sm p-4">
             <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
               Total Audited Events
@@ -121,18 +151,6 @@ export const AdminAuditLogs: React.FC = () => {
             </h3>
             <p className="text-[11px] text-muted-foreground mt-1">
               Immutable audit ledger
-            </p>
-          </Card>
-
-          <Card className="border-border/70 bg-card/50 backdrop-blur-sm p-4">
-            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-              Active Filters
-            </p>
-            <h3 className="text-base sm:text-lg font-bold text-foreground mt-1 truncate">
-              {actionFilter ? actionFilter : (roleFilter ? `Role: ${roleFilter}` : "All Records")}
-            </h3>
-            <p className="text-[11px] text-muted-foreground mt-1">
-              {logs.length} visible in view
             </p>
           </Card>
 
@@ -166,8 +184,9 @@ export const AdminAuditLogs: React.FC = () => {
 
         {/* Filter Toolbar */}
         <Card className="border-border/70 bg-card/40 backdrop-blur-sm p-4">
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+          <div className="flex flex-col gap-3">
             <div className="flex flex-wrap items-center gap-3">
+              {/* Action Filter */}
               <div className="flex items-center gap-2">
                 <Filter className="w-3.5 h-3.5 text-muted-foreground" />
                 <span className="text-xs font-semibold text-foreground">Action:</span>
@@ -180,6 +199,14 @@ export const AdminAuditLogs: React.FC = () => {
                   className="h-8 rounded-lg border border-border/70 bg-background/50 px-2.5 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
                 >
                   <option value="">All Actions</option>
+                  <option value="login">login</option>
+                  <option value="logout">logout</option>
+                  <option value="journal_create">journal_create</option>
+                  <option value="journal_view">journal_view</option>
+                  <option value="prediction_view">prediction_view</option>
+                  <option value="alert_view">alert_view</option>
+                  <option value="consent_change">consent_change</option>
+                  <option value="admin_action">admin_action</option>
                   <option value="VIEW_STUDENT_CASEFILE">VIEW_STUDENT_CASEFILE</option>
                   <option value="GRANT_CONSENT">GRANT_CONSENT</option>
                   <option value="REVOKE_CONSENT">REVOKE_CONSENT</option>
@@ -189,6 +216,51 @@ export const AdminAuditLogs: React.FC = () => {
                 </select>
               </div>
 
+              {/* Resource Type Filter */}
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-semibold text-foreground">Resource:</span>
+                <select
+                  value={resourceTypeFilter}
+                  onChange={(e) => {
+                    setResourceTypeFilter(e.target.value);
+                    setPage(1);
+                  }}
+                  className="h-8 rounded-lg border border-border/70 bg-background/50 px-2.5 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+                >
+                  <option value="">All Resources</option>
+                  <option value="AUTH">AUTH</option>
+                  <option value="JOURNAL">JOURNAL</option>
+                  <option value="PREDICTIONS">PREDICTIONS</option>
+                  <option value="ALERT">ALERT</option>
+                  <option value="CONSENT">CONSENT</option>
+                  <option value="ADMIN">ADMIN</option>
+                  <option value="CASEFILE">CASEFILE</option>
+                  <option value="NOTE">NOTE</option>
+                  <option value="SOS">SOS</option>
+                </select>
+              </div>
+
+              {/* Date Range Filter */}
+              <div className="flex items-center gap-2">
+                <Clock className="w-3.5 h-3.5 text-muted-foreground" />
+                <span className="text-xs font-semibold text-foreground">Date:</span>
+                <select
+                  value={dateRangeFilter}
+                  onChange={(e) => {
+                    setDateRangeFilter(e.target.value);
+                    setPage(1);
+                  }}
+                  className="h-8 rounded-lg border border-border/70 bg-background/50 px-2.5 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+                >
+                  <option value="">All Time</option>
+                  <option value="24h">Last 24 Hours</option>
+                  <option value="7d">Last 7 Days</option>
+                  <option value="30d">Last 30 Days</option>
+                  <option value="90d">Last 90 Days</option>
+                </select>
+              </div>
+
+              {/* Role Filter */}
               <div className="flex items-center gap-2">
                 <span className="text-xs font-semibold text-foreground">Role:</span>
                 <select
@@ -206,24 +278,55 @@ export const AdminAuditLogs: React.FC = () => {
                   <option value="SYSTEM">SYSTEM</option>
                 </select>
               </div>
+
+              {/* Rows Selector */}
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-muted-foreground">Rows:</span>
+                <select
+                  value={pageSize}
+                  onChange={(e) => {
+                    setPageSize(Number(e.target.value));
+                    setPage(1);
+                  }}
+                  className="h-8 rounded-lg border border-border/70 bg-background/50 px-2 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+                >
+                  <option value={10}>10</option>
+                  <option value={25}>25</option>
+                  <option value={50}>50</option>
+                  <option value={100}>100</option>
+                </select>
+              </div>
             </div>
 
-            <div className="flex items-center gap-2 self-end sm:self-auto">
-              <span className="text-xs text-muted-foreground">Rows:</span>
-              <select
-                value={pageSize}
-                onChange={(e) => {
-                  setPageSize(Number(e.target.value));
-                  setPage(1);
-                }}
-                className="h-8 rounded-lg border border-border/70 bg-background/50 px-2 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
-              >
-                <option value={10}>10</option>
-                <option value={25}>25</option>
-                <option value={50}>50</option>
-                <option value={100}>100</option>
-              </select>
-            </div>
+            {/* User ID Search Bar */}
+            <form onSubmit={handleUserSearch} className="flex items-center gap-2 pt-1 border-t border-border/40">
+              <Search className="w-3.5 h-3.5 text-muted-foreground" />
+              <input
+                type="text"
+                value={userIdFilter}
+                onChange={(e) => setUserIdFilter(e.target.value)}
+                placeholder="Search by User UUID (actor or target subject)..."
+                className="h-8 flex-1 rounded-lg border border-border/70 bg-background/50 px-3 text-xs text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-1 focus:ring-primary"
+              />
+              <Button type="submit" size="sm" variant="secondary" className="h-8 text-xs px-3">
+                Search User
+              </Button>
+              {userIdFilter && (
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => {
+                    setUserIdFilter("");
+                    setPage(1);
+                    fetchLogs();
+                  }}
+                  className="h-8 text-xs text-muted-foreground hover:text-foreground px-2"
+                >
+                  Clear
+                </Button>
+              )}
+            </form>
           </div>
         </Card>
 
