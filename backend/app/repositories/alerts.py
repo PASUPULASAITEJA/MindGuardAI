@@ -1,5 +1,5 @@
 from typing import List, Optional
-from sqlalchemy import select, func
+from sqlalchemy import select, func, case
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.models.alerts import Alert, AlertStatus
 from app.repositories.base import CRUDBase
@@ -15,12 +15,16 @@ class AlertRepository(CRUDBase[Alert, BaseModel, BaseModel]):
     ) -> List[Alert]:
         """
         Fetch active alerts for counselors, optionally filtering by status.
+        Critical alerts are prioritized at the very top.
         """
         statement = select(self.model)
         if status_filter:
             statement = statement.where(self.model.status == status_filter)
         
-        statement = statement.order_by(self.model.created_at.desc()).limit(limit)
+        statement = statement.order_by(
+            case((self.model.severity == "CRITICAL", 0), else_=1),
+            self.model.created_at.desc()
+        ).limit(limit)
         result = await db.execute(statement)
         return list(result.scalars().all())
 
