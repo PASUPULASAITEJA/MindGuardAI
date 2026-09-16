@@ -7,7 +7,9 @@ export interface AlertItem {
   assessment_id: string;
   status: "PENDING" | "REVIEWED" | "RESOLVED";
   severity?: "CRITICAL" | "HIGH" | string;
+  counselor_id?: string | null;
   created_at: string;
+  resolved_at?: string | null;
 }
 
 export interface AlertsResponse {
@@ -39,7 +41,7 @@ export const useUpdateAlertStatus = (statusFilter?: string) => {
 
   return useMutation({
     mutationFn: async (payload: AlertUpdatePayload) => {
-      const response = await api.put(`/counselors/alerts/${payload.id}`, { status: payload.status });
+      const response = await api.patch(`/counselors/alerts/${payload.id}/status`, { status: payload.status });
       return response.data;
     },
     // Enforce optimistic UI updates
@@ -73,10 +75,45 @@ export const useUpdateAlertStatus = (statusFilter?: string) => {
         queryClient.setQueryData(context.queryKey, context.previousData);
       }
     },
-    onSettled: (data, error, variables, context) => {
+    onSettled: () => {
       // Always sync cache on resolution
       queryClient.invalidateQueries({ queryKey: ["counselor-alerts"] });
       queryClient.invalidateQueries({ queryKey: ["user-notifications"] });
+    },
+  });
+};
+
+export const useAssignAlert = (statusFilter?: string) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (payload: { id: string; counselorId?: string }) => {
+      const response = await api.patch(`/counselors/alerts/${payload.id}/assign`, {
+        counselor_id: payload.counselorId || null,
+      });
+      return response.data;
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ["counselor-alerts"] });
+      queryClient.invalidateQueries({ queryKey: ["user-notifications"] });
+    },
+  });
+};
+
+export const useAddAlertNote = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (payload: { alertId: string; note: string }) => {
+      const response = await api.post(`/counselors/alerts/${payload.alertId}/notes`, {
+        note: payload.note,
+      });
+      return response.data;
+    },
+    onSettled: (_data, _err, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["counselor-alerts"] });
+      queryClient.invalidateQueries({ queryKey: ["alert-notes", variables.alertId] });
+      queryClient.invalidateQueries({ queryKey: ["student-casefile"] });
     },
   });
 };
