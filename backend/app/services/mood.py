@@ -98,6 +98,7 @@ async def process_journal_entry_background(
                 try:
                     from app.models.users import User
                     from app.services.email_service import email_service
+                    from app.services.notification_service import notification_service
                     student_user = await db.get(User, student_id)
                     if student_user:
                         await email_service.notify_counselors_on_high_risk(
@@ -108,8 +109,16 @@ async def process_journal_entry_background(
                             event_type="HIGH_RISK_ALERT",
                             custom_message=f"Student submitted journal entry evaluating to HIGH clinical risk (Wellness Score: {mental_wellness_score:.1f}/100)."
                         )
+                        await notification_service.notify_high_risk(
+                            db,
+                            student_id=student_id,
+                            student_email=student_user.email,
+                            risk_tier=risk_level,
+                            wellness_score=mental_wellness_score,
+                            assessment_id=assessment_obj.id
+                        )
                 except Exception as notify_err:
-                    logger.error(f"Failed to dispatch counselor email notification: {str(notify_err)}", exc_info=True)
+                    logger.error(f"Failed to dispatch counselor notification: {str(notify_err)}", exc_info=True)
             
             await db.commit()
             logger.info(f"Asynchronous analysis successfully committed for mood log ID {mood_log_id}.")
