@@ -6,8 +6,8 @@ from uuid import UUID
 from app.db.session import get_db
 from app.api.dependencies import require_role, verify_student_consent
 from app.models.users import User, UserRole
-from app.models.alerts import AlertStatus
-from app.schemas.alerts import ActiveAlertsResponse, AlertUpdateRequest, AlertUpdateResponse, SOSResponse
+from app.models.alerts import AlertStatus, Alert
+from app.schemas.alerts import ActiveAlertsResponse, AlertUpdateRequest, AlertUpdateResponse, SOSResponse, AssignAlertRequest
 from app.schemas.notes import CreateCounselorNoteRequest, CounselorNoteResponse, CounselorNotesListResponse
 from app.services.alerts import alert_service
 from app.services.casefile_service import casefile_service
@@ -48,10 +48,10 @@ async def update_alert_status(
     alert_id: UUID,
     payload: AlertUpdateRequest,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_role([UserRole.COUNSELOR]))
+    current_user: User = Depends(require_role([UserRole.COUNSELOR, UserRole.ADMIN]))
 ):
     """
-    Allows clinic counselors to claim (REVIEWED) or close out (RESOLVED) high-risk warning alerts.
+    Allows clinic counselors/admins to claim (REVIEWED) or close out (RESOLVED) high-risk warning alerts.
     """
     updated_alert = await alert_service.update_alert_status(
         db,
@@ -69,7 +69,141 @@ async def update_alert_status(
         target_resource_id=str(alert_id),
         metadata={"new_status": payload.status.value if hasattr(payload.status, "value") else str(payload.status)}
     )
-    return updated_alert
+    return AlertUpdateResponse(
+        id=updated_alert.id,
+        status=updated_alert.status,
+        counselor_id=updated_alert.counselor_id,
+        severity=updated_alert.severity,
+        resolved_at=updated_alert.resolved_at,
+        message="Alert status updated successfully."
+    )
+
+@router.patch(
+    "/alerts/{alert_id}/assign",
+    response_model=AlertUpdateResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Assign counselor to an alert or self-assign"
+)
+async def assign_alert_counselor(
+    alert_id: UUID,
+    payload: Optional[AssignAlertRequest] = None,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_role([UserRole.COUNSELOR, UserRole.ADMIN]))
+):
+    """
+    Assigns an alert to a specific counselor or to the calling counselor/admin.
+    Transitions alert from PENDING to REVIEWED if currently PENDING.
+    """
+    alert = await db.get(Alert, alert_id)
+    if not alert:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail={"error_code": "ALERT_NOT_FOUND", "message": "The alert record does not exist.", "details": {}}
+        )
+
+    target_counselor_id = payload.counselor_id if (payload and payload.counselor_id) else current_user.id
+    target_counselor = await db.get(User, target_counselor_id)
+    if not target_counselor or target_counselor.role not in [UserRole.COUNSELOR, UserRole.ADMIN]:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail={"error_code": "INVALID_COUNSELOR", "message": "Specified user is not an active clinical counselor or admin.", "details": {}}
+        )
+
+    alert.counselor_id = target_counselor_id
+    if alert.status == AlertStatus.PENDING:
+        alert.status = AlertStatus.REVIEWED
+
+    db.add(alert)
+    await db.commit()
+    await db.refresh(alert)
+
+    await audit_service.log_event(
+        db,
+        action="ASSIGN_ALERT_COUNSELOR",
+        actor_user_id=current_user.id,
+        actor_role=current_user.role.value,
+        target_user_id=alert.student_id,
+        target_resource_type="ALERT",
+        target_resource_id=str(alert.id),
+        metadata={
+            "alert_id": str(alert.id),
+            "assigned_counselor_id": str(target_counselor_id),
+            "assigned_by": str(current_user.id),
+            "status": alert.status.value
+        }
+    )
+
+    return AlertUpdateResponse(
+        id=alert.id,
+        status=alert.status,
+        counselor_id=alert.counselor_id,
+        severity=alert.severity,
+        resolved_at=alert.resolved_at,
+        message="Alert assigned successfully."
+    )
+
+@router.patch(
+    "/alerts/{alert_id}/status",
+    response_model=AlertUpdateResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Update case workflow status for an alert"
+)
+async def patch_alert_status(
+    alert_id: UUID,
+    payload: AlertUpdateRequest,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_role([UserRole.COUNSELOR, UserRole.ADMIN]))
+):
+    """
+    Updates the clinical triage status of an alert (PENDING, REVIEWED, RESOLVED).
+    """
+    from datetime import datetime, timezone
+    alert = await db.get(Alert, alert_id)
+    if not alert:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail={"error_code": "ALERT_NOT_FOUND", "message": "The alert record does not exist.", "details": {}}
+        )
+
+    old_status = alert.status
+    alert.status = payload.status
+
+    if payload.status == AlertStatus.RESOLVED:
+        alert.resolved_at = datetime.now(timezone.utc)
+    elif payload.status == AlertStatus.PENDING:
+        alert.resolved_at = None
+
+    if payload.status == AlertStatus.REVIEWED and not alert.counselor_id:
+        alert.counselor_id = current_user.id
+
+    db.add(alert)
+    await db.commit()
+    await db.refresh(alert)
+
+    await audit_service.log_event(
+        db,
+        action="UPDATE_ALERT_STATUS",
+        actor_user_id=current_user.id,
+        actor_role=current_user.role.value,
+        target_user_id=alert.student_id,
+        target_resource_type="ALERT",
+        target_resource_id=str(alert.id),
+        metadata={
+            "alert_id": str(alert.id),
+            "old_status": old_status.value if hasattr(old_status, "value") else str(old_status),
+            "new_status": alert.status.value if hasattr(alert.status, "value") else str(alert.status)
+        }
+    )
+
+    return AlertUpdateResponse(
+        id=alert.id,
+        status=alert.status,
+        counselor_id=alert.counselor_id,
+        severity=alert.severity,
+        resolved_at=alert.resolved_at,
+        message="Alert status updated successfully."
+    )
+
     
 @router.get(
     "/students/{student_id}/casefile",
@@ -124,13 +258,23 @@ async def add_alert_note(
     alert_id: UUID,
     payload: CreateCounselorNoteRequest,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_role([UserRole.COUNSELOR]))
+    current_user: User = Depends(require_role([UserRole.COUNSELOR, UserRole.ADMIN]))
 ):
     """
     Appends a timestamped clinical case note to the target alert and student history.
     """
     res = await notes_service.create_alert_note(
         db, alert_id=alert_id, counselor=current_user, note_text=payload.note
+    )
+    await audit_service.log_event(
+        db,
+        action="CREATE_CASE_NOTE",
+        actor_user_id=current_user.id,
+        actor_role=current_user.role.value,
+        target_user_id=res.student_id,
+        target_resource_type="NOTE",
+        target_resource_id=str(res.id),
+        metadata={"alert_id": str(alert_id)}
     )
     await audit_service.log_event(
         db,
