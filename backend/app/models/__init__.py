@@ -8,6 +8,7 @@ from app.models.chat import Conversation, ChatMessage, SafetyEvent, ChatSender
 from app.models.behavioral import BehavioralLog
 from app.models.appointments import Appointment, AppointmentStatus, AppointmentType
 from app.models.consent import Consent, ConsentStatus
+from app.models.consent_records import ConsentRecord, ConsentType
 from app.models.counselor_notes import CounselorNote
 from app.models.case_notes import CaseNote
 from app.models.audit_logs import AuditLog
@@ -34,6 +35,8 @@ __all__ = [
     "AppointmentType",
     "Consent",
     "ConsentStatus",
+    "ConsentRecord",
+    "ConsentType",
     "CounselorNote",
     "CaseNote",
     "AuditLog",
