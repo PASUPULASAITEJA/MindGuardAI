@@ -1015,8 +1015,9 @@ export const StudentDashboard: React.FC = () => {
       {/* Explainable AI Factors Modal */}
       {isExplainOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="relative w-full max-w-lg rounded-3xl bg-card border border-border shadow-2xl overflow-hidden p-6 space-y-4">
+          <div className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-3xl bg-card border border-border shadow-2xl p-6 space-y-4">
             <ExplainableAIFactors
+              studentId={user?.id}
               wellnessScore={wellnessScore ?? 0}
               riskLevel={latestAssessment?.risk_level || "LOW"}
               lateNightMins={lateNightMins}
