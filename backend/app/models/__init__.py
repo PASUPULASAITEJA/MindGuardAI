@@ -14,6 +14,7 @@ from app.models.case_notes import CaseNote
 from app.models.risk_explanations import RiskExplanation, ExplanationDirection
 from app.models.audit_logs import AuditLog
 from app.models.notification_deliveries import NotificationDelivery
+from app.models.notifications import Notification, NotificationType, NotificationChannel
 
 __all__ = [
     "Base",
@@ -44,5 +45,8 @@ __all__ = [
     "ExplanationDirection",
     "AuditLog",
     "NotificationDelivery",
+    "Notification",
+    "NotificationType",
+    "NotificationChannel",
 ]
 
