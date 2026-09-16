@@ -24,6 +24,8 @@ from app.schemas.predictions import (
 from app.services.audit_service import audit_service
 from app.schemas.risk_explanations import ShapPredictionExplanationResponse
 from app.services.shap_service import shap_service
+from app.schemas.trends import WellnessTrendResponse
+from app.services.trend_service import trend_service
 
 router = APIRouter()
 
@@ -583,3 +585,40 @@ async def get_prediction_shap_explanation(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to generate SHAP explanation: {str(e)}"
         )
+
+
+@router.get(
+    "/trends",
+    response_model=WellnessTrendResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Get longitudinal mental wellness trend series and aggregations"
+)
+async def get_wellness_trends(
+    student_id: Optional[UUID] = Query(None, description="Student ID (required for counselors)"),
+    timeframe: str = Query("30d", pattern="^(7d|30d|90d)$", description="Trend timeframe: 7d, 30d, or 90d"),
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Retrieves chronological mental wellness trajectory points and clinical summary aggregations.
+    Students access their own records; counselors and admins can query student records with consent verification.
+    """
+    if current_user.role == UserRole.STUDENT:
+        target_student_id = current_user.id
+    elif current_user.role in (UserRole.COUNSELOR, UserRole.ADMIN):
+        if not student_id:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail={"error_code": "STUDENT_ID_REQUIRED", "message": "Counselors must provide 'student_id' parameter."}
+            )
+        target_student_id = student_id
+        await verify_student_consent(db, target_student_id)
+    else:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access restricted.")
+
+    return await trend_service.get_student_trends(
+        db,
+        student_id=target_student_id,
+        timeframe=timeframe
+    )
+
