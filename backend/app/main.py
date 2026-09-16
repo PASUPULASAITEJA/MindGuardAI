@@ -46,6 +46,14 @@ async def lifespan(app: FastAPI):
                 await conn.execute(text("ALTER TABLE alerts ADD COLUMN severity VARCHAR(50) DEFAULT 'HIGH'"))
             except Exception:
                 pass
+            try:
+                await conn.execute(text("ALTER TABLE alerts ADD COLUMN counselor_id CHAR(32)"))
+            except Exception:
+                pass
+            try:
+                await conn.execute(text("ALTER TABLE alerts ADD COLUMN resolved_at DATETIME"))
+            except Exception:
+                pass
         logger.info("Database schema initialized and verified.")
     except Exception as e:
         logger.error(f"Database initialization error: {e}")
