@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Optional, List
 from uuid import UUID
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 from app.models.appointments import AppointmentStatus, AppointmentType
 
 class AppointmentCreateRequest(BaseModel):
@@ -15,6 +15,8 @@ class AppointmentStatusUpdateRequest(BaseModel):
     notes: Optional[str] = Field(None, description="Counselor clinical notes")
 
 class AppointmentResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: UUID
     student_id: UUID
     counselor_id: Optional[UUID] = None
@@ -25,9 +27,6 @@ class AppointmentResponse(BaseModel):
     notes: Optional[str] = None
     created_at: datetime
     updated_at: datetime
-
-    class Config:
-        from_attributes = True
 
 class AppointmentListResponse(BaseModel):
     appointments: List[AppointmentResponse]
