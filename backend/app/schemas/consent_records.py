@@ -2,7 +2,7 @@ import enum
 from datetime import datetime
 from typing import Dict, List, Optional
 from uuid import UUID
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 
 class ConsentTypeEnum(str, enum.Enum):
     JOURNAL_SHARING = "journal_sharing"
@@ -18,6 +18,8 @@ class ConsentBatchChangeRequest(BaseModel):
     consents: Dict[ConsentTypeEnum, bool] = Field(..., description="Map of consent types to granted flags")
 
 class ConsentRecordItem(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: UUID
     user_id: UUID
     consent_type: str
@@ -26,9 +28,6 @@ class ConsentRecordItem(BaseModel):
     revoked_at: Optional[datetime] = None
     ip_address: Optional[str] = None
     created_at: datetime
-
-    class Config:
-        from_attributes = True
 
 class UserConsentsSummaryResponse(BaseModel):
     user_id: UUID
