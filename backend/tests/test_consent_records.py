@@ -18,15 +18,15 @@ from app.middleware.consent_enforcement import require_consent
 TEST_DATABASE_URL = "sqlite+aiosqlite:///:memory:"
 
 # Setup a dummy protected test router to verify require_consent dependency
-test_protected_router = APIRouter()
+mock_protected_router = APIRouter()
 
-@test_protected_router.get("/test/protected-journal")
+@mock_protected_router.get("/test/protected-journal")
 async def protected_journal_route(
     current_user: User = Depends(require_consent(ConsentType.JOURNAL_SHARING))
 ):
     return {"message": "Journal data accessed successfully"}
 
-app.include_router(test_protected_router)
+app.include_router(mock_protected_router)
 
 @pytest_asyncio.fixture(scope="function")
 async def test_db():
