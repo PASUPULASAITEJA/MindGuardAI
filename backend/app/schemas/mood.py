@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import List, Optional
 from uuid import UUID
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, field_validator, ConfigDict
 from app.models.mood_logs import InputType
 
 class JournalSubmissionRequest(BaseModel):
@@ -25,6 +25,8 @@ class JournalSubmissionResponse(BaseModel):
     sentiment_score: Optional[float] = None
 
 class MoodHistoryItem(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: UUID
     input_type: InputType
     self_reported_score: Optional[int] = None
@@ -32,9 +34,6 @@ class MoodHistoryItem(BaseModel):
     nlp_sentiment_scaled: Optional[float] = None
     primary_emotion: Optional[str] = None
     logged_at: datetime
-
-    class Config:
-        from_attributes = True
 
 class MoodHistoryResponse(BaseModel):
     history: List[MoodHistoryItem]
