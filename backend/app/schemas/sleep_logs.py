@@ -1,7 +1,7 @@
 from typing import List, Optional
 from uuid import UUID
 from datetime import datetime, date
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, Field, model_validator, ConfigDict
 
 
 class SleepLogCreateRequest(BaseModel):
@@ -36,6 +36,8 @@ class SleepLogCreateRequest(BaseModel):
 
 
 class SleepLogResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     user_id: UUID
     log_date: date
@@ -48,9 +50,6 @@ class SleepLogResponse(BaseModel):
     sleep_disruptions: int
     source: str
     created_at: datetime
-
-    class Config:
-        from_attributes = True
 
 
 class SleepLogListResponse(BaseModel):
