@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Optional
 from uuid import UUID
-from pydantic import BaseModel, EmailStr, Field, model_validator
+from pydantic import BaseModel, EmailStr, Field, model_validator, ConfigDict
 from app.models.users import UserRole
 
 class UserBase(BaseModel):
@@ -27,27 +27,27 @@ class UserUpdate(BaseModel):
     password: Optional[str] = Field(None, min_length=8)
 
 class UserResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: UUID
     email: EmailStr
     role: UserRole
     is_active: bool
     created_at: datetime
 
-    class Config:
-        from_attributes = True
-
 # Schema specific to registration API response
 class UserRegisterResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: UUID
     email: EmailStr
     role: UserRole
     full_name: Optional[str] = None
 
-    class Config:
-        from_attributes = True
-
 # Schema for profile endpoint response
 class UserProfileResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: UUID
     email: EmailStr
     role: UserRole
@@ -58,9 +58,6 @@ class UserProfileResponse(BaseModel):
     academic_department: Optional[str] = None
     consent_counselor_sharing: bool = True
     created_at: datetime
-
-    class Config:
-        from_attributes = True
 
 class UserProfileUpdateRequest(BaseModel):
     full_name: Optional[str] = Field(None, max_length=255)
@@ -76,13 +73,12 @@ class UserListResponse(BaseModel):
     current_page: int
 
 class AdminUserResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: UUID
     email: EmailStr
     role: UserRole
     is_active: bool
-
-    class Config:
-        from_attributes = True
 
 class UserDirectoryResponse(BaseModel):
     users: list[AdminUserResponse]
