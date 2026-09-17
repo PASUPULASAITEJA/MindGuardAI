@@ -1,7 +1,7 @@
 from typing import List, Optional, Dict, Literal
 from uuid import UUID
 from datetime import datetime
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 
 
 class MoodCheckinCreateRequest(BaseModel):
@@ -55,6 +55,8 @@ class MoodCheckinCreateRequest(BaseModel):
 
 
 class MoodCheckinResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     user_id: UUID
     checkin_type: str
@@ -67,9 +69,6 @@ class MoodCheckinResponse(BaseModel):
     one_word_feeling: Optional[str] = None
     stress_source: Optional[str] = None
     created_at: datetime
-
-    class Config:
-        from_attributes = True
 
 
 class MoodCheckinListResponse(BaseModel):
