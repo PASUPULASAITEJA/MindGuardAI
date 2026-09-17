@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import List, Optional, Dict, Any
 from uuid import UUID
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 
 # --- Intent & Emotion Schemas ---
 class IntentInfo(BaseModel):
@@ -25,6 +25,8 @@ class CreateConversationRequest(BaseModel):
     title: Optional[str] = Field(None, max_length=255, description="Optional custom conversation title")
 
 class ConversationSummary(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: UUID
     student_id: UUID
     title: str
@@ -34,14 +36,13 @@ class ConversationSummary(BaseModel):
     updated_at: datetime
     message_count: Optional[int] = 0
 
-    class Config:
-        from_attributes = True
-
 # --- Message Schemas ---
 class SendMessageRequest(BaseModel):
     message: str = Field(..., min_length=1, max_length=4000, description="The student's text message")
 
 class ChatMessageItem(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: UUID
     conversation_id: UUID
     sender: str
@@ -53,9 +54,6 @@ class ChatMessageItem(BaseModel):
     risk_level: str = "GREEN"
     is_crisis_flag: bool = False
     created_at: datetime
-
-    class Config:
-        from_attributes = True
 
 class ChatResponsePayload(BaseModel):
     conversation_id: UUID
