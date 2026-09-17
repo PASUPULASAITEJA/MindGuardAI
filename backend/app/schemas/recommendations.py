@@ -1,7 +1,7 @@
 from typing import List, Optional
 from uuid import UUID
 from datetime import datetime
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 from app.models.assessments import RiskLevel
 
 
@@ -19,6 +19,8 @@ class RecommendationResponse(BaseModel):
 
 # --- Next-Gen Personalized Recommendation Engine Schemas ---
 class PersonalizedRecommendationItem(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: UUID = Field(..., description="Unique ID for recommendation record")
     category: str = Field(..., description="Intervention category (e.g., BREATHING, GROUNDING, COGNITIVE_REFRAME)")
     title: str = Field(..., description="Concise actionable title")
@@ -31,9 +33,6 @@ class PersonalizedRecommendationItem(BaseModel):
     feedback: Optional[str] = Field(None, description="Student feedback: HELPFUL or NOT_HELPFUL")
     created_at: datetime = Field(..., description="Timestamp recommendation was generated")
     completed_at: Optional[datetime] = Field(None, description="Timestamp completed")
-
-    class Config:
-        from_attributes = True
 
 
 class PersonalizedRecommendationsResponse(BaseModel):
