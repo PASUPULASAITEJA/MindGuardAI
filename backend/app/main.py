@@ -134,7 +134,7 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
         details[loc] = error.get("msg", "Validation error")
 
     return JSONResponse(
-        status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+        status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
         content={
             "error_code": "VALIDATION_ERROR",
             "message": "Validation failed for request parameters.",
@@ -191,7 +191,13 @@ app.include_router(predictions_router, prefix="/api/predictions", tags=["Clinica
 app.include_router(recommendations_router, prefix="/api/v1/recommendations", tags=["Wellness Recommendations"])
 app.include_router(recommendations_router, prefix="/api/recommendations", tags=["Wellness Recommendations"])
 app.include_router(alerts_router, prefix="/api/v1/counselors", tags=["Counselor Warning Queues"])
+app.include_router(alerts_router, prefix="/api/counselors", tags=["Counselor Warning Queues"])
+app.include_router(alerts_router, prefix="/api/counselor", tags=["Counselor Warning Queues"])
+app.include_router(alerts_router, prefix="/api/counsellor", tags=["Counselor Warning Queues"])
+app.include_router(alerts_router, prefix="/api/v1/counselor", tags=["Counselor Warning Queues"])
+app.include_router(alerts_router, prefix="/api/v1/counsellor", tags=["Counselor Warning Queues"])
 app.include_router(alerts_router, prefix="/api/v1/alerts", tags=["Emergency Alerts & SOS"])
+app.include_router(alerts_router, prefix="/api/alerts", tags=["Emergency Alerts & SOS"])
 app.include_router(notifications_router, prefix="/api/v1/notifications", tags=["User Notifications"])
 app.include_router(notifications_router, prefix="/api/notifications", tags=["User Notifications"])
 from app.api.v1.notifications import websocket_notifications
@@ -199,6 +205,7 @@ app.add_api_websocket_route("/ws/notifications", websocket_notifications)
 app.include_router(analytics_router, prefix="/api/v1/analytics", tags=["Campus Analytics"])
 app.include_router(chatbot_router, prefix="/api/v1", tags=["AI Wellness Chatbot"])
 app.include_router(appointments_router, prefix="/api/v1/appointments", tags=["Counselor Appointments"])
+app.include_router(appointments_router, prefix="/api/appointments", tags=["Counselor Appointments"])
 app.include_router(consent_router, prefix="/api/v1/consent", tags=["Student Consent"])
 app.include_router(consent_records_router, prefix="/api/consent", tags=["Consent Records"])
 app.include_router(consent_records_router, prefix="/api/v1/consent-records", tags=["Consent Records"])
