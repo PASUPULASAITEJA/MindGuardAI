@@ -35,7 +35,7 @@ export const MoodMicroCheckin: React.FC = () => {
   const defaultType = currentHour < 16 ? "morning" : "evening";
 
   const [checkinType, setCheckinType] = useState<"morning" | "evening">(defaultType);
-  const [moodScore, setMoodScore] = useState<number>(7);
+  const [moodScore, setMoodScore] = useState<number>(8);
   const [energyLevel, setEnergyLevel] = useState<number>(7);
   const [anxietyLevel, setAnxietyLevel] = useState<number>(3);
   const [sleepQuality, setSleepQuality] = useState<"poor" | "fair" | "good" | "great">("good");
@@ -176,10 +176,11 @@ export const MoodMicroCheckin: React.FC = () => {
                 <button
                   key={item.score}
                   type="button"
+                  aria-pressed={moodScore === item.score}
                   onClick={() => setMoodScore(item.score)}
                   className={`p-3 rounded-xl border flex flex-col items-center justify-center transition-all ${
-                    Math.abs(moodScore - item.score) <= 1
-                      ? "bg-primary/10 border-primary text-primary font-bold shadow-2xs scale-105"
+                    moodScore === item.score
+                      ? "bg-primary/10 border-primary text-primary font-bold shadow-2xs scale-105 ring-1 ring-primary/30"
                       : "bg-muted/20 border-border/60 hover:bg-muted/40 text-muted-foreground"
                   }`}
                 >
