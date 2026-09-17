@@ -222,4 +222,11 @@ app.include_router(counselor_sleep_router, prefix="/api/counsellor", tags=["Coun
 app.include_router(counselor_sleep_router, prefix="/api/v1/counselors", tags=["Counselor Student Sleep Profiles"])
 app.include_router(counselor_sleep_router, prefix="/api/v1/counselor", tags=["Counselor Student Sleep Profiles"])
 
+@app.get("/health", tags=["Health"])
+@app.get("/api/health", tags=["Health"])
+@app.get("/api/v1/health", tags=["Health"])
+async def health_check():
+    return {"status": "healthy", "service": "MindGuardAI API", "version": "1.0.0"}
+
+
 
