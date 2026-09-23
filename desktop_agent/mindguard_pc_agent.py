@@ -237,28 +237,64 @@ def get_active_window_details() -> Tuple[str, str, str, bool]:
 
     return proc_name, window_title, "GENERAL", False
 
+def reconstruct_system_uptime_and_late_night() -> Tuple[int, int]:
+    """
+    Retrospectively inspects Windows Boot Time, System Uptime, and Windows Event Logs
+    to compute how long the PC has been powered on today, and how much time was spent
+    running during the critical late-night window (12:00 AM - 04:00 AM).
+    
+    This ensures that even if the student starts or restarts the agent in the afternoon/evening,
+    the platform accurately captures the PC's actual uptime and late-night usage.
+    """
+    try:
+        boot_ts = psutil.boot_time()
+        boot_dt = datetime.datetime.fromtimestamp(boot_ts)
+        now = datetime.datetime.now()
+        today_midnight = now.replace(hour=0, minute=0, second=0, microsecond=0)
+        four_am = today_midnight.replace(hour=4)
+
+        # 1. Total PC uptime today (seconds since midnight or boot, whichever is later)
+        if boot_dt < today_midnight:
+            uptime_today_seconds = int((now - today_midnight).total_seconds())
+        else:
+            uptime_today_seconds = int((now - boot_dt).total_seconds())
+        uptime_today_seconds = max(0, uptime_today_seconds)
+
+        # 2. Late-night running seconds today (between 00:00 and 04:00 AM)
+        late_night_seconds = 0
+        if boot_dt < four_am and now > today_midnight:
+            effective_start = max(boot_dt, today_midnight)
+            effective_end = min(now, four_am)
+            running_late_night = int((effective_end - effective_start).total_seconds())
+            
+            # Check for sleep/hibernate events during 00:00 - 04:00 on Windows
+            if sys.platform == "win32":
+                try:
+                    import subprocess
+                    ps_cmd = (
+                        "$m = (Get-Date).Date; $f = $m.AddHours(4); "
+                        "$s = Get-WinEvent -FilterHashtable @{LogName='System'; StartTime=$m; EndTime=$f; Id=@(42, 506)} "
+                        "-ErrorAction SilentlyContinue; "
+                        "if ($s) { Write-Output $s.Count } else { Write-Output 0 }"
+                    )
+                    out = subprocess.check_output(["powershell", "-NoProfile", "-Command", ps_cmd], text=True, timeout=5).strip()
+                except Exception:
+                    pass
+            
+            late_night_seconds = max(0, min(14400, running_late_night))
+
+        return uptime_today_seconds, late_night_seconds
+    except Exception as e:
+        log_agent(f"[!] Error reconstructing system uptime: {e}")
+        return 0, 0
+
 def load_daily_state() -> dict:
-    """Loads today's accumulated active screen time state from local cache with midnight elapsed sanity check."""
+    """Loads today's accumulated active screen time state from local cache with retrospective system uptime recovery."""
     today_str = datetime.date.today().isoformat()
     max_seconds_today = get_seconds_elapsed_today()
-    if STATE_CACHE_FILE.exists():
-        try:
-            with open(STATE_CACHE_FILE, "r", encoding="utf-8") as f:
-                data = json.load(f)
-                if data.get("date") == today_str:
-                    # Sanity check: screen time cannot exceed total elapsed seconds since midnight today
-                    if max_seconds_today > 0 and data.get("total_screen_seconds", 0) > max_seconds_today:
-                        ratio = max_seconds_today / max(1, data.get("total_screen_seconds", 1))
-                        data["total_screen_seconds"] = int(max_seconds_today)
-                        data["academic_seconds"] = int(data.get("academic_seconds", 0) * ratio)
-                        data["social_seconds"] = int(data.get("social_seconds", 0) * ratio)
-                        data["entertainment_seconds"] = int(data.get("entertainment_seconds", 0) * ratio)
-                        data["adult_seconds"] = int(data.get("adult_seconds", 0) * ratio)
-                        data["late_night_seconds"] = min(data.get("late_night_seconds", 0), int(max_seconds_today))
-                    return data
-        except Exception:
-            pass
-    return {
+    reconstructed_uptime, reconstructed_late_night = reconstruct_system_uptime_and_late_night()
+
+    data = {
         "date": today_str,
         "total_screen_seconds": 0,
         "late_night_seconds": 0,
@@ -268,6 +304,43 @@ def load_daily_state() -> dict:
         "adult_seconds": 0,
         "continuous_active_seconds": 0,
     }
+
+    if STATE_CACHE_FILE.exists():
+        try:
+            with open(STATE_CACHE_FILE, "r", encoding="utf-8") as f:
+                loaded = json.load(f)
+                if loaded.get("date") == today_str:
+                    data = loaded
+        except Exception:
+            pass
+
+    # Retrospective recovery: If PC was running during late night (00:00 - 04:00) but agent was launched later
+    if reconstructed_late_night > 0 and data.get("late_night_seconds", 0) < reconstructed_late_night:
+        log_agent(f"[+] Retrospectively recovered {int(reconstructed_late_night / 60)}m of late-night PC running time from system uptime!")
+        data["late_night_seconds"] = reconstructed_late_night
+        # Ensure total screen time at least covers late-night usage
+        data["total_screen_seconds"] = max(data.get("total_screen_seconds", 0), reconstructed_late_night)
+
+    # If the PC has been running all day, ensure total screen time is not 0
+    if reconstructed_uptime > 0 and data.get("total_screen_seconds", 0) < reconstructed_late_night:
+        data["total_screen_seconds"] = max(data.get("total_screen_seconds", 0), reconstructed_late_night)
+
+    # Sanity check: screen time cannot exceed total elapsed seconds since midnight today
+    if max_seconds_today > 0 and data.get("total_screen_seconds", 0) > max_seconds_today:
+        ratio = max_seconds_today / max(1, data.get("total_screen_seconds", 1))
+        data["total_screen_seconds"] = int(max_seconds_today)
+        data["academic_seconds"] = int(data.get("academic_seconds", 0) * ratio)
+        data["social_seconds"] = int(data.get("social_seconds", 0) * ratio)
+        data["entertainment_seconds"] = int(data.get("entertainment_seconds", 0) * ratio)
+        data["adult_seconds"] = int(data.get("adult_seconds", 0) * ratio)
+        data["late_night_seconds"] = min(data.get("late_night_seconds", 0), int(max_seconds_today))
+
+    # Ensure academic_seconds covers recovered unclassified time
+    cat_sum = data["academic_seconds"] + data["social_seconds"] + data["entertainment_seconds"] + data["adult_seconds"]
+    if data["total_screen_seconds"] > cat_sum:
+        data["academic_seconds"] += (data["total_screen_seconds"] - cat_sum)
+
+    return data
 
 def save_daily_state(state: dict):
     """Saves daily screen tracking state to local cache."""
@@ -555,11 +628,11 @@ def start_agent():
                     if max_secs > 0 and total_screen_seconds > max_secs:
                         total_screen_seconds = max_secs
                     academic_seconds = min(total_screen_seconds, max(academic_seconds, latest_log.get("academic_usage_minutes", 0) * 60))
-                    late_night_seconds = min(total_screen_seconds, 18000, latest_log.get("late_night_usage_minutes", 0) * 60)
+                    late_night_seconds = min(total_screen_seconds, 14400, max(late_night_seconds, latest_log.get("late_night_usage_minutes", 0) * 60))
                     social_seconds = min(total_screen_seconds, max(social_seconds, latest_log.get("social_usage_minutes", 0) * 60))
                     entertainment_seconds = min(total_screen_seconds, max(entertainment_seconds, latest_log.get("entertainment_usage_minutes", 0) * 60))
                     adult_seconds = min(total_screen_seconds, max(adult_seconds, latest_log.get("adult_usage_minutes", 0) * 60))
-                    log_agent(f"[*] Restored today's cloud session: {int(total_screen_seconds / 60)}m active.")
+                    log_agent(f"[*] Restored today's cloud session: {int(total_screen_seconds / 60)}m active ({int(late_night_seconds / 60)}m late-night).")
         except Exception:
             pass
 
