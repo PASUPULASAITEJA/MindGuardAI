@@ -95,7 +95,7 @@ async def get_academic_period_trends(
         )
         res_score = await db.execute(stmt_score)
         avg_score, total_count = res_score.one_or_none() or (None, 0)
-        mean_score = round(float(avg_score), 1) if avg_score is not None else 68.5
+        mean_score = round(float(avg_score), 1) if avg_score is not None else 0.0
 
         # Query aggregate stress from checkins
         stmt_stress = (
@@ -104,7 +104,14 @@ async def get_academic_period_trends(
         )
         res_stress = await db.execute(stmt_stress)
         avg_stress = res_stress.scalar()
-        mean_stress = round(float(avg_stress), 1) if avg_stress is not None else 4.2
+        mean_stress = round(float(avg_stress), 1) if avg_stress is not None else 0.0
+
+        # Query total active students to calculate real participation percentage
+        stmt_total_students = select(func.count(User.id)).where(User.role == UserRole.STUDENT, User.is_active == True)
+        total_students_res = await db.execute(stmt_total_students)
+        total_students_count = total_students_res.scalar() or 0
+        
+        participation = round((total_count / total_students_count * 100.0), 1) if total_students_count > 0 else 0.0
 
         trends.append(
             AcademicPeriodTrend(
@@ -115,7 +122,7 @@ async def get_academic_period_trends(
                 end_date=ev.end_date,
                 observed_average_wellness=mean_score,
                 observed_average_stress=mean_stress,
-                checkin_participation_rate=min(100.0, round(float(total_count * 12.5), 1)) if total_count else 45.0,
+                checkin_participation_rate=min(100.0, participation),
                 context_note=f"Observed aggregate indicators during {ev.title} ({ev.event_type.value.replace('_', ' ').title()})"
             )
         )
