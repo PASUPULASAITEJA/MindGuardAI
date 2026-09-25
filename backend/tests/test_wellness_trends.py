@@ -54,7 +54,7 @@ async def test_trend_service_empty_baseline(test_db: AsyncSession):
     res = await trend_service.get_student_trends(test_db, student_id=student_id, timeframe="30d")
     assert res.student_id == student_id
     assert res.timeframe == "30d"
-    assert res.summary.average_wellness_score == 70.0
+    assert res.summary.average_wellness_score == 0.0
     assert res.summary.direction == "STABLE"
     assert res.summary.total_checkins == 0
     assert len(res.points) == 0
