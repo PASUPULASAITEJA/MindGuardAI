@@ -1,7 +1,7 @@
 <div align="center">
 
 # 🧠 MindGuardAI
-### University-Grade Digital Wellbeing, Behavioral Phenotyping & Early Clinical Support Platform
+### Student Mental Wellness Detection and Early Intervention
 
 <p align="center">
   <a href="https://github.com/PASUPULASAITEJA/MindGuardAI"><img src="https://img.shields.io/badge/Platform-MindGuardAI%20v1.2.0-indigo?style=for-the-badge&logo=shield" alt="Platform Version"></a>
@@ -369,5 +369,5 @@ cd frontend && npm run build
 ---
 
 <div align="center">
-  <sub>MindGuardAI • Designed for Higher Education Wellbeing & Proactive Clinical Support</sub>
+  <sub>MindGuardAI • Student Mental Wellness Detection and Early Intervention</sub>
 </div>
