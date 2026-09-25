@@ -4,50 +4,50 @@
 
 @layer base {
   :root {
-    /* Warm Interactive Companion (Finch / Notion style) - Light Palette */
-    --background: 40 20% 97.5%;          /* #FAF9F5 - warm soothing organic canvas */
-    --foreground: 220 30% 12%;           /* #141A24 - deep warm charcoal */
-    --card: 0 0% 100%;                   /* #FFFFFF - clean elevated warm surface */
-    --card-foreground: 220 30% 12%;
+    /* Production-Grade SaaS Design System - Light Palette */
+    --background: 210 40% 98%;          /* #F8FAFC - clean cool slate canvas */
+    --foreground: 222 47% 11%;           /* #0F172A - deep rich slate */
+    --card: 0 0% 100%;                   /* #FFFFFF - crisp elevated white surface */
+    --card-foreground: 222 47% 11%;
     --popover: 0 0% 100%;
-    --popover-foreground: 220 30% 12%;
-    --primary: 224 76% 50%;              /* #2563EB - MindGuard Royal Indigo */
+    --popover-foreground: 222 47% 11%;
+    --primary: 221 83% 53%;              /* #2563EB - MindGuard Royal Indigo */
     --primary-foreground: 0 0% 100%;
-    --secondary: 40 18% 92%;             /* #ECEAE4 - warm Notion-like secondary */
-    --secondary-foreground: 220 30% 15%;
-    --muted: 40 18% 92%;
-    --muted-foreground: 218 14% 46%;     /* #667080 - comfortable secondary text */
-    --accent: 40 25% 90%;
-    --accent-foreground: 220 30% 12%;
-    --destructive: 0 84% 60%;
+    --secondary: 210 40% 96.1%;          /* #F1F5F9 - clean subtle slate secondary */
+    --secondary-foreground: 222 47% 11%;
+    --muted: 210 40% 96.1%;              /* #F1F5F9 */
+    --muted-foreground: 215 16% 47%;     /* #64748B - crisp readable subtext */
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222 47% 11%;
+    --destructive: 0 84% 60%;            /* #EF4444 */
     --destructive-foreground: 0 0% 100%;
-    --border: 38 16% 87%;                /* #E2DED6 - warm organic border */
-    --input: 38 16% 87%;
-    --ring: 224 76% 50%;
-    --radius: 1.25rem;                   /* Friendly organic rounded edges */
+    --border: 214 32% 91%;                /* #E2E8F0 - sharp subtle border */
+    --input: 214 32% 91%;
+    --ring: 221 83% 53%;
+    --radius: 0.5rem;                    /* Restrained 8px base radius */
   }
 
   .dark {
-    /* Warm Interactive Companion (Finch / Notion style) - Dark Palette */
-    --background: 220 32% 8%;            /* #0E131B - deep midnight slate */
-    --foreground: 40 20% 96%;            /* #F7F6F3 - warm cream text */
-    --card: 220 28% 12.5%;               /* #161D28 - warm elevated card surface */
-    --card-foreground: 40 20% 96%;
-    --popover: 220 28% 12.5%;
-    --popover-foreground: 40 20% 96%;
-    --primary: 217 91% 62%;              /* #4D8EFF - luminous warm sapphire */
+    /* Production-Grade SaaS Design System - Dark Palette */
+    --background: 224 71% 4%;            /* #070A11 - deep midnight canvas */
+    --foreground: 210 40% 98%;           /* #F8FAFC - crisp primary text */
+    --card: 222 47% 8%;                  /* #0D1322 - elevated slate surface */
+    --card-foreground: 210 40% 98%;
+    --popover: 222 47% 8%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 217 91% 60%;              /* #3B82F6 - radiant sapphire */
     --primary-foreground: 0 0% 100%;
-    --secondary: 220 22% 18%;            /* #232C3A */
-    --secondary-foreground: 40 20% 96%;
-    --muted: 220 22% 18%;
-    --muted-foreground: 218 14% 66%;     /* #9AA4B2 */
-    --accent: 220 22% 21%;               /* #2A3546 */
-    --accent-foreground: 40 20% 96%;
+    --secondary: 217 33% 14%;            /* #172033 */
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217 33% 14%;
+    --muted-foreground: 215 20% 65%;     /* #94A3B8 */
+    --accent: 217 33% 16%;               /* #1C263D */
+    --accent-foreground: 210 40% 98%;
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
-    --border: 220 18% 21%;               /* #2A3444 - refined warm border */
-    --input: 220 18% 21%;
-    --ring: 217 91% 62%;
+    --border: 217 33% 17%;               /* #1E293B */
+    --input: 217 33% 17%;
+    --ring: 217 91% 60%;
   }
 }
 
@@ -58,33 +58,22 @@
   
   html {
     font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Outfit', sans-serif;
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     letter-spacing: -0.02em;
+    font-weight: 700;
   }
 
   body {
-    @apply bg-background text-foreground transition-colors duration-200;
+    @apply bg-background text-foreground transition-colors duration-150;
     font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    background-image: 
-      radial-gradient(circle at 12% 0%, rgba(37, 99, 235, 0.04), transparent 45%),
-      radial-gradient(circle at 88% 12%, rgba(245, 158, 11, 0.035), transparent 40%),
-      radial-gradient(circle at 50% 90%, rgba(16, 185, 129, 0.035), transparent 45%);
-    background-attachment: fixed;
-  }
-  
-  html.dark body,
-  .dark body {
-    background-image: 
-      radial-gradient(circle at 12% 0%, rgba(77, 142, 255, 0.07), transparent 45%),
-      radial-gradient(circle at 88% 12%, rgba(245, 158, 11, 0.05), transparent 40%),
-      radial-gradient(circle at 50% 90%, rgba(16, 185, 129, 0.05), transparent 45%);
-    background-attachment: fixed;
   }
 
-  /* Custom Smooth Scrollbar */
+  /* Custom Clean Minimal Scrollbar */
   ::-webkit-scrollbar {
     width: 6px;
     height: 6px;
@@ -93,52 +82,50 @@
     @apply bg-transparent;
   }
   ::-webkit-scrollbar-thumb {
-    @apply bg-muted-foreground/25 rounded-full hover:bg-muted-foreground/40 transition-colors;
+    @apply bg-muted-foreground/20 rounded-full hover:bg-muted-foreground/35 transition-colors;
   }
 }
 
-@layer utilities {
-  /* Modern Wellness Platform & Healthcare SaaS Surfaces */
-  .wellness-card {
-    @apply bg-card border border-border/80 rounded-2xl shadow-xs transition-all duration-200 hover:shadow-sm;
+@layer components {
+  /* Clean SaaS Surface Panels */
+  .saas-panel {
+    @apply bg-card border border-border rounded-xl shadow-xs transition-all duration-150;
   }
 
-  .wellness-card-interactive {
-    @apply bg-card border border-border/80 rounded-2xl shadow-xs transition-all duration-200 hover:shadow-md hover:border-primary/40 hover:-translate-y-0.5;
+  .saas-panel-hover {
+    @apply bg-card border border-border rounded-xl shadow-xs transition-all duration-150 hover:border-border/80 hover:shadow-sm;
   }
 
-  .metric-pill {
-    @apply inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-semibold border transition-all;
+  .saas-table {
+    @apply w-full text-left text-xs border-collapse;
   }
 
-  /* Semantic Soft Badges */
-  .badge-low-risk {
-    @apply bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20 font-bold;
+  .saas-table th {
+    @apply px-4 py-3 font-semibold text-muted-foreground uppercase tracking-wider text-[11px] bg-secondary/50 border-b border-border;
   }
 
-  .badge-medium-risk {
-    @apply bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-500/20 font-bold;
+  .saas-table td {
+    @apply px-4 py-3 text-foreground border-b border-border/60 transition-colors;
   }
 
-  .badge-high-risk {
-    @apply bg-rose-500/10 text-rose-700 dark:text-rose-400 border border-rose-500/20 font-bold;
+  .saas-table tr:hover td {
+    @apply bg-secondary/30;
   }
 
-  .badge-critical-risk {
-    @apply bg-rose-600 text-white border border-rose-700 font-black animate-pulse shadow-xs shadow-rose-600/50;
+  /* Refined Semantic Badges */
+  .badge-stable {
+    @apply bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20 font-semibold px-2 py-0.5 rounded-md text-[11px];
   }
 
-  /* Finch / Notion Companion Surfaces */
-  .finch-card {
-    @apply bg-card border border-border/80 rounded-2xl shadow-xs transition-all duration-200 hover:shadow-sm hover:border-primary/40;
+  .badge-moderate {
+    @apply bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-500/20 font-semibold px-2 py-0.5 rounded-md text-[11px];
   }
 
-  .notion-pill {
-    @apply inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-semibold border transition-all;
+  .badge-elevated {
+    @apply bg-rose-500/10 text-rose-700 dark:text-rose-400 border border-rose-500/20 font-semibold px-2 py-0.5 rounded-md text-[11px];
   }
 
-  /* Soft Ambient Halo */
-  .companion-aura {
-    box-shadow: 0 0 25px -5px rgba(37, 99, 235, 0.12);
+  .badge-neutral {
+    @apply bg-secondary text-secondary-foreground border border-border/80 font-semibold px-2 py-0.5 rounded-md text-[11px];
   }
 }

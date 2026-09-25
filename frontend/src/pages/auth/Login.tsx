@@ -7,12 +7,10 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/components/ui/toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label, FormItem } from "@/components/ui/label";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
-import { Eye, EyeOff, Loader2, ArrowLeft } from "lucide-react";
+import { Eye, EyeOff, Loader2, ArrowLeft, ShieldCheck, Lock } from "lucide-react";
 import ThemeToggle from "@/components/layouts/ThemeToggle";
 
-// Form validation schema - supports username or institutional email
 const loginSchema = z.object({
   email: z.string().min(2, "Please enter your username or university email address."),
   password: z.string().min(1, "Password is required."),
@@ -48,12 +46,11 @@ export const Login: React.FC = () => {
       const loggedUser = await login(data.email, data.password, rememberMe);
 
       toast({
-        title: "Welcome back!",
-        description: "Successfully authenticated to MindGuardAI.",
+        title: "Authenticated",
+        description: `Signed in as ${loggedUser.role}.`,
         variant: "success",
       });
 
-      // Redirect depending on user role
       if (loggedUser.role === "STUDENT") {
         navigate("/student/dashboard");
       } else if (loggedUser.role === "COUNSELOR") {
@@ -76,136 +73,127 @@ export const Login: React.FC = () => {
   };
 
   return (
-    <div className="relative min-h-screen flex items-center justify-center bg-background px-4 py-12 transition-colors duration-300">
-      {/* Calm Ambient Lighting */}
-      <div className="absolute top-12 left-1/2 -translate-x-1/2 w-[600px] h-[350px] bg-primary/10 rounded-full blur-[120px] pointer-events-none" />
-      <div className="absolute bottom-10 right-10 w-[300px] h-[300px] bg-emerald-500/5 rounded-full blur-[100px] pointer-events-none" />
-
-      {/* Top Controls */}
-      <div className="absolute top-6 left-6 right-6 flex items-center justify-between z-10 max-w-5xl mx-auto">
+    <div className="min-h-screen flex items-center justify-center bg-background px-4 py-12">
+      {/* Top Header Controls */}
+      <div className="absolute top-6 left-6 right-6 flex items-center justify-between max-w-5xl mx-auto">
         <Link
           to="/"
-          className="inline-flex items-center gap-2 text-xs font-semibold text-muted-foreground hover:text-foreground transition-colors px-3 py-1.5 rounded-xl border border-border/60 bg-card/60 backdrop-blur-md group"
+          className="inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors px-2.5 py-1.5 rounded-lg border border-border bg-card"
         >
-          <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-1 transition-transform" />
+          <ArrowLeft className="w-3.5 h-3.5" />
           <span>Home</span>
         </Link>
         <ThemeToggle />
       </div>
 
-      <div className="w-full max-w-md z-10 pt-4">
-        {/* Brand Header */}
-        <div className="flex flex-col items-center mb-7 text-center">
-          <div className="h-14 w-14 rounded-2xl bg-gradient-to-tr from-indigo-500 via-indigo-600 to-emerald-400 p-0.5 shadow-xl shadow-indigo-500/15 mb-3.5 flex items-center justify-center">
-            <div className="w-full h-full rounded-[14px] bg-card overflow-hidden flex items-center justify-center">
-              <img src="/favicon.jpg" alt="MindGuardAI Logo" className="h-full w-full object-cover" />
-            </div>
-          </div>
-          <h1 className="text-3xl font-extrabold tracking-tight text-foreground">
-            MindGuard<span className="text-primary">AI</span>
+      <div className="w-full max-w-sm">
+        {/* Brand */}
+        <div className="flex flex-col items-center mb-6 text-center">
+          <img
+            src="/logo.png"
+            alt="MindGuardAI Logo"
+            className="h-16 w-16 rounded-2xl object-contain bg-white dark:bg-card border border-border p-1.5 shadow-sm mb-3"
+          />
+          <h1 className="text-xl font-bold tracking-tight text-foreground">
+            Sign in to MindGuard<span className="text-primary">AI</span>
           </h1>
-          <p className="text-xs text-muted-foreground mt-1.5 font-medium">Campus Psychological Safety & Early Care</p>
+          <p className="text-xs text-muted-foreground mt-1">
+            Campus Student Wellbeing & Early Support Platform
+          </p>
         </div>
 
-        {/* Auth Glass Card */}
-        <Card className="border-border/80 bg-card/85 dark:bg-card/80 backdrop-blur-2xl shadow-xl shadow-black/5 dark:shadow-black/20 rounded-3xl">
-          <CardHeader className="space-y-1 pb-4">
-            <CardTitle className="text-xl font-bold tracking-tight">Sign In</CardTitle>
-            <CardDescription className="text-xs text-muted-foreground">
-              Enter your university credentials to access your wellness dashboard
-            </CardDescription>
-          </CardHeader>
+        <Card className="p-6">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            <div>
+              <label className="text-xs font-medium text-foreground block mb-1.5">
+                University Email or Username
+              </label>
+              <Input
+                type="text"
+                placeholder="student@university.edu"
+                {...register("email")}
+                className="text-xs h-9"
+              />
+              {errors.email && (
+                <p className="text-[11px] text-rose-500 mt-1 font-medium">{errors.email.message}</p>
+              )}
+            </div>
 
-          <form onSubmit={handleSubmit(onSubmit)}>
-            <CardContent className="space-y-4">
-              {/* Username or Email Address */}
-              <FormItem>
-                <Label htmlFor="email" className="text-xs font-semibold text-foreground">Username or Institutional Email</Label>
+            <div>
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="text-xs font-medium text-foreground block">
+                  Password
+                </label>
+                <Link
+                  to="/forgot-password"
+                  className="text-[11px] text-primary hover:underline font-medium"
+                >
+                  Forgot password?
+                </Link>
+              </div>
+              <div className="relative">
                 <Input
-                  id="email"
-                  type="text"
-                  autoComplete="username"
-                  placeholder="e.g. username or student@nmims.in"
-                  className="h-11 rounded-xl border-border/80 bg-background/60 text-sm focus-visible:ring-primary focus-visible:ring-1"
-                  {...register("email")}
+                  type={showPassword ? "text" : "password"}
+                  placeholder="••••••••••••"
+                  {...register("password")}
+                  className="text-xs h-9 pr-8"
                 />
-                {errors.email && (
-                  <p className="text-xs text-destructive font-medium mt-1">{errors.email.message}</p>
-                )}
-              </FormItem>
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-2.5 top-2.5 text-muted-foreground hover:text-foreground"
+                >
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
+              {errors.password && (
+                <p className="text-[11px] text-rose-500 mt-1 font-medium">{errors.password.message}</p>
+              )}
+            </div>
 
-              {/* Password */}
-              <FormItem>
-                <div className="flex justify-between items-center">
-                  <Label htmlFor="password" className="text-xs font-semibold text-foreground">Password</Label>
-                  <Link
-                    to="/forgot-password"
-                    className="text-xs text-primary hover:underline font-medium"
-                  >
-                    Forgot password?
-                  </Link>
-                </div>
-                <div className="relative">
-                  <Input
-                    id="password"
-                    type={showPassword ? "text" : "password"}
-                    placeholder="••••••••"
-                    className="h-11 rounded-xl border-border/80 bg-background/60 text-sm pr-10 focus-visible:ring-primary focus-visible:ring-1"
-                    {...register("password")}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3.5 top-3.5 text-muted-foreground hover:text-foreground transition-colors"
-                  >
-                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                  </button>
-                </div>
-                {errors.password && (
-                  <p className="text-xs text-destructive font-medium mt-1">{errors.password.message}</p>
-                )}
-              </FormItem>
-
-              {/* Remember Me */}
-              <div className="flex items-center gap-2 pt-0.5">
+            <div className="flex items-center justify-between pt-1">
+              <label className="flex items-center gap-2 cursor-pointer">
                 <input
-                  id="remember-me"
                   type="checkbox"
                   checked={rememberMe}
                   onChange={(e) => setRememberMe(e.target.checked)}
-                  className="rounded-md border-border text-primary focus:ring-primary h-4 w-4"
+                  className="rounded border-border text-primary focus:ring-primary h-3.5 w-3.5"
                 />
-                <label htmlFor="remember-me" className="text-xs text-muted-foreground cursor-pointer select-none">
-                  Keep me signed in on this device
-                </label>
-              </div>
-            </CardContent>
+                <span className="text-xs text-muted-foreground font-medium">Keep me signed in</span>
+              </label>
+            </div>
 
-            <CardFooter className="flex flex-col gap-4 pt-2">
-              <Button
-                type="submit"
-                disabled={isSubmitting || !isValid}
-                className="w-full h-11 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground font-bold shadow-md shadow-primary/20 transition-all active:scale-[0.99]"
-              >
-                {isSubmitting ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Authenticating...
-                  </>
-                ) : (
-                  "Sign In to Portal"
-                )}
-              </Button>
-
-              <div className="text-xs text-center text-muted-foreground">
-                Don't have an account?{" "}
-                <Link to="/register" className="text-primary hover:underline font-bold">
-                  Create Student Account
-                </Link>
-              </div>
-            </CardFooter>
+            <Button
+              type="submit"
+              disabled={isSubmitting || !isValid}
+              className="w-full text-xs font-semibold h-9"
+            >
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="h-3.5 w-3.5 animate-spin mr-1.5" />
+                  Signing In...
+                </>
+              ) : (
+                "Sign In"
+              )}
+            </Button>
           </form>
+
+          <div className="pt-4 border-t border-border mt-4 text-center">
+            <p className="text-xs text-muted-foreground">
+              Need an account?{" "}
+              <Link to="/register" className="text-primary font-semibold hover:underline">
+                Create Account
+              </Link>
+            </p>
+          </div>
         </Card>
+
+        {/* Security / Privacy guarantee */}
+        <div className="mt-4 flex items-center justify-center gap-1.5 text-[11px] text-muted-foreground">
+          <ShieldCheck className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
+          <span>Role-Guarded • End-to-End Encrypted Authentication</span>
+        </div>
       </div>
     </div>
   );
