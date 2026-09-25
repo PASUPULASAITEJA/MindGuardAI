@@ -18,6 +18,8 @@ from app.models.notifications import Notification, NotificationType, Notificatio
 from app.models.recommendations import RecommendationRecord
 from app.models.mood_checkins import MoodCheckin
 from app.models.sleep_logs import SleepLog
+from app.models.academic import AcademicEvent, AcademicEventType
+from app.models.interventions import Intervention, InterventionType, InterventionStatus, InterventionOutcome
 
 __all__ = [
     "Base",
@@ -54,5 +56,11 @@ __all__ = [
     "RecommendationRecord",
     "MoodCheckin",
     "SleepLog",
+    "AcademicEvent",
+    "AcademicEventType",
+    "Intervention",
+    "InterventionType",
+    "InterventionStatus",
+    "InterventionOutcome",
 ]
 
