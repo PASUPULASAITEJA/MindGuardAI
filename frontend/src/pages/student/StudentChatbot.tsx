@@ -40,27 +40,27 @@ interface QuickPrompt {
 
 const QUICK_PROMPTS: QuickPrompt[] = [
   {
-    title: "Exam & Academic Stress",
-    desc: "Manage heavy coursework and fear of failure",
-    prompt: "I'm feeling really overwhelmed with upcoming exams and deadlines. Can you help me organize my thoughts?",
-    icon: "🎓",
-  },
-  {
-    title: "Instant Panic & Anxiety Relief",
-    desc: "Gentle grounding when your heart feels overwhelmed",
-    prompt: "I feel panic and anxiety rising right now. Can you help ground me and calm my breathing?",
+    title: "I'm feeling stressed",
+    desc: "Decompress current feelings with calm guided reflection",
+    prompt: "I'm feeling stressed right now and need some help sorting through what I'm experiencing.",
     icon: "🌿",
   },
   {
-    title: "Burnout & Social Disconnection",
-    desc: "Talk through loneliness or academic exhaustion",
-    prompt: "I've been feeling deeply exhausted, lonely, and disconnected from campus life. I just need a safe space to vent.",
-    icon: "💬",
+    title: "Help me manage exam pressure",
+    desc: "Academic organization and cognitive focus strategy",
+    prompt: "Help me manage exam pressure and heavy study deadlines without burning out.",
+    icon: "🎓",
   },
   {
-    title: "5-Minute Guided Reset",
-    desc: "Guided mindfulness and cognitive breathing",
-    prompt: "Could you guide me through a quick, gentle 5-minute mindfulness breathing exercise?",
+    title: "I want to talk to someone",
+    desc: "Connect with campus counselling & crisis pathways",
+    prompt: "I want to talk to someone about what I'm going through. Can you show me how to speak with a counselor?",
+    icon: "🤝",
+  },
+  {
+    title: "Show me relaxation resources",
+    desc: "Box breathing, sensory grounding & sleep pacing",
+    prompt: "Show me relaxation resources and evidence-based exercises to help steady my mind.",
     icon: "🧘",
   },
 ];

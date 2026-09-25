@@ -14,6 +14,7 @@ import StudentChatbot from "./pages/student/StudentChatbot";
 import DailyCheckInPage from "./pages/student/DailyCheckInPage";
 import MoodHistoryPage from "./pages/student/MoodHistoryPage";
 import SelfCareResourcesPage from "./pages/student/SelfCareResourcesPage";
+import PrivacyConsentPage from "./pages/student/PrivacyConsentPage";
 import CounselorDashboard from "./pages/counselor/CounselorDashboard";
 import { StudentCaseFile } from "./pages/counselor/StudentCaseFile";
 import AdminDashboard from "./pages/admin/AdminDashboard";
@@ -106,6 +107,19 @@ function App() {
                     subtitle="Access clinical exercises, meditation techniques, and customized pathways."
                   >
                     <SelfCareResourcesPage />
+                  </DashboardLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/student/privacy"
+              element={
+                <ProtectedRoute allowedRoles={["STUDENT"]}>
+                  <DashboardLayout
+                    title="Privacy & Consent Center"
+                    subtitle="Manage data collection preferences, AI explainability rights, and counselor escalation controls."
+                  >
+                    <PrivacyConsentPage />
                   </DashboardLayout>
                 </ProtectedRoute>
               }

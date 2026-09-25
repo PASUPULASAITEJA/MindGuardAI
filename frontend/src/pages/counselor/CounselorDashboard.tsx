@@ -1,28 +1,38 @@
 import React, { useState } from "react";
-import { useLocation, NavLink } from "react-router-dom";
-import { useTheme } from "@/contexts/ThemeContext";
+import { useLocation, NavLink, useNavigate } from "react-router-dom";
 import { useCounselorAlerts, useUpdateAlertStatus, useAssignAlert, useAddAlertNote, AlertItem } from "@/hooks/useAlerts";
-import { useMoodHistory } from "@/hooks/useMood";
-import { useLatestAssessment } from "@/hooks/usePredictions";
 import { useToast } from "@/components/ui/toast";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { 
-  LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer 
-} from "recharts";
-import { 
-  AlertCircle, CheckCircle2, Clock, X, ChevronRight, User as UserIcon, Loader2, Users, Calendar, FileEdit 
+  AlertCircle, 
+  CheckCircle2, 
+  Clock, 
+  X, 
+  ChevronRight, 
+  User as UserIcon, 
+  Loader2, 
+  Users, 
+  Calendar, 
+  FileEdit,
+  Search,
+  Filter,
+  ShieldCheck,
+  Activity,
+  ArrowRight,
+  PhoneCall
 } from "lucide-react";
-import { appointmentsAPI, AppointmentItem } from "@/services/api";
+import { appointmentsAPI, AppointmentItem, alertsAPI } from "@/services/api";
+import { cn } from "@/utils/cn";
 
 export const CounselorDashboard: React.FC = () => {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const location = useLocation();
   const path = location.pathname;
   
-  // Sidebar/Filter state
+  // Filter states
   const [statusFilter, setStatusFilter] = useState<string>("PENDING");
-  const [selectedStudentId, setSelectedStudentId] = useState<string | null>(null);
   const [studentSearchQuery, setStudentSearchQuery] = useState("");
 
   // 1. Fetching Alerts Queue & Booked Appointments
@@ -46,7 +56,7 @@ export const CounselorDashboard: React.FC = () => {
       const data = await appointmentsAPI.getMyAppointments();
       setAppointmentsList(data.appointments || []);
     } catch (e) {
-      // Ignored
+      // Handled silently
     } finally {
       setIsAppointmentsLoading(false);
     }
@@ -60,8 +70,8 @@ export const CounselorDashboard: React.FC = () => {
     try {
       await appointmentsAPI.updateStatus(appId, status);
       toast({
-        title: "Appointment Status Updated",
-        description: `Session marked as ${status}.`,
+        title: "Session Updated",
+        description: `Marked session as ${status}.`,
         variant: "success",
       });
       fetchAppointments();
@@ -74,59 +84,43 @@ export const CounselorDashboard: React.FC = () => {
     }
   };
 
-
   // Parse unique student list
   const uniqueStudents = React.useMemo(() => {
     if (!allAlertsData?.alerts) return [];
-    const studentMap = new Map<string, { studentId: string; lastAlert: string; alertCount: number }>();
+    const studentMap = new Map<string, { studentId: string; lastAlert: string; alertCount: number; severity: string }>();
     allAlertsData.alerts.forEach((alert) => {
       const existing = studentMap.get(alert.student_id);
       if (existing) {
         existing.alertCount += 1;
         if (new Date(alert.created_at) > new Date(existing.lastAlert)) {
           existing.lastAlert = alert.created_at;
+          existing.severity = alert.severity || "LOW";
         }
       } else {
         studentMap.set(alert.student_id, {
           studentId: alert.student_id,
           lastAlert: alert.created_at,
-          alertCount: 1
+          alertCount: 1,
+          severity: alert.severity || "LOW"
         });
       }
     });
     return Array.from(studentMap.values());
   }, [allAlertsData]);
 
-  // 2. Perform status transitions optimistically
   const handleStatusChange = async (alertId: string, newStatus: "PENDING" | "REVIEWED" | "RESOLVED") => {
     try {
-      await updateStatusMutation.mutateAsync({ id: alertId, status: newStatus });
+      await alertsAPI.updateAlertStatus(alertId, newStatus);
       toast({
-        title: "Alert Status Updated",
-        description: `Alert successfully marked as ${newStatus}.`,
+        title: "Status Updated",
+        description: `Alert marked as ${newStatus}.`,
         variant: "success",
       });
-    } catch (err) {
-      toast({
-        title: "Status Update Failed",
-        description: "Failed to sync status changes to the database.",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const handleAssignAlert = async (alertId: string, counselorId?: string) => {
-    try {
-      await assignAlertMutation.mutateAsync({ id: alertId, counselorId });
-      toast({
-        title: "Case Assigned",
-        description: "Alert assigned to counselor for clinical triage.",
-        variant: "success",
-      });
+      fetchAppointments();
     } catch (err: any) {
       toast({
-        title: "Assignment Failed",
-        description: err?.response?.data?.message || "Failed to assign case.",
+        title: "Update Failed",
+        description: err?.response?.data?.message || "Could not update status.",
         variant: "destructive",
       });
     }
@@ -142,8 +136,8 @@ export const CounselorDashboard: React.FC = () => {
         note: alertNoteText.trim(),
       });
       toast({
-        title: "Case Note Recorded",
-        description: "Observation saved to case file and audit log.",
+        title: "Clinical Note Recorded",
+        description: "Your case note has been saved with timestamp.",
         variant: "success",
       });
       setAlertNoteText("");
@@ -161,12 +155,6 @@ export const CounselorDashboard: React.FC = () => {
 
   const isAlertsPage = path === "/counselor/alerts";
   const isStudentsPage = path === "/counselor/students";
-  const isOverviewPage = path === "/counselor/dashboard" || (!isAlertsPage && !isStudentsPage);
-
-  // Filter student list by search query
-  const filteredStudents = uniqueStudents.filter((s) =>
-    s.studentId.toLowerCase().includes(studentSearchQuery.toLowerCase())
-  );
 
   const criticalAlertsCount = React.useMemo(() => {
     return (allAlertsData?.alerts || []).filter(
@@ -174,627 +162,430 @@ export const CounselorDashboard: React.FC = () => {
     ).length;
   }, [allAlertsData]);
 
-  const overviewPendingAlerts = React.useMemo(() => {
-    if (!allAlertsData?.alerts) return [];
-    return allAlertsData.alerts
-      .filter((a) => a.status === "PENDING")
-      .sort((a, b) => {
-        if (a.severity === "CRITICAL" && b.severity !== "CRITICAL") return -1;
-        if (a.severity !== "CRITICAL" && b.severity === "CRITICAL") return 1;
-        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
-      });
-  }, [allAlertsData]);
+  const pendingAlerts = (allAlertsData?.alerts || []).filter((a) => a.status === "PENDING");
+  const reviewedAlerts = (allAlertsData?.alerts || []).filter((a) => a.status === "REVIEWED");
+  const resolvedAlerts = (allAlertsData?.alerts || []).filter((a) => a.status === "RESOLVED");
 
-  const sortedAlerts = React.useMemo(() => {
-    if (!alertsData?.alerts) return [];
-    return [...alertsData.alerts].sort((a, b) => {
-      if (a.severity === "CRITICAL" && b.severity !== "CRITICAL") return -1;
-      if (a.severity !== "CRITICAL" && b.severity === "CRITICAL") return 1;
-      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
-    });
-  }, [alertsData]);
+  // Filter alerts by student search query
+  const filteredAlerts = (alertsData?.alerts || []).filter((a) =>
+    a.student_id.toLowerCase().includes(studentSearchQuery.toLowerCase()) ||
+    ((a as any).reason || a.severity || "").toLowerCase().includes(studentSearchQuery.toLowerCase())
+  );
 
   return (
-    <div className="relative space-y-6 min-h-[calc(100vh-80px)] text-foreground">
-      {/* 0. CRITICAL EMERGENCY SOS BANNER */}
+    <div className="space-y-6 pb-12">
+      {/* 0. Critical Alert Banner if Active SOS */}
       {criticalAlertsCount > 0 && (
-        <div className="p-4 rounded-xl bg-rose-950/40 border-2 border-rose-500/80 text-rose-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-lg shadow-rose-950/40 animate-pulse">
-          <div className="flex items-center gap-3.5">
-            <div className="p-2.5 bg-rose-600 text-white rounded-xl shadow-xs">
-              <AlertCircle className="h-6 w-6" />
+        <div className="p-4 rounded-xl bg-rose-500/10 border border-rose-500/30 text-foreground flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-rose-500 text-white rounded-lg">
+              <AlertCircle className="h-5 w-5" />
             </div>
             <div>
-              <div className="flex items-center gap-2 flex-wrap">
-                <span className="text-[11px] font-black uppercase tracking-widest px-2.5 py-0.5 rounded-full bg-rose-600 text-white shadow-xs">
-                  CRITICAL SOS ALERT
+              <div className="flex items-center gap-2">
+                <span className="text-[11px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-rose-500 text-white">
+                  Immediate SOS Attention
                 </span>
-                <span className="text-sm font-bold text-white">
-                  {criticalAlertsCount} {criticalAlertsCount === 1 ? "Active Student Emergency Signal" : "Active Student Emergency Signals"}
+                <span className="text-sm font-semibold text-rose-600 dark:text-rose-400">
+                  {criticalAlertsCount} {criticalAlertsCount === 1 ? "Active Emergency Distress Signal" : "Active Emergency Distress Signals"}
                 </span>
               </div>
-              <p className="text-xs text-rose-200/90 mt-1">
-                Student triggered immediate SOS distress alert. Requires urgent clinical intervention and contact.
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Urgent student distress detected via Tele-MANAS escalation or direct student SOS trigger.
               </p>
             </div>
           </div>
-          {!isAlertsPage && (
-            <NavLink
-              to="/counselor/alerts"
-              className="whitespace-nowrap px-3.5 py-2 rounded-lg bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold transition-all shadow hover:shadow-rose-600/40"
-            >
-              Open Critical Queue →
-            </NavLink>
-          )}
+          <NavLink
+            to="/counselor/alerts"
+            className="px-3 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold whitespace-nowrap transition-colors"
+          >
+            Review Critical Queue
+          </NavLink>
         </div>
       )}
 
-      {/* 1. OVERVIEW VIEW */}
-      {isOverviewPage && (
-        <div className="space-y-6">
-          {/* Summary metrics row */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <Card className="wellness-card border-l-4 border-l-rose-500 p-5 flex flex-col justify-between shadow-xs">
-              <div className="flex items-start justify-between">
-                <div>
-                  <span className="text-[11px] font-extrabold text-muted-foreground uppercase tracking-wider">Active Alerts Queue</span>
-                  <h4 className="text-3xl font-black text-rose-500 mt-1 tracking-tight">
-                    {allAlertsData?.alerts.filter((a) => a.status === "PENDING").length ?? 0}
-                  </h4>
-                </div>
-                <div className="p-2.5 rounded-xl bg-rose-500/10 text-rose-500 border border-rose-500/20">
-                  <AlertCircle className="h-5 w-5 animate-pulse" />
-                </div>
-              </div>
-              <p className="text-xs text-muted-foreground mt-3 font-medium">Urgent flags awaiting counselor assessment</p>
-            </Card>
+      {/* 1. Header & Top Metrics */}
+      <div className="space-y-4">
+        <div>
+          <h1 className="text-xl md:text-2xl font-bold tracking-tight text-foreground">
+            {isStudentsPage ? "Student Case Directory" : isAlertsPage ? "Support & Triage Queue" : "Counsellor Clinical Dashboard"}
+          </h1>
+          <p className="text-xs text-muted-foreground mt-0.5">
+            Case management, student triage review, and psychological support monitoring.
+          </p>
+        </div>
 
-            <Card className="wellness-card border-l-4 border-l-amber-500 p-5 flex flex-col justify-between shadow-xs">
-              <div className="flex items-start justify-between">
-                <div>
-                  <span className="text-[11px] font-extrabold text-muted-foreground uppercase tracking-wider">Under Active Review</span>
-                  <h4 className="text-3xl font-black text-amber-500 mt-1 tracking-tight">
-                    {allAlertsData?.alerts.filter((a) => a.status === "REVIEWED").length ?? 0}
-                  </h4>
-                </div>
-                <div className="p-2.5 rounded-xl bg-amber-500/10 text-amber-500 border border-amber-500/20">
-                  <Clock className="h-5 w-5" />
-                </div>
-              </div>
-              <p className="text-xs text-muted-foreground mt-3 font-medium">Claimed cases actively being triaged</p>
-            </Card>
-
-            <Card className="wellness-card border-l-4 border-l-emerald-500 p-5 flex flex-col justify-between shadow-xs">
-              <div className="flex items-start justify-between">
-                <div>
-                  <span className="text-[11px] font-extrabold text-muted-foreground uppercase tracking-wider">Resolved Cases</span>
-                  <h4 className="text-3xl font-black text-emerald-500 mt-1 tracking-tight">
-                    {allAlertsData?.alerts.filter((a) => a.status === "RESOLVED").length ?? 0}
-                  </h4>
-                </div>
-                <div className="p-2.5 rounded-xl bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">
-                  <CheckCircle2 className="h-5 w-5" />
-                </div>
-              </div>
-              <p className="text-xs text-muted-foreground mt-3 font-medium">Interventions successfully concluded</p>
-            </Card>
-          </div>
-
-          {/* Quick links header */}
-          <div className="flex justify-between items-center border-b border-border/50 pb-3">
-            <div>
-              <h3 className="text-foreground text-sm md:text-base font-extrabold">Recent Pending Warnings</h3>
-              <p className="text-muted-foreground text-xs md:text-sm mt-0.5">High-priority warning flags needing immediate review.</p>
+        {/* 4 Executive KPI Cards */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          <div className="p-4 rounded-xl border border-border bg-card shadow-xs">
+            <div className="flex items-center justify-between text-muted-foreground">
+              <span className="text-[11px] font-medium uppercase tracking-wider">Students Requiring Review</span>
+              <AlertCircle className="h-4 w-4 text-rose-500" />
             </div>
-            <NavLink to="/counselor/alerts" className="text-xs md:text-sm font-bold text-primary hover:underline">
-              View All Alerts →
-            </NavLink>
+            <span className="text-2xl font-bold text-foreground font-sans mt-1 block">
+              {pendingAlerts.length}
+            </span>
+            <span className="text-[11px] text-muted-foreground mt-0.5 block">Active pending flags</span>
           </div>
 
-          {/* Teaser Alerts Queue */}
-          <Card className="overflow-hidden">
-            <CardContent className="p-0">
-              {isAlertsLoading ? (
-                <div className="space-y-3 p-6">
-                  <div className="h-10 rounded-xl bg-muted/40 animate-pulse" />
-                  <div className="h-10 rounded-xl bg-muted/40 animate-pulse" />
-                </div>
-              ) : !allAlertsData || allAlertsData.alerts.filter((a) => a.status === "PENDING").length === 0 ? (
-                <div className="flex flex-col items-center justify-center text-center p-12">
-                  <CheckCircle2 className="h-9 w-9 text-emerald-500/60 mb-2" />
-                  <h4 className="text-foreground font-bold text-xs md:text-sm">No pending warnings. Excellent!</h4>
-                </div>
-              ) : (
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left border-collapse text-xs md:text-sm">
-                    <thead>
-                      <tr className="border-b border-border/50 text-muted-foreground font-bold bg-background/30">
-                        <th className="p-4 uppercase tracking-wider">Date</th>
-                        <th className="p-4 uppercase tracking-wider">Student ID</th>
-                        <th className="p-4 uppercase tracking-wider">Risk Level</th>
-                        <th className="p-4 uppercase tracking-wider text-right">Triage Action</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-border/40">
-                      {overviewPendingAlerts
-                        .slice(0, 5)
-                        .map((alert) => (
-                          <tr 
-                            key={alert.id}
-                            className={`hover:bg-accent/20 cursor-pointer group transition-colors ${
-                              alert.severity === "CRITICAL" ? "bg-rose-500/10 border-l-4 border-l-rose-600" : ""
-                            }`}
-                            onClick={() => setSelectedStudentId(alert.student_id)}
-                          >
-                            <td className="p-4 text-muted-foreground">
-                              {new Date(alert.created_at).toLocaleString([], { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}
-                            </td>
-                            <td className="p-4 font-bold text-foreground group-hover:text-primary transition-colors">
-                              {alert.student_id.substring(0, 8)}...
-                            </td>
-                            <td className="p-4">
-                              {alert.severity === "CRITICAL" ? (
-                                <span className="badge-critical-risk px-2.5 py-0.5 rounded-full text-[10px] uppercase tracking-wide">
-                                  CRITICAL SOS
-                                </span>
-                              ) : (
-                                <span className="badge-high-risk px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wide">
-                                  HIGH RISK
-                                </span>
-                              )}
-                            </td>
-                            <td className="p-4 text-right" onClick={(e) => e.stopPropagation()}>
-                              <div className="flex items-center gap-1.5 justify-end">
-                                {!alert.counselor_id && (
-                                  <Button
-                                    size="sm"
-                                    onClick={() => handleAssignAlert(alert.id)}
-                                    className="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs h-8 px-2.5 rounded-lg"
-                                    title="Assign to me"
-                                  >
-                                    Assign
-                                  </Button>
-                                )}
-                                <Button
-                                  size="sm"
-                                  onClick={() => handleStatusChange(alert.id, "REVIEWED")}
-                                  className="bg-amber-600 hover:bg-amber-500 text-white font-semibold text-xs h-8 px-2.5 rounded-lg"
-                                >
-                                  Claim Case
-                                </Button>
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  onClick={() => {
-                                    setActiveNoteAlert(alert);
-                                    setAlertNoteText("");
-                                  }}
-                                  className="border-border text-foreground hover:bg-accent font-semibold text-xs h-8 px-2 rounded-lg"
-                                  title="Add Clinical Note"
-                                >
-                                  <FileEdit className="h-3.5 w-3.5" />
-                                </Button>
-                              </div>
-                            </td>
-                          </tr>
-                        ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-            </CardContent>
-          </Card>
+          <div className="p-4 rounded-xl border border-border bg-card shadow-xs">
+            <div className="flex items-center justify-between text-muted-foreground">
+              <span className="text-[11px] font-medium uppercase tracking-wider">Open Active Cases</span>
+              <Users className="h-4 w-4 text-primary" />
+            </div>
+            <span className="text-2xl font-bold text-foreground font-sans mt-1 block">
+              {reviewedAlerts.length}
+            </span>
+            <span className="text-[11px] text-muted-foreground mt-0.5 block">Under counsellor follow-up</span>
+          </div>
 
-          {/* Booked Appointments Table */}
-          <div className="pt-4">
-            <div className="flex justify-between items-center border-b border-border/50 pb-3 mb-3">
+          <div className="p-4 rounded-xl border border-border bg-card shadow-xs">
+            <div className="flex items-center justify-between text-muted-foreground">
+              <span className="text-[11px] font-medium uppercase tracking-wider">Sessions Scheduled</span>
+              <Calendar className="h-4 w-4 text-blue-500" />
+            </div>
+            <span className="text-2xl font-bold text-foreground font-sans mt-1 block">
+              {appointmentsList.filter((a) => a.status === "CONFIRMED" || a.status === "PENDING").length}
+            </span>
+            <span className="text-[11px] text-muted-foreground mt-0.5 block">Upcoming 1-on-1 consultations</span>
+          </div>
+
+          <div className="p-4 rounded-xl border border-border bg-card shadow-xs">
+            <div className="flex items-center justify-between text-muted-foreground">
+              <span className="text-[11px] font-medium uppercase tracking-wider">Resolved Cases</span>
+              <CheckCircle2 className="h-4 w-4 text-emerald-500" />
+            </div>
+            <span className="text-2xl font-bold text-foreground font-sans mt-1 block">
+              {resolvedAlerts.length}
+            </span>
+            <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold mt-0.5 block">Care protocols completed</span>
+          </div>
+        </div>
+      </div>
+
+      {/* 2. Main Content Split: Support Queue Table + Sessions/Activity */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Support Queue Column (Left 2 cols) */}
+        <div className="lg:col-span-2 space-y-4">
+          <Card className="p-5">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-border pb-4 mb-4">
               <div>
-                <h3 className="text-foreground text-sm md:text-base font-extrabold flex items-center gap-2">
-                  <Calendar className="h-4.5 w-4.5 text-primary" />
-                  Scheduled Student Appointments
+                <h3 className="text-sm font-semibold text-foreground">
+                  {isStudentsPage ? "All Monitored Students" : "Support Triage Queue"}
                 </h3>
-                <p className="text-muted-foreground text-xs md:text-sm mt-0.5">1-on-1 virtual consultations and in-person intake requests</p>
+                <p className="text-xs text-muted-foreground">
+                  Real-time early warning flags and student check-in alerts
+                </p>
               </div>
-              <span className="text-xs font-bold text-primary px-2.5 py-1 rounded-full bg-primary/10 border border-primary/20">
-                {appointmentsList.length} Sessions
-              </span>
-            </div>
 
-
-            <Card className="overflow-hidden">
-              <CardContent className="p-0">
-                {isAppointmentsLoading ? (
-                  <div className="p-6 text-center text-xs text-muted-foreground">Loading appointment queue...</div>
-                ) : appointmentsList.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center text-center p-8">
-                    <Calendar className="h-8 w-8 text-muted-foreground/40 mb-2" />
-                    <p className="text-xs text-muted-foreground font-medium">No student sessions currently scheduled.</p>
-                  </div>
-                ) : (
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-left border-collapse text-xs md:text-sm">
-                      <thead>
-                        <tr className="border-b border-border/50 text-muted-foreground font-bold bg-background/30">
-                          <th className="p-3.5 uppercase tracking-wider">Scheduled Date</th>
-                          <th className="p-3.5 uppercase tracking-wider">Student ID</th>
-                          <th className="p-3.5 uppercase tracking-wider">Format</th>
-                          <th className="p-3.5 uppercase tracking-wider">Concern / Reason</th>
-                          <th className="p-3.5 uppercase tracking-wider">Status</th>
-                          <th className="p-3.5 uppercase tracking-wider text-right">Action</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-border/40">
-                        {appointmentsList.map((app) => (
-                          <tr key={app.id} className="hover:bg-accent/20 transition-colors">
-                            <td className="p-3.5 text-foreground font-medium">
-                              {new Date(app.scheduled_time).toLocaleString([], {
-                                month: "short",
-                                day: "numeric",
-                                hour: "2-digit",
-                                minute: "2-digit",
-                              })}
-                            </td>
-                            <td className="p-3.5 font-mono text-xs text-primary">
-                              {app.student_id.substring(0, 8)}...
-                            </td>
-                            <td className="p-3.5">
-                              <span className="text-xs font-medium px-2 py-0.5 rounded bg-accent/40 border border-border">
-                                {app.appointment_type}
-                              </span>
-                            </td>
-                            <td className="p-3.5 text-xs text-foreground/80 max-w-xs truncate">
-                              {app.reason || "General Wellness"}
-                            </td>
-                            <td className="p-3.5">
-                              <span className={`inline-block px-2.5 py-0.5 rounded-full font-bold text-[10px] uppercase tracking-wide ${
-                                app.status === "CONFIRMED"
-                                  ? "badge-low-risk"
-                                  : app.status === "PENDING"
-                                  ? "badge-medium-risk"
-                                  : "bg-muted text-muted-foreground"
-                              }`}>
-                                {app.status}
-                              </span>
-                            </td>
-                            <td className="p-3.5 text-right space-x-2">
-                              {app.status === "PENDING" && (
-                                <Button
-                                  size="sm"
-                                  onClick={() => handleUpdateAppointment(app.id, "CONFIRMED")}
-                                  className="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs h-7 px-2.5 rounded-lg"
-                                >
-                                  Confirm
-                                </Button>
-                              )}
-                              {app.status === "CONFIRMED" && (
-                                <Button
-                                  size="sm"
-                                  onClick={() => handleUpdateAppointment(app.id, "COMPLETED")}
-                                  className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold text-xs h-7 px-2.5 rounded-lg"
-                                >
-                                  Mark Done
-                                </Button>
-                              )}
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      )}
-
-
-      {/* 2. ALERTS DIRECTORY VIEW */}
-      {isAlertsPage && (
-        <div className="space-y-6">
-          {/* Filters Toolbar */}
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-border/50 pb-4">
-            <div>
-              <h3 className="text-foreground text-base md:text-lg font-extrabold">Active Intervention Alerts</h3>
-              <p className="text-muted-foreground text-xs md:text-sm mt-0.5">Triage high-risk clinical warnings flagged by student check-ins</p>
-            </div>
-
-            {/* Filter buttons */}
-            <div className="flex bg-background/50 border border-border/70 p-0.5 rounded-lg">
-              {(["PENDING", "REVIEWED", "RESOLVED", ""] as const).map((filter) => (
-                <button
-                  key={filter}
-                  onClick={() => setStatusFilter(filter)}
-                  className={`px-3 py-1.5 rounded-md text-xs font-bold uppercase transition-all duration-200 ${
-                    statusFilter === filter
-                      ? "bg-primary text-primary-foreground shadow"
-                      : "text-muted-foreground hover:text-foreground"
-                  }`}
-                >
-                  {filter === "" ? "All Alerts" : filter}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Main Alerts Queue Table */}
-          <Card className="border-border/50 bg-card/40 backdrop-blur-md overflow-hidden">
-            <CardContent className="p-0">
-              {isAlertsLoading ? (
-                <div className="space-y-3 p-6">
-                  <div className="h-10 rounded-xl bg-muted/40 animate-pulse" />
-                  <div className="h-10 rounded-xl bg-muted/40 animate-pulse" />
-                  <div className="h-10 rounded-xl bg-muted/40 animate-pulse" />
-                </div>
-              ) : !alertsData || alertsData.alerts.length === 0 ? (
-                <div className="flex flex-col items-center justify-center text-center p-16">
-                  <CheckCircle2 className="h-10 w-10 text-emerald-500/60 mb-3 animate-bounce" />
-                  <h4 className="text-foreground font-bold text-sm">All caught up! No active warnings.</h4>
-                  <p className="text-muted-foreground text-xs max-w-xs mt-1">There are no alerts matching the selected status filter.</p>
-                </div>
-              ) : (
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left border-collapse text-xs md:text-sm">
-                    <thead>
-                      <tr className="border-b border-border/50 text-muted-foreground font-bold bg-background/30">
-                        <th className="p-4 uppercase tracking-wider">Created At</th>
-                        <th className="p-4 uppercase tracking-wider">Student Reference</th>
-                        <th className="p-4 uppercase tracking-wider">Risk Severity</th>
-                        <th className="p-4 uppercase tracking-wider">Assignment</th>
-                        <th className="p-4 uppercase tracking-wider">Assessment ID</th>
-                        <th className="p-4 uppercase tracking-wider">Workflow Status</th>
-                        <th className="p-4 uppercase tracking-wider text-right">Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-border/40">
-                      {sortedAlerts.map((alert) => (
-                        <tr 
-                          key={alert.id}
-                          className={`hover:bg-accent/20 cursor-pointer group transition-colors ${
-                            alert.severity === "CRITICAL" ? "bg-rose-500/10 border-l-4 border-l-rose-600" : ""
-                          }`}
-                          onClick={() => setSelectedStudentId(alert.student_id)}
-                        >
-                          <td className="p-4 text-muted-foreground">
-                            {new Date(alert.created_at).toLocaleString([], { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}
-                          </td>
-                          <td className="p-4 font-bold text-foreground group-hover:text-primary transition-colors flex items-center gap-1.5">
-                            <UserIcon className="h-3.5 w-3.5 text-muted-foreground/60" />
-                            {alert.student_id.substring(0, 8)}...
-                          </td>
-                          <td className="p-4">
-                            {alert.severity === "CRITICAL" ? (
-                              <span className="badge-critical-risk px-2.5 py-0.5 rounded-full text-[10px] uppercase tracking-wide">
-                                CRITICAL SOS
-                              </span>
-                            ) : (
-                              <span className="badge-high-risk px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wide">
-                                HIGH RISK
-                              </span>
-                            )}
-                          </td>
-                          <td className="p-4">
-                            {alert.counselor_id ? (
-                              <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-primary px-2 py-0.5 rounded-md bg-primary/10 border border-primary/20">
-                                <UserIcon className="h-3 w-3" />
-                                Assigned
-                              </span>
-                            ) : (
-                              <span className="inline-flex items-center text-[11px] font-medium text-muted-foreground px-2 py-0.5 rounded-md bg-muted border border-border">
-                                Unassigned
-                              </span>
-                            )}
-                          </td>
-                          <td className="p-4 text-muted-foreground">{alert.assessment_id.substring(0, 12)}...</td>
-                          <td className="p-4">
-                            <span className={`inline-flex items-center gap-1 font-bold ${
-                              alert.status === "PENDING" 
-                                ? "text-red-500" 
-                                : alert.status === "REVIEWED" 
-                                ? "text-amber-500" 
-                                : "text-emerald-500"
-                            }`}>
-                              {alert.status === "PENDING" && <Clock className="h-3.5 w-3.5" />}
-                              {alert.status === "REVIEWED" && <Clock className="h-3.5 w-3.5 animate-spin" />}
-                              {alert.status === "RESOLVED" && <CheckCircle2 className="h-3.5 w-3.5" />}
-                              {alert.status}
-                            </span>
-                          </td>
-                          <td className="p-4 text-right" onClick={(e) => e.stopPropagation()}>
-                            <div className="flex gap-1.5 justify-end items-center flex-wrap">
-                              {!alert.counselor_id && (
-                                <Button
-                                  size="sm"
-                                  onClick={() => handleAssignAlert(alert.id)}
-                                  className="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs h-8 px-2.5 rounded-lg"
-                                  title="Assign to me"
-                                >
-                                  Assign
-                                </Button>
-                              )}
-                              {alert.status === "PENDING" && (
-                                <Button
-                                  size="sm"
-                                  onClick={() => handleStatusChange(alert.id, "REVIEWED")}
-                                  className="bg-amber-600 hover:bg-amber-500 text-white font-semibold text-xs h-8 px-2.5 rounded-lg"
-                                >
-                                  Claim
-                                </Button>
-                              )}
-                              {alert.status !== "RESOLVED" && (
-                                <Button
-                                  size="sm"
-                                  onClick={() => handleStatusChange(alert.id, "RESOLVED")}
-                                  className="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs h-8 px-2.5 rounded-lg"
-                                >
-                                  Resolve
-                                </Button>
-                              )}
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => {
-                                  setActiveNoteAlert(alert);
-                                  setAlertNoteText("");
-                                }}
-                                className="border-border text-foreground hover:bg-accent font-semibold text-xs h-8 px-2 rounded-lg flex items-center gap-1"
-                                title="Add Clinical Note"
-                              >
-                                <FileEdit className="h-3.5 w-3.5" />
-                              </Button>
-                              <NavLink
-                                to={`/counselor/students/${alert.student_id}/casefile`}
-                                className="inline-flex items-center gap-1 bg-primary/10 hover:bg-primary/20 text-primary border border-primary/30 font-semibold text-xs h-8 px-2 rounded-lg transition-colors"
-                              >
-                                Case File
-                              </NavLink>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+              {/* Status Filter Tabs */}
+              {!isStudentsPage && (
+                <div className="flex rounded-lg bg-secondary p-0.5 text-xs font-medium border border-border">
+                  {[
+                    { key: "PENDING", label: "Pending" },
+                    { key: "REVIEWED", label: "Under Review" },
+                    { key: "RESOLVED", label: "Resolved" },
+                    { key: "", label: "All" },
+                  ].map((tab) => (
+                    <button
+                      key={tab.key}
+                      type="button"
+                      onClick={() => setStatusFilter(tab.key)}
+                      className={cn(
+                        "px-2.5 py-1 rounded-md transition-colors",
+                        statusFilter === tab.key
+                          ? "bg-card text-foreground font-semibold shadow-xs"
+                          : "text-muted-foreground hover:text-foreground"
+                      )}
+                    >
+                      {tab.label}
+                    </button>
+                  ))}
                 </div>
               )}
-            </CardContent>
-          </Card>
-        </div>
-      )}
-
-      {/* 3. STUDENT DIRECTORY / RECORDS VIEW */}
-      {isStudentsPage && (
-        <div className="space-y-6">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-border/50 pb-4">
-            <div>
-              <h3 className="text-foreground text-base md:text-lg font-extrabold">Student Wellness Directory</h3>
-              <p className="text-muted-foreground text-xs md:text-sm mt-0.5">Explore active clinical case folders matching institutional alerts</p>
             </div>
 
             {/* Search Input */}
-            <input
-              type="text"
-              placeholder="Search Student ID..."
-              value={studentSearchQuery}
-              onChange={(e) => setStudentSearchQuery(e.target.value)}
-              className="h-8 w-48 rounded-lg border border-border/70 bg-background/50 px-3 text-xs md:text-sm placeholder:text-muted-foreground/60 focus:outline-none focus:ring-1 focus:ring-primary"
-            />
-          </div>
-
-          {/* Student Grid */}
-          {isAlertsLoading ? (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="h-32 rounded-xl bg-muted/40 animate-pulse border border-border/70" />
-              <div className="h-32 rounded-xl bg-muted/40 animate-pulse border border-border/70" />
+            <div className="relative mb-4">
+              <Search className="absolute left-3 top-2.5 h-3.5 w-3.5 text-muted-foreground" />
+              <input
+                type="text"
+                value={studentSearchQuery}
+                onChange={(e) => setStudentSearchQuery(e.target.value)}
+                placeholder="Search by student identifier or reason..."
+                className="w-full pl-8 pr-4 py-1.5 text-xs rounded-lg border border-border bg-background focus:outline-none focus:ring-1 focus:ring-primary"
+              />
             </div>
-          ) : filteredStudents.length === 0 ? (
-            <div className="flex flex-col items-center justify-center p-12 text-center">
-              <Users className="h-8 w-8 text-muted-foreground/40 mb-2" />
-              <h4 className="text-foreground font-semibold text-xs md:text-sm">No student case files found</h4>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {filteredStudents.map((student) => (
-                <Card 
-                  key={student.studentId}
-                  onClick={() => setSelectedStudentId(student.studentId)}
-                  className="border-border/50 bg-card/40 hover:bg-accent/40 cursor-pointer transition-all p-5 rounded-xl hover:border-primary/20 hover:shadow shadow-primary/5 flex flex-col justify-between"
-                >
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2">
-                      <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary font-bold text-xs md:text-sm">
-                        ST
-                      </div>
-                      <div>
-                        <h4 className="font-extrabold text-foreground text-xs md:text-sm leading-snug">Case File</h4>
-                        <p className="text-muted-foreground text-xs font-mono">ID: {student.studentId.substring(0, 12)}...</p>
-                      </div>
-                    </div>
 
-                    <div className="border-t border-border/50 pt-2 space-y-1 text-xs">
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Alert Incident Count:</span>
-                        <b className="text-foreground">{student.alertCount} Flag(s)</b>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Last Incident Date:</span>
-                        <span className="text-foreground">{new Date(student.lastAlert).toLocaleDateString()}</span>
-                      </div>
-                    </div>
-                  </div>
-                  <span className="text-xs text-primary font-bold mt-4 tracking-wider uppercase flex items-center">Open Case Folder →</span>
-                </Card>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* Slide-out Student Profile Detail Panel (Right Sidebar Sheet) */}
-      {selectedStudentId && (
-        <StudentDetailSheet 
-          studentId={selectedStudentId} 
-          onClose={() => setSelectedStudentId(null)} 
-        />
-      )}
-
-      {/* Alert Clinical Case Note Modal */}
-      {activeNoteAlert && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-          <div className="bg-card border border-border/80 rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-4">
-            <div className="flex items-center justify-between border-b border-border/60 pb-3">
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-lg bg-primary/15 text-primary flex items-center justify-center">
-                  <FileEdit className="w-4 h-4" />
-                </div>
-                <div>
-                  <h3 className="text-base font-bold text-foreground">Record Alert Case Note</h3>
-                  <p className="text-xs text-muted-foreground">
-                    Alert ID: {activeNoteAlert.id.substring(0, 8)}... • Student: {activeNoteAlert.student_id.substring(0, 8)}...
-                  </p>
-                </div>
+            {/* Student Cases or Alerts Table */}
+            {isStudentsPage ? (
+              <div className="overflow-x-auto">
+                <table className="saas-table">
+                  <thead>
+                    <tr>
+                      <th>Student Identifier</th>
+                      <th>Last Flagged</th>
+                      <th>Severity</th>
+                      <th>Total Flags</th>
+                      <th className="text-right">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {uniqueStudents.map((st) => (
+                      <tr key={st.studentId}>
+                        <td className="font-semibold text-foreground font-mono">
+                          {st.studentId.substring(0, 14)}...
+                        </td>
+                        <td className="text-muted-foreground">
+                          {new Date(st.lastAlert).toLocaleDateString()}
+                        </td>
+                        <td>
+                          <span className={cn(
+                            "badge-neutral text-[10px]",
+                            st.severity === "CRITICAL" ? "badge-elevated" : st.severity === "HIGH" ? "badge-moderate" : "badge-stable"
+                          )}>
+                            {st.severity}
+                          </span>
+                        </td>
+                        <td>{st.alertCount} events</td>
+                        <td className="text-right">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => navigate(`/counselor/students/${st.studentId}/casefile`)}
+                            className="text-xs h-7 px-2.5 font-medium gap-1"
+                          >
+                            <span>Open Case</span>
+                            <ArrowRight className="h-3 w-3" />
+                          </Button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
-              <button 
+            ) : isAlertsLoading ? (
+              <div className="py-12 text-center text-xs text-muted-foreground flex flex-col items-center gap-2">
+                <Loader2 className="h-5 w-5 animate-spin text-primary" />
+                <span>Loading triage queue...</span>
+              </div>
+            ) : filteredAlerts.length === 0 ? (
+              <div className="py-12 text-center text-xs text-muted-foreground space-y-1">
+                <CheckCircle2 className="h-6 w-6 text-emerald-500 mx-auto mb-2" />
+                <p className="font-medium text-foreground">No alerts currently pending triage.</p>
+                <p className="text-[11px]">All student check-ins are currently operating within stable parameters.</p>
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="saas-table">
+                  <thead>
+                    <tr>
+                      <th>Student</th>
+                      <th>Support Level</th>
+                      <th>Reason / Signal</th>
+                      <th>Logged Date</th>
+                      <th className="text-right">Triage Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredAlerts.map((alert) => (
+                      <tr key={alert.id}>
+                        <td>
+                          <button
+                            onClick={() => navigate(`/counselor/students/${alert.student_id}/casefile`)}
+                            className="font-mono text-xs font-semibold text-primary hover:underline block text-left"
+                          >
+                            {alert.student_id.substring(0, 10)}...
+                          </button>
+                          <span className="text-[10px] text-muted-foreground">ID: #{alert.id.substring(0, 6)}</span>
+                        </td>
+                        <td>
+                          <span className={cn(
+                            "badge-neutral text-[10px]",
+                            alert.severity === "CRITICAL" ? "badge-elevated" : alert.severity === "HIGH" ? "badge-moderate" : "badge-stable"
+                          )}>
+                            {alert.severity}
+                          </span>
+                        </td>
+                        <td className="max-w-[180px] truncate text-muted-foreground" title={(alert as any).reason || alert.severity}>
+                          {(alert as any).reason || `Elevated ${alert.severity} triage signal`}
+                        </td>
+                        <td className="text-muted-foreground text-[11px]">
+                          {new Date(alert.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                        </td>
+                        <td className="text-right">
+                          <div className="flex items-center justify-end gap-1.5">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => {
+                                setActiveNoteAlert(alert);
+                                setAlertNoteText((alert as any).counselor_notes || "");
+                              }}
+                              className="text-xs h-7 px-2 font-medium"
+                              title="Add Clinical Note"
+                            >
+                              <FileEdit className="h-3 w-3 mr-1" />
+                              Note
+                            </Button>
+
+                            {alert.status === "PENDING" && (
+                              <Button
+                                size="sm"
+                                onClick={() => handleStatusChange(alert.id, "REVIEWED")}
+                                className="text-xs h-7 px-2.5 font-medium bg-primary text-primary-foreground"
+                              >
+                                Review
+                              </Button>
+                            )}
+
+                            {alert.status === "REVIEWED" && (
+                              <Button
+                                size="sm"
+                                onClick={() => handleStatusChange(alert.id, "RESOLVED")}
+                                className="text-xs h-7 px-2.5 font-medium bg-emerald-600 hover:bg-emerald-700 text-white"
+                              >
+                                Resolve
+                              </Button>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </Card>
+        </div>
+
+        {/* Appointments & Schedule Column (Right 1 col) */}
+        <div className="space-y-4">
+          <Card className="p-5">
+            <div className="flex items-center justify-between border-b border-border pb-3 mb-3">
+              <div className="flex items-center gap-2">
+                <Calendar className="h-4 w-4 text-primary" />
+                <h3 className="text-sm font-semibold text-foreground">Scheduled Sessions</h3>
+              </div>
+              <span className="text-xs text-muted-foreground font-mono">
+                {appointmentsList.length} total
+              </span>
+            </div>
+
+            {isAppointmentsLoading ? (
+              <div className="py-8 text-center text-xs text-muted-foreground">
+                Loading appointments...
+              </div>
+            ) : appointmentsList.length === 0 ? (
+              <div className="py-8 text-center text-xs text-muted-foreground">
+                <Calendar className="h-6 w-6 text-muted-foreground/40 mx-auto mb-1" />
+                <p>No student counselling appointments booked yet.</p>
+              </div>
+            ) : (
+              <div className="space-y-2.5">
+                {appointmentsList.slice(0, 5).map((app) => (
+                  <div key={app.id} className="p-3 rounded-lg border border-border bg-secondary/30 space-y-2">
+                    <div className="flex items-start justify-between gap-2">
+                      <div>
+                        <span className="text-xs font-semibold text-foreground block">
+                          Student #{app.student_id.substring(0, 8)}
+                        </span>
+                        <span className="text-[11px] text-muted-foreground">
+                          {new Date(app.scheduled_time).toLocaleDateString()} at {new Date(app.scheduled_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        </span>
+                      </div>
+                      <span className={cn(
+                        "text-[10px] font-semibold px-2 py-0.5 rounded border",
+                        app.status === "CONFIRMED" ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20" :
+                        app.status === "CANCELLED" ? "bg-rose-500/10 text-rose-600 border-rose-500/20" :
+                        "bg-amber-500/10 text-amber-600 border-amber-500/20"
+                      )}>
+                        {app.status}
+                      </span>
+                    </div>
+
+                    {app.notes && (
+                      <p className="text-[11px] text-muted-foreground italic truncate">
+                        "{app.notes}"
+                      </p>
+                    )}
+
+                    {app.status === "PENDING" && (
+                      <div className="flex gap-1.5 pt-1 border-t border-border/50">
+                        <button
+                          onClick={() => handleUpdateAppointment(app.id, "CONFIRMED")}
+                          className="text-[11px] font-semibold text-emerald-600 hover:underline"
+                        >
+                          Confirm
+                        </button>
+                        <span className="text-muted-foreground">•</span>
+                        <button
+                          onClick={() => handleUpdateAppointment(app.id, "CANCELLED")}
+                          className="text-[11px] font-semibold text-rose-600 hover:underline"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </Card>
+        </div>
+      </div>
+
+      {/* Case Note Modal */}
+      {activeNoteAlert && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm animate-in fade-in duration-150">
+          <div className="relative w-full max-w-lg rounded-xl bg-card border border-border p-6 shadow-lg space-y-4">
+            <div className="flex items-center justify-between border-b border-border pb-3">
+              <div>
+                <h3 className="text-sm font-semibold text-foreground">Record Clinical Case Note</h3>
+                <p className="text-xs text-muted-foreground">
+                  Case ID: #{activeNoteAlert.id.substring(0, 8)} • Student #{activeNoteAlert.student_id.substring(0, 8)}
+                </p>
+              </div>
+              <button
                 onClick={() => setActiveNoteAlert(null)}
-                className="text-muted-foreground hover:text-foreground text-xs"
+                className="p-1 rounded text-muted-foreground hover:text-foreground"
               >
-                ✕
+                <X className="h-4 w-4" />
               </button>
             </div>
 
             <form onSubmit={handleSaveAlertNote} className="space-y-4">
-              <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-muted-foreground">
-                  Clinical Triage Observations & Actions Taken:
+              <div>
+                <label className="text-xs font-medium text-muted-foreground mb-1 block">
+                  Clinical Assessment & Plan
                 </label>
                 <textarea
                   rows={4}
                   value={alertNoteText}
                   onChange={(e) => setAlertNoteText(e.target.value)}
-                  placeholder="Record confidential case notes, contact attempts, welfare check outcomes, or safety plans..."
-                  className="w-full rounded-xl border border-border/70 bg-background/50 p-3 text-xs md:text-sm text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-1 focus:ring-primary resize-none"
+                  placeholder="Record intervention notes, student contact outcome, or recommended follow-up steps..."
+                  className="w-full p-2.5 text-xs rounded-lg border border-border bg-background focus:outline-none focus:ring-1 focus:ring-primary"
                   required
                 />
               </div>
 
-              <div className="p-3 rounded-xl bg-accent/20 border border-border/60 text-[11px] text-muted-foreground">
-                🔒 This note is securely stored in clinical case notes and logged into the compliance audit trail.
-              </div>
-
-              <div className="flex items-center justify-end gap-2 pt-2">
+              <div className="flex justify-end gap-2 pt-2 border-t border-border">
                 <Button
                   type="button"
                   variant="outline"
+                  size="sm"
                   onClick={() => setActiveNoteAlert(null)}
-                  disabled={isSubmittingAlertNote}
-                  className="h-9 text-xs px-4 rounded-lg"
+                  className="text-xs font-medium"
                 >
                   Cancel
                 </Button>
                 <Button
                   type="submit"
-                  disabled={isSubmittingAlertNote || !alertNoteText.trim()}
-                  className="h-9 text-xs px-4 rounded-lg bg-primary hover:bg-primary/90 text-primary-foreground font-semibold"
+                  size="sm"
+                  disabled={isSubmittingAlertNote}
+                  className="text-xs font-medium"
                 >
-                  {isSubmittingAlertNote ? "Saving Note..." : "Save Case Note"}
+                  {isSubmittingAlertNote ? "Saving..." : "Save Note"}
                 </Button>
               </div>
             </form>
@@ -805,144 +596,4 @@ export const CounselorDashboard: React.FC = () => {
   );
 };
 
-// Sub-component rendering the student profile modal (slide-out Sheet details)
-interface StudentDetailSheetProps {
-  studentId: string;
-  onClose: () => void;
-}
-
-const StudentDetailSheet: React.FC<StudentDetailSheetProps> = ({ studentId, onClose }) => {
-  const { theme } = useTheme();
-  // 1. Load details using react-query hooks
-  const { data: latestAssessment, isLoading: isProfileLoading } = useLatestAssessment(studentId);
-  const { data: moodHistory, isLoading: isHistoryLoading } = useMoodHistory("7d", studentId); // get student history
-
-  return (
-    <>
-      <div 
-        className="fixed inset-0 z-40 bg-background/80 backdrop-blur-xs animate-in fade-in duration-200" 
-        onClick={onClose} 
-      />
-      <div className="fixed inset-y-0 right-0 w-full max-w-lg bg-card border-l border-border shadow-2xl z-50 flex flex-col justify-between animate-in slide-in-from-right duration-300 text-foreground">
-      
-      {/* Header */}
-      <div className="p-6 border-b border-border flex items-center justify-between bg-background/20">
-        <div className="flex items-center gap-3">
-          <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
-            <UserIcon className="h-5 w-5" />
-          </div>
-          <div>
-            <h4 className="font-extrabold text-sm md:text-base text-foreground">Student Case File</h4>
-            <p className="text-muted-foreground text-xs md:text-sm">ID: {studentId.substring(0, 18)}...</p>
-          </div>
-        </div>
-        <button 
-          onClick={onClose}
-          className="p-1.5 rounded-lg border border-border hover:bg-accent text-muted-foreground hover:text-foreground transition-colors"
-        >
-          <X className="h-4 w-4" />
-        </button>
-      </div>
-
-      {/* Body details */}
-      <div className="flex-1 p-6 space-y-6 overflow-y-auto">
-        {isProfileLoading ? (
-          <div className="flex flex-col items-center justify-center p-12">
-            <Loader2 className="h-8 w-8 animate-spin text-primary mb-2" />
-            <p className="text-xs md:text-sm text-muted-foreground">Loading student clinical indicators...</p>
-          </div>
-        ) : !latestAssessment ? (
-          <p className="text-xs md:text-sm text-muted-foreground">No profile records found for this user.</p>
-        ) : (
-          <>
-            {/* Risk details block */}
-            <div className="grid grid-cols-2 gap-4">
-              <Card className="border-border/50 bg-background/30 p-4 rounded-xl">
-                <p className="text-muted-foreground text-xs font-bold uppercase tracking-wider">Wellness Score</p>
-                <h5 className="text-2xl font-extrabold text-foreground mt-1">
-                  {Number(latestAssessment.mental_wellness_score).toFixed(1)}
-                </h5>
-                <p className="text-muted-foreground text-xs mt-1">Scale bounds: 0.0 - 100.0</p>
-              </Card>
-
-              <Card className="border-border/50 bg-background/30 p-4 rounded-xl">
-                <p className="text-muted-foreground text-xs font-bold uppercase tracking-wider">Risk Level</p>
-                <h5 className="text-2xl font-extrabold text-foreground mt-1 flex items-center gap-1.5">
-                  <AlertCircle className="h-5 w-5 text-red-500" />
-                  {latestAssessment.risk_level}
-                </h5>
-                <p className="text-muted-foreground text-xs mt-1">Status queue: Flagged</p>
-              </Card>
-            </div>
-
-            {/* Emotions detected */}
-            <Card className="border-border/50 bg-background/30 p-4 rounded-xl">
-              <p className="text-muted-foreground text-xs font-bold uppercase tracking-wider mb-3">Extracted NLP Emotions</p>
-              <div className="space-y-2">
-                {Object.entries(latestAssessment.emotions_detected).map(([emotion, prob]) => (
-                  <div key={emotion} className="space-y-1">
-                    <div className="flex justify-between text-xs md:text-sm font-semibold">
-                      <span className="capitalize text-foreground/90">{emotion}</span>
-                      <span className="text-muted-foreground">{(prob * 100).toFixed(1)}%</span>
-                    </div>
-                    <div className="h-1.5 bg-muted rounded-full overflow-hidden">
-                      <div 
-                        className="h-full bg-primary rounded-full" 
-                        style={{ width: `${prob * 100}%` }}
-                      />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </Card>
-
-            {/* Recharts history chart */}
-            <Card className="border-border/50 bg-background/30 p-4 rounded-xl">
-              <p className="text-muted-foreground text-xs font-bold uppercase tracking-wider mb-3">Historical Trajectory</p>
-              <div className="h-44">
-                {isHistoryLoading ? (
-                  <div className="h-full w-full flex items-center justify-center">
-                    <Loader2 className="h-5 w-5 animate-spin text-primary" />
-                  </div>
-                ) : (
-                  <ResponsiveContainer width="100%" height="100%">
-                    <LineChart data={moodHistory} margin={{ top: 10, right: 10, left: -25, bottom: 0 }}>
-                      <XAxis dataKey="logged_at" stroke={theme === "dark" ? "#475569" : "#94a3b8"} fontSize={8} tickFormatter={(str) => {
-                        try {
-                          return new Date(str).toLocaleDateString([], { month: "short", day: "numeric" });
-                        } catch {
-                          return str;
-                        }
-                      }} />
-                      <YAxis stroke={theme === "dark" ? "#475569" : "#94a3b8"} fontSize={8} domain={[1, 10]} />
-                      <Tooltip contentStyle={{ backgroundColor: theme === "dark" ? "#0f172a" : "#ffffff", border: "1px solid var(--border)", borderRadius: "8px", fontSize: "11px" }} />
-                      <Line type="monotone" dataKey="self_reported_score" name="Score" stroke="#8b5cf6" strokeWidth={2} />
-                    </LineChart>
-                  </ResponsiveContainer>
-                )}
-              </div>
-            </Card>
-          </>
-        )}
-      </div>
-
-      {/* Footer */}
-      <div className="p-6 border-t border-border bg-background/20 space-y-2">
-        <NavLink
-          to={`/counselor/students/${studentId}/casefile`}
-          className="w-full inline-flex items-center justify-center gap-1.5 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold text-xs md:text-sm py-2.5 rounded-xl transition-all shadow-sm"
-        >
-          Open Longitudinal Timeline & Full Case File →
-        </NavLink>
-        <Button 
-          onClick={onClose}
-          className="w-full bg-muted hover:bg-muted/80 text-foreground font-semibold text-xs md:text-sm py-2.5 rounded-xl transition-all duration-300"
-        >
-          Close Drawer
-        </Button>
-      </div>
-    </div>
-    </>
-  );
-};
 export default CounselorDashboard;

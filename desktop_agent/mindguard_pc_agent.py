@@ -21,7 +21,7 @@ import datetime
 import threading
 import webbrowser
 from pathlib import Path
-from typing import Dict, Optional, Tuple
+from typing import Dict, Optional, Tuple, Any
 
 import requests
 import psutil
@@ -364,6 +364,142 @@ def get_seconds_elapsed_today() -> float:
     except Exception:
         return 86400.0
 
+def get_system_power_and_uptime_history_today() -> Dict[str, Any]:
+    """
+    Directly extracts Windows hardware and kernel power telemetry for today (00:00:00 to now):
+    - Calculates exact minutes the PC was powered on and running/awake.
+    - Accurately computes late-night usage (12:00 AM - 5:00 AM) even if the app was closed.
+    - Discovers exact sleep onset time (when PC entered sleep/hibernate) and morning wake time.
+    """
+    import subprocess
+    now_dt = datetime.datetime.now()
+    today_midnight = now_dt.replace(hour=0, minute=0, second=0, microsecond=0)
+    today_str = now_dt.date().isoformat()
+
+    boot_time_ts = psutil.boot_time()
+    boot_dt = datetime.datetime.fromtimestamp(boot_time_ts)
+
+    total_awake_seconds = 0.0
+    late_night_seconds = 0.0
+    last_night_sleep_dt = None
+    first_morning_wake_dt = None
+
+    if sys.platform == "win32":
+        try:
+            ps_code = """
+$events = Get-WinEvent -FilterHashtable @{
+    LogName='System'; 
+    StartTime=(Get-Date).Date; 
+    ProviderName=@('Microsoft-Windows-Kernel-Power', 'Microsoft-Windows-Power-Troubleshooter')
+} -ErrorAction SilentlyContinue
+
+$results = @()
+foreach ($e in $events) {
+    if ($e.Id -in @(1, 42, 107, 506, 507)) {
+        $results += [PSCustomObject]@{
+            Time = $e.TimeCreated.ToString('yyyy-MM-dd HH:mm:ss')
+            Id = $e.Id
+        }
+    }
+}
+$results | Sort-Object Time | ConvertTo-Json -Depth 2
+"""
+            events = []
+            res = subprocess.run(["powershell", "-NoProfile", "-Command", ps_code], capture_output=True, text=True, timeout=8)
+            if res.stdout.strip():
+                raw = json.loads(res.stdout)
+                if isinstance(raw, dict):
+                    raw = [raw]
+                events = raw
+
+            is_awake_at_midnight = False
+            ps_midnight_state = """
+$lastPreMidnight = Get-WinEvent -FilterHashtable @{
+    LogName='System'; 
+    EndTime=(Get-Date).Date; 
+    ProviderName=@('Microsoft-Windows-Kernel-Power', 'Microsoft-Windows-Power-Troubleshooter')
+} -MaxEvents 5 -ErrorAction SilentlyContinue | Where-Object { $_.Id -in @(1, 42, 107, 506, 507) } | Select-Object -First 1
+
+if ($lastPreMidnight) {
+    [PSCustomObject]@{
+        Time = $lastPreMidnight.TimeCreated.ToString('yyyy-MM-dd HH:mm:ss')
+        Id = $lastPreMidnight.Id
+    } | ConvertTo-Json
+} else {
+    Write-Output "NONE"
+}
+"""
+            try:
+                res_pre = subprocess.run(["powershell", "-NoProfile", "-Command", ps_midnight_state], capture_output=True, text=True, timeout=8)
+                if res_pre.stdout.strip() and "NONE" not in res_pre.stdout:
+                    pre_ev = json.loads(res_pre.stdout)
+                    if pre_ev.get("Id") not in (42, 506):
+                        is_awake_at_midnight = True
+            except Exception:
+                pass
+
+            start_time = max(today_midnight, boot_dt)
+            current_state_awake = is_awake_at_midnight if boot_dt < today_midnight else True
+            current_interval_start = start_time
+
+            intervals = []
+            for ev in events:
+                try:
+                    ev_time = datetime.datetime.strptime(ev["Time"], "%Y-%m-%d %H:%M:%S")
+                except Exception:
+                    continue
+                ev_id = ev.get("Id")
+                if ev_id in (42, 506):
+                    if current_state_awake:
+                        intervals.append((current_interval_start, ev_time))
+                        current_state_awake = False
+                        if ev_time.hour < 5:
+                            last_night_sleep_dt = ev_time
+                elif ev_id in (1, 107, 507):
+                    if not current_state_awake:
+                        current_interval_start = ev_time
+                        current_state_awake = True
+                        if 5 <= ev_time.hour <= 12 and first_morning_wake_dt is None:
+                            first_morning_wake_dt = ev_time
+
+            if current_state_awake:
+                intervals.append((current_interval_start, now_dt))
+
+            late_night_start = today_midnight
+            late_night_end = today_midnight.replace(hour=5, minute=0, second=0)
+
+            for s_int, e_int in intervals:
+                dur = (e_int - s_int).total_seconds()
+                total_awake_seconds += max(0.0, dur)
+                ln_s = max(s_int, late_night_start)
+                ln_e = min(e_int, late_night_end)
+                if ln_e > ln_s:
+                    late_night_seconds += (ln_e - ln_s).total_seconds()
+        except Exception as e:
+            log_agent(f"[!] Warning reading Windows power events: {e}")
+
+    # Fallback to boot time if event logs returned 0
+    if total_awake_seconds <= 0:
+        elapsed_today = max(0.0, (now_dt - today_midnight).total_seconds())
+        if boot_dt <= today_midnight:
+            total_awake_seconds = elapsed_today
+            late_night_seconds = min(5 * 3600.0, elapsed_today)
+        else:
+            total_awake_seconds = max(0.0, (now_dt - boot_dt).total_seconds())
+            if boot_dt.hour < 5:
+                ln_end = today_midnight.replace(hour=5, minute=0, second=0)
+                late_night_seconds = max(0.0, (min(now_dt, ln_end) - boot_dt).total_seconds())
+
+    return {
+        "date": today_str,
+        "total_screen_seconds": int(total_awake_seconds),
+        "late_night_seconds": int(late_night_seconds),
+        "total_screen_time_minutes": int(total_awake_seconds / 60),
+        "late_night_usage_minutes": int(late_night_seconds / 60),
+        "last_night_sleep_dt": last_night_sleep_dt,
+        "first_morning_wake_dt": first_morning_wake_dt,
+    }
+
 def get_system_first_wake_time_today() -> Optional[datetime.datetime]:
     """
     Checks when the system first resumed from sleep or Modern Standby today (5:00 AM - 12:00 PM).
@@ -386,7 +522,13 @@ def get_system_first_wake_time_today() -> Optional[datetime.datetime]:
         pass
     return None
 
-def infer_circadian_sleep_metrics(late_night_seconds: float, entertainment_seconds: float, wake_hour_override: Optional[float] = None) -> dict:
+def infer_circadian_sleep_metrics(
+    late_night_seconds: float,
+    entertainment_seconds: float,
+    wake_hour_override: Optional[float] = None,
+    sleep_dt_override: Optional[datetime.datetime] = None,
+    wake_dt_override: Optional[datetime.datetime] = None
+) -> dict:
     """
     Mathematical Circadian Sleep-Wake Cycle Estimator:
     - Inferred Sleep Onset (T_sleep): Last activity after 10:00 PM followed by >= 4 hours idle/sleep
@@ -398,7 +540,10 @@ def infer_circadian_sleep_metrics(late_night_seconds: float, entertainment_secon
     late_mins = int(late_night_seconds / 60)
     
     # 1. Inferred Sleep Onset (T_sleep)
-    if late_mins >= 180:
+    if sleep_dt_override:
+        sleep_onset_str = sleep_dt_override.strftime("%I:%M %p")
+        sleep_onset_hour = sleep_dt_override.hour + sleep_dt_override.minute / 60.0
+    elif late_mins >= 180:
         sleep_onset_hour = 3.5
         sleep_onset_str = "03:30 AM"
     elif late_mins >= 120:
@@ -415,7 +560,10 @@ def infer_circadian_sleep_metrics(late_night_seconds: float, entertainment_secon
         sleep_onset_str = "11:30 PM"
         
     # 2. Inferred Wake Time (T_wake) - between 5:00 AM and 12:00 PM
-    if wake_hour_override is not None:
+    if wake_dt_override:
+        wake_time_str = wake_dt_override.strftime("%I:%M %p")
+        wake_hour = wake_dt_override.hour + wake_dt_override.minute / 60.0
+    elif wake_hour_override is not None:
         wake_hour = wake_hour_override
         h = int(wake_hour)
         m = int((wake_hour - h) * 60)
@@ -434,9 +582,12 @@ def infer_circadian_sleep_metrics(late_night_seconds: float, entertainment_secon
             wake_time_str = "08:15 AM"
         
     # 3. Estimated Sleep Duration (Delta T)
-    effective_onset = sleep_onset_hour if sleep_onset_hour < 12 else (sleep_onset_hour - 24)
-    duration_hours = max(3.5, min(10.5, wake_hour - effective_onset))
-    duration_hours = round(duration_hours, 1)
+    if sleep_dt_override and wake_dt_override and wake_dt_override > sleep_dt_override:
+        duration_hours = round(max(3.5, min(10.5, (wake_dt_override - sleep_dt_override).total_seconds() / 3600.0)), 1)
+    else:
+        effective_onset = sleep_onset_hour if sleep_onset_hour < 12 else (sleep_onset_hour - 24)
+        duration_hours = max(3.5, min(10.5, wake_hour - effective_onset))
+        duration_hours = round(duration_hours, 1)
     
     # 4. Circadian Regularity Index (CRI, 0-100)
     cri = max(20.0, min(100.0, round(100.0 - (late_mins * 0.42), 1)))
@@ -600,16 +751,20 @@ def start_agent():
     entertainment_seconds = daily_state.get("entertainment_seconds", 0)
     adult_seconds = daily_state.get("adult_seconds", 0)
 
-    # 1. Load active computer time from daily state or initialize active usage
-    if total_screen_seconds > 0:
-        log_agent(f"[*] Active Daily Screen Session: {int(total_screen_seconds / 60)}m active today (PC boot: {boot_time_str}).")
-    else:
-        # First startup today: initialize active computer time from current interactive session
-        initial_idle = get_system_idle_seconds()
-        if initial_idle < 180:
-            total_screen_seconds = min(int(max_seconds_today), 300)
-            academic_seconds = int(total_screen_seconds * 0.8)
-        log_agent(f"[*] Initialized from System Boot: PC turned on at {boot_time_str}. Monitoring active keyboard/mouse usage.")
+    # 1. Authoritative hardware PC running time and late-night usage from Windows
+    sys_metrics = get_system_power_and_uptime_history_today()
+    pc_screen_secs = sys_metrics.get("total_screen_seconds", 0)
+    pc_late_secs = sys_metrics.get("late_night_seconds", 0)
+
+    total_screen_seconds = max(total_screen_seconds, pc_screen_secs)
+    late_night_seconds = max(late_night_seconds, pc_late_secs)
+
+    if academic_seconds == 0 and total_screen_seconds > 0:
+        academic_seconds = int(total_screen_seconds * 0.70)
+        social_seconds = int(total_screen_seconds * 0.15)
+        entertainment_seconds = int(total_screen_seconds * 0.15)
+
+    log_agent(f"[*] Windows System Telemetry: {int(total_screen_seconds / 60)}m PC active today ({int(late_night_seconds / 60)}m late-night). Boot: {boot_time_str}")
 
     # 2. Check if backend has existing cloud record for this student
     if token:
@@ -627,14 +782,26 @@ def start_agent():
                     total_screen_seconds = max(total_screen_seconds, cloud_total)
                     if max_secs > 0 and total_screen_seconds > max_secs:
                         total_screen_seconds = max_secs
-                    academic_seconds = min(total_screen_seconds, max(academic_seconds, latest_log.get("academic_usage_minutes", 0) * 60))
-                    late_night_seconds = min(total_screen_seconds, 14400, max(late_night_seconds, latest_log.get("late_night_usage_minutes", 0) * 60))
+                    late_night_seconds = max(late_night_seconds, min(total_screen_seconds, 18000, latest_log.get("late_night_usage_minutes", 0) * 60))
                     social_seconds = min(total_screen_seconds, max(social_seconds, latest_log.get("social_usage_minutes", 0) * 60))
                     entertainment_seconds = min(total_screen_seconds, max(entertainment_seconds, latest_log.get("entertainment_usage_minutes", 0) * 60))
                     adult_seconds = min(total_screen_seconds, max(adult_seconds, latest_log.get("adult_usage_minutes", 0) * 60))
                     log_agent(f"[*] Restored today's cloud session: {int(total_screen_seconds / 60)}m active ({int(late_night_seconds / 60)}m late-night).")
         except Exception:
             pass
+
+    # Save initialized baseline to daily cache
+    save_daily_state({
+        "date": daily_state["date"],
+        "total_screen_seconds": total_screen_seconds,
+        "late_night_seconds": late_night_seconds,
+        "academic_seconds": academic_seconds,
+        "social_seconds": social_seconds,
+        "entertainment_seconds": entertainment_seconds,
+        "adult_seconds": adult_seconds,
+        "continuous_active_seconds": continuous_active_seconds,
+        "last_sync": datetime.datetime.now().isoformat()
+    })
 
     has_crisis_event = False
     last_sync_time = 0  # Trigger immediate sync upon startup
@@ -760,8 +927,13 @@ def start_agent():
                         "baseline_deviation_score": 0.0,
                         "is_crisis_search_flag": has_crisis_event
                     }
-                    # Integrate Mathematical Sleep-Wake Cycle Metrics
-                    sleep_cycle_metrics = infer_circadian_sleep_metrics(late_night_seconds, entertainment_seconds)
+                    # Integrate Mathematical Sleep-Wake Cycle Metrics using real power event timestamps
+                    sleep_cycle_metrics = infer_circadian_sleep_metrics(
+                        late_night_seconds,
+                        entertainment_seconds,
+                        sleep_dt_override=sys_metrics.get("last_night_sleep_dt"),
+                        wake_dt_override=sys_metrics.get("first_morning_wake_dt")
+                    )
                     payload.update(sleep_cycle_metrics)
                     has_crisis_event = False  # Reset flag after sync
 
@@ -792,15 +964,15 @@ def start_agent():
                                 f"Context: {category} ({display_title}) | "
                                 f"Risk: {risk_level}"
                             )
-                        elif res.status_code in (401, 403, 404):
-                            log_agent("[!] Token expired, invalid, or user removed. Clearing cached token and awaiting student re-login...")
-                            try:
-                                if TOKEN_CACHE_FILE.exists():
-                                    TOKEN_CACHE_FILE.unlink()
-                            except Exception:
-                                pass
-                            token = None
-                            student_id = None
+                        elif res.status_code in (401, 403):
+                            log_agent(f"[!] Authentication warning ({res.status_code}). Reloading cached credentials...")
+                            new_auth = get_active_student_auth()
+                            if new_auth and new_auth.get("access_token") != token:
+                                token = new_auth.get("access_token")
+                                student_id = new_auth.get("id")
+                                log_agent("[+] Reloaded new authentication token successfully.")
+                            else:
+                                log_agent("[*] Awaiting token update or student dashboard activity...")
                     except requests.exceptions.RequestException:
                         log_agent(f"[*] Offline tracking: {int(total_screen_seconds / 60)}m recorded locally (waiting for backend sync)...")
                 else:
@@ -849,6 +1021,20 @@ def run_tray_agent():
     except ImportError:
         start_agent()
 
+_AGENT_MUTEX = None
+
+def ensure_single_instance():
+    """Ensures only a single instance of the MindGuard PC agent runs on the desktop."""
+    global _AGENT_MUTEX
+    if sys.platform == "win32":
+        try:
+            _AGENT_MUTEX = ctypes.windll.kernel32.CreateMutexW(None, False, "Global\\MindGuardPCAgentMutex")
+            if ctypes.windll.kernel32.GetLastError() == 183: # ERROR_ALREADY_EXISTS
+                log_agent("[*] Another instance of MindGuard PC Agent is already running.")
+                sys.exit(0)
+        except Exception:
+            pass
+
 if __name__ == "__main__":
     if "--install-startup" in sys.argv:
         install_to_startup()
@@ -857,7 +1043,9 @@ if __name__ == "__main__":
     elif "--login" in sys.argv:
         prompt_student_login()
     elif "--tray" in sys.argv or os.environ.get("MINDGUARD_TRAY") == "1":
+        ensure_single_instance()
         run_tray_agent()
     else:
+        ensure_single_instance()
         start_agent()
 
