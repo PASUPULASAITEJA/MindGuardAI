@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQueryClient, useQuery } from "@tanstack/react-query";
-import { useLatestAssessment } from "@/hooks/usePredictions";
+import { useLatestAssessment, useWellnessTrends } from "@/hooks/usePredictions";
 import { useCurrentRecommendations } from "@/hooks/useRecommendations";
 import { useMoodHistory } from "@/hooks/useMood";
 import { useAuth } from "@/contexts/AuthContext";
@@ -94,9 +94,11 @@ export const StudentDashboard: React.FC = () => {
   }, [user]);
 
   // Queries
+  const [selectedTimeframe, setSelectedTimeframe] = useState<"7d" | "30d" | "90d" | "180d">("30d");
   const { data: latestAssessment, isLoading: isAssessmentLoading } = useLatestAssessment();
   const { data: recommendations } = useCurrentRecommendations();
   const { data: moodHistory = [] } = useMoodHistory("30d");
+  const { data: trendData } = useWellnessTrends(selectedTimeframe);
 
   // Telemetry Behavioral Summary Query
   const { 
@@ -345,7 +347,7 @@ export const StudentDashboard: React.FC = () => {
       {/* Consent Notice if applicable */}
       <ConsentBanner />
 
-      {/* 2. Support Status & Wellbeing Trend Panel */}
+      {/* 2. Support Status & Personal Baseline Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* Current Support Status Card */}
         <Card className="lg:col-span-1 p-5 flex flex-col justify-between">
@@ -385,13 +387,97 @@ export const StudentDashboard: React.FC = () => {
           </div>
         </Card>
 
-        {/* 30-Day Wellbeing Trend Visualizer */}
-        <Card className="lg:col-span-2 p-5 flex flex-col justify-between">
-          <div className="flex items-center justify-between mb-2">
+        {/* Personal Baseline Analysis Panel */}
+        <Card className="lg:col-span-2 p-5 flex flex-col justify-between space-y-4">
+          <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-sm font-semibold text-foreground">30-Day Wellbeing Trend</h3>
-              <p className="text-xs text-muted-foreground">Continuous composite wellness indices</p>
+              <h3 className="text-sm font-semibold text-foreground">Personal Wellbeing Baseline</h3>
+              <p className="text-xs text-muted-foreground">Calibrated against your own longitudinal check-in trajectory</p>
             </div>
+            <span className="text-[10px] font-semibold px-2.5 py-0.5 rounded-full border border-border bg-secondary text-muted-foreground">
+              Confidence: {trendData?.baseline?.baseline_confidence || "ESTABLISHING"}
+            </span>
+          </div>
+
+          <div className="grid grid-cols-3 gap-3">
+            <div className="p-3 rounded-lg bg-secondary/40 border border-border/60">
+              <div className="text-[10px] text-muted-foreground font-medium uppercase">Usual Stress</div>
+              <div className="text-base font-bold text-foreground mt-0.5">
+                {trendData?.baseline?.usual_stress ? `${trendData.baseline.usual_stress} / 10` : "—"}
+              </div>
+              <div className="text-[10px] text-muted-foreground mt-0.5">
+                Recent: {trendData?.baseline?.recent_stress ? `${trendData.baseline.recent_stress} / 10` : "—"}
+              </div>
+              {trendData?.baseline?.stress_delta !== undefined && trendData.baseline.stress_delta !== null && (
+                <div className={cn("text-[10px] font-semibold mt-1", trendData.baseline.stress_delta > 0 ? "text-amber-500" : "text-emerald-500")}>
+                  {trendData.baseline.stress_delta > 0 ? `+${trendData.baseline.stress_delta}` : trendData.baseline.stress_delta} deviation
+                </div>
+              )}
+            </div>
+
+            <div className="p-3 rounded-lg bg-secondary/40 border border-border/60">
+              <div className="text-[10px] text-muted-foreground font-medium uppercase">Usual Sleep</div>
+              <div className="text-base font-bold text-foreground mt-0.5">
+                {trendData?.baseline?.usual_sleep_hours ? `${trendData.baseline.usual_sleep_hours}h` : "—"}
+              </div>
+              <div className="text-[10px] text-muted-foreground mt-0.5">
+                Recent: {trendData?.baseline?.recent_sleep_hours ? `${trendData.baseline.recent_sleep_hours}h` : "—"}
+              </div>
+              {trendData?.baseline?.sleep_delta !== undefined && trendData.baseline.sleep_delta !== null && (
+                <div className={cn("text-[10px] font-semibold mt-1", trendData.baseline.sleep_delta < 0 ? "text-amber-500" : "text-emerald-500")}>
+                  {trendData.baseline.sleep_delta > 0 ? `+${trendData.baseline.sleep_delta}h` : `${trendData.baseline.sleep_delta}h`} deviation
+                </div>
+              )}
+            </div>
+
+            <div className="p-3 rounded-lg bg-secondary/40 border border-border/60">
+              <div className="text-[10px] text-muted-foreground font-medium uppercase">Usual Mood</div>
+              <div className="text-base font-bold text-foreground mt-0.5">
+                {trendData?.baseline?.usual_mood_score ? `${trendData.baseline.usual_mood_score} / 10` : "—"}
+              </div>
+              <div className="text-[10px] text-muted-foreground mt-0.5">
+                Recent: {trendData?.baseline?.recent_mood_score ? `${trendData.baseline.recent_mood_score} / 10` : "—"}
+              </div>
+              {trendData?.baseline?.mood_delta !== undefined && trendData.baseline.mood_delta !== null && (
+                <div className={cn("text-[10px] font-semibold mt-1", trendData.baseline.mood_delta >= 0 ? "text-emerald-500" : "text-amber-500")}>
+                  {trendData.baseline.mood_delta > 0 ? `+${trendData.baseline.mood_delta}` : trendData.baseline.mood_delta} shift
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="text-xs text-muted-foreground bg-secondary/30 p-2.5 rounded-lg border border-border/40 flex items-center gap-2">
+            <span className="text-sm">💡</span>
+            <span>{trendData?.baseline?.summary_message || "Continue checking in to establish your personal wellbeing baseline."}</span>
+          </div>
+        </Card>
+      </div>
+
+      {/* 3. My Wellbeing Journey Area Chart */}
+      <Card className="p-5 space-y-3">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <h3 className="text-sm font-semibold text-foreground">My Wellbeing Journey</h3>
+            <p className="text-xs text-muted-foreground">Longitudinal composite wellness indicators over time</p>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <div className="flex rounded-lg bg-secondary p-0.5 text-xs font-medium border border-border">
+              {(["7d", "30d", "90d", "180d"] as const).map((t) => (
+                <button
+                  key={t}
+                  type="button"
+                  onClick={() => setSelectedTimeframe(t)}
+                  className={cn(
+                    "px-2.5 py-1 rounded-md text-[11px] font-semibold transition-colors uppercase",
+                    selectedTimeframe === t ? "bg-card text-foreground shadow-xs" : "text-muted-foreground hover:text-foreground"
+                  )}
+                >
+                  {t === "180d" ? "6M" : t === "90d" ? "3M" : t}
+                </button>
+              ))}
+            </div>
+
             <Button
               variant="ghost"
               size="sm"
@@ -402,48 +488,58 @@ export const StudentDashboard: React.FC = () => {
               <ArrowRight className="h-3 w-3" />
             </Button>
           </div>
+        </div>
 
-          {chartData.length > 0 ? (
-            <div className="h-44 w-full pt-2">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={chartData} margin={{ top: 5, right: 10, left: -25, bottom: 0 }}>
-                  <defs>
-                    <linearGradient id="wellGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.15} />
-                      <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0.0} />
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.6} />
-                  <XAxis dataKey="name" tick={{ fontSize: 10 }} stroke="hsl(var(--muted-foreground))" />
-                  <YAxis domain={[0, 100]} tick={{ fontSize: 10 }} stroke="hsl(var(--muted-foreground))" />
-                  <Tooltip 
-                    contentStyle={{ 
-                      borderRadius: "8px", 
-                      fontSize: "12px", 
-                      backgroundColor: "hsl(var(--card))", 
-                      borderColor: "hsl(var(--border))" 
-                    }} 
-                    formatter={(val: any) => [`${val} / 100`, "Wellbeing"]}
-                  />
-                  <Area 
-                    type="monotone" 
-                    dataKey="score" 
-                    stroke="hsl(var(--primary))" 
-                    strokeWidth={2} 
-                    fillOpacity={1} 
-                    fill="url(#wellGrad)" 
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
-            </div>
-          ) : (
-            <div className="h-44 flex flex-col items-center justify-center text-center p-4">
-              <Activity className="h-6 w-6 text-muted-foreground/40 mb-1" />
-              <p className="text-xs text-muted-foreground">Complete your daily check-in to generate trend data.</p>
-            </div>
-          )}
-        </Card>
-      </div>
+        {((trendData?.points && trendData.points.length > 0) || chartData.length > 0) ? (
+          <div className="h-48 w-full pt-2">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart 
+                data={trendData?.points && trendData.points.length > 0 
+                  ? trendData.points.map(p => ({
+                      name: new Date(p.date).toLocaleDateString("en-US", { month: "short", day: "numeric" }),
+                      score: p.wellness_score,
+                      rolling: p.rolling_avg
+                    }))
+                  : chartData
+                } 
+                margin={{ top: 5, right: 10, left: -25, bottom: 0 }}
+              >
+                <defs>
+                  <linearGradient id="wellGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.2} />
+                    <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0.0} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.6} />
+                <XAxis dataKey="name" tick={{ fontSize: 10 }} stroke="hsl(var(--muted-foreground))" />
+                <YAxis domain={[0, 100]} tick={{ fontSize: 10 }} stroke="hsl(var(--muted-foreground))" />
+                <Tooltip 
+                  contentStyle={{ 
+                    borderRadius: "8px", 
+                    fontSize: "12px", 
+                    backgroundColor: "hsl(var(--card))", 
+                    borderColor: "hsl(var(--border))" 
+                  }} 
+                  formatter={(val: any) => [`${val} / 100`, "Wellbeing"]}
+                />
+                <Area 
+                  type="monotone" 
+                  dataKey="score" 
+                  stroke="hsl(var(--primary))" 
+                  strokeWidth={2} 
+                  fillOpacity={1} 
+                  fill="url(#wellGrad)" 
+                />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
+        ) : (
+          <div className="h-44 flex flex-col items-center justify-center text-center p-4">
+            <Activity className="h-6 w-6 text-muted-foreground/40 mb-1" />
+            <p className="text-xs text-muted-foreground">Complete your daily check-in to generate trend data.</p>
+          </div>
+        )}
+      </Card>
 
       {/* 3. Today's Fast Micro Check-in Widget */}
       <MoodMicroCheckin />
