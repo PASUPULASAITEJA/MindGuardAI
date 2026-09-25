@@ -17,7 +17,7 @@ class UserCreate(UserBase):
         from app.core.whitelist import is_valid_institutional_domain
         email_str = str(self.email).lower().strip()
         if not is_valid_institutional_domain(email_str):
-            raise ValueError("Registration is restricted to authorized institutional email domains: @nmims.in, @nmims.edu.in, or @nmims.edu.")
+            raise ValueError("Registration is restricted to authorized institutional email domains (.edu, .ac, or campus domains).")
         return self
 
 class UserUpdate(BaseModel):
