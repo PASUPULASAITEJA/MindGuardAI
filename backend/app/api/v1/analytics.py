@@ -70,11 +70,8 @@ async def get_institution_report(
         wellness_avg_query = wellness_avg_query.where(Assessment.evaluated_at <= end_dt)
         
     wellness_avg_result = await db.execute(wellness_avg_query)
-    avg_score = wellness_avg_result.scalar()
-    if avg_score is None:
-        avg_score = 68.4
-    else:
-        avg_score = round(float(avg_score), 1)
+    raw_avg = wellness_avg_result.scalar()
+    avg_score = round(float(raw_avg), 1) if raw_avg is not None else 0.0
 
     # 3. Risk distribution
     risk_query = select(Assessment.risk_level, func.count(Assessment.id)).group_by(Assessment.risk_level)
@@ -86,15 +83,9 @@ async def get_institution_report(
     risk_result = await db.execute(risk_query)
     risk_counts = {r: count for r, count in risk_result.all()}
     
-    # Defaults if no assessments exist
     low_count = risk_counts.get(RiskLevel.LOW, 0)
     med_count = risk_counts.get(RiskLevel.MEDIUM, 0)
     high_count = risk_counts.get(RiskLevel.HIGH, 0)
-    
-    if low_count == 0 and med_count == 0 and high_count == 0:
-        low_count = 60
-        med_count = 25
-        high_count = 15
 
     # 4. Dominant campus emotion
     emotion_query = select(
@@ -109,7 +100,7 @@ async def get_institution_report(
     
     emotion_result = await db.execute(emotion_query)
     emotion_row = emotion_result.first()
-    dominant_emotion = emotion_row[0] if emotion_row else "anxiety"
+    dominant_emotion = emotion_row[0] if emotion_row else "neutral"
 
     return InstitutionReportResponse(
         total_students_monitored=total_students,
@@ -152,8 +143,8 @@ async def get_department_risk(
     rows = res.all()
 
     dept_map = {}
-    for dept_raw, risk_lvl, avg_score, count in rows:
-        dept = dept_raw or "General / Undeclared"
+    for dept_raw, risk_lvl, dept_avg_score, count in rows:
+        dept = dept_raw or "General"
         if dept not in dept_map:
             dept_map[dept] = {
                 "scores": [],
@@ -162,8 +153,8 @@ async def get_department_risk(
                 "high": 0,
                 "count": 0
             }
-        if avg_score is not None:
-            dept_map[dept]["scores"].append(float(avg_score))
+        if dept_avg_score is not None:
+            dept_map[dept]["scores"].append(float(dept_avg_score))
         dept_map[dept]["count"] += count
 
         risk_str = risk_lvl.value if hasattr(risk_lvl, "value") else str(risk_lvl)
@@ -174,38 +165,17 @@ async def get_department_risk(
         else:
             dept_map[dept]["low"] += count
 
-    # If database has no department rows yet, provide standard institutional defaults
-    if not dept_map:
-        defaults = [
-            ("Computer Science & Engineering", 72.4, 180, 25, 8),
-            ("Electronics & Telecommunications", 68.1, 140, 30, 12),
-            ("Mechanical Engineering", 65.5, 110, 28, 14),
-            ("Data Science & AI", 74.2, 160, 20, 6),
-            ("Information Technology", 69.8, 130, 26, 9)
-        ]
-        dept_items = [
-            DepartmentRiskItem(
-                department=d,
-                student_count=l + m + h,
-                average_wellness_score=avg,
-                low_risk_count=l,
-                medium_risk_count=m,
-                high_risk_count=h
-            )
-            for d, avg, l, m, h in defaults
-        ]
-    else:
-        dept_items = [
-            DepartmentRiskItem(
-                department=dept,
-                student_count=vals["count"],
-                average_wellness_score=round(sum(vals["scores"]) / len(vals["scores"]), 1) if vals["scores"] else 70.0,
-                low_risk_count=vals["low"],
-                medium_risk_count=vals["medium"],
-                high_risk_count=vals["high"]
-            )
-            for dept, vals in dept_map.items()
-        ]
+    dept_items = [
+        DepartmentRiskItem(
+            department=dept,
+            student_count=vals["count"],
+            average_wellness_score=round(sum(vals["scores"]) / len(vals["scores"]), 1) if vals["scores"] else 0.0,
+            low_risk_count=vals["low"],
+            medium_risk_count=vals["medium"],
+            high_risk_count=vals["high"]
+        )
+        for dept, vals in dept_map.items()
+    ]
 
     return DepartmentRiskResponse(
         departments=dept_items,
