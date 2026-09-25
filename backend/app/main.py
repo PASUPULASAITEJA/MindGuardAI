@@ -26,6 +26,8 @@ from app.api.v1.consent import consent_router
 from app.api.v1.consent_records import consent_records_router
 from app.api.v1.checkins import router as checkins_router, counselor_checkins_router
 from app.api.v1.sleep import router as sleep_router, counselor_sleep_router
+from app.api.v1.interventions import router as interventions_router
+from app.api.v1.academic import router as academic_router
 from app.middleware.audit_logging import AuditLoggingMiddleware
 
 from contextlib import asynccontextmanager
@@ -221,6 +223,10 @@ app.include_router(counselor_sleep_router, prefix="/api/counselor", tags=["Couns
 app.include_router(counselor_sleep_router, prefix="/api/counsellor", tags=["Counselor Student Sleep Profiles"])
 app.include_router(counselor_sleep_router, prefix="/api/v1/counselors", tags=["Counselor Student Sleep Profiles"])
 app.include_router(counselor_sleep_router, prefix="/api/v1/counselor", tags=["Counselor Student Sleep Profiles"])
+app.include_router(interventions_router, prefix="/api/v1", tags=["Interventions"])
+app.include_router(interventions_router, prefix="/api", tags=["Interventions"])
+app.include_router(academic_router, prefix="/api/v1", tags=["Academic Calendar"])
+app.include_router(academic_router, prefix="/api", tags=["Academic Calendar"])
 
 @app.get("/health", tags=["Health"])
 @app.get("/api/health", tags=["Health"])
