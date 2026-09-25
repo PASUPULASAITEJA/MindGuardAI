@@ -134,19 +134,19 @@ async def run_all_tests():
                         id=uuid.uuid4(),
                         email=email,
                         role=role,
-                        password_hash=get_password_hash("password123"),
+                        password_hash=get_password_hash("MindGuard@Role2026!"),
                         is_active=True
                     )
                     session.add(u)
                 else:
-                    u.password_hash = get_password_hash("password123")
+                    u.password_hash = get_password_hash("MindGuard@Role2026!")
                     u.is_active = True
             await session.commit()
 
         # Student Login
         res_student_login = await client.post(
             "/api/v1/auth/login",
-            json={"email": "student@nmims.in", "password": "password123"}
+            json={"email": "student@nmims.in", "password": "MindGuard@Role2026!"}
         )
         student_token = res_student_login.json().get("access_token") if res_student_login.status_code == 200 else None
         record_test(
@@ -158,7 +158,7 @@ async def run_all_tests():
         # Counselor Login
         res_counselor_login = await client.post(
             "/api/v1/auth/login",
-            json={"email": "counselor@nmims.edu", "password": "password123"}
+            json={"email": "counselor@nmims.edu", "password": "MindGuard@Role2026!"}
         )
         counselor_token = res_counselor_login.json().get("access_token") if res_counselor_login.status_code == 200 else None
         record_test(
@@ -170,7 +170,7 @@ async def run_all_tests():
         # Admin Login
         res_admin_login = await client.post(
             "/api/v1/auth/login",
-            json={"email": "admin@nmims.edu", "password": "password123"}
+            json={"email": "admin@nmims.edu", "password": "MindGuard@Role2026!"}
         )
         admin_token = res_admin_login.json().get("access_token") if res_admin_login.status_code == 200 else None
         record_test(
