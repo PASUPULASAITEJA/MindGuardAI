@@ -344,15 +344,15 @@ class TrendAnalysisService:
             else:
                 direction = "STABLE"
         else:
-            mean_score = 70.0
-            highest = 70.0
-            lowest = 70.0
+            mean_score = 0.0
+            highest = 0.0
+            lowest = 0.0
             delta = 0.0
             volatility = 0.0
             direction = "STABLE"
 
         emotion_counter = Counter(all_emotions)
-        dominant_emotion = emotion_counter.most_common(1)[0][0] if all_emotions else "calm"
+        dominant_emotion = emotion_counter.most_common(1)[0][0] if all_emotions else "neutral"
         emotion_dist = dict(emotion_counter)
 
         summary = WellnessTrendSummary(
