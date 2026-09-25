@@ -262,23 +262,23 @@ export const StudentDashboard: React.FC = () => {
 
   // Score computation
   const hasAssessment = !!latestAssessment;
-  const rawScore = (latestAssessment as any)?.mental_wellness_score ?? (latestAssessment as any)?.wellness_score ?? 78;
-  const wellnessScore = Math.min(100, Math.max(0, rawScore));
-  const wellnessClass = classifyMentalWellness(wellnessScore);
+  const rawScore = (latestAssessment as any)?.mental_wellness_score ?? (latestAssessment as any)?.wellness_score ?? (trendData?.summary?.average_wellness_score && trendData.summary.average_wellness_score > 0 ? trendData.summary.average_wellness_score : null);
+  const wellnessScore = rawScore !== null ? Math.min(100, Math.max(0, rawScore)) : null;
+  const wellnessClass = classifyMentalWellness(wellnessScore ?? 75);
 
   // Circadian data values
-  const sleepOnset = circadianData?.estimated_sleep_onset || (lateNightMins > 0 ? "02:15 AM" : "11:30 PM");
-  const wakeTime = circadianData?.estimated_wake_time || "07:30 AM";
-  const sleepDuration = circadianData?.sleep_duration_hours || (lateNightMins >= 120 ? 5.2 : 7.5);
-  const circadianDebt = (circadianData as any)?.circadian_debt_hours || (lateNightMins >= 120 ? 2.3 : 0);
+  const sleepOnset = circadianData?.estimated_sleep_onset || (lateNightMins > 0 ? "Late Night" : "—");
+  const wakeTime = circadianData?.estimated_wake_time || "—";
+  const sleepDuration = circadianData?.sleep_duration_hours ?? null;
+  const circadianDebt = (circadianData as any)?.circadian_debt_hours || 0;
 
   // Historical Area Chart Data
   const chartData = moodHistory.map((item, index) => ({
     name: new Date(item.logged_at).toLocaleDateString("en-US", { month: "short", day: "numeric" }),
-    score: (item.self_reported_score || 7) * 10,
+    score: (item.self_reported_score || 0) * 10,
   }));
 
-  if (chartData.length === 0 && hasAssessment) {
+  if (chartData.length === 0 && wellnessScore !== null) {
     chartData.push({
       name: "Recent Assessment",
       score: wellnessScore,
@@ -363,7 +363,7 @@ export const StudentDashboard: React.FC = () => {
 
             <div className="flex items-baseline gap-2">
               <span className="text-4xl font-bold tracking-tight text-foreground font-sans">
-                {wellnessScore.toFixed(0)}
+                {wellnessScore !== null ? wellnessScore.toFixed(0) : "—"}
               </span>
               <span className="text-xs text-muted-foreground">/ 100 Wellbeing Index</span>
             </div>
@@ -608,7 +608,7 @@ export const StudentDashboard: React.FC = () => {
           <div className="p-4 rounded-xl border border-border bg-card shadow-xs">
             <span className="text-[11px] text-muted-foreground uppercase font-medium block">Inferred Rest</span>
             <span className="text-2xl font-bold text-foreground font-sans mt-1 block">
-              {sleepDuration} hrs
+              {sleepDuration !== null ? `${sleepDuration} hrs` : "—"}
             </span>
             <span className="text-[11px] text-muted-foreground block mt-1">
               Onset: {sleepOnset} • Wake: {wakeTime}
