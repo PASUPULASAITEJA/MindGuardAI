@@ -237,10 +237,10 @@ async def explain_student_risk(
     else:
         if mood_logs_30d:
             valid_scores = [m.self_reported_score for m in mood_logs_30d if m.self_reported_score is not None]
-            avg_m = (sum(valid_scores) / len(valid_scores)) if valid_scores else 6.0
+            avg_m = (sum(valid_scores) / len(valid_scores)) if valid_scores else 0.0
             current_wellness = round(avg_m * 10.0, 1)
         else:
-            current_wellness = 65.0
+            current_wellness = 0.0
         current_risk_tier = RiskLevel.LOW
         evaluated_at = now
 
