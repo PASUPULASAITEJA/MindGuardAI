@@ -42,7 +42,7 @@ BASE_AUTHORIZED_ROSTER: Dict[str, UserRole] = {
     "s.saikarthik.reddy18@nmims.in": UserRole.STUDENT,
     "sathwika.sv54@nmims.in": UserRole.STUDENT,
 
-    # 2. Clinical Counselor Staff Roster
+    # 2. Authorized Clinical Counselor Staff Roster
     "naresh.vurukonda@nmims.edu": UserRole.COUNSELOR,
     "chandrakant.wani@nmims.edu": UserRole.COUNSELOR,
     "vinayak.mukkawar@nmims.edu": UserRole.COUNSELOR,
@@ -53,7 +53,7 @@ BASE_AUTHORIZED_ROSTER: Dict[str, UserRole] = {
     "dr.kapoor@nmims.edu": UserRole.COUNSELOR,
     "wellness.counselor@nmims.edu": UserRole.COUNSELOR,
 
-    # 3. Institutional Administration Roster
+    # 3. Authorized Institutional Administration Roster
     "raja.govindaacharyk@nmims.edu": UserRole.ADMIN,
     "dean.studentaffairs@nmims.edu": UserRole.ADMIN,
 }
@@ -124,7 +124,7 @@ def _load_excel_roster() -> Dict[str, UserRole]:
 AUTHORIZED_DOMAINS = ("@nmims.in", "@nmims.edu.in", "@nmims.edu")
 
 def is_valid_institutional_domain(email: str) -> bool:
-    """Checks if the email belongs to an authorized institutional domain."""
+    """Checks if the email belongs to an authorized NMIMS domain."""
     normalized = email.lower().strip()
     return any(normalized.endswith(domain) for domain in AUTHORIZED_DOMAINS)
 
@@ -137,11 +137,11 @@ def get_authorized_roster() -> Dict[str, UserRole]:
 
 def get_authorized_role(email: str, requested_role: Optional[UserRole] = None) -> Optional[UserRole]:
     """
-    Returns the designated UserRole if the email is authorized under institutional domains, else None.
+    Returns the designated UserRole if the email is authorized under NMIMS domains, else None.
     1. If explicitly in base roster or Excel roster, returns that designated role.
-    2. If not explicitly listed, but matches student domains -> UserRole.STUDENT.
-    3. If matches institutional staff domains -> UserRole.COUNSELOR, UserRole.ADMIN, or UserRole.STUDENT based on requested_role.
-    4. If not matching any authorized domain -> None (Unauthorized).
+    2. If not explicitly listed, but matches @nmims.in or @nmims.edu.in -> UserRole.STUDENT.
+    3. If matches @nmims.edu -> UserRole.COUNSELOR, UserRole.ADMIN, or UserRole.STUDENT based on requested_role.
+    4. If not matching any authorized NMIMS domain -> None (Unauthorized).
     """
     normalized_email = email.lower().strip()
     if not is_valid_institutional_domain(normalized_email):
