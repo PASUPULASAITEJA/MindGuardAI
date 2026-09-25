@@ -15,18 +15,19 @@ export const api = axios.create({
 const LOCAL_STORAGE_TOKEN_KEY = "mindguard_auth_token";
 const REMEMBER_ME_KEY = "mindguard_remember_me";
 
-let inMemoryToken: string | null = (typeof window !== "undefined" && localStorage.getItem(REMEMBER_ME_KEY) === "true")
-  ? localStorage.getItem(LOCAL_STORAGE_TOKEN_KEY)
+let inMemoryToken: string | null = (typeof window !== "undefined")
+  ? (localStorage.getItem(LOCAL_STORAGE_TOKEN_KEY) || sessionStorage.getItem(LOCAL_STORAGE_TOKEN_KEY))
   : null;
 
-export const setAccessToken = (token: string | null, rememberMe: boolean = false) => {
+export const setAccessToken = (token: string | null, _rememberMe: boolean = true) => {
   inMemoryToken = token;
   if (typeof window !== "undefined") {
-    if (token && rememberMe) {
+    if (token) {
       localStorage.setItem(LOCAL_STORAGE_TOKEN_KEY, token);
       localStorage.setItem(REMEMBER_ME_KEY, "true");
-    } else if (!token) {
+    } else {
       localStorage.removeItem(LOCAL_STORAGE_TOKEN_KEY);
+      sessionStorage.removeItem(LOCAL_STORAGE_TOKEN_KEY);
       localStorage.removeItem(REMEMBER_ME_KEY);
     }
   }
@@ -218,6 +219,28 @@ api.interceptors.response.use(
         is_agent_connected: boolean;
         is_currently_active: boolean;
         last_synced_minutes_ago: number;
+        purpose_analysis?: {
+          academic_percentage: number;
+          non_academic_percentage: number;
+          purpose_status: string;
+          purpose_tier: string;
+          purpose_advice: string;
+        };
+        circadian_sleep_analysis?: {
+          last_night_minutes: number;
+          circadian_status: string;
+          circadian_tier: string;
+          estimated_sleep_onset: string;
+          estimated_wake_time: string;
+          sleep_duration_hours: number;
+          sleep_consistency_badge: string;
+          circadian_regularity_score: number;
+          pre_bedtime_screen_minutes: number;
+          circadian_debt_hours: number;
+          actionable_wind_down_advice: string;
+          recovery_tip: string;
+          wearable_synced: boolean;
+        };
         latest_log: {
           date: string;
           total_screen_time_minutes: number;
@@ -225,6 +248,8 @@ api.interceptors.response.use(
           academic_usage_minutes: number;
           social_usage_minutes: number;
           entertainment_usage_minutes: number;
+          adult_usage_minutes?: number;
+          continuous_screen_minutes?: number;
           baseline_deviation_score: number;
           risk_level: string;
           synced_at: string;
@@ -232,6 +257,10 @@ api.interceptors.response.use(
         weekly_history: Array<{
           date: string;
           total_screen_time_minutes: number;
+          academic_usage_minutes?: number;
+          social_usage_minutes?: number;
+          entertainment_usage_minutes?: number;
+          adult_usage_minutes?: number;
           late_night_usage_minutes: number;
           risk_level: string;
         }>;
