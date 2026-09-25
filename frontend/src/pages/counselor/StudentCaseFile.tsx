@@ -60,7 +60,7 @@ export const StudentCaseFile: React.FC = () => {
   const [interventions, setInterventions] = useState<InterventionItem[]>([]);
   const [isInterventionsLoading, setIsInterventionsLoading] = useState(false);
   const [isInterventionModalOpen, setIsInterventionModalOpen] = useState(false);
-  const [newInterventionType, setNewInterventionType] = useState<string>("CBT_EXERCISE");
+  const [newInterventionType, setNewInterventionType] = useState<string>("CBT_BREATHING");
   const [newInterventionTitle, setNewInterventionTitle] = useState("");
   const [newInterventionDesc, setNewInterventionDesc] = useState("");
   const [newInterventionFollowUpDays, setNewInterventionFollowUpDays] = useState(7);
@@ -158,8 +158,8 @@ export const StudentCaseFile: React.FC = () => {
         intervention_type: newInterventionType,
         title: newInterventionTitle.trim(),
         description: newInterventionDesc.trim() || undefined,
-        baseline_wellness_score: casefile?.summary?.latest_wellness_score ?? 60,
-        baseline_stress: 6.5,
+        baseline_wellness_score: casefile?.summary?.latest_wellness_score ?? undefined,
+        baseline_stress: 5.0,
         follow_up_date: followUpDate.toISOString(),
       });
 
@@ -188,9 +188,8 @@ export const StudentCaseFile: React.FC = () => {
       await interventionsAPI.update(interventionId, {
         status,
         outcome: outcome || undefined,
-        follow_up_wellness_score: status === "COMPLETED" ? 78 : undefined,
-        follow_up_stress: status === "COMPLETED" ? 3.5 : undefined,
-        outcome_notes: status === "COMPLETED" ? "Student reported reduced tension and improved daily focus." : undefined
+        follow_up_wellness_score: casefile?.summary?.latest_wellness_score,
+        outcome_notes: status === "COMPLETED" ? "Support protocol completed and reviewed by counsellor." : undefined
       });
       toast({
         title: "Intervention Updated",
@@ -233,6 +232,7 @@ export const StudentCaseFile: React.FC = () => {
   const student = casefile?.student;
   const summary = casefile?.summary;
   const timeline = casefile?.timeline || [];
+  const assessmentEvents = timeline.filter(ev => ev.event_type === "ASSESSMENT");
 
   return (
     <div className="space-y-6 pb-12">
@@ -252,7 +252,7 @@ export const StudentCaseFile: React.FC = () => {
             </h1>
             <span className={cn(
               "text-[10px] font-semibold px-2 py-0.5 rounded border uppercase",
-              student?.current_risk_level === "HIGH" ? "badge-elevated" : student?.current_risk_level === "MEDIUM" ? "badge-moderate" : "badge-stable"
+              student?.current_risk_level === "HIGH" || student?.current_risk_level === "CRITICAL" ? "badge-elevated" : student?.current_risk_level === "MEDIUM" ? "badge-moderate" : "badge-stable"
             )}>
               {student?.current_risk_level || "Stable"} Support Tier
             </span>
@@ -292,7 +292,7 @@ export const StudentCaseFile: React.FC = () => {
           { key: "overview", label: "Overview" },
           { key: "trends", label: "Wellbeing Timeline" },
           { key: "timeline", label: `Events (${timeline.length})` },
-          { key: "assessments", label: `Assessments (${summary?.total_assessments ?? 0})` },
+          { key: "assessments", label: `Assessments (${assessmentEvents.length})` },
           { key: "ai_factors", label: "AI Indicators & SHAP" },
           { key: "interventions", label: `Interventions & Outcomes (${interventions.length})` },
           { key: "notes", label: `Clinical Notes (${studentNotes.length})` },
@@ -320,7 +320,7 @@ export const StudentCaseFile: React.FC = () => {
             <div className="p-4 rounded-xl border border-border bg-card shadow-xs">
               <span className="text-[11px] text-muted-foreground uppercase font-medium block">Latest Score</span>
               <span className="text-2xl font-bold text-foreground font-sans mt-1 block">
-                {summary?.latest_wellness_score ?? 76} <span className="text-xs text-muted-foreground font-normal">/ 100</span>
+                {summary?.latest_wellness_score !== undefined ? `${summary.latest_wellness_score.toFixed(1)}` : "--"} <span className="text-xs text-muted-foreground font-normal">/ 100</span>
               </span>
               <span className="text-[11px] text-muted-foreground block mt-0.5">Composite index</span>
             </div>
@@ -330,7 +330,7 @@ export const StudentCaseFile: React.FC = () => {
               <span className="text-2xl font-bold text-foreground font-sans mt-1 block">
                 {summary?.total_assessments ?? 0}
               </span>
-              <span className="text-[11px] text-muted-foreground block mt-0.5">PHQ-9 / GAD-7 submissions</span>
+              <span className="text-[11px] text-muted-foreground block mt-0.5">Submissions on file</span>
             </div>
 
             <div className="p-4 rounded-xl border border-border bg-card shadow-xs">
@@ -344,7 +344,7 @@ export const StudentCaseFile: React.FC = () => {
             <div className="p-4 rounded-xl border border-border bg-card shadow-xs">
               <span className="text-[11px] text-muted-foreground uppercase font-medium block">Active Interventions</span>
               <span className="text-2xl font-bold text-foreground font-sans mt-1 block">
-                {interventions.filter(i => i.status === "PENDING").length}
+                {interventions.filter(i => i.status === "ACTIVE" || i.status === "PENDING").length}
               </span>
               <span className="text-[11px] text-muted-foreground block mt-0.5">In-progress protocols</span>
             </div>
@@ -421,38 +421,37 @@ export const StudentCaseFile: React.FC = () => {
             <div className="flex items-center justify-between border-b border-border pb-3">
               <div>
                 <h3 className="text-sm font-semibold text-foreground">Validated Assessment Submissions</h3>
-                <p className="text-xs text-muted-foreground">Standardized psychometric screeners (PHQ-9 / GAD-7)</p>
+                <p className="text-xs text-muted-foreground">Standardized psychometric screeners recorded in student history</p>
               </div>
               <span className="badge-neutral text-[10px]">Validated Instruments</span>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="p-4 rounded-lg border border-border bg-secondary/20 space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-semibold text-foreground">PHQ-9 (Depression Inventory)</span>
-                  <span className="text-xs font-bold text-primary font-mono">Score: 6 / 27</span>
-                </div>
-                <p className="text-[11px] text-muted-foreground">Classification: Mild depressive symptoms. Endorsed mild sleep disruption and fatigue.</p>
-                <div className="pt-2 border-t border-border/50 text-[11px] space-y-1 text-muted-foreground">
-                  <p>• Item 1 (Anhedonia): 1/3 (Several days)</p>
-                  <p>• Item 2 (Depressed mood): 1/3 (Several days)</p>
-                  <p>• Item 9 (Suicidal ideation): 0/3 (Not at all)</p>
-                </div>
+            {assessmentEvents.length === 0 ? (
+              <div className="py-8 text-center text-xs text-muted-foreground space-y-1">
+                <ClipboardList className="h-6 w-6 text-muted-foreground/40 mx-auto mb-1" />
+                <p className="font-medium text-foreground">No validated assessments submitted yet.</p>
+                <p className="text-[11px]">When the student completes a PHQ-9 or GAD-7 assessment, submissions will be documented here.</p>
               </div>
-
-              <div className="p-4 rounded-lg border border-border bg-secondary/20 space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-semibold text-foreground">GAD-7 (Anxiety Inventory)</span>
-                  <span className="text-xs font-bold text-amber-500 font-mono">Score: 8 / 21</span>
-                </div>
-                <p className="text-[11px] text-muted-foreground">Classification: Mild to moderate anxiety. Heightened somatic tension and academic worry.</p>
-                <div className="pt-2 border-t border-border/50 text-[11px] space-y-1 text-muted-foreground">
-                  <p>• Item 1 (Nervousness): 2/3 (More than half days)</p>
-                  <p>• Item 2 (Uncontrollable worry): 1/3 (Several days)</p>
-                  <p>• Item 7 (Feeling afraid): 1/3 (Several days)</p>
-                </div>
+            ) : (
+              <div className="space-y-3">
+                {assessmentEvents.map((ev, idx) => (
+                  <div key={idx} className="p-4 rounded-lg border border-border bg-secondary/20 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-semibold text-foreground">{ev.title}</span>
+                      <span className="text-xs font-bold text-primary font-mono">
+                        Score: {ev.details?.wellness_score ? `${Number(ev.details.wellness_score).toFixed(1)} / 100` : "--"}
+                      </span>
+                    </div>
+                    {ev.summary && (
+                      <p className="text-xs text-muted-foreground">{ev.summary}</p>
+                    )}
+                    <span className="text-[10px] text-muted-foreground font-mono block">
+                      Evaluated: {new Date(ev.timestamp).toLocaleString()}
+                    </span>
+                  </div>
+                ))}
               </div>
-            </div>
+            )}
           </Card>
         </div>
       )}
@@ -466,11 +465,9 @@ export const StudentCaseFile: React.FC = () => {
           <ShapExplanationCard />
           <ExplainableAIFactors
             studentId={studentId}
-            wellnessScore={summary?.latest_wellness_score ?? 75}
+            wellnessScore={summary?.latest_wellness_score ?? undefined}
             riskLevel={student?.current_risk_level || "LOW"}
-            lateNightMins={45}
-            totalScreenMins={380}
-            hasAssessment={true}
+            hasAssessment={assessmentEvents.length > 0}
           />
         </div>
       )}
@@ -511,7 +508,7 @@ export const StudentCaseFile: React.FC = () => {
                         <span className="text-xs font-semibold text-foreground">{item.title}</span>
                         <span className={cn(
                           "text-[10px] font-semibold px-2 py-0.5 rounded border uppercase",
-                          item.status === "COMPLETED" ? "badge-stable" : item.status === "PENDING" ? "badge-moderate" : "badge-neutral"
+                          item.status === "COMPLETED" ? "badge-stable" : item.status === "ACTIVE" ? "badge-moderate" : "badge-neutral"
                         )}>
                           {item.status.replace(/_/g, " ")}
                         </span>
@@ -553,7 +550,7 @@ export const StudentCaseFile: React.FC = () => {
                     </div>
                     <div>
                       <span className="text-[10px] text-muted-foreground uppercase block">Initial Stress</span>
-                      <span className="font-mono text-foreground font-semibold">{item.baseline_stress ?? "6.5"} / 10</span>
+                      <span className="font-mono text-foreground font-semibold">{item.baseline_stress !== undefined && item.baseline_stress !== null ? `${item.baseline_stress} / 10` : "--"}</span>
                     </div>
                     <div>
                       <span className="text-[10px] text-muted-foreground uppercase block">Observed Outcome</span>
@@ -673,12 +670,14 @@ export const StudentCaseFile: React.FC = () => {
                   onChange={(e) => setNewInterventionType(e.target.value)}
                   className="w-full p-2 text-xs rounded-lg border border-border bg-background focus:outline-none focus:ring-1 focus:ring-primary"
                 >
-                  <option value="CBT_EXERCISE">CBT Grounding & Cognitive Reframing</option>
-                  <option value="BREATHING_TOOL">Resonant Breathing & Autonomic Regulation</option>
-                  <option value="COUNSELING_SESSION">1-on-1 Clinical Counselling Follow-up</option>
+                  <option value="CBT_BREATHING">CBT Grounding & Resonant Breathing</option>
+                  <option value="MINDFULNESS">Mindfulness & Reflective Journaling</option>
                   <option value="SLEEP_HYGIENE">Sleep Hygiene Protocol</option>
+                  <option value="COUNSELOR_CONSULTATION">1-on-1 Clinical Consultation Follow-up</option>
+                  <option value="ACADEMIC_WORKSHOP">Academic Time Management & Study Skills</option>
                   <option value="PEER_SUPPORT">Peer Support Network</option>
-                  <option value="MINDFULNESS">Mindfulness & Journaling</option>
+                  <option value="CRISIS_MANAGEMENT">Safety Protocol & Crisis Support</option>
+                  <option value="CUSTOM">Custom Clinician Protocol</option>
                 </select>
               </div>
 
