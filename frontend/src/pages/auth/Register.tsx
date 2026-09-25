@@ -25,12 +25,12 @@ const registerSchema = z
   })
   .superRefine((data, ctx) => {
     const email = data.email.toLowerCase().trim();
-    const isAuthorized = email.endsWith("@nmims.in") || email.endsWith("@nmims.edu.in") || email.endsWith("@nmims.edu") || email.endsWith(".edu") || email.endsWith(".edu.in") || email.endsWith(".ac.in");
+    const isAuthorized = email.includes("@") && email.includes(".");
     if (!isAuthorized) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         path: ["email"],
-        message: "Email must be an authorized institutional address (@university.edu, @edu.in, @ac.in).",
+        message: "Please enter a valid institutional or university email address.",
       });
     }
   });
@@ -74,7 +74,7 @@ export const Register: React.FC = () => {
   React.useEffect(() => {
     const checkEmail = async () => {
       const email = (typedEmail || "").trim().toLowerCase();
-      if (email.includes("@") && (email.endsWith("@nmims.in") || email.endsWith("@nmims.edu.in") || email.endsWith("@nmims.edu"))) {
+      if (email.includes("@") && email.includes(".")) {
         try {
           const res = await api.get(`/auth/roster-info?email=${encodeURIComponent(email)}`);
           if (res.data?.is_authorized) {
