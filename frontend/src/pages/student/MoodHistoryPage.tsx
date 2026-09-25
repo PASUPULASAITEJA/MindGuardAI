@@ -19,25 +19,28 @@ import {
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useMoodHistory } from "@/hooks/useMood";
-import { useLatestAssessment } from "@/hooks/usePredictions";
+import { useLatestAssessment, useWellnessTrends } from "@/hooks/usePredictions";
 import { Alert } from "@/components/ui/alert";
 import WellnessTrendDashboard from "@/components/WellnessTrendDashboard";
 
 export const MoodHistoryPage: React.FC = () => {
   const navigate = useNavigate();
-  const [timeframe, setTimeframe] = useState<string>("30d");
+  const [timeframe, setTimeframe] = useState<"7d" | "30d" | "90d" | "180d">("30d");
   const { data: history = [], isLoading } = useMoodHistory(timeframe);
   const { data: latestAssessment } = useLatestAssessment();
+  const { data: trendData } = useWellnessTrends(timeframe);
 
   // Compute average score
   const validScores = history.filter((h) => typeof h.self_reported_score === "number");
   const numAvg = validScores.length > 0
     ? validScores.reduce((acc, h) => acc + h.self_reported_score, 0) / validScores.length
-    : 7.2;
-  const avgScore = numAvg.toFixed(1);
+    : (trendData?.summary?.average_wellness_score && trendData.summary.average_wellness_score > 0 ? trendData.summary.average_wellness_score / 10 : null);
+  const avgScore = numAvg !== null ? numAvg.toFixed(1) : "—";
 
   // Baseline calibration
-  const isBaselineNormal = numAvg >= 6.0;
+  const isBaselineNormal = numAvg === null || numAvg >= 6.0;
+
+  const baseline = trendData?.baseline;
 
   return (
     <div className="max-w-5xl mx-auto space-y-6 pb-12">
@@ -60,11 +63,10 @@ export const MoodHistoryPage: React.FC = () => {
             { key: "30d", label: "30D" },
             { key: "90d", label: "3M" },
             { key: "180d", label: "6M" },
-            { key: "365d", label: "1Y" },
           ].map((t) => (
             <button
               key={t.key}
-              onClick={() => setTimeframe(t.key)}
+              onClick={() => setTimeframe(t.key as any)}
               className={`px-3 py-1 rounded-lg text-xs font-bold transition-all ${
                 timeframe === t.key 
                   ? "bg-background text-foreground shadow-sm" 
@@ -88,65 +90,79 @@ export const MoodHistoryPage: React.FC = () => {
 
       {/* Personal Baseline Range Notice */}
       <Alert variant="info" title="Personal Historical Baseline">
-        {isBaselineNormal
-          ? "Your recent wellbeing indicators are within your typical historical range. Regular sleep habits and daily check-ins help maintain this balance."
-          : "Your recent stress and fatigue indicators are currently elevated compared to your typical baseline. Consider exploring calming exercises or booking a chat with a campus counselor."}
+        {baseline?.summary_message || (
+          isBaselineNormal
+            ? "Your recent wellbeing indicators are within your typical historical range. Regular sleep habits and daily check-ins help maintain this balance."
+            : "Your recent stress and fatigue indicators are currently elevated compared to your typical baseline. Consider exploring calming exercises or booking a chat with a campus counselor."
+        )}
       </Alert>
 
       {/* Multidimensional Breakdown Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
         <div className="p-3.5 rounded-2xl border border-border/80 bg-card shadow-xs space-y-1.5">
           <div className="flex items-center justify-between text-muted-foreground">
-            <span className="text-[11px] font-bold uppercase tracking-wider">Mood</span>
+            <span className="text-[11px] font-bold uppercase tracking-wider">Mood Index</span>
             <Smile className="h-3.5 w-3.5 text-emerald-500" />
           </div>
-          <p className="text-xl font-black text-foreground font-mono">{avgScore}<span className="text-xs font-normal text-muted-foreground">/10</span></p>
-          <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400">Stable Baseline</span>
+          <p className="text-xl font-black text-foreground font-mono">
+            {baseline?.recent_mood_score ? `${baseline.recent_mood_score}` : avgScore}
+            {avgScore !== "—" && <span className="text-xs font-normal text-muted-foreground">/10</span>}
+          </p>
+          <span className="text-[10px] font-bold text-muted-foreground">
+            {baseline?.usual_mood_score ? `Usual: ${baseline.usual_mood_score}/10` : "Self-Reported"}
+          </span>
         </div>
 
         <div className="p-3.5 rounded-2xl border border-border/80 bg-card shadow-xs space-y-1.5">
           <div className="flex items-center justify-between text-muted-foreground">
-            <span className="text-[11px] font-bold uppercase tracking-wider">Stress</span>
+            <span className="text-[11px] font-bold uppercase tracking-wider">Stress Level</span>
             <Activity className="h-3.5 w-3.5 text-indigo-500" />
           </div>
-          <p className="text-xl font-black text-foreground font-mono">Low-Mod</p>
-          <span className="text-[10px] font-bold text-indigo-600 dark:text-indigo-400">Within Range</span>
+          <p className="text-xl font-black text-foreground font-mono">
+            {baseline?.recent_stress !== undefined && baseline?.recent_stress !== null ? `${baseline.recent_stress}/10` : "—"}
+          </p>
+          <span className="text-[10px] font-bold text-muted-foreground">
+            {baseline?.usual_stress ? `Usual: ${baseline.usual_stress}/10` : "Check-in Trajectory"}
+          </span>
         </div>
 
         <div className="p-3.5 rounded-2xl border border-border/80 bg-card shadow-xs space-y-1.5">
           <div className="flex items-center justify-between text-muted-foreground">
-            <span className="text-[11px] font-bold uppercase tracking-wider">Anxiety</span>
-            <ShieldCheck className="h-3.5 w-3.5 text-cyan-500" />
-          </div>
-          <p className="text-xl font-black text-foreground font-mono">Minimal</p>
-          <span className="text-[10px] font-bold text-cyan-600 dark:text-cyan-400">GAD-7: 3/21</span>
-        </div>
-
-        <div className="p-3.5 rounded-2xl border border-border/80 bg-card shadow-xs space-y-1.5">
-          <div className="flex items-center justify-between text-muted-foreground">
-            <span className="text-[11px] font-bold uppercase tracking-wider">Sleep</span>
+            <span className="text-[11px] font-bold uppercase tracking-wider">Sleep Hours</span>
             <Moon className="h-3.5 w-3.5 text-purple-500" />
           </div>
-          <p className="text-xl font-black text-foreground font-mono">7.2 <span className="text-xs font-normal text-muted-foreground">hrs</span></p>
-          <span className="text-[10px] font-bold text-purple-600 dark:text-purple-400">Restorative</span>
+          <p className="text-xl font-black text-foreground font-mono">
+            {baseline?.recent_sleep_hours !== undefined && baseline?.recent_sleep_hours !== null ? `${baseline.recent_sleep_hours} hrs` : "—"}
+          </p>
+          <span className="text-[10px] font-bold text-muted-foreground">
+            {baseline?.usual_sleep_hours ? `Usual: ${baseline.usual_sleep_hours}h` : "Logged Sleep"}
+          </span>
         </div>
 
         <div className="p-3.5 rounded-2xl border border-border/80 bg-card shadow-xs space-y-1.5">
           <div className="flex items-center justify-between text-muted-foreground">
-            <span className="text-[11px] font-bold uppercase tracking-wider">Energy</span>
+            <span className="text-[11px] font-bold uppercase tracking-wider">Assessments</span>
+            <ShieldCheck className="h-3.5 w-3.5 text-cyan-500" />
+          </div>
+          <p className="text-xl font-black text-foreground font-mono">
+            {latestAssessment?.mental_wellness_score ? `${Number(latestAssessment.mental_wellness_score).toFixed(0)}/100` : "—"}
+          </p>
+          <span className="text-[10px] font-bold text-muted-foreground">
+            {latestAssessment?.risk_level ? `Risk: ${latestAssessment.risk_level}` : "Clinical Psychometric"}
+          </span>
+        </div>
+
+        <div className="p-3.5 rounded-2xl border border-border/80 bg-card shadow-xs space-y-1.5">
+          <div className="flex items-center justify-between text-muted-foreground">
+            <span className="text-[11px] font-bold uppercase tracking-wider">Confidence</span>
             <Zap className="h-3.5 w-3.5 text-amber-500" />
           </div>
-          <p className="text-xl font-black text-foreground font-mono">Optimal</p>
-          <span className="text-[10px] font-bold text-amber-600 dark:text-amber-400">Circadian Synced</span>
-        </div>
-
-        <div className="p-3.5 rounded-2xl border border-border/80 bg-card shadow-xs space-y-1.5">
-          <div className="flex items-center justify-between text-muted-foreground">
-            <span className="text-[11px] font-bold uppercase tracking-wider">Academics</span>
-            <BookOpen className="h-3.5 w-3.5 text-blue-500" />
-          </div>
-          <p className="text-xl font-black text-foreground font-mono">Manageable</p>
-          <span className="text-[10px] font-bold text-blue-600 dark:text-blue-400">Balanced Load</span>
+          <p className="text-xl font-black text-foreground font-mono">
+            {baseline?.baseline_confidence || "ESTABLISHING"}
+          </p>
+          <span className="text-[10px] font-bold text-muted-foreground">
+            {baseline?.observations_count ? `${baseline.observations_count} observations` : "Active Calibration"}
+          </span>
         </div>
       </div>
       
