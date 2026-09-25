@@ -11,22 +11,22 @@ interface EmergencySOSModalProps {
 
 const DEFAULT_HELPLINES: SOSHelpline[] = [
   {
-    name: "Tele-MANAS (Govt of India)",
+    name: "Tele-MANAS (National Tele-Mental Health)",
     number: "14416",
     badge: "24/7 Toll-Free",
-    description: "National comprehensive tele-mental health services programme of India"
+    description: "National comprehensive tele-mental health services programme"
   },
   {
-    name: "KIRAN National Helpline",
+    name: "KIRAN Mental Health Rehabilitation",
     number: "1800-599-0019",
     badge: "24/7 Toll-Free",
-    description: "Official 24/7 mental health rehabilitation helpline"
+    description: "Official 24/7 national mental health helpline"
   },
   {
-    name: "Campus Student Health & Wellbeing Clinic",
-    number: "+91 22 4235 5555",
-    badge: "Campus Medical Desk",
-    description: "On-campus emergency medical response and psychologist on duty"
+    name: "National Emergency Response Support",
+    number: "112",
+    badge: "24/7 Emergency",
+    description: "Unified national emergency services and medical response"
   }
 ];
 
