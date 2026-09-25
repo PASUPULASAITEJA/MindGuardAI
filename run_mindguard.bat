@@ -1,9 +1,9 @@
 @echo off
-title MindGuardAI - Academic Mental Health & Telemetry Platform
+title MindGuardAI - Student Mental Wellness Detection and Early Intervention
 color 0A
 
 echo ===============================================================================
-echo                MindGuardAI: Student Wellness & Digital Phenotyping
+echo          MindGuardAI: Student Mental Wellness Detection and Early Intervention
 echo ===============================================================================
 echo [*] Checking runtime environment...
 
