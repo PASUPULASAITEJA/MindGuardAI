@@ -2,7 +2,7 @@
 # Author: Pasupula Sai Teja & Avuti Anoushka
 
 Write-Host "===============================================================================" -ForegroundColor Cyan
-Write-Host "       MindGuardAI: Institutional Mental Health & Digital Phenotyping          " -ForegroundColor White
+Write-Host "   MindGuardAI: Student Mental Wellness Detection and Early Intervention       " -ForegroundColor White
 Write-Host "===============================================================================" -ForegroundColor Cyan
 
 $ProjectRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
