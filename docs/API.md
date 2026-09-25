@@ -31,12 +31,10 @@
 ```json
 {
   "email": "student@university.edu",
-  "password": "securepassword123",
+  "password": "StrongPassword#2026!",
   "role": "STUDENT"
 }
-
 ```
-
 
 * **Response (201 Created):**
 ```json
@@ -45,9 +43,7 @@
   "email": "student@university.edu",
   "role": "STUDENT"
 }
-
 ```
-
 
 * **Error Codes:** `400 BAD_REQUEST` (Invalid input), `409 CONFLICT` (Email already exists).
 
@@ -61,9 +57,8 @@
 ```json
 {
   "email": "student@university.edu",
-  "password": "securepassword123"
+  "password": "StrongPassword#2026!"
 }
-
 ```
 
 
