@@ -25,21 +25,12 @@ const registerSchema = z
   })
   .superRefine((data, ctx) => {
     const email = data.email.toLowerCase().trim();
-    const isAcademic = email.includes("@") && (
-      email.includes(".edu") ||
-      email.includes(".ac.") ||
-      email.includes(".in") ||
-      email.endsWith("@university.edu") ||
-      email.endsWith("@campus.edu") ||
-      email.endsWith("@nmims.in") ||
-      email.endsWith("@nmims.edu.in") ||
-      email.endsWith("@nmims.edu")
-    );
-    if (!isAcademic) {
+    const isAuthorized = email.endsWith("@nmims.in") || email.endsWith("@nmims.edu.in") || email.endsWith("@nmims.edu") || email.endsWith(".edu") || email.endsWith(".edu.in") || email.endsWith(".ac.in");
+    if (!isAuthorized) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         path: ["email"],
-        message: "Email must be an accredited institutional address (.edu, .ac, or university domain).",
+        message: "Email must be an authorized institutional address (@university.edu, @edu.in, @ac.in).",
       });
     }
   });
@@ -173,7 +164,7 @@ export const Register: React.FC = () => {
               </span>
             </div>
             <CardDescription className="text-xs text-muted-foreground">
-              Register using your authorized institutional email address
+              Register using your authorized institutional email
             </CardDescription>
           </CardHeader>
 
@@ -224,7 +215,7 @@ export const Register: React.FC = () => {
                 <div className="flex justify-between items-center">
                   <Label htmlFor="email" className="text-xs font-semibold text-foreground">Institutional Email</Label>
                   <span className="text-[10px] text-primary font-medium">
-                    {selectedRole === "STUDENT" ? ".edu / .ac / student domain" : "faculty / clinic domain"}
+                    {selectedRole === "STUDENT" ? "Student Domain" : "Staff Domain"}
                   </span>
                 </div>
                 <Input
