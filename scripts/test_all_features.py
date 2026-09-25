@@ -406,6 +406,70 @@ async def run_all_tests():
             f"Status: {res_sec_3.status_code}"
         )
 
+        # -------------------------------------------------------------
+        # 7. Testing EMA Check-Ins & Sleep Rhythm Tracking
+        # -------------------------------------------------------------
+        print(f"\n{BOLD}7. Testing EMA Micro Check-In & Sleep Circadian Tracking{RESET}")
+
+        # Post 30-Second Micro Check-In
+        res_checkin = await client.post(
+            "/api/v1/checkins",
+            headers=student_headers,
+            json={
+                "checkin_type": "morning",
+                "mood_score": 8,
+                "energy_level": 7,
+                "anxiety_level": 3,
+                "sleep_quality": "good",
+                "sleep_hours": 7.5,
+                "primary_emotion": "calm",
+                "one_word_feeling": "Focused",
+                "stress_source": "academics"
+            }
+        )
+        record_test(
+            "Log Ecological Momentary Assessment Check-In (/api/v1/checkins)",
+            res_checkin.status_code == 201 and res_checkin.json().get("mood_score") == 8,
+            f"Status: {res_checkin.status_code}, Mood: {res_checkin.json().get('mood_score')}/10"
+        )
+
+        # Get Check-In Summary & Streak
+        res_checkin_sum = await client.get("/api/v1/checkins/summary", headers=student_headers)
+        record_test(
+            "Get Student Check-In Streak & Summary (/api/v1/checkins/summary)",
+            res_checkin_sum.status_code == 200 and "streak_days" in res_checkin_sum.json(),
+            f"Status: {res_checkin_sum.status_code}, Streak: {res_checkin_sum.json().get('streak_days')} days"
+        )
+
+        # Post Sleep Log
+        res_sleep = await client.post(
+            "/api/v1/sleep",
+            headers=student_headers,
+            json={
+                "log_date": datetime.now().date().isoformat(),
+                "bedtime": datetime.now().isoformat(),
+                "wake_time": datetime.now().isoformat(),
+                "sleep_quality": 3,
+                "sleep_hours": 7.5,
+                "nap_taken": False,
+                "nap_duration_minutes": 0,
+                "sleep_disruptions": 0
+            }
+        )
+        record_test(
+            "Log Sleep & Nocturnal Rest Log (/api/v1/sleep)",
+            res_sleep.status_code == 201 and res_sleep.json().get("sleep_hours") == 7.5,
+            f"Status: {res_sleep.status_code}, Quality: {res_sleep.json().get('sleep_quality')}/4"
+        )
+
+        # Get Sleep Analysis
+        res_sleep_ana = await client.get("/api/v1/sleep/analysis?days=7", headers=student_headers)
+        record_test(
+            "Get Sleep & Circadian Analytics (/api/v1/sleep/analysis)",
+            res_sleep_ana.status_code == 200 and "avg_sleep_hours" in res_sleep_ana.json(),
+            f"Status: {res_sleep_ana.status_code}, Avg Sleep: {res_sleep_ana.json().get('avg_sleep_hours')}h"
+        )
+
         # Teardown temporary test accounts to prevent polluting database with dummy records
         try:
             from sqlalchemy import delete
@@ -413,12 +477,16 @@ async def run_all_tests():
             from app.models.emotion_analyses import EmotionAnalysis
             from app.models.assessments import Assessment
             from app.models.alerts import Alert
+            from app.models.mood_checkins import MoodCheckin
+            from app.models.sleep_logs import SleepLog
 
             async with AsyncSessionLocal() as session:
                 for email in ["student@nmims.in", "counselor@nmims.edu", "admin@nmims.edu"]:
                     res = await session.execute(select(User).where(User.email == email))
                     u = res.scalars().first()
                     if u:
+                        await session.execute(delete(MoodCheckin).where(MoodCheckin.user_id == u.id))
+                        await session.execute(delete(SleepLog).where(SleepLog.user_id == u.id))
                         await session.execute(delete(Alert).where(Alert.student_id == u.id))
                         mood_ids = (await session.execute(select(MoodLog.id).where(MoodLog.student_id == u.id))).scalars().all()
                         if mood_ids:

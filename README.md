@@ -156,7 +156,10 @@ backend\.venv\Scripts\python.exe scripts/test_chatbot.py
 # 3. Behavioral Telemetry & Circadian Extraction Verification
 backend\.venv\Scripts\python.exe scripts/test_behavioral_agent.py
 
-# 4. Frontend Production Build & TypeScript Strict Validation
+# 4. Backend Unit & Integration Suite (32+ tests)
+cd backend && .\.venv\Scripts\python -m pytest tests/
+
+# 5. Frontend Production Build & TypeScript Strict Validation
 cd frontend && npm run build
 ```
 
@@ -288,6 +291,28 @@ $$S_{\text{wellness}} = \max\left(0, \min\left(100, 100 - \left(w_{\text{phq}} \
 #### 4. SHAP Feature Attribution (TreeExplainer)
 Feature contribution $\phi_i$ to the predicted clinical risk score is calculated via the Shapley value:
 $$\phi_i(f, x) = \sum_{S \subseteq F \setminus \{i\}} \frac{|S|!(|F| - |S| - 1)!}{|F|!} \left[f(S \cup \{i\}) - f(S)\right]$$
+
+### Multi-Modal Risk Stratification Criteria
+
+MindGuardAI classifies student state into three primary operational risk tiers (**Normal/Low**, **Medium**, **High/Red**) based on multi-modal evidence across 4 distinct inputs:
+
+| Risk Tier | Mental Wellness Score | Clinical Screeners (PHQ-9 / GAD-7) | Linguistic Emotion & Sentiment | Digital Biomarkers (Sleep & Telemetry) | Clinical Action & Safety Protocol |
+|:---|:---:|:---:|:---:|:---:|:---|
+| **Low / Normal (GREEN)** | **65.0 – 100.0** | PHQ-9: `0 – 9`<br>GAD-7: `0 – 9`<br>*(Minimal to Mild)* | Positive or balanced sentiment (`>= 0.0`), baseline joy, optimism, and calm affect. | Regular sleep (`7 – 9h`), low disruptions, stable daily routine. | **Self-Care:** Personalized wellness articles, progressive habit tracker, dual-pacer breathing exercises. |
+| **Medium Risk (YELLOW)** | **35.0 – 64.9** | PHQ-9: `10 – 14`<br>GAD-7: `10 – 14`<br>*(Moderate symptoms)* | Elevated sadness, anxiety, or stress markers (`-0.2` to `-0.5` sentiment), academic fatigue, feeling overwhelmed. | Short sleep (`< 5.5h`), high disruptions, late-night screen time spikes (12 AM–4 AM). | **Guided Support:** In-chat CBT cognitive reframers, 5-4-3-2-1 sensory grounding, sleep hygiene tips, optional counselor booking. |
+| **High / Critical Risk (HIGH / RED)** | **< 35.0** (or trigger) | PHQ-9: `15 – 27`<br>GAD-7: `15 – 21`<br>*(Moderately Severe to Severe)* | Deep despair, acute hopelessness, or persistent multi-turn negative emotional spiral. | Chronic sleep deficit, severe sleep disruptions, late-night distress search queries. | **Emergency Safety Escalation:** Immediate SOS modal with Tele-MANAS (`14416`) & KIRAN (`1800-599-0019`), priority triage queue dispatch. |
+
+#### Deterministic Safety Overrides (Zero-False-Negative Safeguards)
+1. **PHQ-9 Item 9 Safety Rule:** If Question 9 of the PHQ-9 (thoughts of self-harm or suicide) is scored `> 0`, the platform **immediately triggers an emergency safety escalation**, bypassing ML classification.
+2. **Deterministic Safety Engine:** Regex and semantic scanning monitor both English and Hinglish crisis phrases (`suicidal`, `want to die`, `marne ka man`, `jaan dena`, lethal self-harm plans). Detection instantly assigns **RED Risk (Score 95.0)**, activates emergency SOS resources, and alerts the campus counselor queue without requiring model training weights.
+
+### Data Preprocessing & PII Masking
+To comply with health informatics regulations (e.g., HIPAA), all qualitative inputs are processed through a Named Entity Recognition (NER) masking regex. Identifiers like student names, email addresses, and phone numbers are mapped to redacted labels (e.g., `[EMAIL]`, `[PHONE]`) before text reaches the models.
+
+### Model Versioning & Registry
+- Models are trained using the PyTorch ecosystem (for NLP emotion detection) and Scikit-learn/XGBoost (for risk assessment).
+- Clinical dataset evaluation is backed by the DAIC-WOZ audio/transcript pipeline via `scripts/train_daicwoz.py`.
+- Saved model binary configurations (`.pt` and `.joblib`) are versioned and cached under `backend/app/ml/models`.
 
 ---
 
