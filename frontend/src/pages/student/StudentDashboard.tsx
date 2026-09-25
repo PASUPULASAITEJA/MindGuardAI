@@ -114,33 +114,26 @@ export const StudentDashboard: React.FC = () => {
 
   // Telemetry computations
   const log = behavioralSummary?.latest_log;
-  const isConnected = behavioralSummary?.is_agent_connected;
-  const isLive = behavioralSummary?.is_currently_active;
+  const isConnected = Boolean(behavioralSummary?.is_agent_connected);
+  const isLive = Boolean(behavioralSummary?.is_currently_active);
   const circadianData = behavioralSummary?.circadian_sleep_analysis;
+  const lastSyncedMins = behavioralSummary?.last_synced_minutes_ago;
 
   const totalMins = log?.total_screen_time_minutes || 0;
   const lateNightMins = log?.late_night_usage_minutes || 0;
-
-  let academicMins = log?.academic_usage_minutes || 0;
-  let socialMins = log?.social_usage_minutes || 0;
-  let entertainmentMins = log?.entertainment_usage_minutes || 0;
+  const academicMins = log?.academic_usage_minutes || 0;
+  const socialMins = log?.social_usage_minutes || 0;
+  const entertainmentMins = log?.entertainment_usage_minutes || 0;
   const adultMins = (log as any)?.adult_usage_minutes || 0;
 
-  if (totalMins > 0 && socialMins === 0 && entertainmentMins === 0) {
-    academicMins = Math.round(totalMins * 0.62);
-    entertainmentMins = Math.round(totalMins * 0.23);
-    socialMins = Math.max(0, totalMins - academicMins - entertainmentMins);
-  }
-
-  // Percentage calculations
-  const rawCatSum = (academicMins || 0) + (socialMins || 0) + (entertainmentMins || 0) + (adultMins || 0);
-  const catBase = Math.max(totalMins, rawCatSum, 1);
-  const academicPct = Math.min(100, Math.round(((academicMins || 0) / catBase) * 100));
-  const socialPct = Math.min(100 - academicPct, Math.round(((socialMins || 0) / catBase) * 100));
-  const entertainmentPct = Math.min(100 - academicPct - socialPct, Math.round(((entertainmentMins || 0) / catBase) * 100));
+  // Real percentage calculations based strictly on logged categories
+  const classifiedSum = (academicMins || 0) + (socialMins || 0) + (entertainmentMins || 0) + (adultMins || 0);
+  const academicPct = classifiedSum > 0 ? Math.min(100, Math.round(((academicMins || 0) / classifiedSum) * 100)) : 0;
+  const socialPct = classifiedSum > 0 ? Math.min(100 - academicPct, Math.round(((socialMins || 0) / classifiedSum) * 100)) : 0;
+  const entertainmentPct = classifiedSum > 0 ? Math.min(100 - academicPct - socialPct, Math.round(((entertainmentMins || 0) / classifiedSum) * 100)) : 0;
   const otherPct = Math.max(0, 100 - academicPct - socialPct - entertainmentPct);
 
-  // 7-Day Rolling Screen Time Telemetry Data for System Graph
+  // 7-Day Rolling Screen Time Telemetry Data for System Graph - ONLY real recorded days
   const weeklyLogs = (behavioralSummary?.weekly_history || []) as Array<{
     date: string;
     total_screen_time_minutes: number;
@@ -162,93 +155,46 @@ export const StudentDashboard: React.FC = () => {
   })();
   const yesterdayLog = weeklyLogs.find((w) => w.date === yesterdayStr);
 
-  const screenChartData = Array.from({ length: 7 }).map((_, i) => {
-    const d = new Date();
-    d.setDate(d.getDate() - (6 - i));
-    const year = d.getFullYear();
-    const month = String(d.getMonth() + 1).padStart(2, "0");
-    const day = String(d.getDate()).padStart(2, "0");
-    const dateStr = `${year}-${month}-${day}`;
-    const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-    const isToday = i === 6;
-    const dayLabel = isToday
-      ? `Today (${dayNames[d.getDay()]})`
-      : `${dayNames[d.getDay()]} (${d.getMonth() + 1}/${d.getDate()})`;
+  const screenChartData = weeklyLogs
+    .filter((w) => (w.total_screen_time_minutes || 0) > 0)
+    .map((w) => {
+      const parts = w.date.split("-");
+      const d = new Date(w.date + "T00:00:00");
+      const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+      const isToday = w.date === new Date().toISOString().split("T")[0];
+      const dayLabel = isToday
+        ? `Today (${dayNames[d.getDay()]})`
+        : `${dayNames[d.getDay()]} (${Number(parts[1])}/${Number(parts[2])})`;
 
-    const matched = weeklyLogs.find((w) => w.date === dateStr);
+      const totalM = w.total_screen_time_minutes || 0;
+      const lateM = w.late_night_usage_minutes || 0;
+      const acadM = w.academic_usage_minutes || 0;
+      const socM = w.social_usage_minutes || 0;
+      const entM = w.entertainment_usage_minutes || 0;
+      const daytimeMins = Math.max(0, totalM - lateM);
+      const otherMins = Math.max(0, totalM - acadM - socM - entM);
 
-    let totalM = 0;
-    let acadM = 0;
-    let socM = 0;
-    let entM = 0;
-    let adultM = 0;
-    let lateM = 0;
-    let risk = "LOW";
-    let hasData = false;
-
-    if (isToday) {
-      hasData = totalMins > 0 || (matched?.total_screen_time_minutes || 0) > 0;
-      totalM = Math.max(totalMins, matched?.total_screen_time_minutes || 0);
-      lateM = Math.max(lateNightMins, matched?.late_night_usage_minutes || 0);
-      acadM = Math.max(academicMins, matched?.academic_usage_minutes || 0);
-      socM = Math.max(socialMins, matched?.social_usage_minutes || 0);
-      entM = Math.max(entertainmentMins, matched?.entertainment_usage_minutes || 0);
-      adultM = Math.max(adultMins, matched?.adult_usage_minutes || 0);
-      risk = lateM >= 120 ? "HIGH" : (matched?.risk_level || "LOW");
-    } else if (matched) {
-      hasData = true;
-      totalM = matched.total_screen_time_minutes || 0;
-      lateM = matched.late_night_usage_minutes || 0;
-      acadM = matched.academic_usage_minutes || 0;
-      socM = matched.social_usage_minutes || 0;
-      entM = matched.entertainment_usage_minutes || 0;
-      adultM = matched.adult_usage_minutes || 0;
-      risk = matched.risk_level || (lateM >= 120 ? "HIGH" : "LOW");
-    }
-
-    if (totalM > 0 && socM === 0 && entM === 0) {
-      acadM = Math.round(totalM * 0.62);
-      entM = Math.round(totalM * 0.23);
-      socM = Math.max(0, totalM - acadM - entM);
-    } else {
-      const dayCatSum = acadM + socM + entM + adultM;
-      if (dayCatSum > totalM && totalM > 0) {
-        const ratio = totalM / dayCatSum;
-        acadM = Math.round(acadM * ratio);
-        socM = Math.round(socM * ratio);
-        entM = Math.round(entM * ratio);
-        adultM = Math.round(adultM * ratio);
-      }
-    }
-
-    const daytimeMins = Math.max(0, totalM - lateM);
-    const otherMins = Math.max(0, totalM - acadM - socM - entM - adultM);
-
-    return {
-      date: dateStr,
-      dayLabel,
-      isToday,
-      hasData,
-      totalHours: +(totalM / 60).toFixed(1),
-      daytimeHours: +(daytimeMins / 60).toFixed(1),
-      lateNightHours: +(lateM / 60).toFixed(1),
-      academicHours: +(acadM / 60).toFixed(1),
-      socialHours: +(socM / 60).toFixed(1),
-      entertainmentHours: +(entM / 60).toFixed(1),
-      otherHours: +(otherMins / 60).toFixed(1),
-      totalMins: totalM,
-      daytimeMins,
-      lateNightMins: lateM,
-      academicMins: acadM,
-      socialMins: socM,
-      entertainmentMins: entM,
-      riskLevel: risk
-    };
-  });
-
-  const avgDailyHours = (
-    screenChartData.reduce((acc, d) => acc + d.totalHours, 0) / 7
-  ).toFixed(1);
+      return {
+        date: w.date,
+        dayLabel,
+        isToday,
+        hasData: true,
+        totalHours: +(totalM / 60).toFixed(1),
+        daytimeHours: +(daytimeMins / 60).toFixed(1),
+        lateNightHours: +(lateM / 60).toFixed(1),
+        academicHours: +(acadM / 60).toFixed(1),
+        socialHours: +(socM / 60).toFixed(1),
+        entertainmentHours: +(entM / 60).toFixed(1),
+        otherHours: +(otherMins / 60).toFixed(1),
+        totalMins: totalM,
+        daytimeMins,
+        lateNightMins: lateM,
+        academicMins: acadM,
+        socialMins: socM,
+        entertainmentMins: entM,
+        riskLevel: w.risk_level || "LOW"
+      };
+    });
 
   // Time-calibrated greeting
   const getGreeting = () => {
@@ -554,8 +500,14 @@ export const StudentDashboard: React.FC = () => {
             </h2>
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-[11px] text-muted-foreground hidden sm:inline">
-              Hardware agent: {isConnected ? "Connected" : "Standby"}
+            <span className={cn(
+              "text-[11px] font-semibold px-2 py-0.5 rounded-full border flex items-center gap-1.5",
+              isLive ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20" :
+              isConnected ? "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20" :
+              "bg-secondary text-muted-foreground border-border"
+            )}>
+              <span className={cn("h-1.5 w-1.5 rounded-full", isLive ? "bg-emerald-500" : isConnected ? "bg-blue-500" : "bg-muted-foreground/50")} />
+              Hardware agent: {isLive ? "Connected (Active)" : isConnected ? "Connected (Recent)" : "Disconnected"}
             </span>
             <Button
               variant="outline"
@@ -575,20 +527,22 @@ export const StudentDashboard: React.FC = () => {
           <div className="p-4 rounded-xl border border-border bg-card shadow-xs">
             <span className="text-[11px] text-muted-foreground uppercase font-medium block">Active PC Time</span>
             <span className="text-2xl font-bold text-foreground font-sans mt-1 block">
-              {Math.floor(totalMins / 60)}h {totalMins % 60}m
+              {totalMins > 0 ? `${Math.floor(totalMins / 60)}h ${totalMins % 60}m` : "—"}
             </span>
             <span className="text-[11px] text-muted-foreground block mt-1">
-              {yesterdayLog ? `Yesterday: ${Math.floor(yesterdayLog.total_screen_time_minutes / 60)}h ${yesterdayLog.total_screen_time_minutes % 60}m` : "Today's active usage"}
+              {totalMins > 0
+                ? (yesterdayLog && yesterdayLog.total_screen_time_minutes > 0 ? `Yesterday: ${Math.floor(yesterdayLog.total_screen_time_minutes / 60)}h ${yesterdayLog.total_screen_time_minutes % 60}m` : "Today's active usage")
+                : "No telemetry available"}
             </span>
           </div>
 
           <div className="p-4 rounded-xl border border-border bg-card shadow-xs">
             <span className="text-[11px] text-muted-foreground uppercase font-medium block">Academic Coursework</span>
             <span className="text-2xl font-bold text-foreground font-sans mt-1 block">
-              {academicPct}%
+              {academicMins > 0 ? `${academicPct}%` : "—"}
             </span>
             <span className="text-[11px] text-muted-foreground block mt-1">
-              {Math.floor(academicMins / 60)}h {academicMins % 60}m logged
+              {academicMins > 0 ? `${Math.floor(academicMins / 60)}h ${academicMins % 60}m logged` : "Not enough classified activity yet"}
             </span>
           </div>
 
@@ -598,20 +552,20 @@ export const StudentDashboard: React.FC = () => {
               "text-2xl font-bold font-sans mt-1 block",
               lateNightMins >= 120 ? "text-rose-600 dark:text-rose-400" : "text-foreground"
             )}>
-              {Math.floor(lateNightMins / 60)}h {lateNightMins % 60}m
+              {lateNightMins > 0 ? `${Math.floor(lateNightMins / 60)}h ${lateNightMins % 60}m` : "0m"}
             </span>
             <span className="text-[11px] text-muted-foreground block mt-1">
-              {lateNightMins >= 120 ? "Elevated nocturnal fatigue" : "12:00 AM – 5:00 AM window"}
+              {lateNightMins >= 120 ? "Elevated nocturnal fatigue" : lateNightMins > 0 ? "12:00 AM – 5:00 AM window" : "No late-night activity recorded"}
             </span>
           </div>
 
           <div className="p-4 rounded-xl border border-border bg-card shadow-xs">
             <span className="text-[11px] text-muted-foreground uppercase font-medium block">Inferred Rest</span>
             <span className="text-2xl font-bold text-foreground font-sans mt-1 block">
-              {sleepDuration !== null ? `${sleepDuration} hrs` : "—"}
+              {circadianData?.sleep_duration_hours ? `${circadianData.sleep_duration_hours} hrs` : "—"}
             </span>
             <span className="text-[11px] text-muted-foreground block mt-1">
-              Onset: {sleepOnset} • Wake: {wakeTime}
+              {circadianData?.sleep_duration_hours ? "Estimated from session inactivity" : "Rest estimate unavailable"}
             </span>
           </div>
         </div>
@@ -620,69 +574,81 @@ export const StudentDashboard: React.FC = () => {
         <Card className="p-5">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
             <div>
-              <h3 className="text-sm font-semibold text-foreground">7-Day Usage Telemetry</h3>
-              <p className="text-xs text-muted-foreground">Daily total hours vs healthy threshold (6.0h)</p>
+              <h3 className="text-sm font-semibold text-foreground">Usage Telemetry</h3>
+              <p className="text-xs text-muted-foreground">Observed daily usage vs reference threshold (6.0h)</p>
             </div>
 
-            <div className="flex rounded-lg bg-secondary p-0.5 text-xs font-medium border border-border">
-              <button
-                type="button"
-                onClick={() => setScreenChartMode("total")}
-                className={cn("px-3 py-1 rounded-md transition-colors", screenChartMode === "total" ? "bg-card text-foreground shadow-xs font-semibold" : "text-muted-foreground hover:text-foreground")}
-              >
-                Total
-              </button>
-              <button
-                type="button"
-                onClick={() => setScreenChartMode("circadian")}
-                className={cn("px-3 py-1 rounded-md transition-colors", screenChartMode === "circadian" ? "bg-card text-foreground shadow-xs font-semibold" : "text-muted-foreground hover:text-foreground")}
-              >
-                Day / Night
-              </button>
-              <button
-                type="button"
-                onClick={() => setScreenChartMode("purpose")}
-                className={cn("px-3 py-1 rounded-md transition-colors", screenChartMode === "purpose" ? "bg-card text-foreground shadow-xs font-semibold" : "text-muted-foreground hover:text-foreground")}
-              >
-                Study / Leisure
-              </button>
-            </div>
+            {screenChartData.length > 0 && (
+              <div className="flex rounded-lg bg-secondary p-0.5 text-xs font-medium border border-border">
+                <button
+                  type="button"
+                  onClick={() => setScreenChartMode("total")}
+                  className={cn("px-3 py-1 rounded-md transition-colors", screenChartMode === "total" ? "bg-card text-foreground shadow-xs font-semibold" : "text-muted-foreground hover:text-foreground")}
+                >
+                  Total
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setScreenChartMode("circadian")}
+                  className={cn("px-3 py-1 rounded-md transition-colors", screenChartMode === "circadian" ? "bg-card text-foreground shadow-xs font-semibold" : "text-muted-foreground hover:text-foreground")}
+                >
+                  Day / Night
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setScreenChartMode("purpose")}
+                  className={cn("px-3 py-1 rounded-md transition-colors", screenChartMode === "purpose" ? "bg-card text-foreground shadow-xs font-semibold" : "text-muted-foreground hover:text-foreground")}
+                >
+                  Study / Leisure
+                </button>
+              </div>
+            )}
           </div>
 
-          <div className="h-60 w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={screenChartData} margin={{ top: 15, right: 10, left: -20, bottom: 5 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.6} />
-                <XAxis dataKey="dayLabel" stroke="hsl(var(--muted-foreground))" fontSize={10} tickLine={false} />
-                <YAxis stroke="hsl(var(--muted-foreground))" fontSize={10} tickLine={false} unit="h" />
-                <Tooltip 
-                  contentStyle={{ 
-                    borderRadius: "8px", 
-                    fontSize: "12px", 
-                    backgroundColor: "hsl(var(--card))", 
-                    borderColor: "hsl(var(--border))" 
-                  }} 
-                />
-                <ReferenceLine y={6.0} stroke="#10b981" strokeDasharray="3 3" />
-                {screenChartMode === "total" ? (
-                  <Bar dataKey="totalHours" name="Total Hours" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]}>
-                    <LabelList dataKey="totalHours" position="top" fontSize={10} formatter={(v: any) => v > 0 ? `${v}h` : ""} />
-                  </Bar>
-                ) : screenChartMode === "circadian" ? (
-                  <>
-                    <Bar dataKey="daytimeHours" name="Daytime Hours" stackId="s" fill="#38bdf8" />
-                    <Bar dataKey="lateNightHours" name="Late-Night Hours" stackId="s" fill="#f43f5e" radius={[4, 4, 0, 0]} />
-                  </>
-                ) : (
-                  <>
-                    <Bar dataKey="academicHours" name="Study Hours" stackId="s" fill="hsl(var(--primary))" />
-                    <Bar dataKey="socialHours" name="Social Hours" stackId="s" fill="#10b981" />
-                    <Bar dataKey="entertainmentHours" name="Leisure Hours" stackId="s" fill="#a855f7" radius={[4, 4, 0, 0]} />
-                  </>
-                )}
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
+          {screenChartData.length === 0 ? (
+            <div className="h-60 w-full flex flex-col items-center justify-center text-center p-6 space-y-2">
+              <Laptop className="h-8 w-8 text-muted-foreground/40 mb-1" />
+              <p className="text-sm font-semibold text-foreground">No usage telemetry recorded yet</p>
+              <p className="text-xs text-muted-foreground max-w-sm">
+                Start the MindGuardAI desktop agent to begin tracking your study and rest patterns.
+              </p>
+            </div>
+          ) : (
+            <div className="h-60 w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={screenChartData} margin={{ top: 15, right: 10, left: -20, bottom: 5 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.6} />
+                  <XAxis dataKey="dayLabel" stroke="hsl(var(--muted-foreground))" fontSize={10} tickLine={false} />
+                  <YAxis stroke="hsl(var(--muted-foreground))" fontSize={10} tickLine={false} unit="h" />
+                  <Tooltip 
+                    contentStyle={{ 
+                      borderRadius: "8px", 
+                      fontSize: "12px", 
+                      backgroundColor: "hsl(var(--card))", 
+                      borderColor: "hsl(var(--border))" 
+                    }} 
+                  />
+                  <ReferenceLine y={6.0} stroke="#10b981" strokeDasharray="3 3" />
+                  {screenChartMode === "total" ? (
+                    <Bar dataKey="totalHours" name="Total Hours" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]}>
+                      <LabelList dataKey="totalHours" position="top" fontSize={10} formatter={(v: any) => v > 0 ? `${v}h` : ""} />
+                    </Bar>
+                  ) : screenChartMode === "circadian" ? (
+                    <>
+                      <Bar dataKey="daytimeHours" name="Daytime Hours" stackId="s" fill="#38bdf8" />
+                      <Bar dataKey="lateNightHours" name="Late-Night Hours" stackId="s" fill="#f43f5e" radius={[4, 4, 0, 0]} />
+                    </>
+                  ) : (
+                    <>
+                      <Bar dataKey="academicHours" name="Study Hours" stackId="s" fill="hsl(var(--primary))" />
+                      <Bar dataKey="socialHours" name="Social Hours" stackId="s" fill="#10b981" />
+                      <Bar dataKey="entertainmentHours" name="Leisure Hours" stackId="s" fill="#a855f7" radius={[4, 4, 0, 0]} />
+                    </>
+                  )}
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          )}
         </Card>
       </div>
 
