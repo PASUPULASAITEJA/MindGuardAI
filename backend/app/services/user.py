@@ -31,14 +31,14 @@ class UserService:
 
         normalized_email = user_in.email.lower().strip()
 
-        # 1. Validate that the email is authorized under institutional domains
+        # 1. Validate that the email is authorized under approved institutional domains
         whitelisted_role = get_authorized_role(normalized_email, requested_role=user_in.role)
         if not whitelisted_role:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail={
                     "error_code": "NOT_ON_ROSTER",
-                    "message": "Only accredited institutional and university email addresses are authorized to register.",
+                    "message": "Only authorized institutional emails are permitted to register on this platform.",
                     "details": {"email": user_in.email}
                 }
             )
