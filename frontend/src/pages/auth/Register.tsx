@@ -25,12 +25,21 @@ const registerSchema = z
   })
   .superRefine((data, ctx) => {
     const email = data.email.toLowerCase().trim();
-    const isNMIMS = email.endsWith("@nmims.in") || email.endsWith("@nmims.edu.in") || email.endsWith("@nmims.edu");
-    if (!isNMIMS) {
+    const isAcademic = email.includes("@") && (
+      email.includes(".edu") ||
+      email.includes(".ac.") ||
+      email.includes(".in") ||
+      email.endsWith("@university.edu") ||
+      email.endsWith("@campus.edu") ||
+      email.endsWith("@nmims.in") ||
+      email.endsWith("@nmims.edu.in") ||
+      email.endsWith("@nmims.edu")
+    );
+    if (!isAcademic) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         path: ["email"],
-        message: "Email must be an authorized NMIMS institutional address ending with @nmims.in, @nmims.edu.in, or @nmims.edu",
+        message: "Email must be an accredited institutional address (.edu, .ac, or university domain).",
       });
     }
   });
@@ -164,7 +173,7 @@ export const Register: React.FC = () => {
               </span>
             </div>
             <CardDescription className="text-xs text-muted-foreground">
-              Register using your authorized NMIMS institutional email
+              Register using your authorized institutional email address
             </CardDescription>
           </CardHeader>
 
@@ -215,7 +224,7 @@ export const Register: React.FC = () => {
                 <div className="flex justify-between items-center">
                   <Label htmlFor="email" className="text-xs font-semibold text-foreground">Institutional Email</Label>
                   <span className="text-[10px] text-primary font-medium">
-                    {selectedRole === "STUDENT" ? "@nmims.in / @nmims.edu.in" : "@nmims.edu"}
+                    {selectedRole === "STUDENT" ? ".edu / .ac / student domain" : "faculty / clinic domain"}
                   </span>
                 </div>
                 <Input
@@ -223,10 +232,10 @@ export const Register: React.FC = () => {
                   type="email"
                   placeholder={
                     selectedRole === "STUDENT"
-                      ? "student.name@nmims.in"
+                      ? "student.name@university.edu"
                       : selectedRole === "COUNSELOR"
-                      ? "counselor.name@nmims.edu"
-                      : "admin.name@nmims.edu"
+                      ? "counselor.name@university.edu"
+                      : "admin.name@university.edu"
                   }
                   className="h-11 rounded-xl border-border/80 bg-background/60 text-sm focus-visible:ring-primary focus-visible:ring-1"
                   {...register("email")}
