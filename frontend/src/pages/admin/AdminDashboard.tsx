@@ -69,7 +69,7 @@ export const AdminDashboard: React.FC = () => {
     enabled: path === "/admin/directory"
   });
 
-  // 2. Fetch Department Risk Matrix
+  // 2. Fetch Department Risk Matrix (Real Database Data)
   const { data: deptRiskData, isLoading: isDeptRiskLoading } = useQuery({
     queryKey: ["admin-department-risk"],
     queryFn: () => adminAPI.getDepartmentRisk(),
@@ -96,7 +96,7 @@ export const AdminDashboard: React.FC = () => {
     }
   });
 
-  // 4. Institutional Analytics Report
+  // 4. Institutional Analytics Report (Real Database Data)
   const { data: report, isLoading: isReportLoading } = useInstitutionReport(
     startDate || undefined,
     endDate || undefined
@@ -104,27 +104,18 @@ export const AdminDashboard: React.FC = () => {
   
   const { data: alertsData, isLoading: isAlertsLoading } = useCounselorAlerts("PENDING");
 
-  // 5. Academic Calendar & Milestone Impact Trends
-  const { data: academicTrendsData } = useQuery({
+  // 5. Academic Calendar & Milestone Impact Trends (Real Database Data)
+  const { data: academicTrendsData, isLoading: isAcademicTrendsLoading } = useQuery({
     queryKey: ["academic-trends"],
     queryFn: () => academicAPI.getPeriodTrends(),
     staleTime: 5 * 60 * 1000
   });
 
-  const monthlyTrends = [
-    { name: "Jan", score: 68.2 },
-    { name: "Feb", score: 70.4 },
-    { name: "Mar", score: 69.1 },
-    { name: "Apr", score: 72.3 },
-    { name: "May", score: 74.0 },
-    { name: "Jun", score: report?.average_wellness_score || 76.5 }
-  ];
-
   const riskData = report ? [
     { name: "Stable / Optimal", value: report.risk_distribution.LOW, color: "#10b981" },
     { name: "Moderate Strain", value: report.risk_distribution.MEDIUM, color: "#f59e0b" },
     { name: "Elevated Risk", value: report.risk_distribution.HIGH, color: "#ef4444" }
-  ] : [];
+  ].filter(r => r.value > 0) : [];
 
   const pendingAlertCount = alertsData?.total ?? alertsData?.alerts?.length ?? 0;
 
@@ -138,21 +129,8 @@ export const AdminDashboard: React.FC = () => {
     return u.email.toLowerCase().includes(q) || u.id.toLowerCase().includes(q);
   }) || [];
 
-  // Academic Milestone Data fallback if empty
-  const academicPeriods: AcademicPeriodTrendItem[] = (academicTrendsData && academicTrendsData.length > 0) ? academicTrendsData : [
-    { event_id: "1", title: "Semester Onboarding & Orientation", event_type: "ORIENTATION", start_date: "2026-08-01", end_date: "2026-08-20", observed_average_stress: 3.2, observed_average_wellness: 78.5, checkin_participation_rate: 82.0, context_note: "Initial cohort baseline establishment" },
-    { event_id: "2", title: "Mid-Term Examinations Period", event_type: "EXAM", start_date: "2026-10-10", end_date: "2026-10-25", observed_average_stress: 6.8, observed_average_wellness: 64.2, checkin_participation_rate: 89.5, context_note: "Midterm academic evaluations" },
-    { event_id: "3", title: "Major Project Submissions", event_type: "ASSIGNMENT", start_date: "2026-11-15", end_date: "2026-11-30", observed_average_stress: 5.9, observed_average_wellness: 68.0, checkin_participation_rate: 86.0, context_note: "Capstone milestones" },
-    { event_id: "4", title: "End-Semester Examinations", event_type: "EXAM", start_date: "2026-12-05", end_date: "2026-12-20", observed_average_stress: 7.2, observed_average_wellness: 61.5, checkin_participation_rate: 91.0, context_note: "Final semester assessments" },
-  ];
-
-  // Campus Zones Data
-  const campusZones = [
-    { zone: "Zone A (North Academic Block)", population: 420, participation: "88%", avgScore: 78.4, supportDemand: "Low", trend: "Stable" },
-    { zone: "Zone B (Engineering & Labs)", population: 380, participation: "92%", avgScore: 71.2, supportDemand: "Moderate", trend: "Improving" },
-    { zone: "Zone C (Student Hostels & Res)", population: 510, participation: "85%", avgScore: 74.8, supportDemand: "Low", trend: "Stable" },
-    { zone: "Zone D (Library & Self-Study)", population: 290, participation: "79%", avgScore: 69.5, supportDemand: "Moderate", trend: "Under Review" },
-  ];
+  const academicPeriods: AcademicPeriodTrendItem[] = academicTrendsData || [];
+  const departmentsList: DepartmentRiskItem[] = deptRiskData?.departments || [];
 
   return (
     <div className="space-y-6 pb-12">
@@ -326,15 +304,15 @@ export const AdminDashboard: React.FC = () => {
             <div className="p-4 rounded-xl border border-border bg-card shadow-xs">
               <span className="text-[11px] text-muted-foreground uppercase font-medium block">Campus Wellness Index</span>
               <span className="text-2xl font-bold text-foreground font-sans mt-1 block">
-                {isReportLoading ? "--" : (report?.average_wellness_score.toFixed(1) ?? "76.4")}
+                {isReportLoading ? "--" : (report?.average_wellness_score ? report.average_wellness_score.toFixed(1) : "--")}
               </span>
-              <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold mt-0.5 block">↑ 3.2% vs last semester</span>
+              <span className="text-[11px] text-muted-foreground mt-0.5 block">Aggregated campus metric</span>
             </div>
 
             <div className="p-4 rounded-xl border border-border bg-card shadow-xs">
               <span className="text-[11px] text-muted-foreground uppercase font-medium block">Total Students</span>
               <span className="text-2xl font-bold text-foreground font-sans mt-1 block">
-                {report?.total_students_monitored ?? 1600}
+                {report?.total_students_monitored ?? 0}
               </span>
               <span className="text-[11px] text-muted-foreground mt-0.5 block">Active registered cohort</span>
             </div>
@@ -350,9 +328,9 @@ export const AdminDashboard: React.FC = () => {
             <div className="p-4 rounded-xl border border-border bg-card shadow-xs">
               <span className="text-[11px] text-muted-foreground uppercase font-medium block">Departments Monitored</span>
               <span className="text-2xl font-bold text-foreground font-sans mt-1 block">
-                {deptRiskData?.total_departments ?? 5}
+                {departmentsList.length}
               </span>
-              <span className="text-[11px] text-muted-foreground mt-0.5 block">Aggregated continuous data</span>
+              <span className="text-[11px] text-muted-foreground mt-0.5 block">Active cohort departments</span>
             </div>
           </div>
 
@@ -364,7 +342,7 @@ export const AdminDashboard: React.FC = () => {
                 <div>
                   <h3 className="text-sm font-semibold text-foreground">Academic Calendar & Milestone Context</h3>
                   <p className="text-xs text-muted-foreground">
-                    Observed aggregate trends during distinct academic periods (midterms, exams, submissions, placements)
+                    Observed aggregate trends during distinct academic periods
                   </p>
                 </div>
               </div>
@@ -374,135 +352,71 @@ export const AdminDashboard: React.FC = () => {
               </div>
             </div>
 
-            <div className="overflow-x-auto">
-              <table className="saas-table">
-                <thead>
-                  <tr>
-                    <th>Academic Milestone Period</th>
-                    <th>Timeline Window</th>
-                    <th>Observed Avg Stress</th>
-                    <th>Aggregate Wellbeing</th>
-                    <th>Participation Rate</th>
-                    <th>Context Note</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {academicPeriods.map((period) => (
-                    <tr key={period.event_id}>
-                      <td className="font-semibold text-foreground text-xs">{period.title}</td>
-                      <td className="text-muted-foreground text-[11px] font-mono">
-                        {new Date(period.start_date).toLocaleDateString("en-US", { month: "short", day: "numeric" })} - {new Date(period.end_date).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
-                      </td>
-                      <td>
-                        <span className={cn(
-                          "font-mono font-semibold",
-                          period.observed_average_stress >= 7.0 ? "text-rose-500" : period.observed_average_stress >= 5.5 ? "text-amber-500" : "text-emerald-500"
-                        )}>
-                          {period.observed_average_stress.toFixed(1)} / 10
-                        </span>
-                      </td>
-                      <td>
-                        <span className="font-semibold font-mono text-foreground">{period.observed_average_wellness.toFixed(1)}</span> / 100
-                      </td>
-                      <td className="font-mono text-muted-foreground text-xs">{period.checkin_participation_rate.toFixed(1)}%</td>
-                      <td className="text-muted-foreground text-[11px]">
-                        {period.context_note}
-                      </td>
+            {isAcademicTrendsLoading ? (
+              <div className="py-8 text-center text-xs text-muted-foreground">Loading academic trends...</div>
+            ) : academicPeriods.length === 0 ? (
+              <div className="py-8 text-center text-xs text-muted-foreground space-y-1">
+                <CalendarRange className="h-6 w-6 text-muted-foreground/40 mx-auto mb-1" />
+                <p className="font-medium text-foreground">No academic calendar periods logged yet.</p>
+                <p className="text-[11px]">Academic events registered in the system will correlate aggregate wellbeing changes during exams and milestones.</p>
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="saas-table">
+                  <thead>
+                    <tr>
+                      <th>Academic Milestone Period</th>
+                      <th>Timeline Window</th>
+                      <th>Observed Avg Stress</th>
+                      <th>Aggregate Wellbeing</th>
+                      <th>Participation Rate</th>
+                      <th>Context Note</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody>
+                    {academicPeriods.map((period) => (
+                      <tr key={period.event_id}>
+                        <td className="font-semibold text-foreground text-xs">{period.title}</td>
+                        <td className="text-muted-foreground text-[11px] font-mono">
+                          {new Date(period.start_date).toLocaleDateString("en-US", { month: "short", day: "numeric" })} - {new Date(period.end_date).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                        </td>
+                        <td>
+                          <span className={cn(
+                            "font-mono font-semibold",
+                            period.observed_average_stress >= 7.0 ? "text-rose-500" : period.observed_average_stress >= 5.5 ? "text-amber-500" : "text-emerald-500"
+                          )}>
+                            {period.observed_average_stress > 0 ? `${period.observed_average_stress.toFixed(1)} / 10` : "No data"}
+                          </span>
+                        </td>
+                        <td>
+                          {period.observed_average_wellness > 0 ? (
+                            <span><span className="font-semibold font-mono text-foreground">{period.observed_average_wellness.toFixed(1)}</span> / 100</span>
+                          ) : (
+                            <span className="text-muted-foreground">No data</span>
+                          )}
+                        </td>
+                        <td className="font-mono text-muted-foreground text-xs">{period.checkin_participation_rate.toFixed(1)}%</td>
+                        <td className="text-muted-foreground text-[11px]">
+                          {period.context_note}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
             <p className="text-[11px] text-muted-foreground italic">
               Note: Data reflects observed aggregate trend during the academic period. No individual responses or identifiers are exposed.
             </p>
           </Card>
 
-          {/* Longitudinal Trend Chart & Support Distribution */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <Card className="lg:col-span-2 p-5">
-              <div className="flex items-center justify-between mb-4">
-                <div>
-                  <h3 className="text-sm font-semibold text-foreground">University Wellbeing Trend</h3>
-                  <p className="text-xs text-muted-foreground">Monthly aggregate score trajectory</p>
-                </div>
-                <span className="text-xs font-semibold text-primary">6-Month Horizon</span>
-              </div>
-
-              <div className="h-56 w-full">
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={monthlyTrends} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.6} />
-                    <XAxis dataKey="name" stroke="hsl(var(--muted-foreground))" fontSize={11} tickLine={false} />
-                    <YAxis domain={[50, 100]} stroke="hsl(var(--muted-foreground))" fontSize={11} tickLine={false} />
-                    <Tooltip 
-                      contentStyle={{ 
-                        borderRadius: "8px", 
-                        fontSize: "12px", 
-                        backgroundColor: "hsl(var(--card))", 
-                        borderColor: "hsl(var(--border))" 
-                      }} 
-                    />
-                    <Line 
-                      type="monotone" 
-                      dataKey="score" 
-                      stroke="hsl(var(--primary))" 
-                      strokeWidth={2.5} 
-                      dot={{ r: 4, fill: "hsl(var(--primary))" }} 
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
-              </div>
-            </Card>
-
-            <Card className="p-5 flex flex-col justify-between">
-              <div>
-                <h3 className="text-sm font-semibold text-foreground mb-1">Support Distribution</h3>
-                <p className="text-xs text-muted-foreground mb-4">Risk tiers based on validated psychometrics</p>
-
-                <div className="h-40 w-full flex items-center justify-center">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <PieChart>
-                      <Pie
-                        data={riskData}
-                        cx="50%"
-                        cy="50%"
-                        innerRadius={45}
-                        outerRadius={65}
-                        paddingAngle={4}
-                        dataKey="value"
-                      >
-                        {riskData.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={entry.color} />
-                        ))}
-                      </Pie>
-                      <Tooltip />
-                    </PieChart>
-                  </ResponsiveContainer>
-                </div>
-              </div>
-
-              <div className="space-y-1.5 pt-2 border-t border-border text-xs">
-                {riskData.map((item) => (
-                  <div key={item.name} className="flex items-center justify-between text-muted-foreground">
-                    <div className="flex items-center gap-1.5">
-                      <span className="h-2 w-2 rounded-full" style={{ backgroundColor: item.color }} />
-                      <span>{item.name}</span>
-                    </div>
-                    <span className="font-semibold text-foreground">{item.value} students</span>
-                  </div>
-                ))}
-              </div>
-            </Card>
-          </div>
-
-          {/* Campus Zones / Location Analytics Table with Privacy Assurance */}
+          {/* Department Analytics Table with Privacy Threshold */}
           <Card className="p-5">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-border pb-3 mb-4">
               <div>
-                <h3 className="text-sm font-semibold text-foreground">Campus Zone Wellbeing Overview</h3>
+                <h3 className="text-sm font-semibold text-foreground">Academic Department Risk & Wellbeing Breakdown</h3>
                 <p className="text-xs text-muted-foreground">
-                  Aggregated statistics with k-anonymity privacy protection (no individual data visible)
+                  Aggregated department statistics with strict k-anonymity privacy protection (k ≥ 10 threshold)
                 </p>
               </div>
               <div className="flex items-center gap-1.5 text-xs text-muted-foreground bg-secondary px-2.5 py-1 rounded-md border border-border">
@@ -511,41 +425,69 @@ export const AdminDashboard: React.FC = () => {
               </div>
             </div>
 
-            <div className="overflow-x-auto">
-              <table className="saas-table">
-                <thead>
-                  <tr>
-                    <th>Campus Zone</th>
-                    <th>Cohort Population</th>
-                    <th>Check-in Participation</th>
-                    <th>Aggregate Wellbeing</th>
-                    <th>Support Demand</th>
-                    <th>Trend</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {campusZones.map((z) => (
-                    <tr key={z.zone}>
-                      <td className="font-semibold text-foreground text-xs">{z.zone}</td>
-                      <td>{z.population} students</td>
-                      <td className="font-mono">{z.participation}</td>
-                      <td>
-                        <span className="font-semibold text-foreground font-mono">{z.avgScore}</span> / 100
-                      </td>
-                      <td>
-                        <span className={cn(
-                          "badge-neutral text-[10px]",
-                          z.supportDemand === "Moderate" ? "badge-moderate" : "badge-stable"
-                        )}>
-                          {z.supportDemand}
-                        </span>
-                      </td>
-                      <td className="text-muted-foreground text-[11px] font-medium">{z.trend}</td>
+            {isDeptRiskLoading ? (
+              <div className="py-8 text-center text-xs text-muted-foreground">Loading department data...</div>
+            ) : departmentsList.length === 0 ? (
+              <div className="py-8 text-center text-xs text-muted-foreground space-y-1">
+                <Building2 className="h-6 w-6 text-muted-foreground/40 mx-auto mb-1" />
+                <p className="font-medium text-foreground">No student assessment data recorded by department yet.</p>
+                <p className="text-[11px]">Department wellness aggregations will appear as students submit validated check-ins.</p>
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="saas-table">
+                  <thead>
+                    <tr>
+                      <th>Department</th>
+                      <th>Cohort Population</th>
+                      <th>Aggregate Wellbeing</th>
+                      <th>Low Strain</th>
+                      <th>Moderate Strain</th>
+                      <th>Elevated Risk</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody>
+                    {departmentsList.map((d) => {
+                      const isCohortTooSmall = d.student_count < 10;
+                      return (
+                        <tr key={d.department}>
+                          <td className="font-semibold text-foreground text-xs">{d.department}</td>
+                          <td>{d.student_count} students</td>
+                          <td>
+                            {isCohortTooSmall ? (
+                              <span className="text-xs text-muted-foreground italic">Insufficient data for aggregate display (k &lt; 10)</span>
+                            ) : (
+                              <span><span className="font-semibold text-foreground font-mono">{d.average_wellness_score}</span> / 100</span>
+                            )}
+                          </td>
+                          <td>
+                            {isCohortTooSmall ? (
+                              <span className="text-muted-foreground">--</span>
+                            ) : (
+                              <span className="badge-stable text-[10px]">{d.low_risk_count}</span>
+                            )}
+                          </td>
+                          <td>
+                            {isCohortTooSmall ? (
+                              <span className="text-muted-foreground">--</span>
+                            ) : (
+                              <span className="badge-moderate text-[10px]">{d.medium_risk_count}</span>
+                            )}
+                          </td>
+                          <td>
+                            {isCohortTooSmall ? (
+                              <span className="text-muted-foreground">--</span>
+                            ) : (
+                              <span className="badge-elevated text-[10px]">{d.high_risk_count}</span>
+                            )}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </Card>
         </div>
       )}
