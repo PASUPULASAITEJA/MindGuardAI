@@ -486,7 +486,7 @@
       "description": "Official 24/7 mental health rehabilitation helpline"
     },
     {
-      "name": "NMIMS Campus Health Clinic",
+      "name": "Campus Health & Wellbeing Center",
       "number": "+91 22 4235 5555",
       "badge": "Campus Medical Desk",
       "description": "On-campus emergency medical response and psychologist on duty"
