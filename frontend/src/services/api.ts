@@ -934,6 +934,120 @@ api.interceptors.response.use(
     }
   };
 
+  export interface InterventionItem {
+    id: string;
+    student_id: string;
+    counselor_id?: string | null;
+    intervention_type: string;
+    title: string;
+    description?: string | null;
+    status: "PENDING" | "ACTIVE" | "COMPLETED" | "DISCONTINUED";
+    start_date: string;
+    target_date?: string | null;
+    follow_up_date?: string | null;
+    baseline_wellness_score?: number | null;
+    follow_up_wellness_score?: number | null;
+    baseline_stress?: number | null;
+    follow_up_stress?: number | null;
+    outcome: "IMPROVED" | "STABLE" | "DECLINED" | "INCONCLUSIVE" | "PENDING_EVALUATION";
+    outcome_notes?: string | null;
+    clinical_notes?: string | null;
+    created_at: string;
+    updated_at: string;
+  }
+
+  export interface InterventionCreatePayload {
+    student_id: string;
+    intervention_type?: string;
+    title: string;
+    description?: string;
+    target_date?: string;
+    follow_up_date?: string;
+    baseline_wellness_score?: number;
+    baseline_stress?: number;
+    clinical_notes?: string;
+  }
+
+  export interface InterventionUpdatePayload {
+    status?: string;
+    outcome?: string;
+    follow_up_wellness_score?: number;
+    follow_up_stress?: number;
+    follow_up_date?: string;
+    outcome_notes?: string;
+    clinical_notes?: string;
+  }
+
+  export interface InterventionSummary {
+    total_active: number;
+    total_completed: number;
+    follow_ups_due_today: number;
+    observed_improvement_rate: number;
+  }
+
+  export const interventionsAPI = {
+    getMyInterventions: async () => {
+      const res = await api.get<InterventionItem[]>("/interventions/me");
+      return res.data;
+    },
+    getStudentInterventions: async (studentId: string) => {
+      const res = await api.get<InterventionItem[]>(`/interventions/student/${studentId}`);
+      return res.data;
+    },
+    create: async (payload: InterventionCreatePayload) => {
+      const res = await api.post<InterventionItem>("/interventions", payload);
+      return res.data;
+    },
+    update: async (id: string, payload: InterventionUpdatePayload) => {
+      const res = await api.patch<InterventionItem>(`/interventions/${id}`, payload);
+      return res.data;
+    },
+    getCounselorSummary: async () => {
+      const res = await api.get<InterventionSummary>("/interventions/counselor/summary");
+      return res.data;
+    }
+  };
+
+  export interface AcademicEventItem {
+    id: string;
+    title: string;
+    event_type: string;
+    start_date: string;
+    end_date: string;
+    academic_year: string;
+    semester?: string | null;
+    department?: string | null;
+    description?: string | null;
+    created_at?: string | null;
+  }
+
+  export interface AcademicPeriodTrendItem {
+    event_id: string;
+    title: string;
+    event_type: string;
+    start_date: string;
+    end_date: string;
+    observed_average_wellness: number;
+    observed_average_stress: number;
+    checkin_participation_rate: number;
+    context_note: string;
+  }
+
+  export const academicAPI = {
+    getEvents: async (params?: { academic_year?: string; semester?: string; department?: string }) => {
+      const res = await api.get<AcademicEventItem[]>("/academic/events", { params });
+      return res.data;
+    },
+    createEvent: async (payload: Partial<AcademicEventItem>) => {
+      const res = await api.post<AcademicEventItem>("/academic/events", payload);
+      return res.data;
+    },
+    getPeriodTrends: async () => {
+      const res = await api.get<AcademicPeriodTrendItem[]>("/academic/trends");
+      return res.data;
+    }
+  };
+
   export default api;
 
 
