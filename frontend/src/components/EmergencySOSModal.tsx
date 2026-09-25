@@ -23,7 +23,7 @@ const DEFAULT_HELPLINES: SOSHelpline[] = [
     description: "Official 24/7 mental health rehabilitation helpline"
   },
   {
-    name: "Campus Health & Wellbeing Center",
+    name: "Campus Student Health & Wellbeing Clinic",
     number: "+91 22 4235 5555",
     badge: "Campus Medical Desk",
     description: "On-campus emergency medical response and psychologist on duty"
