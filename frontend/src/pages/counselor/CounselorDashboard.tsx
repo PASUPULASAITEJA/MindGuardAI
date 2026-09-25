@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useLocation, NavLink, useNavigate } from "react-router-dom";
 import { useCounselorAlerts, useUpdateAlertStatus, useAssignAlert, useAddAlertNote, AlertItem } from "@/hooks/useAlerts";
 import { useToast } from "@/components/ui/toast";
@@ -20,9 +20,12 @@ import {
   ShieldCheck,
   Activity,
   ArrowRight,
-  PhoneCall
+  PhoneCall,
+  Target,
+  TrendingUp,
+  Brain
 } from "lucide-react";
-import { appointmentsAPI, AppointmentItem, alertsAPI } from "@/services/api";
+import { appointmentsAPI, AppointmentItem, alertsAPI, interventionsAPI, InterventionSummary } from "@/services/api";
 import { cn } from "@/utils/cn";
 
 export const CounselorDashboard: React.FC = () => {
@@ -47,8 +50,12 @@ export const CounselorDashboard: React.FC = () => {
   const [alertNoteText, setAlertNoteText] = useState("");
   const [isSubmittingAlertNote, setIsSubmittingAlertNote] = useState(false);
 
+  // Appointments
   const [appointmentsList, setAppointmentsList] = useState<AppointmentItem[]>([]);
   const [isAppointmentsLoading, setIsAppointmentsLoading] = useState(false);
+
+  // Interventions summary
+  const [interventionSummary, setInterventionSummary] = useState<InterventionSummary | null>(null);
 
   const fetchAppointments = React.useCallback(async () => {
     setIsAppointmentsLoading(true);
@@ -62,9 +69,19 @@ export const CounselorDashboard: React.FC = () => {
     }
   }, []);
 
-  React.useEffect(() => {
+  const fetchInterventionSummary = React.useCallback(async () => {
+    try {
+      const data = await interventionsAPI.getCounselorSummary();
+      setInterventionSummary(data);
+    } catch (e) {
+      // Handled silently
+    }
+  }, []);
+
+  useEffect(() => {
     fetchAppointments();
-  }, [fetchAppointments]);
+    fetchInterventionSummary();
+  }, [fetchAppointments, fetchInterventionSummary]);
 
   const handleUpdateAppointment = async (appId: string, status: string) => {
     try {
@@ -174,7 +191,7 @@ export const CounselorDashboard: React.FC = () => {
 
   return (
     <div className="space-y-6 pb-12">
-      {/* 0. Critical Alert Banner if Active SOS */}
+      {/* Critical Alert Banner if Active SOS */}
       {criticalAlertsCount > 0 && (
         <div className="p-4 rounded-xl bg-rose-500/10 border border-rose-500/30 text-foreground flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
           <div className="flex items-center gap-3">
@@ -211,7 +228,7 @@ export const CounselorDashboard: React.FC = () => {
             {isStudentsPage ? "Student Case Directory" : isAlertsPage ? "Support & Triage Queue" : "Counsellor Clinical Dashboard"}
           </h1>
           <p className="text-xs text-muted-foreground mt-0.5">
-            Case management, student triage review, and psychological support monitoring.
+            Student Mental Wellness Detection and Early Intervention • Practitioner Case Management
           </p>
         </div>
 
@@ -219,46 +236,50 @@ export const CounselorDashboard: React.FC = () => {
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
           <div className="p-4 rounded-xl border border-border bg-card shadow-xs">
             <div className="flex items-center justify-between text-muted-foreground">
-              <span className="text-[11px] font-medium uppercase tracking-wider">Students Requiring Review</span>
+              <span className="text-[11px] font-medium uppercase tracking-wider">Cases Requiring Review</span>
               <AlertCircle className="h-4 w-4 text-rose-500" />
             </div>
             <span className="text-2xl font-bold text-foreground font-sans mt-1 block">
               {pendingAlerts.length}
             </span>
-            <span className="text-[11px] text-muted-foreground mt-0.5 block">Active pending flags</span>
+            <span className="text-[11px] text-muted-foreground mt-0.5 block">Pending triage flags</span>
           </div>
 
           <div className="p-4 rounded-xl border border-border bg-card shadow-xs">
             <div className="flex items-center justify-between text-muted-foreground">
-              <span className="text-[11px] font-medium uppercase tracking-wider">Open Active Cases</span>
-              <Users className="h-4 w-4 text-primary" />
+              <span className="text-[11px] font-medium uppercase tracking-wider">Active Interventions</span>
+              <Target className="h-4 w-4 text-primary" />
             </div>
             <span className="text-2xl font-bold text-foreground font-sans mt-1 block">
-              {reviewedAlerts.length}
+              {interventionSummary?.total_active ?? reviewedAlerts.length}
             </span>
-            <span className="text-[11px] text-muted-foreground mt-0.5 block">Under counsellor follow-up</span>
+            <span className="text-[11px] text-muted-foreground mt-0.5 block">
+              {interventionSummary?.follow_ups_due_today ?? 0} follow-ups due today
+            </span>
           </div>
 
           <div className="p-4 rounded-xl border border-border bg-card shadow-xs">
             <div className="flex items-center justify-between text-muted-foreground">
-              <span className="text-[11px] font-medium uppercase tracking-wider">Sessions Scheduled</span>
+              <span className="text-[11px] font-medium uppercase tracking-wider">Consultations Scheduled</span>
               <Calendar className="h-4 w-4 text-blue-500" />
             </div>
             <span className="text-2xl font-bold text-foreground font-sans mt-1 block">
               {appointmentsList.filter((a) => a.status === "CONFIRMED" || a.status === "PENDING").length}
             </span>
-            <span className="text-[11px] text-muted-foreground mt-0.5 block">Upcoming 1-on-1 consultations</span>
+            <span className="text-[11px] text-muted-foreground mt-0.5 block">Upcoming 1-on-1 sessions</span>
           </div>
 
           <div className="p-4 rounded-xl border border-border bg-card shadow-xs">
             <div className="flex items-center justify-between text-muted-foreground">
-              <span className="text-[11px] font-medium uppercase tracking-wider">Resolved Cases</span>
+              <span className="text-[11px] font-medium uppercase tracking-wider">Observed Outcomes</span>
               <CheckCircle2 className="h-4 w-4 text-emerald-500" />
             </div>
             <span className="text-2xl font-bold text-foreground font-sans mt-1 block">
-              {resolvedAlerts.length}
+              {interventionSummary ? `${interventionSummary.observed_improvement_rate}%` : `${resolvedAlerts.length}`}
             </span>
-            <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold mt-0.5 block">Care protocols completed</span>
+            <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold mt-0.5 block">
+              Observed post-intervention improvement
+            </span>
           </div>
         </div>
       </div>
@@ -465,7 +486,7 @@ export const CounselorDashboard: React.FC = () => {
             <div className="flex items-center justify-between border-b border-border pb-3 mb-3">
               <div className="flex items-center gap-2">
                 <Calendar className="h-4 w-4 text-primary" />
-                <h3 className="text-sm font-semibold text-foreground">Scheduled Sessions</h3>
+                <h3 className="text-sm font-semibold text-foreground">Scheduled Consultations</h3>
               </div>
               <span className="text-xs text-muted-foreground font-mono">
                 {appointmentsList.length} total
