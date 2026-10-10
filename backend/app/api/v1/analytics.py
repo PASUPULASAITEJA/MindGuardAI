@@ -133,7 +133,7 @@ async def get_department_risk(
             User.academic_department,
             Assessment.risk_level,
             func.avg(Assessment.mental_wellness_score),
-            func.count(Assessment.id)
+            func.count(func.distinct(User.id))
         )
         .join(Assessment, Assessment.student_id == User.id)
         .where(User.role == UserRole.STUDENT)
@@ -165,17 +165,33 @@ async def get_department_risk(
         else:
             dept_map[dept]["low"] += count
 
-    dept_items = [
-        DepartmentRiskItem(
-            department=dept,
-            student_count=vals["count"],
-            average_wellness_score=round(sum(vals["scores"]) / len(vals["scores"]), 1) if vals["scores"] else 0.0,
-            low_risk_count=vals["low"],
-            medium_risk_count=vals["medium"],
-            high_risk_count=vals["high"]
-        )
-        for dept, vals in dept_map.items()
-    ]
+    K_ANONYMITY_THRESHOLD = 10
+    dept_items = []
+    for dept, vals in dept_map.items():
+        total_unique = vals["count"]
+        if total_unique < K_ANONYMITY_THRESHOLD:
+            # Enforce k-anonymity suppression to prevent deanonymization of small cohorts
+            dept_items.append(
+                DepartmentRiskItem(
+                    department=f"{dept} [Protected: N < {K_ANONYMITY_THRESHOLD}]",
+                    student_count=total_unique,
+                    average_wellness_score=0.0,
+                    low_risk_count=0,
+                    medium_risk_count=0,
+                    high_risk_count=0
+                )
+            )
+        else:
+            dept_items.append(
+                DepartmentRiskItem(
+                    department=dept,
+                    student_count=total_unique,
+                    average_wellness_score=round(sum(vals["scores"]) / len(vals["scores"]), 1) if vals["scores"] else 0.0,
+                    low_risk_count=vals["low"],
+                    medium_risk_count=vals["medium"],
+                    high_risk_count=vals["high"]
+                )
+            )
 
     return DepartmentRiskResponse(
         departments=dept_items,

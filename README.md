@@ -1,34 +1,5 @@
 <div align="center">
 
-# 🧠 MindGuardAI
-### Student Mental Wellness Detection and Early Intervention
-
-<p align="center">
-  <a href="https://github.com/PASUPULASAITEJA/MindGuardAI"><img src="https://img.shields.io/badge/Platform-MindGuardAI%20v1.2.0-indigo?style=for-the-badge&logo=shield" alt="Platform Version"></a>
-  <a href="https://fastapi.tiangolo.com/"><img src="https://img.shields.io/badge/Backend-FastAPI%200.100%2B-009688?style=for-the-badge&logo=fastapi&logoColor=white" alt="FastAPI"></a>
-  <a href="https://react.dev/"><img src="https://img.shields.io/badge/Frontend-React%2018%20%7C%20TypeScript%205-61DAFB?style=for-the-badge&logo=react&logoColor=black" alt="React & TS"></a>
-  <a href="https://pytorch.org/"><img src="https://img.shields.io/badge/AI%20Core-PyTorch%20%7C%20DistilBERT-EE4C2C?style=for-the-badge&logo=pytorch&logoColor=white" alt="PyTorch & DistilBERT"></a>
-  <a href="https://scikit-learn.org/"><img src="https://img.shields.io/badge/Analytics-XGBoost%20%7C%20SHAP-F7931E?style=for-the-badge&logo=scikitlearn&logoColor=white" alt="XGBoost & SHAP"></a>
-  <a href="#"><img src="https://img.shields.io/badge/Security-Zero--Trust%20%7C%20k--Anonymity-blue?style=for-the-badge&logo=security" alt="Zero-Trust Architecture"></a>
-</p>
-
-<p align="center">
-  <img src="https://img.shields.io/badge/Python-3.11-3776AB?style=flat-square&logo=python&logoColor=white" alt="Python 3.11">
-  <img src="https://img.shields.io/badge/Vite-5.4-646CFF?style=flat-square&logo=vite&logoColor=white" alt="Vite">
-  <img src="https://img.shields.io/badge/TailwindCSS-3.4-38B2AC?style=flat-square&logo=tailwindcss&logoColor=white" alt="Tailwind">
-  <img src="https://img.shields.io/badge/SQLAlchemy-2.0%20Async-red?style=flat-square&logo=sqlite" alt="SQLAlchemy 2.0">
-  <img src="https://img.shields.io/badge/Docker-Ready-2496ED?style=flat-square&logo=docker&logoColor=white" alt="Docker">
-  <img src="https://img.shields.io/badge/Privacy-HIPAA%20%2F%20FERPA%20Compliant-emerald?style=flat-square&logo=security" alt="Privacy Compliant">
-  <img src="https://img.shields.io/badge/Tests-100%25%20Passing-brightgreen?style=flat-square" alt="Tests Passing">
-  <img src="https://img.shields.io/badge/License-MIT-yellow?style=flat-square" alt="License">
-</p>
-
-> **Transforming campus mental healthcare from a reactive, crisis-driven intervention model into an intelligent, continuous digital phenotyping and early prevention ecosystem.**
-
-[Clinical Workflow](#-end-to-end-clinical--user-workflow) • [Key Innovations](#-key-innovations--clinical-paradigm) • [System Architecture](#-system-architecture) • [ML Pipeline](#-machine-learning--clinical-intelligence-pipeline) • [Digital Phenotyping](#-passive-digital-phenotyping--windows-telemetry-engine) • [Live Portals](#-live-portals--role-based-workflows) • [Quick Start](#-quick-start--one-click-run) • [Research Citations](#-research--clinical-references)
-
-</div>
-
 ---
 
 ## 🌟 Executive Summary
@@ -62,30 +33,30 @@ graph TD
 
 ### Clinical Stage Execution
 
-| Stage | Product Component | System Behavior & Clinical Logic |
-| :--- | :--- | :--- |
-| **1. Onboarding & Consent** | `/register`, [`PrivacyConsentPage.tsx`](file:///frontend/src/pages/student/PrivacyConsentPage.tsx) | Zero-trust registration with student-defined credentials. Transparent disclosures on zero-keystroke telemetry and right to revoke. |
-| **2. Situational Reflection** | [`DailyCheckInPage.tsx`](file:///frontend/src/pages/student/DailyCheckInPage.tsx), [`MoodMicroCheckin.tsx`](file:///frontend/src/components/MoodMicroCheckin.tsx) | Student tags situational events (*Exams, Deadlines, Sleep, Relationships*). NLP extracts affective sentiment with PII redaction. |
-| **3. PHQ-9 Screener** | [`ClinicalSurveyModal.tsx`](file:///frontend/src/components/ClinicalSurveyModal.tsx) | Guided 9-question DSM-5 depression screener (score 0–27). Deterministic Item 9 safety override for self-harm flags. |
-| **4. Derived PHQ-2** | `assessment_service.py` | Automatically extracts Items 1 (*Anhedonia*) and 2 (*Depressed Mood*). A score $\ge 3$ indicates clinical depression threshold. |
-| **5. Functional Impairment** | [`ClinicalSurveyModal.tsx`](file:///frontend/src/components/ClinicalSurveyModal.tsx) | Evaluates how difficult symptoms make academic/daily tasks (*Not difficult $\to$ Extremely difficult*). |
-| **6. Triaged Care Pathways** | [`StudentChatbot.tsx`](file:///frontend/src/pages/student/StudentChatbot.tsx), [`StudentDashboard.tsx`](file:///frontend/src/pages/student/StudentDashboard.tsx) | Stratifies outcome into: **Self-Care Articles** (0–9), **Guided CBT Tools** (10–14), or **Counsellor Triage Queue & Tele-MANAS** (15+). |
-| **7. Repeated Engagement** | [`mindguard_pc_agent.py`](file:///desktop_agent/mindguard_pc_agent.py) | Background circadian telemetry tracks sleep onset, wake time, and active screen habits without user overhead. |
-| **8. Follow-up Assessment** | [`MoodHistoryPage.tsx`](file:///frontend/src/pages/student/MoodHistoryPage.tsx) | Re-evaluates validated inventories every 14 days or during significant biometric/sentiment shifts. |
-| **9. Longitudinal Comparison** | [`MoodHistoryPage.tsx`](file:///frontend/src/pages/student/MoodHistoryPage.tsx), [`StudentCaseFile.tsx`](file:///frontend/src/pages/counselor/StudentCaseFile.tsx) | 30-day/6-month area chart visualizes trajectory. Clinicians view SHAP factor drift comparing baseline vs. current state. |
+| Stage                                | Product Component                                                                                                                                                    | System Behavior & Clinical Logic                                                                                                                           |
+| :----------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **1. Onboarding & Consent**    | `/register`, [`PrivacyConsentPage.tsx`](file:///frontend/src/pages/student/PrivacyConsentPage.tsx)                                                                | Zero-trust registration with student-defined credentials. Transparent disclosures on zero-keystroke telemetry and right to revoke.                         |
+| **2. Situational Reflection**  | [`DailyCheckInPage.tsx`](file:///frontend/src/pages/student/DailyCheckInPage.tsx), [`MoodMicroCheckin.tsx`](file:///frontend/src/components/MoodMicroCheckin.tsx)  | Student tags situational events (*Exams, Deadlines, Sleep, Relationships*). NLP extracts affective sentiment with PII redaction.                         |
+| **3. PHQ-9 Screener**          | [`ClinicalSurveyModal.tsx`](file:///frontend/src/components/ClinicalSurveyModal.tsx)                                                                                | Guided 9-question DSM-5 depression screener (score 0–27). Deterministic Item 9 safety override for self-harm flags.                                       |
+| **4. Derived PHQ-2**           | `assessment_service.py`                                                                                                                                            | Automatically extracts Items 1 (*Anhedonia*) and 2 (*Depressed Mood*). A score $\ge 3$ indicates clinical depression threshold.                      |
+| **5. Functional Impairment**   | [`ClinicalSurveyModal.tsx`](file:///frontend/src/components/ClinicalSurveyModal.tsx)                                                                                | Evaluates how difficult symptoms make academic/daily tasks (*Not difficult $\to$ Extremely difficult*).                                                |
+| **6. Triaged Care Pathways**   | [`StudentChatbot.tsx`](file:///frontend/src/pages/student/StudentChatbot.tsx), [`StudentDashboard.tsx`](file:///frontend/src/pages/student/StudentDashboard.tsx)   | Stratifies outcome into:**Self-Care Articles** (0–9), **Guided CBT Tools** (10–14), or **Counsellor Triage Queue & Tele-MANAS** (15+). |
+| **7. Repeated Engagement**     | [`mindguard_pc_agent.py`](file:///desktop_agent/mindguard_pc_agent.py)                                                                                              | Background circadian telemetry tracks sleep onset, wake time, and active screen habits without user overhead.                                              |
+| **8. Follow-up Assessment**    | [`MoodHistoryPage.tsx`](file:///frontend/src/pages/student/MoodHistoryPage.tsx)                                                                                     | Re-evaluates validated inventories every 14 days or during significant biometric/sentiment shifts.                                                         |
+| **9. Longitudinal Comparison** | [`MoodHistoryPage.tsx`](file:///frontend/src/pages/student/MoodHistoryPage.tsx), [`StudentCaseFile.tsx`](file:///frontend/src/pages/counselor/StudentCaseFile.tsx) | 30-day/6-month area chart visualizes trajectory. Clinicians view SHAP factor drift comparing baseline vs. current state.                                   |
 
 ---
 
 ## 🔬 Key Innovations & Clinical Paradigm
 
-| Dimension | Traditional Campus Mental Health | MindGuardAI Proactive Ecosystem |
-| :--- | :--- | :--- |
-| **Detection Timing** | **Reactive**: Intervenes only after crisis, academic drop, or self-referral. | **Continuous & Proactive**: Detects subtle circadian and linguistic shifts 2–3 weeks in advance. |
-| **Data Collection** | Sporadic, manual appointments or paper questionnaires. | Multi-modal digital phenotyping: physical hardware telemetry + longitudinal mood + validated surveys. |
-| **Privacy Paradigm** | Intrusive surveillance or unmonitored isolation. | **Zero-Keystroke Privacy**: On-device classification of window metadata, automated PII scrubbing. |
-| **Circadian Assessment**| Subjective self-reported sleep estimates with high recall bias. | **Kernel-Power Telemetry**: Microsecond-accurate Windows sleep/wake transitions & melatonin debt calculation. |
-| **Explainability** | Black-box intuition or opaque counselor scoring. | **Game-Theoretic SHAP Attribution**: Transparent factor impact breakdown for students and clinicians. |
-| **Crisis Intervention**| Delayed email scheduling or office hour bottlenecks. | Omnipresent **24/7 SOS Gateway** with instant triage dispatch & verified helpline access. |
+| Dimension                      | Traditional Campus Mental Health                                                   | MindGuardAI Proactive Ecosystem                                                                                     |
+| :----------------------------- | :--------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------ |
+| **Detection Timing**     | **Reactive**: Intervenes only after crisis, academic drop, or self-referral. | **Continuous & Proactive**: Detects subtle circadian and linguistic shifts 2–3 weeks in advance.             |
+| **Data Collection**      | Sporadic, manual appointments or paper questionnaires.                             | Multi-modal digital phenotyping: physical hardware telemetry + longitudinal mood + validated surveys.               |
+| **Privacy Paradigm**     | Intrusive surveillance or unmonitored isolation.                                   | **Zero-Keystroke Privacy**: On-device classification of window metadata, automated PII scrubbing.             |
+| **Circadian Assessment** | Subjective self-reported sleep estimates with high recall bias.                    | **Kernel-Power Telemetry**: Microsecond-accurate Windows sleep/wake transitions & melatonin debt calculation. |
+| **Explainability**       | Black-box intuition or opaque counselor scoring.                                   | **Game-Theoretic SHAP Attribution**: Transparent factor impact breakdown for students and clinicians.         |
+| **Crisis Intervention**  | Delayed email scheduling or office hour bottlenecks.                               | Omnipresent**24/7 SOS Gateway** with instant triage dispatch & verified helpline access.                      |
 
 ---
 
@@ -196,31 +167,49 @@ graph LR
 ### Mathematical Formulations
 
 #### 1. Emotion Probability Vector (DistilBERT)
+
 Given token sequence $T = (t_1, t_2, \dots, t_n)$, the hidden state representation of the `[CLS]` classification token is projected across the emotion taxonomy $\mathcal{E}$:
-$$P(e_i \mid T) = \frac{\exp(W_e \cdot h_{\text{[CLS]}} + b_e)_i}{\sum_{j=1}^{6} \exp(W_e \cdot h_{\text{[CLS]}} + b_e)_j}, \quad e_i \in \{\text{joy}, \text{sadness}, \text{anxiety}, \text{anger}, \text{fear}, \text{surprise}\}$$
+
+$$
+P(e_i \mid T) = \frac{\exp(W_e \cdot h_{\text{[CLS]}} + b_e)_i}{\sum_{j=1}^{6} \exp(W_e \cdot h_{\text{[CLS]}} + b_e)_j}, \quad e_i \in \{\text{joy}, \text{sadness}, \text{anxiety}, \text{anger}, \text{fear}, \text{surprise}\}
+$$
 
 #### 2. Circadian Sleep Disruption $Z$-Score
+
 Late-night screen usage past midnight ($T_{\text{late}}$) is benchmarked against the student's personal moving baseline:
-$$Z_{\text{circadian}} = \frac{T_{\text{late}} - \mu_{\text{late}}}{\sigma_{\text{late}}}$$
+
+$$
+Z_{\text{circadian}} = \frac{T_{\text{late}} - \mu_{\text{late}}}{\sigma_{\text{late}}}
+$$
+
 *Where $T_{\text{late}} \ge 120\text{ mins}$ triggers an automated $\text{HIGH}$ risk flag representing severe melatonin suppression and circadian phase delay.*
 
 #### 3. Continuous Mental Wellness Index
+
 The unified 0–100 Mental Wellness Score combines psychometric severity, circadian strain, and emotional sentiment:
-$$S_{\text{wellness}} = \max\left(0, \min\left(100, 100 - \left(w_{\text{phq}} \cdot \frac{\text{PHQ9}}{27} + w_{\text{gad}} \cdot \frac{\text{GAD7}}{21} + w_{\text{circ}} \cdot \frac{T_{\text{late}}}{300} - w_{\text{sent}} \cdot V_{\text{sent}}\right) \times 100\right)\right)$$
+
+$$
+S_{\text{wellness}} = \max\left(0, \min\left(100, 100 - \left(w_{\text{phq}} \cdot \frac{\text{PHQ9}}{27} + w_{\text{gad}} \cdot \frac{\text{GAD7}}{21} + w_{\text{circ}} \cdot \frac{T_{\text{late}}}{300} - w_{\text{sent}} \cdot V_{\text{sent}}\right) \times 100\right)\right)
+$$
 
 #### 4. SHAP Feature Attribution (TreeExplainer)
+
 Feature contribution $\phi_i$ to the predicted clinical risk score is calculated via the Shapley value:
-$$\phi_i(f, x) = \sum_{S \subseteq F \setminus \{i\}} \frac{|S|!(|F| - |S| - 1)!}{|F|!} \left[f(S \cup \{i\}) - f(S)\right]$$
+
+$$
+\phi_i(f, x) = \sum_{S \subseteq F \setminus \{i\}} \frac{|S|!(|F| - |S| - 1)!}{|F|!} \left[f(S \cup \{i\}) - f(S)\right]
+$$
 
 ### Multi-Modal Risk Stratification Criteria
 
-| Risk Tier | Mental Wellness Score | Clinical Screeners (PHQ-9 / GAD-7) | Linguistic Emotion & Sentiment | Digital Biomarkers (Sleep & Telemetry) | Clinical Action & Safety Protocol |
-|:---|:---:|:---:|:---:|:---:|:---|
-| **Low / Normal (GREEN)** | **65.0 – 100.0** | PHQ-9: `0 – 9`<br>GAD-7: `0 – 9`<br>*(Minimal to Mild)* | Positive or balanced sentiment (`>= 0.0`), baseline joy, optimism, and calm affect. | Regular sleep (`7 – 9h`), low disruptions, stable daily routine. | **Self-Care:** Personalized wellness articles, progressive habit tracker, dual-pacer breathing exercises. |
-| **Medium Risk (YELLOW)** | **35.0 – 64.9** | PHQ-9: `10 – 14`<br>GAD-7: `10 – 14`<br>*(Moderate symptoms)* | Elevated sadness, anxiety, or stress markers (`-0.2` to `-0.5` sentiment), academic fatigue, feeling overwhelmed. | Short sleep (`< 5.5h`), high disruptions, late-night screen time spikes (12 AM–4 AM). | **Guided Support:** In-chat CBT cognitive reframers, 5-4-3-2-1 sensory grounding, sleep hygiene tips, optional counselor booking. |
-| **High / Critical Risk (HIGH / RED)** | **< 35.0** (or trigger) | PHQ-9: `15 – 27`<br>GAD-7: `15 – 21`<br>*(Moderately Severe to Severe)* | Deep despair, acute hopelessness, or persistent multi-turn negative emotional spiral. | Chronic sleep deficit, severe sleep disruptions, late-night distress search queries. | **Emergency Safety Escalation:** Immediate SOS modal with Tele-MANAS (`14416`) & KIRAN (`1800-599-0019`), priority triage queue dispatch. |
+| Risk Tier                                   |     Mental Wellness Score     |                   Clinical Screeners (PHQ-9 / GAD-7)                   |                                            Linguistic Emotion & Sentiment                                            |                          Digital Biomarkers (Sleep & Telemetry)                          | Clinical Action & Safety Protocol                                                                                                                   |
+| :------------------------------------------ | :---------------------------: | :--------------------------------------------------------------------: | :-------------------------------------------------------------------------------------------------------------------: | :--------------------------------------------------------------------------------------: | :-------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Low / Normal (GREEN)**              |    **65.0 – 100.0**    |         PHQ-9:`0 – 9`GAD-7: `0 – 9`*(Minimal to Mild)*         |                 Positive or balanced sentiment (`>= 0.0`), baseline joy, optimism, and calm affect.                 |           Regular sleep (`7 – 9h`), low disruptions, stable daily routine.           | **Self-Care:** Personalized wellness articles, progressive habit tracker, dual-pacer breathing exercises.                                     |
+| **Medium Risk (YELLOW)**              |    **35.0 – 64.9**    |      PHQ-9:`10 – 14`GAD-7: `10 – 14`*(Moderate symptoms)*      | Elevated sadness, anxiety, or stress markers (`-0.2` to `-0.5` sentiment), academic fatigue, feeling overwhelmed. | Short sleep (`< 5.5h`), high disruptions, late-night screen time spikes (12 AM–4 AM). | **Guided Support:** In-chat CBT cognitive reframers, 5-4-3-2-1 sensory grounding, sleep hygiene tips, optional counselor booking.             |
+| **High / Critical Risk (HIGH / RED)** | **< 35.0** (or trigger) | PHQ-9:`15 – 27`GAD-7: `15 – 21`*(Moderately Severe to Severe)* |                 Deep despair, acute hopelessness, or persistent multi-turn negative emotional spiral.                 |   Chronic sleep deficit, severe sleep disruptions, late-night distress search queries.   | **Emergency Safety Escalation:** Immediate SOS modal with Tele-MANAS (`14416`) & KIRAN (`1800-599-0019`), priority triage queue dispatch. |
 
 #### Deterministic Safety Overrides (Zero-False-Negative Safeguards)
+
 1. **PHQ-9 Item 9 Safety Rule:** If Question 9 of the PHQ-9 (thoughts of self-harm or suicide) is scored `> 0`, the platform **immediately triggers an emergency safety escalation**, bypassing ML classification.
 2. **Deterministic Safety Engine:** Regex and semantic scanning monitor both English and Hinglish crisis phrases (`suicidal`, `want to die`, `marne ka man`, `jaan dena`, lethal self-harm plans). Detection instantly assigns **RED Risk (Score 95.0)**, activates emergency SOS resources, and alerts the campus counselor queue without requiring model training weights.
 
@@ -250,12 +239,12 @@ The MindGuard desktop telemetry agent ([`desktop_agent/mindguard_pc_agent.py`](f
 
 In accordance with zero-trust security standards (HIPAA & NIST SP 800-63B), **no default or hardcoded passwords exist** on the platform. Every user sets their own private credentials during self-registration:
 
-| Role Portal | Live Route | Authorized Role | Primary Capabilities |
-| :--- | :--- | :--- | :--- |
-| 🎓 **Student Command Center** | [`/student/dashboard`](http://localhost:5173/student/dashboard) | `STUDENT` | Longitudinal wellbeing area chart, 5-state sentiment check-in, circadian sleep timeline, 7-day screen habits, CBT breathing pacer, 1-click counselor booking. |
-| 🩺 **Counselor Triage Queue** | [`/counselor/dashboard`](http://localhost:5173/counselor/dashboard) | `COUNSELOR` | Priority triage queue table, 5-tab student case workspace, multi-factor risk attribution, secure case notes, emergency dispatch. |
-| 🏛️ **Institution Macro Analytics** | [`/admin/dashboard`](http://localhost:5173/admin/dashboard) | `ADMIN` | Departmental wellness index, k-anonymity campus zone heatmaps, institutional resource allocation, audit log streams. |
-| 📑 **Interactive API Explorer** | [`/docs`](http://127.0.0.1:8000/docs) | *All Roles* | Full OpenAPI / Swagger documentation with live payload testing and schema validation. |
+| Role Portal                               | Live Route                                                           | Authorized Role | Primary Capabilities                                                                                                                                          |
+| :---------------------------------------- | :------------------------------------------------------------------- | :-------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 🎓**Student Command Center**        | [`/student/dashboard`](http://localhost:5173/student/dashboard)     | `STUDENT`     | Longitudinal wellbeing area chart, 5-state sentiment check-in, circadian sleep timeline, 7-day screen habits, CBT breathing pacer, 1-click counselor booking. |
+| 🩺**Counselor Triage Queue**        | [`/counselor/dashboard`](http://localhost:5173/counselor/dashboard) | `COUNSELOR`   | Priority triage queue table, 5-tab student case workspace, multi-factor risk attribution, secure case notes, emergency dispatch.                              |
+| 🏛️**Institution Macro Analytics** | [`/admin/dashboard`](http://localhost:5173/admin/dashboard)         | `ADMIN`       | Departmental wellness index, k-anonymity campus zone heatmaps, institutional resource allocation, audit log streams.                                          |
+| 📑**Interactive API Explorer**      | [`/docs`](http://127.0.0.1:8000/docs)                               | *All Roles*   | Full OpenAPI / Swagger documentation with live payload testing and schema validation.                                                                         |
 
 ---
 
@@ -280,12 +269,14 @@ The repository provides automated launch scripts that orchestrate the Backend AP
 ### Option B: Manual Service-by-Service Execution
 
 #### Step 1: Clone & Configure
+
 ```bash
 git clone https://github.com/PASUPULASAITEJA/MindGuardAI.git
 cd MindGuardAI
 ```
 
 #### Step 2: Backend Gateway & ML Engine (Port 8000)
+
 ```bash
 cd backend
 python -m venv .venv
@@ -300,6 +291,7 @@ uvicorn app.main:app --host 127.0.0.1 --port 8000 --reload
 ```
 
 #### Step 3: Frontend Client SPA (Port 5173)
+
 ```bash
 cd ../frontend
 npm install
@@ -307,6 +299,7 @@ npm run dev
 ```
 
 #### Step 4: Background Hardware Telemetry PC Agent
+
 ```bash
 cd ../desktop_agent
 ..\backend\.venv\Scripts\python.exe mindguard_pc_agent.py

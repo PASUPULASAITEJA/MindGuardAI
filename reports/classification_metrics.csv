@@ -1,0 +1,4 @@
+Risk_Tier,Precision,Recall_Sensitivity,Specificity,F1_Score,Test_Support
+GREEN,99.34,99.94,98.56,0.9964,3326
+YELLOW,99.37,97.62,99.81,0.9849,1136
+RED,98.49,98.49,99.87,0.9849,397

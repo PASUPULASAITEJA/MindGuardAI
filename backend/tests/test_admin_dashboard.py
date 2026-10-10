@@ -97,7 +97,7 @@ async def test_department_risk_and_admin_rbac(client: AsyncClient, test_db: Asyn
     assert data["total_departments"] >= 1
     # Check that Computer Science & Engineering is present
     depts = [d["department"] for d in data["departments"]]
-    assert "Computer Science & Engineering" in depts
+    assert any("Computer Science & Engineering" in d for d in depts)
 
 
 @pytest.mark.asyncio

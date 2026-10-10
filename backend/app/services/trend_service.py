@@ -168,8 +168,9 @@ class TrendAnalysisService:
                     "sentiments": [],
                     "emotions": []
                 }
-            if s.sleep_duration_hours is not None:
-                day_buckets[d_str]["sleep_hours"].append(float(s.sleep_duration_hours))
+            s_val = getattr(s, "sleep_hours", getattr(s, "sleep_duration_hours", None))
+            if s_val is not None:
+                day_buckets[d_str]["sleep_hours"].append(float(s_val))
 
         # Sort dates chronologically
         sorted_dates = sorted(day_buckets.keys())
