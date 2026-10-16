@@ -3,7 +3,7 @@
 **Model Type:** Random Forest Classifier (Balanced Ensemble)  
 **Dataset:** University Mental Health Psychometric Benchmark (UMH-24K)  
 **Test Cohort Size ($N$):** 4,859 unique participants (20% held-out test split)  
-**Evaluation Date:** 2026-10-16 11:59:19  
+**Evaluation Date:** 2026-10-16 12:16:30  
 
 ---
 
@@ -11,13 +11,13 @@
 
 | Metric | Measured Value | Clinical Benchmark Target | Status |
 |---|:---:|:---:|:---:|
-| **Overall Accuracy** | **99.28%** | $> 90.0\%$ | **Passed** |
-| **Balanced Accuracy** | **98.68%** | $> 88.0\%$ | **Passed** |
-| **Macro Precision** | **99.07%** | $> 88.0\%$ | **Passed** |
-| **Macro Recall** | **98.68%** | $> 88.0\%$ | **Passed** |
-| **Macro F1-Score** | **98.87%** | $> 88.0\%$ | **Passed** |
-| **Weighted F1-Score** | **99.28%** | $> 90.0\%$ | **Passed** |
-| **High-Risk (RED) Recall** | **98.49%** | $> 95.0\%$ | **Passed (Zero-Miss Priority)** |
+| **Overall Accuracy** | **99.28%** | > 90.0% | **Passed** |
+| **Balanced Accuracy** | **98.68%** | > 88.0% | **Passed** |
+| **Macro Precision** | **99.07%** | > 88.0% | **Passed** |
+| **Macro Recall** | **98.68%** | > 88.0% | **Passed** |
+| **Macro F1-Score** | **98.87%** | > 88.0% | **Passed** |
+| **Weighted F1-Score** | **99.28%** | > 90.0% | **Passed** |
+| **High-Risk (RED) Recall** | **98.49%** | > 95.0% | **Passed (Zero-Miss Priority)** |
 
 ---
 
@@ -34,7 +34,7 @@
 ## 3. Acute Clinical Distress (RED Tier) Sensitivity Analysis
 
 ### Formula & Derivation:
-$$\text{Recall}_{\text{RED}} = \frac{\text{TP}_{\text{RED}}}{\text{TP}_{\text{RED}} + \text{FN}_{\text{RED}}} = \frac{391}{391 + 6} = \mathbf{98.49\%}$$
+$$\text{Recall}_{\text{RED}} = \frac{\text{TP}_{\text{RED}}}{\text{TP}_{\text{RED}} + \text{FN}_{\text{RED}}} = \frac{391}{391 + 6} = \mathbf{98.49\\%}$$
 
 * **True Positives (RED)**: **391** out of 397 acute distress participants.
 * **False Negatives (Missed RED)**: **6** cases (5 classified as YELLOW, 1 classified as GREEN).
