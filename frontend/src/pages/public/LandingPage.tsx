@@ -113,7 +113,7 @@ export const LandingPage: React.FC = () => {
           <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
             <Link
               to="/login"
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-xs font-semibold bg-primary text-primary-foreground hover:bg-primary/90 transition shadow-xs"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-semibold bg-primary text-primary-foreground hover:bg-primary/90 transition-all shadow-xs transform hover:-translate-y-0.5"
             >
               <GraduationCap className="w-4 h-4" />
               <span>Student Portal</span>
@@ -121,7 +121,7 @@ export const LandingPage: React.FC = () => {
 
             <Link
               to="/login"
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-xs font-semibold border border-border bg-card text-foreground hover:bg-secondary transition shadow-xs"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-semibold border border-border/80 bg-card text-foreground hover:bg-secondary transition-all shadow-xs transform hover:-translate-y-0.5"
             >
               <HeartHandshake className="w-4 h-4 text-primary" />
               <span>Counsellor Portal</span>
@@ -129,9 +129,9 @@ export const LandingPage: React.FC = () => {
 
             <Link
               to="/login"
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-xs font-semibold border border-border bg-card text-foreground hover:bg-secondary transition shadow-xs"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-semibold border border-border/80 bg-card text-foreground hover:bg-secondary transition-all shadow-xs transform hover:-translate-y-0.5"
             >
-              <Building2 className="w-4 h-4 text-blue-500" />
+              <Building2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
               <span>University Overview</span>
             </Link>
           </div>

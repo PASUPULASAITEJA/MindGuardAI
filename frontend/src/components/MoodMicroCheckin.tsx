@@ -109,14 +109,14 @@ export const MoodMicroCheckin: React.FC = () => {
                     type="button"
                     onClick={() => setMoodScore(opt.score)}
                     className={cn(
-                      "flex flex-col items-center justify-center p-2.5 rounded-lg border text-xs transition-colors",
+                      "flex flex-col items-center justify-center p-3 rounded-xl border text-xs transition-all transform hover:-translate-y-0.5",
                       isSelected
-                        ? "border-primary bg-primary/5 text-primary font-semibold shadow-xs"
-                        : "border-border hover:bg-secondary/60 text-muted-foreground hover:text-foreground"
+                        ? "border-primary bg-primary/10 text-primary font-semibold shadow-xs ring-1 ring-primary/40"
+                        : "border-border hover:bg-secondary text-muted-foreground hover:text-foreground"
                     )}
                   >
-                    <span className="text-xl mb-1">{opt.symbol}</span>
-                    <span className="text-[11px]">{opt.label}</span>
+                    <span className="text-2xl mb-1">{opt.symbol}</span>
+                    <span className="text-[11px] font-medium">{opt.label}</span>
                   </button>
                 );
               })}

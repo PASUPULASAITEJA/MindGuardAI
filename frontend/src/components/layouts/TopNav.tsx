@@ -39,10 +39,10 @@ const TopNav: React.FC<TopNavProps> = ({ title, subtitle, onMenuClick }) => {
             {user?.role === "STUDENT" && (
               <button
                 onClick={() => setIsSOSOpen(true)}
-                className="inline-flex items-center gap-1.5 rounded-lg border border-rose-500/30 bg-rose-500/10 px-2.5 py-1 text-xs font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-500 hover:text-white transition-colors"
+                className="inline-flex items-center gap-1.5 rounded-full border border-rose-500/30 bg-rose-500/10 px-3 py-1.5 text-xs font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-500 hover:text-white transition-all shadow-xs"
                 title="Immediate 24/7 Crisis Support"
               >
-                <AlertTriangle className="h-3 w-3 text-rose-500" />
+                <AlertTriangle className="h-3.5 w-3.5 text-rose-500" />
                 <span>Crisis Support</span>
               </button>
             )}

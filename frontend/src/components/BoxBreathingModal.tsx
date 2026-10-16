@@ -49,10 +49,10 @@ export const BoxBreathingModal: React.FC<BoxBreathingModalProps> = ({ isOpen, on
 
   const phaseColor =
     phase === "Inhale"
-      ? "text-emerald-500 border-emerald-500 bg-emerald-500/10 shadow-emerald-500/20"
+      ? "text-teal-600 dark:text-teal-400 border-teal-500 bg-teal-500/10 shadow-teal-500/20"
       : phase === "Hold" || phase === "Hold After"
-      ? "text-indigo-500 border-indigo-500 bg-indigo-500/10 shadow-indigo-500/20"
-      : "text-purple-500 border-purple-500 bg-purple-500/10 shadow-purple-500/20";
+      ? "text-emerald-600 dark:text-emerald-400 border-emerald-500 bg-emerald-500/10 shadow-emerald-500/20"
+      : "text-sky-600 dark:text-sky-400 border-sky-500 bg-sky-500/10 shadow-sky-500/20";
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-md animate-in fade-in duration-200">

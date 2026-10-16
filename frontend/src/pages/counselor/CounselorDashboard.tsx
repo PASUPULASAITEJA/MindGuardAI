@@ -125,6 +125,33 @@ export const CounselorDashboard: React.FC = () => {
     return Array.from(studentMap.values());
   }, [allAlertsData]);
 
+  const getAlertClassificationTag = (alert: AlertItem) => {
+    const reason = (alert as any).reason || "";
+    const severity = alert.severity || "";
+    if (severity === "CRITICAL" || reason.toLowerCase().includes("sos") || reason.toLowerCase().includes("emergency")) {
+      return (
+        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-rose-500/15 text-rose-600 dark:text-rose-400 border border-rose-500/30">
+          <AlertCircle className="h-3 w-3" />
+          <span>Emergency SOS</span>
+        </span>
+      );
+    }
+    if (reason.toLowerCase().includes("phq") || reason.toLowerCase().includes("gad") || reason.toLowerCase().includes("survey") || reason.toLowerCase().includes("assessment")) {
+      return (
+        <span className="tag-clinical-fact">
+          <CheckCircle2 className="h-3 w-3" />
+          <span>Clinical Fact</span>
+        </span>
+      );
+    }
+    return (
+      <span className="tag-ai-insight">
+        <Brain className="h-3 w-3" />
+        <span>AI Inferred Signal</span>
+      </span>
+    );
+  };
+
   const handleStatusChange = async (alertId: string, newStatus: "PENDING" | "REVIEWED" | "RESOLVED") => {
     try {
       await alertsAPI.updateAlertStatus(alertId, newStatus);
@@ -231,6 +258,35 @@ export const CounselorDashboard: React.FC = () => {
             Student Mental Wellness Detection and Early Intervention • Practitioner Case Management
           </p>
         </div>
+
+        {/* Priority Action Banner for Counselors */}
+        {pendingAlerts.length > 0 && (
+          <div className="wellness-card p-4 bg-gradient-to-r from-rose-500/10 via-amber-500/5 to-card border-rose-500/20 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <div className="h-9 w-9 rounded-xl bg-rose-500/15 text-rose-600 dark:text-rose-400 flex items-center justify-center shrink-0">
+                <AlertCircle className="h-5 w-5" />
+              </div>
+              <div>
+                <h3 className="text-xs font-bold text-foreground flex items-center gap-2">
+                  <span>Priority Follow-up Required</span>
+                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-rose-500 text-white font-semibold">
+                    {pendingAlerts.length} Actionable Cases
+                  </span>
+                </h3>
+                <p className="text-[11px] text-muted-foreground mt-0.5">
+                  High-risk clinical surveys, emergency SOS triggers, and sustained baseline deviations awaiting practitioner triage.
+                </p>
+              </div>
+            </div>
+            <Button
+              size="sm"
+              onClick={() => setStatusFilter("PENDING")}
+              className="text-xs font-semibold h-8 bg-rose-600 hover:bg-rose-700 text-white shrink-0 shadow-xs"
+            >
+              Filter Urgent Cases
+            </Button>
+          </div>
+        )}
 
         {/* 4 Executive KPI Cards */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
@@ -403,6 +459,7 @@ export const CounselorDashboard: React.FC = () => {
                     <tr>
                       <th>Student</th>
                       <th>Support Level</th>
+                      <th>Source Type</th>
                       <th>Reason / Signal</th>
                       <th>Logged Date</th>
                       <th className="text-right">Triage Actions</th>
@@ -428,7 +485,10 @@ export const CounselorDashboard: React.FC = () => {
                             {alert.severity}
                           </span>
                         </td>
-                        <td className="max-w-[180px] truncate text-muted-foreground" title={(alert as any).reason || alert.severity}>
+                        <td>
+                          {getAlertClassificationTag(alert)}
+                        </td>
+                        <td className="max-w-[200px] truncate text-muted-foreground" title={(alert as any).reason || alert.severity}>
                           {(alert as any).reason || `Elevated ${alert.severity} triage signal`}
                         </td>
                         <td className="text-muted-foreground text-[11px]">

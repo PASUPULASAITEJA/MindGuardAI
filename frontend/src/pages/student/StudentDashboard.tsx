@@ -233,28 +233,27 @@ export const StudentDashboard: React.FC = () => {
 
   return (
     <div className="space-y-6 pb-12">
-      {/* 1. Welcoming Header & Quick Actions Bar */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-border pb-5">
+      {/* 1. Welcoming Header */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-border/80 pb-4">
         <div>
-          <h1 className="text-xl md:text-2xl font-bold tracking-tight text-foreground">
+          <div className="flex items-center gap-2 mb-1">
+            <span className="wellness-pill">
+              <Sparkles className="h-3 w-3 text-primary" />
+              <span>Personal Wellness Space</span>
+            </span>
+            <span className="text-xs text-muted-foreground hidden sm:inline">
+              • {new Date().toLocaleDateString("en-US", { weekday: "long", month: "short", day: "numeric" })}
+            </span>
+          </div>
+          <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-foreground">
             {getGreeting()}, {studentName}
           </h1>
-          <p className="text-xs text-muted-foreground mt-0.5">
-            Here is an overview of your wellbeing and campus support journey.
+          <p className="text-xs md:text-sm text-muted-foreground mt-0.5">
+            Your space to reflect, track personal balance, and connect with confidential campus care.
           </p>
         </div>
 
-        {/* Quick Actions Buttons */}
         <div className="flex flex-wrap items-center gap-2">
-          <Button
-            size="sm"
-            onClick={() => navigate("/student/check-in")}
-            className="text-xs font-semibold gap-1.5 h-9"
-          >
-            <Smile className="h-3.5 w-3.5" />
-            <span>Complete Check-in</span>
-          </Button>
-
           <Button
             size="sm"
             variant="outline"
@@ -262,31 +261,87 @@ export const StudentDashboard: React.FC = () => {
               setSurveyType("phq-9");
               setIsSurveyOpen(true);
             }}
-            className="text-xs font-semibold gap-1.5 h-9"
+            className="text-xs font-semibold gap-1.5 h-9 bg-card"
           >
-            <CheckCircle2 className="h-3.5 w-3.5" />
-            <span>Take Assessment</span>
-          </Button>
-
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={() => navigate("/student/chat")}
-            className="text-xs font-semibold gap-1.5 h-9"
-          >
-            <MessageSquare className="h-3.5 w-3.5" />
-            <span>Talk to AI Assistant</span>
+            <CheckCircle2 className="h-3.5 w-3.5 text-primary" />
+            <span>Clinical Assessment</span>
           </Button>
 
           <Button
             size="sm"
             variant="outline"
             onClick={() => setIsBookingOpen(true)}
-            className="text-xs font-semibold gap-1.5 h-9"
+            className="text-xs font-semibold gap-1.5 h-9 bg-card"
           >
-            <HeartHandshake className="h-3.5 w-3.5" />
+            <HeartHandshake className="h-3.5 w-3.5 text-primary" />
             <span>Request Counselling</span>
           </Button>
+
+          <Button
+            size="sm"
+            onClick={() => setIsSOSOpen(true)}
+            className="text-xs font-semibold gap-1.5 h-9 bg-rose-500/10 hover:bg-rose-500 text-rose-600 dark:text-rose-400 hover:text-white border border-rose-500/20"
+          >
+            <ShieldAlert className="h-3.5 w-3.5" />
+            <span>Crisis & SOS</span>
+          </Button>
+        </div>
+      </div>
+
+      {/* 2. Prominent "How are you feeling today?" Interactive Hero Card */}
+      <div className="wellness-card p-6 bg-gradient-to-br from-primary/10 via-accent/30 to-card border-primary/20 relative overflow-hidden">
+        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div className="space-y-2.5 max-w-xl">
+            <div className="flex items-center gap-2 text-primary font-semibold text-xs tracking-wide uppercase">
+              <Sun className="h-4 w-4 text-amber-500" />
+              <span>Daily Check-in & Self-Reflection</span>
+            </div>
+            <h2 className="text-lg md:text-xl font-bold text-foreground">
+              How are you feeling right now?
+            </h2>
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              Checking in takes 30 seconds and helps your Personal Baseline Engine calibrate your wellness metrics and care recommendations.
+            </p>
+            
+            {/* Quick 1-Click Mood Selector */}
+            <div className="flex flex-wrap items-center gap-2 pt-1">
+              {[
+                { score: 2, label: "Difficult", symbol: "😔" },
+                { score: 4, label: "Low", symbol: "😕" },
+                { score: 6, label: "Okay", symbol: "😐" },
+                { score: 8, label: "Good", symbol: "🙂" },
+                { score: 10, label: "Great", symbol: "😊" },
+              ].map((m) => (
+                <button
+                  key={m.score}
+                  type="button"
+                  onClick={() => navigate(`/student/check-in?mood=${m.score}`)}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-card hover:bg-primary hover:text-white border border-border/80 shadow-xs text-xs font-medium transition-all transform hover:-translate-y-0.5"
+                >
+                  <span className="text-base">{m.symbol}</span>
+                  <span>{m.label}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="flex flex-col sm:flex-row md:flex-col gap-2.5 shrink-0">
+            <Button
+              onClick={() => navigate("/student/check-in")}
+              className="text-xs font-semibold gap-2 h-10 px-5 shadow-sm"
+            >
+              <Smile className="h-4 w-4" />
+              <span>Complete Full Check-in</span>
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => navigate("/student/chat")}
+              className="text-xs font-semibold gap-2 h-10 px-5 bg-card"
+            >
+              <MessageSquare className="h-4 w-4 text-primary" />
+              <span>Talk to AI Companion</span>
+            </Button>
+          </div>
         </div>
       </div>
 

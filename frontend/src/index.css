@@ -4,50 +4,50 @@
 
 @layer base {
   :root {
-    /* Production-Grade SaaS Design System - Light Palette */
-    --background: 210 40% 98%;          /* #F8FAFC - clean cool slate canvas */
-    --foreground: 222 47% 11%;           /* #0F172A - deep rich slate */
-    --card: 0 0% 100%;                   /* #FFFFFF - crisp elevated white surface */
-    --card-foreground: 222 47% 11%;
+    /* Healthcare & Wellness Design System - Calming Soft Teal & Sage Palette */
+    --background: 160 20% 98.5%;        /* #F8FAF9 - tranquil warm white canvas */
+    --foreground: 215 28% 15%;          /* #16202E - dark slate for high legibility */
+    --card: 0 0% 100%;                  /* #FFFFFF - crisp elevated white surface */
+    --card-foreground: 215 28% 15%;
     --popover: 0 0% 100%;
-    --popover-foreground: 222 47% 11%;
-    --primary: 221 83% 53%;              /* #2563EB - MindGuard Royal Indigo */
+    --popover-foreground: 215 28% 15%;
+    --primary: 174 65% 36%;             /* #209689 - calming healthcare soft teal */
     --primary-foreground: 0 0% 100%;
-    --secondary: 210 40% 96.1%;          /* #F1F5F9 - clean subtle slate secondary */
-    --secondary-foreground: 222 47% 11%;
-    --muted: 210 40% 96.1%;              /* #F1F5F9 */
-    --muted-foreground: 215 16% 47%;     /* #64748B - crisp readable subtext */
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222 47% 11%;
-    --destructive: 0 84% 60%;            /* #EF4444 */
+    --secondary: 160 24% 94%;           /* #EEF5F2 - soft sage-tinted neutral */
+    --secondary-foreground: 215 28% 15%;
+    --muted: 160 20% 95%;               /* #EFF4F1 */
+    --muted-foreground: 215 16% 45%;    /* #627282 - gentle readable slate subtext */
+    --accent: 154 36% 92%;              /* #E1F0E8 - tranquil pale sage accent */
+    --accent-foreground: 174 65% 25%;
+    --destructive: 0 72% 51%;           /* #DC2626 */
     --destructive-foreground: 0 0% 100%;
-    --border: 214 32% 91%;                /* #E2E8F0 - sharp subtle border */
-    --input: 214 32% 91%;
-    --ring: 221 83% 53%;
-    --radius: 0.5rem;                    /* Restrained 8px base radius */
+    --border: 160 20% 90%;              /* #DFEBE5 - gentle wellness border */
+    --input: 160 20% 90%;
+    --ring: 174 65% 36%;
+    --radius: 0.75rem;                  /* Friendly 12px rounded radius */
   }
 
   .dark {
-    /* Production-Grade SaaS Design System - Dark Palette */
-    --background: 224 71% 4%;            /* #070A11 - deep midnight canvas */
-    --foreground: 210 40% 98%;           /* #F8FAFC - crisp primary text */
-    --card: 222 47% 8%;                  /* #0D1322 - elevated slate surface */
-    --card-foreground: 210 40% 98%;
-    --popover: 222 47% 8%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 217 91% 60%;              /* #3B82F6 - radiant sapphire */
-    --primary-foreground: 0 0% 100%;
-    --secondary: 217 33% 14%;            /* #172033 */
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217 33% 14%;
-    --muted-foreground: 215 20% 65%;     /* #94A3B8 */
-    --accent: 217 33% 16%;               /* #1C263D */
-    --accent-foreground: 210 40% 98%;
-    --destructive: 0 72% 51%;
+    /* Healthcare & Wellness Design System - Night Deep Slate Palette */
+    --background: 218 32% 9%;           /* #0F141C - serene deep midnight slate */
+    --foreground: 160 20% 98%;          /* #F8FAF9 - crisp primary text */
+    --card: 218 30% 12%;                /* #141B26 - elevated card slate surface */
+    --card-foreground: 160 20% 98%;
+    --popover: 218 30% 12%;
+    --popover-foreground: 160 20% 98%;
+    --primary: 174 60% 48%;             /* #34D399 / #2DD4BF - soft luminous teal */
+    --primary-foreground: 218 32% 9%;
+    --secondary: 218 24% 17%;           /* #1C2636 */
+    --secondary-foreground: 160 20% 98%;
+    --muted: 218 24% 17%;
+    --muted-foreground: 215 18% 65%;    /* #92A2B5 */
+    --accent: 174 40% 18%;              /* #1A3633 */
+    --accent-foreground: 160 20% 98%;
+    --destructive: 0 68% 54%;
     --destructive-foreground: 0 0% 100%;
-    --border: 217 33% 17%;               /* #1E293B */
-    --input: 217 33% 17%;
-    --ring: 217 91% 60%;
+    --border: 218 22% 20%;              /* #263345 */
+    --input: 218 22% 20%;
+    --ring: 174 60% 48%;
   }
 }
 
@@ -87,13 +87,25 @@
 }
 
 @layer components {
-  /* Clean SaaS Surface Panels */
+  /* Clean Healthcare & Wellness Surface Panels */
+  .wellness-card {
+    @apply bg-card border border-border/80 rounded-2xl shadow-xs transition-all duration-200;
+  }
+
+  .wellness-card-hover {
+    @apply bg-card border border-border/80 rounded-2xl shadow-xs transition-all duration-200 hover:border-primary/40 hover:shadow-sm;
+  }
+
+  .wellness-pill {
+    @apply inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-accent text-accent-foreground border border-primary/20;
+  }
+
   .saas-panel {
-    @apply bg-card border border-border rounded-xl shadow-xs transition-all duration-150;
+    @apply bg-card border border-border/80 rounded-2xl shadow-xs transition-all duration-150;
   }
 
   .saas-panel-hover {
-    @apply bg-card border border-border rounded-xl shadow-xs transition-all duration-150 hover:border-border/80 hover:shadow-sm;
+    @apply bg-card border border-border/80 rounded-2xl shadow-xs transition-all duration-150 hover:border-border hover:shadow-sm;
   }
 
   .saas-table {
@@ -114,18 +126,27 @@
 
   /* Refined Semantic Badges */
   .badge-stable {
-    @apply bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20 font-semibold px-2 py-0.5 rounded-md text-[11px];
+    @apply bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20 font-semibold px-2.5 py-0.5 rounded-full text-[11px];
   }
 
   .badge-moderate {
-    @apply bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-500/20 font-semibold px-2 py-0.5 rounded-md text-[11px];
+    @apply bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-500/20 font-semibold px-2.5 py-0.5 rounded-full text-[11px];
   }
 
   .badge-elevated {
-    @apply bg-rose-500/10 text-rose-700 dark:text-rose-400 border border-rose-500/20 font-semibold px-2 py-0.5 rounded-md text-[11px];
+    @apply bg-rose-500/10 text-rose-700 dark:text-rose-400 border border-rose-500/20 font-semibold px-2.5 py-0.5 rounded-full text-[11px];
   }
 
   .badge-neutral {
-    @apply bg-secondary text-secondary-foreground border border-border/80 font-semibold px-2 py-0.5 rounded-md text-[11px];
+    @apply bg-secondary text-secondary-foreground border border-border/80 font-semibold px-2.5 py-0.5 rounded-full text-[11px];
+  }
+
+  /* Clinical Signal Indicator Tags */
+  .tag-clinical-fact {
+    @apply inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider bg-primary/10 text-primary border border-primary/20;
+  }
+
+  .tag-ai-insight {
+    @apply inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider bg-purple-500/10 text-purple-700 dark:text-purple-300 border border-purple-500/20;
   }
 }

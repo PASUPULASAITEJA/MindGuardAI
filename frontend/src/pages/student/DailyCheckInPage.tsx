@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { 
   Smile, 
   ArrowLeft, 
@@ -27,10 +27,12 @@ const MOOD_OPTIONS = [
 
 export const DailyCheckInPage: React.FC = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { toast } = useToast();
   const submitJournal = useSubmitJournal();
 
-  const [selectedMood, setSelectedMood] = useState<number>(8);
+  const queryMood = searchParams.get("mood") ? Number(searchParams.get("mood")) : null;
+  const [selectedMood, setSelectedMood] = useState<number>(queryMood || 8);
   const [energyLevel, setEnergyLevel] = useState<number>(7);
   const [sleepHours, setSleepHours] = useState<number>(7.5);
   const [journalContent, setJournalContent] = useState<string>("");

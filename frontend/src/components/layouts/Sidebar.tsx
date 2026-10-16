@@ -111,16 +111,16 @@ const Sidebar: React.FC<SidebarProps> = ({ className, onCloseMobile }) => {
                 onClick={onCloseMobile}
                 className={({ isActive }) =>
                   cn(
-                    "flex items-center gap-2.5 rounded-lg px-3 py-2 text-xs font-medium transition-colors",
+                    "flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-xs font-medium transition-all",
                     isActive
-                      ? "bg-secondary text-primary font-semibold shadow-xs"
-                      : "text-muted-foreground hover:bg-secondary/60 hover:text-foreground"
+                      ? "bg-primary/10 text-primary font-semibold border border-primary/20 shadow-2xs"
+                      : "text-muted-foreground hover:bg-secondary/80 hover:text-foreground"
                   )
                 }
               >
                 {({ isActive }) => (
                   <>
-                    <Icon className={cn("h-4 w-4 shrink-0", isActive ? "text-primary" : "text-muted-foreground")} />
+                    <Icon className={cn("h-4 w-4 shrink-0 transition-colors", isActive ? "text-primary" : "text-muted-foreground")} />
                     <span className="truncate">{item.label}</span>
                   </>
                 )}
