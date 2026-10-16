@@ -310,19 +310,60 @@ class TrendAnalysisService:
         else:
             summary_msg = "Your recent wellbeing indicators are within your usual personal baseline range."
 
+        # Compute rolling Z-score deviations with zero-variance protection
+        def compute_sample_std(arr: List[float], mean_val: Optional[float]) -> float:
+            if not arr or len(arr) < 2 or mean_val is None:
+                return 0.0
+            variance = sum((x - mean_val) ** 2 for x in arr) / (len(arr) - 1)
+            return math.sqrt(variance)
+
+        def compute_z_score(val: Optional[float], mean_val: Optional[float], std_val: float, obs_count: int) -> Optional[float]:
+            if val is None or mean_val is None or obs_count < 3:
+                return None
+            if std_val < 1e-5:
+                return 0.0
+            z = (val - mean_val) / std_val
+            return round(max(-4.0, min(4.0, z)), 2)
+
+        std_stress = compute_sample_std(all_stress_hist, u_stress)
+        std_sleep = compute_sample_std(all_sleep_hist, u_sleep)
+        std_mood = compute_sample_std(all_mood_hist, u_mood)
+
+        z_stress = compute_z_score(r_stress, u_stress, std_stress, total_obs)
+        z_sleep = compute_z_score(r_sleep, u_sleep, std_sleep, total_obs)
+        z_mood = compute_z_score(r_mood, u_mood, std_mood, total_obs)
+
+        coverage_pct = round(min(100.0, (total_obs / days) * 100.0), 1) if days > 0 else 0.0
+        missing_pct = round(max(0.0, 100.0 - coverage_pct), 1)
+
         personal_baseline = PersonalBaseline(
             usual_stress=u_stress,
             recent_stress=r_stress,
             stress_delta=delta_stress,
+            stress_z_score=z_stress,
             usual_sleep_hours=u_sleep,
             recent_sleep_hours=r_sleep,
             sleep_delta=delta_sleep,
+            sleep_z_score=z_sleep,
             usual_mood_score=u_mood,
             recent_mood_score=r_mood,
             mood_delta=delta_mood,
+            mood_z_score=z_mood,
             baseline_confidence=confidence,
             observations_count=total_obs,
-            summary_message=summary_msg
+            expected_observations=days,
+            data_coverage_percentage=coverage_pct,
+            missing_data_percentage=missing_pct,
+            window_days=days,
+            summary_message=summary_msg,
+            multi_window_summary={
+                "requested_timeframe": timeframe,
+                "window_days": days,
+                "coverage_pct": coverage_pct,
+                "stress_baseline": {"usual": u_stress, "recent": r_stress, "delta": delta_stress, "z_score": z_stress, "std": round(std_stress, 2)},
+                "sleep_baseline": {"usual": u_sleep, "recent": r_sleep, "delta": delta_sleep, "z_score": z_sleep, "std": round(std_sleep, 2)},
+                "mood_baseline": {"usual": u_mood, "recent": r_mood, "delta": delta_mood, "z_score": z_mood, "std": round(std_mood, 2)}
+            }
         )
 
         # Summary calculations

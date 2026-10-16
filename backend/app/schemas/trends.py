@@ -1,4 +1,4 @@
-from typing import List, Optional, Dict
+from typing import List, Optional, Dict, Any
 from uuid import UUID
 from pydantic import BaseModel, Field
 
@@ -21,18 +21,26 @@ class PersonalBaseline(BaseModel):
     usual_stress: Optional[float] = Field(None, description="Historical baseline average stress (1-10)")
     recent_stress: Optional[float] = Field(None, description="Recent 7-day average stress (1-10)")
     stress_delta: Optional[float] = Field(None, description="Difference between recent and baseline stress")
+    stress_z_score: Optional[float] = Field(None, description="Standardized rolling Z-score deviation for stress")
 
     usual_sleep_hours: Optional[float] = Field(None, description="Historical baseline average sleep duration")
     recent_sleep_hours: Optional[float] = Field(None, description="Recent 7-day average sleep duration")
     sleep_delta: Optional[float] = Field(None, description="Difference in sleep hours from baseline")
+    sleep_z_score: Optional[float] = Field(None, description="Standardized rolling Z-score deviation for sleep")
 
     usual_mood_score: Optional[float] = Field(None, description="Historical baseline average mood (1-10)")
     recent_mood_score: Optional[float] = Field(None, description="Recent 7-day average mood (1-10)")
     mood_delta: Optional[float] = Field(None, description="Difference in mood from baseline")
+    mood_z_score: Optional[float] = Field(None, description="Standardized rolling Z-score deviation for mood")
 
     baseline_confidence: str = Field("ESTABLISHING", description="Confidence in baseline: ESTABLISHING, MODERATE, HIGH")
     observations_count: int = Field(0, description="Total longitudinal observations recorded")
+    expected_observations: int = Field(0, description="Expected observations count in window")
+    data_coverage_percentage: float = Field(0.0, description="Observed data coverage percentage")
+    missing_data_percentage: float = Field(0.0, description="Missing data percentage in window")
+    window_days: int = Field(30, description="Window size in calendar days (7, 30, 90, 180)")
     summary_message: str = Field(..., description="Non-stigmatizing personal baseline summary message")
+    multi_window_summary: Optional[Dict[str, Any]] = Field(default_factory=dict, description="Summary stats across rolling windows")
 
 
 class WellnessTrendSummary(BaseModel):

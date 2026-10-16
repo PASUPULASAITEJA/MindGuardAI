@@ -156,6 +156,10 @@ async def test_sufficient_observations_calibrated_baseline(test_db: AsyncSession
     assert res.baseline.usual_sleep_hours is not None
     assert res.baseline.recent_sleep_hours is not None
     assert res.baseline.sleep_delta is not None
+    assert res.baseline.sleep_z_score is not None
+    assert res.baseline.expected_observations == 30
+    assert res.baseline.data_coverage_percentage > 0.0
+    assert res.baseline.missing_data_percentage >= 0.0
 
 
 @pytest.mark.asyncio
@@ -193,6 +197,7 @@ async def test_zero_variance_safeguard(test_db: AsyncSession):
     assert res.baseline.baseline_confidence == "HIGH"
     assert res.summary.volatility_score == 0.0
     assert res.baseline.stress_delta == 0.0
+    assert res.baseline.stress_z_score == 0.0
 
 
 @pytest.mark.asyncio
@@ -210,6 +215,7 @@ async def test_rolling_timeframes_support(test_db: AsyncSession):
     test_db.add(user)
     await test_db.commit()
 
-    for tf in ["7d", "30d", "90d", "180d"]:
+    for tf, expected_days in [("7d", 7), ("30d", 30), ("90d", 90), ("180d", 180)]:
         res = await trend_service.get_student_trends(test_db, student_id=student_id, timeframe=tf)
         assert res.timeframe == tf
+        assert res.baseline.window_days == expected_days

@@ -90,28 +90,39 @@ async def get_academic_period_trends(
         end_dt = datetime.combine(ev.end_date, datetime.max.time()).replace(tzinfo=timezone.utc)
 
         stmt_score = (
-            select(func.avg(Assessment.mental_wellness_score), func.count(Assessment.id))
+            select(
+                func.avg(Assessment.mental_wellness_score),
+                func.count(func.distinct(Assessment.student_id))
+            )
             .where(and_(Assessment.evaluated_at >= start_dt, Assessment.evaluated_at <= end_dt))
         )
         res_score = await db.execute(stmt_score)
-        avg_score, total_count = res_score.one_or_none() or (None, 0)
-        mean_score = round(float(avg_score), 1) if avg_score is not None else 0.0
-
-        # Query aggregate stress from checkins
-        stmt_stress = (
-            select(func.avg(MoodCheckin.anxiety_level))
-            .where(and_(MoodCheckin.created_at >= start_dt, MoodCheckin.created_at <= end_dt))
-        )
-        res_stress = await db.execute(stmt_stress)
-        avg_stress = res_stress.scalar()
-        mean_stress = round(float(avg_stress), 1) if avg_stress is not None else 0.0
+        avg_score, distinct_students_count = res_score.one_or_none() or (None, 0)
+        distinct_count = distinct_students_count or 0
 
         # Query total active students to calculate real participation percentage
         stmt_total_students = select(func.count(User.id)).where(User.role == UserRole.STUDENT, User.is_active == True)
         total_students_res = await db.execute(stmt_total_students)
         total_students_count = total_students_res.scalar() or 0
-        
-        participation = round((total_count / total_students_count * 100.0), 1) if total_students_count > 0 else 0.0
+        participation = round((distinct_count / total_students_count * 100.0), 1) if total_students_count > 0 else 0.0
+
+        K_ANONYMITY_THRESHOLD = 10
+        if distinct_count < K_ANONYMITY_THRESHOLD:
+            # Enforce k-anonymity suppression to prevent deanonymization of small event cohorts
+            mean_score = 0.0
+            mean_stress = 0.0
+            note = f"Observed aggregate indicators during {ev.title} (Protected: N={distinct_count} < {K_ANONYMITY_THRESHOLD} privacy threshold enforced)"
+        else:
+            mean_score = round(float(avg_score), 1) if avg_score is not None else 0.0
+            # Query aggregate stress from checkins
+            stmt_stress = (
+                select(func.avg(MoodCheckin.anxiety_level))
+                .where(and_(MoodCheckin.created_at >= start_dt, MoodCheckin.created_at <= end_dt))
+            )
+            res_stress = await db.execute(stmt_stress)
+            avg_stress = res_stress.scalar()
+            mean_stress = round(float(avg_stress), 1) if avg_stress is not None else 0.0
+            note = f"Observed aggregate indicators during {ev.title} ({ev.event_type.value.replace('_', ' ').title()})"
 
         trends.append(
             AcademicPeriodTrend(
@@ -123,7 +134,7 @@ async def get_academic_period_trends(
                 observed_average_wellness=mean_score,
                 observed_average_stress=mean_stress,
                 checkin_participation_rate=min(100.0, participation),
-                context_note=f"Observed aggregate indicators during {ev.title} ({ev.event_type.value.replace('_', ' ').title()})"
+                context_note=note
             )
         )
 
