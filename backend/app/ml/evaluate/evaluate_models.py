@@ -183,13 +183,13 @@ def run_evaluation(config_path: Path):
 
 | Metric | Measured Value | Clinical Benchmark Target | Status |
 |---|:---:|:---:|:---:|
-| **Overall Accuracy** | **{acc * 100:.2f}%** | $> 90.0\%$ | **Passed** |
-| **Balanced Accuracy** | **{bal_acc * 100:.2f}%** | $> 88.0\%$ | **Passed** |
-| **Macro Precision** | **{macro_prec * 100:.2f}%** | $> 88.0\%$ | **Passed** |
-| **Macro Recall** | **{macro_rec * 100:.2f}%** | $> 88.0\%$ | **Passed** |
-| **Macro F1-Score** | **{macro_f1 * 100:.2f}%** | $> 88.0\%$ | **Passed** |
-| **Weighted F1-Score** | **{weighted_f1 * 100:.2f}%** | $> 90.0\%$ | **Passed** |
-| **High-Risk (RED) Recall** | **{red_recall * 100:.2f}%** | $> 95.0\%$ | **Passed (Zero-Miss Priority)** |
+| **Overall Accuracy** | **{acc * 100:.2f}%** | > 90.0% | **Passed** |
+| **Balanced Accuracy** | **{bal_acc * 100:.2f}%** | > 88.0% | **Passed** |
+| **Macro Precision** | **{macro_prec * 100:.2f}%** | > 88.0% | **Passed** |
+| **Macro Recall** | **{macro_rec * 100:.2f}%** | > 88.0% | **Passed** |
+| **Macro F1-Score** | **{macro_f1 * 100:.2f}%** | > 88.0% | **Passed** |
+| **Weighted F1-Score** | **{weighted_f1 * 100:.2f}%** | > 90.0% | **Passed** |
+| **High-Risk (RED) Recall** | **{red_recall * 100:.2f}%** | > 95.0% | **Passed (Zero-Miss Priority)** |
 
 ---
 
@@ -202,7 +202,7 @@ def run_evaluation(config_path: Path):
 ## 3. Acute Clinical Distress (RED Tier) Sensitivity Analysis
 
 ### Formula & Derivation:
-$$\\text{{Recall}}_{{\\text{{RED}}}} = \\frac{{\\text{{TP}}_{{\\text{{RED}}}}}}{{\\text{{TP}}_{{\\text{{RED}}}} + \\text{{FN}}_{{\\text{{RED}}}}}} = \\frac{{{red_tp}}}{{{red_tp} + {red_fn}}} = \\mathbf{{{red_recall * 100:.2f}\\%}}$$
+$$\\text{{Recall}}_{{\\text{{RED}}}} = \\frac{{\\text{{TP}}_{{\\text{{RED}}}}}}{{\\text{{TP}}_{{\\text{{RED}}}} + \\text{{FN}}_{{\\text{{RED}}}}}} = \\frac{{{red_tp}}}{{{red_tp} + {red_fn}}} = \\mathbf{{{red_recall * 100:.2f}\\\\%}}$$
 
 * **True Positives (RED)**: **{red_tp}** out of {red_tp + red_fn} acute distress participants.
 * **False Negatives (Missed RED)**: **{red_fn}** cases (5 classified as YELLOW, 1 classified as GREEN).
