@@ -17,6 +17,8 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/toast";
 import { useQueryClient } from "@tanstack/react-query";
 import api from "@/services/api";
+import { motion, AnimatePresence } from "motion/react";
+import { modalBackdropVariants, modalPanelVariants } from "@/utils/motion";
 
 export interface SurveyQuestionItem {
   id: number;
@@ -259,215 +261,253 @@ export const ClinicalSurveyModal: React.FC<ClinicalSurveyModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="relative w-full max-w-xl rounded-3xl border border-border/80 bg-card p-6 md:p-8 shadow-2xl space-y-6">
-        
-        {/* Results Screen */}
-        {resultData ? (
-          <div className="space-y-6 animate-in fade-in duration-200">
-            <div className="flex items-center justify-between border-b border-border/60 pb-4">
-              <div className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-2xl bg-emerald-500/10 flex items-center justify-center text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
-                  <Sparkles className="h-5 w-5" />
-                </div>
-                <div>
-                  <h3 className="text-base font-black text-foreground">Assessment Summary</h3>
-                  <p className="text-xs text-muted-foreground">{surveyTitle}</p>
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={onClose}
-                className="p-1.5 rounded-xl hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-
-            <div className="rounded-2xl border border-border/80 bg-secondary/30 p-5 space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                  Support Status Indicator
-                </span>
-                <span className="text-xs font-black px-3 py-1 rounded-full bg-primary/10 text-primary border border-primary/20">
-                  Score: {resultData.totalScore} / {questions.length * 3}
-                </span>
-              </div>
-              <p className="text-sm font-medium text-foreground leading-relaxed">
-                {resultData.guidance}
-              </p>
-              <p className="text-[11px] text-muted-foreground pt-2 border-t border-border/40">
-                * Note: This psychometric screener is a supportive indicator to assist your self-awareness and campus care decisions. It is not a formal medical diagnosis.
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div className="p-4 rounded-2xl border border-border/70 bg-card space-y-2">
-                <h4 className="text-xs font-bold text-foreground flex items-center gap-1.5">
-                  <BookOpen className="h-3.5 w-3.5 text-primary" />
-                  Recommended Next Step
-                </h4>
-                <p className="text-xs text-muted-foreground">
-                  Explore self-guided breathing exercises and circadian sleep hygiene practices in the resources center.
-                </p>
-              </div>
-
-              <div className="p-4 rounded-2xl border border-border/70 bg-card space-y-2">
-                <h4 className="text-xs font-bold text-foreground flex items-center gap-1.5">
-                  <HeartHandshake className="h-3.5 w-3.5 text-emerald-500" />
-                  Counselling Support
-                </h4>
-                <p className="text-xs text-muted-foreground">
-                  Confidential 1-on-1 consultations with certified campus psychologists are available at no cost.
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-center justify-end gap-3 pt-3 border-t border-border/60">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={onClose}
-                className="text-xs font-bold rounded-xl"
-              >
-                Close Summary
-              </Button>
-              {onBookCounselor && (
-                <Button
-                  size="sm"
-                  onClick={() => {
-                    onClose();
-                    onBookCounselor();
-                  }}
-                  className="text-xs font-bold gap-1.5 rounded-xl bg-primary text-primary-foreground shadow-sm"
-                >
-                  <Calendar className="h-3.5 w-3.5" />
-                  Request Counselling
-                </Button>
-              )}
-            </div>
-          </div>
-        ) : (
-          /* Step-by-Step Question Flow */
-          <>
-            {/* Header */}
-            <div className="flex items-center justify-between border-b border-border/60 pb-4">
-              <div className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-2xl bg-primary/10 flex items-center justify-center text-primary border border-primary/20">
-                  <ClipboardCheck className="h-5 w-5" />
-                </div>
-                <div>
-                  <div className="flex items-center gap-2">
-                    <h3 className="text-base font-black text-foreground">{surveyTitle}</h3>
-                    <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full">
-                      <ShieldCheck className="h-3 w-3" /> Encrypted & Private
-                    </span>
+    <AnimatePresence>
+      <motion.div 
+        variants={modalBackdropVariants}
+        initial="initial"
+        animate="animate"
+        exit="exit"
+        className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm"
+      >
+        <motion.div 
+          variants={modalPanelVariants}
+          initial="initial"
+          animate="animate"
+          exit="exit"
+          className="relative w-full max-w-xl rounded-3xl border border-border/80 bg-card p-6 md:p-8 shadow-2xl space-y-6"
+        >
+          {/* Results Screen */}
+          {resultData ? (
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.96 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.3 }}
+              className="space-y-6"
+            >
+              <div className="flex items-center justify-between border-b border-border/60 pb-4">
+                <div className="flex items-center gap-3">
+                  <div className="h-10 w-10 rounded-2xl bg-emerald-500/10 flex items-center justify-center text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                    <Sparkles className="h-5 w-5" />
                   </div>
-                  <p className="text-xs text-muted-foreground">Question {currentIdx + 1} of {questions.length}</p>
+                  <div>
+                    <h3 className="text-base font-black text-foreground">Assessment Summary</h3>
+                    <p className="text-xs text-muted-foreground">{surveyTitle}</p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="p-1.5 rounded-xl hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+
+              <div className="rounded-2xl border border-border/80 bg-secondary/30 p-5 space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                    Support Status Indicator
+                  </span>
+                  <span className="text-xs font-black px-3 py-1 rounded-full bg-primary/10 text-primary border border-primary/20">
+                    Score: {resultData.totalScore} / {questions.length * 3}
+                  </span>
+                </div>
+                <p className="text-sm font-medium text-foreground leading-relaxed">
+                  {resultData.guidance}
+                </p>
+                <p className="text-[11px] text-muted-foreground pt-2 border-t border-border/40">
+                  * Note: This psychometric screener is a supportive indicator to assist your self-awareness and campus care decisions. It is not a formal medical diagnosis.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="p-4 rounded-2xl border border-border/70 bg-card space-y-2">
+                  <h4 className="text-xs font-bold text-foreground flex items-center gap-1.5">
+                    <BookOpen className="h-3.5 w-3.5 text-primary" />
+                    Recommended Next Step
+                  </h4>
+                  <p className="text-xs text-muted-foreground">
+                    Explore self-guided breathing exercises and circadian sleep hygiene practices in the resources center.
+                  </p>
+                </div>
+
+                <div className="p-4 rounded-2xl border border-border/70 bg-card space-y-2">
+                  <h4 className="text-xs font-bold text-foreground flex items-center gap-1.5">
+                    <HeartHandshake className="h-3.5 w-3.5 text-emerald-500" />
+                    Counselling Support
+                  </h4>
+                  <p className="text-xs text-muted-foreground">
+                    Confidential 1-on-1 consultations with certified campus psychologists are available at no cost.
+                  </p>
                 </div>
               </div>
-              <button
-                type="button"
-                onClick={onClose}
-                className="p-1.5 rounded-xl hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
 
-            {/* Progress Bar */}
-            <div className="space-y-1.5">
-              <div className="flex justify-between text-[11px] font-bold text-muted-foreground">
-                <span>Progress: {answeredCount} of {questions.length} answered</span>
-                <span>{progressPct}%</span>
-              </div>
-              <div className="w-full bg-secondary rounded-full h-2 overflow-hidden">
-                <div
-                  className="bg-primary h-2 rounded-full transition-all duration-300 ease-out"
-                  style={{ width: `${progressPct}%` }}
-                />
-              </div>
-            </div>
-
-            {/* Question Prompt */}
-            <div className="space-y-2 py-1">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-primary">
-                {currentQ.category}
-              </span>
-              <h4 className="text-base md:text-lg font-bold text-foreground leading-snug">
-                {currentQ.prompt}
-              </h4>
-              <p className="text-xs text-muted-foreground italic leading-relaxed">
-                "{currentQ.studentContext}"
-              </p>
-            </div>
-
-            {/* Answer Options Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-              {SURVEY_OPTIONS.map((opt) => {
-                const isSelected = responses[currentIdx] === opt.value;
-                return (
-                  <button
-                    key={opt.value}
-                    type="button"
-                    onClick={() => handleSelectOption(opt.value)}
-                    className={`flex flex-col items-start p-3.5 rounded-2xl border text-left transition-all active:scale-[0.98] ${
-                      isSelected
-                        ? "border-primary bg-primary/10 text-foreground font-black shadow-sm ring-1 ring-primary"
-                        : "border-border/70 hover:border-primary/40 bg-card/60 hover:bg-card text-foreground"
-                    }`}
-                  >
-                    <div className="flex items-center justify-between w-full">
-                      <span className="text-xs font-bold">{opt.label}</span>
-                      {isSelected && <CheckCircle2 className="h-4 w-4 text-primary" />}
-                    </div>
-                    <span className="text-[10px] text-muted-foreground mt-0.5">{opt.helper}</span>
-                  </button>
-                );
-              })}
-            </div>
-
-            {/* Navigation & Submit Footer */}
-            <div className="flex items-center justify-between pt-3 border-t border-border/60">
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                onClick={() => setCurrentIdx((p) => Math.max(0, p - 1))}
-                disabled={currentIdx === 0}
-                className="text-xs font-semibold gap-1 rounded-xl"
-              >
-                <ChevronLeft className="h-4 w-4" />
-                Previous
-              </Button>
-
-              <div className="flex items-center gap-2">
-                {currentIdx < questions.length - 1 ? (
+              <div className="flex items-center justify-end gap-3 pt-3 border-t border-border/60">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={onClose}
+                  className="text-xs font-bold rounded-xl"
+                >
+                  Close Summary
+                </Button>
+                {onBookCounselor && (
                   <Button
-                    type="button"
                     size="sm"
-                    onClick={() => setCurrentIdx((p) => Math.min(questions.length - 1, p + 1))}
-                    className="text-xs font-bold gap-1 rounded-xl bg-secondary hover:bg-secondary/80 text-foreground"
+                    onClick={() => {
+                      onClose();
+                      onBookCounselor();
+                    }}
+                    className="text-xs font-bold gap-1.5 rounded-xl bg-primary text-primary-foreground shadow-sm"
                   >
-                    Next
-                    <ChevronRight className="h-4 w-4" />
-                  </Button>
-                ) : (
-                  <Button
-                    type="button"
-                    size="sm"
-                    onClick={handleSubmit}
-                    disabled={!isComplete || isSubmitting}
-                    className="text-xs font-bold px-5 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground shadow-md"
-                  >
-                    {isSubmitting ? "Submitting..." : "Complete & View Score"}
+                    <Calendar className="h-3.5 w-3.5" />
+                    Request Counselling
                   </Button>
                 )}
               </div>
-            </div>
-          </>
-        )}
-      </div>
-    </div>
+            </motion.div>
+          ) : (
+            /* Step-by-Step Question Flow */
+            <>
+              {/* Header */}
+              <div className="flex items-center justify-between border-b border-border/60 pb-4">
+                <div className="flex items-center gap-3">
+                  <div className="h-10 w-10 rounded-2xl bg-primary/10 flex items-center justify-center text-primary border border-primary/20">
+                    <ClipboardCheck className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <h3 className="text-base font-black text-foreground">{surveyTitle}</h3>
+                      <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full">
+                        <ShieldCheck className="h-3 w-3" /> Encrypted & Private
+                      </span>
+                    </div>
+                    <p className="text-xs text-muted-foreground">Question {currentIdx + 1} of {questions.length}</p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="p-1.5 rounded-xl hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+
+              {/* Progress Bar */}
+              <div className="space-y-1.5">
+                <div className="flex justify-between text-[11px] font-bold text-muted-foreground">
+                  <span>Progress: {answeredCount} of {questions.length} answered</span>
+                  <span>{progressPct}%</span>
+                </div>
+                <div className="w-full bg-secondary rounded-full h-2 overflow-hidden">
+                  <motion.div
+                    animate={{ width: `${progressPct}%` }}
+                    transition={{ duration: 0.35, ease: "easeOut" }}
+                    className="bg-primary h-2 rounded-full"
+                  />
+                </div>
+              </div>
+
+              {/* Animated Question & Options Container */}
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={currentIdx}
+                  initial={{ opacity: 0, x: 10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -10 }}
+                  transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+                  className="space-y-4"
+                >
+                  {/* Question Prompt */}
+                  <div className="space-y-2 py-1">
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-primary">
+                      {currentQ.category}
+                    </span>
+                    <h4 className="text-base md:text-lg font-bold text-foreground leading-snug">
+                      {currentQ.prompt}
+                    </h4>
+                    <p className="text-xs text-muted-foreground italic leading-relaxed">
+                      "{currentQ.studentContext}"
+                    </p>
+                  </div>
+
+                  {/* Answer Options Grid */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                    {SURVEY_OPTIONS.map((opt) => {
+                      const isSelected = responses[currentIdx] === opt.value;
+                      return (
+                        <motion.button
+                          key={opt.value}
+                          type="button"
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                          transition={{ duration: 0.12 }}
+                          onClick={() => handleSelectOption(opt.value)}
+                          className={`flex flex-col items-start p-3.5 rounded-2xl border text-left transition-colors ${
+                            isSelected
+                              ? "border-primary bg-primary/10 text-foreground font-black shadow-sm ring-1 ring-primary"
+                              : "border-border/70 hover:border-primary/40 bg-card/60 hover:bg-card text-foreground"
+                          }`}
+                        >
+                          <div className="flex items-center justify-between w-full">
+                            <span className="text-xs font-bold">{opt.label}</span>
+                            {isSelected && <CheckCircle2 className="h-4 w-4 text-primary" />}
+                          </div>
+                          <span className="text-[10px] text-muted-foreground mt-0.5">{opt.helper}</span>
+                        </motion.button>
+                      );
+                    })}
+                  </div>
+                </motion.div>
+              </AnimatePresence>
+
+              {/* Navigation & Submit Footer */}
+              <div className="flex items-center justify-between pt-3 border-t border-border/60">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setCurrentIdx((p) => Math.max(0, p - 1))}
+                  disabled={currentIdx === 0}
+                  className="text-xs font-semibold gap-1 rounded-xl"
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                  Previous
+                </Button>
+
+                <div className="flex items-center gap-2">
+                  {currentIdx < questions.length - 1 ? (
+                    <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                      <Button
+                        type="button"
+                        size="sm"
+                        onClick={() => setCurrentIdx((p) => Math.min(questions.length - 1, p + 1))}
+                        className="text-xs font-bold gap-1 rounded-xl bg-secondary hover:bg-secondary/80 text-foreground"
+                      >
+                        Next
+                        <ChevronRight className="h-4 w-4" />
+                      </Button>
+                    </motion.div>
+                  ) : (
+                    <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                      <Button
+                        type="button"
+                        size="sm"
+                        onClick={handleSubmit}
+                        disabled={!isComplete || isSubmitting}
+                        className="text-xs font-bold px-5 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground shadow-md"
+                      >
+                        {isSubmitting ? "Submitting..." : "Complete & View Score"}
+                      </Button>
+                    </motion.div>
+                  )}
+                </div>
+              </div>
+            </>
+          )}
+        </motion.div>
+      </motion.div>
+    </AnimatePresence>
   );
 };

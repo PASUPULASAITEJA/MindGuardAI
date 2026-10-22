@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
 import { Eye, EyeOff, Loader2, ArrowLeft, ShieldCheck, Lock } from "lucide-react";
 import ThemeToggle from "@/components/layouts/ThemeToggle";
+import { motion } from "motion/react";
 
 const loginSchema = z.object({
   email: z.string().min(2, "Please enter your username or university email address."),
@@ -86,10 +87,18 @@ export const Login: React.FC = () => {
         <ThemeToggle />
       </div>
 
-      <div className="w-full max-w-sm">
+      <motion.div 
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.42, ease: [0.22, 1, 0.36, 1] }}
+        className="w-full max-w-sm"
+      >
         {/* Brand */}
         <div className="flex flex-col items-center mb-6 text-center">
-          <img
+          <motion.img
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ duration: 0.35, delay: 0.1 }}
             src="/logo.png"
             alt="MindGuardAI Logo"
             className="h-16 w-16 rounded-2xl object-contain bg-white dark:bg-card border border-border p-1.5 shadow-sm mb-3"
@@ -102,7 +111,7 @@ export const Login: React.FC = () => {
           </p>
         </div>
 
-        <Card className="p-6">
+        <Card className="p-6 shadow-sm">
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div>
               <label className="text-xs font-medium text-foreground block mb-1.5">
@@ -194,7 +203,7 @@ export const Login: React.FC = () => {
           <ShieldCheck className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
           <span>Role-Guarded • End-to-End Encrypted Authentication</span>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 };

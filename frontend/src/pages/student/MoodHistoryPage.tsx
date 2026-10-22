@@ -22,6 +22,8 @@ import { useMoodHistory } from "@/hooks/useMood";
 import { useLatestAssessment, useWellnessTrends } from "@/hooks/usePredictions";
 import { Alert } from "@/components/ui/alert";
 import WellnessTrendDashboard from "@/components/WellnessTrendDashboard";
+import { motion } from "motion/react";
+import { pageVariants, staggerContainer, cardEntrance } from "@/utils/motion";
 
 export const MoodHistoryPage: React.FC = () => {
   const navigate = useNavigate();
@@ -43,7 +45,12 @@ export const MoodHistoryPage: React.FC = () => {
   const baseline = trendData?.baseline;
 
   return (
-    <div className="max-w-5xl mx-auto space-y-6 pb-12">
+    <motion.div 
+      variants={pageVariants}
+      initial="initial"
+      animate="animate"
+      className="max-w-5xl mx-auto space-y-6 pb-12"
+    >
       {/* Header */}
       <div className="flex items-center justify-between">
         <Button 
@@ -98,8 +105,13 @@ export const MoodHistoryPage: React.FC = () => {
       </Alert>
 
       {/* Multidimensional Breakdown Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
-        <div className="p-3.5 rounded-2xl border border-border/80 bg-card shadow-xs space-y-1.5">
+      <motion.div 
+        variants={staggerContainer}
+        initial="initial"
+        animate="animate"
+        className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3"
+      >
+        <motion.div variants={cardEntrance} whileHover={{ y: -3 }} className="p-3.5 rounded-2xl border border-border/80 bg-card shadow-xs space-y-1.5">
           <div className="flex items-center justify-between text-muted-foreground">
             <span className="text-[11px] font-bold uppercase tracking-wider">Mood Index</span>
             <Smile className="h-3.5 w-3.5 text-emerald-500" />
@@ -111,9 +123,9 @@ export const MoodHistoryPage: React.FC = () => {
           <span className="text-[10px] font-bold text-muted-foreground">
             {baseline?.usual_mood_score ? `Usual: ${baseline.usual_mood_score}/10` : "Self-Reported"}
           </span>
-        </div>
+        </motion.div>
 
-        <div className="p-3.5 rounded-2xl border border-border/80 bg-card shadow-xs space-y-1.5">
+        <motion.div variants={cardEntrance} whileHover={{ y: -3 }} className="p-3.5 rounded-2xl border border-border/80 bg-card shadow-xs space-y-1.5">
           <div className="flex items-center justify-between text-muted-foreground">
             <span className="text-[11px] font-bold uppercase tracking-wider">Stress Level</span>
             <Activity className="h-3.5 w-3.5 text-indigo-500" />
@@ -124,9 +136,9 @@ export const MoodHistoryPage: React.FC = () => {
           <span className="text-[10px] font-bold text-muted-foreground">
             {baseline?.usual_stress ? `Usual: ${baseline.usual_stress}/10` : "Check-in Trajectory"}
           </span>
-        </div>
+        </motion.div>
 
-        <div className="p-3.5 rounded-2xl border border-border/80 bg-card shadow-xs space-y-1.5">
+        <motion.div variants={cardEntrance} whileHover={{ y: -3 }} className="p-3.5 rounded-2xl border border-border/80 bg-card shadow-xs space-y-1.5">
           <div className="flex items-center justify-between text-muted-foreground">
             <span className="text-[11px] font-bold uppercase tracking-wider">Sleep Hours</span>
             <Moon className="h-3.5 w-3.5 text-purple-500" />
@@ -137,9 +149,9 @@ export const MoodHistoryPage: React.FC = () => {
           <span className="text-[10px] font-bold text-muted-foreground">
             {baseline?.usual_sleep_hours ? `Usual: ${baseline.usual_sleep_hours}h` : "Logged Sleep"}
           </span>
-        </div>
+        </motion.div>
 
-        <div className="p-3.5 rounded-2xl border border-border/80 bg-card shadow-xs space-y-1.5">
+        <motion.div variants={cardEntrance} whileHover={{ y: -3 }} className="p-3.5 rounded-2xl border border-border/80 bg-card shadow-xs space-y-1.5">
           <div className="flex items-center justify-between text-muted-foreground">
             <span className="text-[11px] font-bold uppercase tracking-wider">Assessments</span>
             <ShieldCheck className="h-3.5 w-3.5 text-cyan-500" />
@@ -150,9 +162,9 @@ export const MoodHistoryPage: React.FC = () => {
           <span className="text-[10px] font-bold text-muted-foreground">
             {latestAssessment?.risk_level ? `Risk: ${latestAssessment.risk_level}` : "Clinical Psychometric"}
           </span>
-        </div>
+        </motion.div>
 
-        <div className="p-3.5 rounded-2xl border border-border/80 bg-card shadow-xs space-y-1.5">
+        <motion.div variants={cardEntrance} whileHover={{ y: -3 }} className="p-3.5 rounded-2xl border border-border/80 bg-card shadow-xs space-y-1.5">
           <div className="flex items-center justify-between text-muted-foreground">
             <span className="text-[11px] font-bold uppercase tracking-wider">Confidence</span>
             <Zap className="h-3.5 w-3.5 text-amber-500" />
@@ -163,8 +175,8 @@ export const MoodHistoryPage: React.FC = () => {
           <span className="text-[10px] font-bold text-muted-foreground">
             {baseline?.observations_count ? `${baseline.observations_count} observations` : "Active Calibration"}
           </span>
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
       
       {/* Wellness Trend Visualizer */}
       <WellnessTrendDashboard />
@@ -267,7 +279,7 @@ export const MoodHistoryPage: React.FC = () => {
           )}
         </CardContent>
       </Card>
-    </div>
+    </motion.div>
   );
 };
 

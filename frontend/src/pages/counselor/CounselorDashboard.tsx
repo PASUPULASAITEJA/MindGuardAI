@@ -27,6 +27,8 @@ import {
 } from "lucide-react";
 import { appointmentsAPI, AppointmentItem, alertsAPI, interventionsAPI, InterventionSummary } from "@/services/api";
 import { cn } from "@/utils/cn";
+import { motion, AnimatePresence } from "motion/react";
+import { pageVariants, staggerContainer, cardEntrance, modalBackdropVariants, modalPanelVariants } from "@/utils/motion";
 
 export const CounselorDashboard: React.FC = () => {
   const { toast } = useToast();
@@ -217,7 +219,12 @@ export const CounselorDashboard: React.FC = () => {
   );
 
   return (
-    <div className="space-y-6 pb-12">
+    <motion.div 
+      variants={pageVariants}
+      initial="initial"
+      animate="animate"
+      className="space-y-6 pb-12"
+    >
       {/* Critical Alert Banner if Active SOS */}
       {criticalAlertsCount > 0 && (
         <div className="p-4 rounded-xl bg-rose-500/10 border border-rose-500/30 text-foreground flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
@@ -617,63 +624,77 @@ export const CounselorDashboard: React.FC = () => {
       </div>
 
       {/* Case Note Modal */}
-      {activeNoteAlert && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm animate-in fade-in duration-150">
-          <div className="relative w-full max-w-lg rounded-xl bg-card border border-border p-6 shadow-lg space-y-4">
-            <div className="flex items-center justify-between border-b border-border pb-3">
-              <div>
-                <h3 className="text-sm font-semibold text-foreground">Record Clinical Case Note</h3>
-                <p className="text-xs text-muted-foreground">
-                  Case ID: #{activeNoteAlert.id.substring(0, 8)} • Student #{activeNoteAlert.student_id.substring(0, 8)}
-                </p>
-              </div>
-              <button
-                onClick={() => setActiveNoteAlert(null)}
-                className="p-1 rounded text-muted-foreground hover:text-foreground"
-              >
-                <X className="h-4 w-4" />
-              </button>
-            </div>
-
-            <form onSubmit={handleSaveAlertNote} className="space-y-4">
-              <div>
-                <label className="text-xs font-medium text-muted-foreground mb-1 block">
-                  Clinical Assessment & Plan
-                </label>
-                <textarea
-                  rows={4}
-                  value={alertNoteText}
-                  onChange={(e) => setAlertNoteText(e.target.value)}
-                  placeholder="Record intervention notes, student contact outcome, or recommended follow-up steps..."
-                  className="w-full p-2.5 text-xs rounded-lg border border-border bg-background focus:outline-none focus:ring-1 focus:ring-primary"
-                  required
-                />
-              </div>
-
-              <div className="flex justify-end gap-2 pt-2 border-t border-border">
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
+      <AnimatePresence>
+        {activeNoteAlert && (
+          <motion.div 
+            variants={modalBackdropVariants}
+            initial="initial"
+            animate="animate"
+            exit="exit"
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm"
+          >
+            <motion.div 
+              variants={modalPanelVariants}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              className="relative w-full max-w-lg rounded-2xl bg-card border border-border p-6 shadow-xl space-y-4"
+            >
+              <div className="flex items-center justify-between border-b border-border pb-3">
+                <div>
+                  <h3 className="text-sm font-semibold text-foreground">Record Clinical Case Note</h3>
+                  <p className="text-xs text-muted-foreground">
+                    Case ID: #{activeNoteAlert.id.substring(0, 8)} • Student #{activeNoteAlert.student_id.substring(0, 8)}
+                  </p>
+                </div>
+                <button
                   onClick={() => setActiveNoteAlert(null)}
-                  className="text-xs font-medium"
+                  className="p-1 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted"
                 >
-                  Cancel
-                </Button>
-                <Button
-                  type="submit"
-                  size="sm"
-                  disabled={isSubmittingAlertNote}
-                  className="text-xs font-medium"
-                >
-                  {isSubmittingAlertNote ? "Saving..." : "Save Note"}
-                </Button>
+                  <X className="h-4 w-4" />
+                </button>
               </div>
-            </form>
-          </div>
-        </div>
-      )}
-    </div>
+
+              <form onSubmit={handleSaveAlertNote} className="space-y-4">
+                <div>
+                  <label className="text-xs font-medium text-muted-foreground mb-1 block">
+                    Clinical Assessment & Plan
+                  </label>
+                  <textarea
+                    rows={4}
+                    value={alertNoteText}
+                    onChange={(e) => setAlertNoteText(e.target.value)}
+                    placeholder="Record intervention notes, student contact outcome, or recommended follow-up steps..."
+                    className="w-full p-2.5 text-xs rounded-lg border border-border bg-background focus:outline-none focus:ring-1 focus:ring-primary"
+                    required
+                  />
+                </div>
+
+                <div className="flex justify-end gap-2 pt-2 border-t border-border">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setActiveNoteAlert(null)}
+                    className="text-xs font-medium"
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    type="submit"
+                    size="sm"
+                    disabled={isSubmittingAlertNote}
+                    className="text-xs font-medium"
+                  >
+                    {isSubmittingAlertNote ? "Saving..." : "Save Note"}
+                  </Button>
+                </div>
+              </form>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
   );
 };
 

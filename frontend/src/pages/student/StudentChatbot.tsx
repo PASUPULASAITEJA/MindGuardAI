@@ -30,6 +30,8 @@ import { chatAPI, ChatMessageItem, ChatResponsePayload, getAccessToken } from "@
 import { cn } from "@/utils/cn";
 import { useToast } from "@/components/ui/toast";
 import { EmergencySOSModal } from "@/components/EmergencySOSModal";
+import { motion, AnimatePresence } from "motion/react";
+import { chatBotMessageVariants, chatUserMessageVariants } from "@/utils/motion";
 
 interface QuickPrompt {
   title: string;
@@ -589,10 +591,13 @@ export const StudentChatbot: React.FC = () => {
               {/* Quick Prompts */}
               <div className="mt-6 grid max-w-lg grid-cols-1 gap-2.5 sm:grid-cols-2">
                 {QUICK_PROMPTS.map((item, idx) => (
-                  <button
+                  <motion.button
                     key={idx}
+                    whileHover={{ scale: 1.02, y: -2 }}
+                    whileTap={{ scale: 0.98 }}
+                    transition={{ duration: 0.15 }}
                     onClick={() => handleSendMessage(item.prompt)}
-                    className="flex flex-col text-left p-3.5 rounded-2xl border border-border/80 bg-card hover:border-primary/40 hover:bg-primary/5 transition-all shadow-xs group"
+                    className="flex flex-col text-left p-3.5 rounded-2xl border border-border/80 bg-card hover:border-primary/40 hover:bg-primary/5 transition-colors shadow-xs group"
                   >
                     <div className="flex items-center justify-between mb-1.5">
                       <span className="text-xl">{item.icon}</span>
@@ -604,7 +609,7 @@ export const StudentChatbot: React.FC = () => {
                     <span className="text-[11px] text-muted-foreground mt-0.5 leading-snug">
                       {item.desc}
                     </span>
-                  </button>
+                  </motion.button>
                 ))}
               </div>
             </div>
@@ -614,8 +619,11 @@ export const StudentChatbot: React.FC = () => {
               const isRed = msg.risk_level === "RED";
 
               return (
-                <div
+                <motion.div
                   key={msg.id}
+                  variants={isStudent ? chatUserMessageVariants : chatBotMessageVariants}
+                  initial="initial"
+                  animate="animate"
                   className={cn("flex w-full gap-3", isStudent ? "justify-end" : "justify-start")}
                 >
                   {!isStudent && (
@@ -707,7 +715,7 @@ export const StudentChatbot: React.FC = () => {
                       <UserIcon className="h-4 w-4" />
                     </div>
                   )}
-                </div>
+                </motion.div>
               );
             })
           )}

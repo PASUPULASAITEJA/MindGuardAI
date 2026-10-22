@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { X, Wind, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { motion, AnimatePresence } from "motion/react";
+import { modalBackdropVariants, modalPanelVariants } from "@/utils/motion";
 
 interface BoxBreathingModalProps {
   isOpen: boolean;
@@ -36,8 +38,6 @@ export const BoxBreathingModal: React.FC<BoxBreathingModalProps> = ({ isOpen, on
     return () => clearInterval(timer);
   }, [isOpen]);
 
-  if (!isOpen) return null;
-
   const phaseInstruction =
     phase === "Inhale"
       ? "Slowly breathe in through your nose..."
@@ -55,8 +55,22 @@ export const BoxBreathingModal: React.FC<BoxBreathingModalProps> = ({ isOpen, on
       : "text-sky-600 dark:text-sky-400 border-sky-500 bg-sky-500/10 shadow-sky-500/20";
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-md animate-in fade-in duration-200">
-      <div className="relative w-full max-w-md rounded-3xl border border-border/80 bg-card p-6 sm:p-8 shadow-2xl text-center space-y-6">
+    <AnimatePresence>
+      {isOpen && (
+        <motion.div 
+          variants={modalBackdropVariants}
+          initial="initial"
+          animate="animate"
+          exit="exit"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-md"
+        >
+          <motion.div 
+            variants={modalPanelVariants}
+            initial="initial"
+            animate="animate"
+            exit="exit"
+            className="relative w-full max-w-md rounded-3xl border border-border/80 bg-card p-6 sm:p-8 shadow-2xl text-center space-y-6"
+          >
         <button
           type="button"
           onClick={onClose}
@@ -79,10 +93,15 @@ export const BoxBreathingModal: React.FC<BoxBreathingModalProps> = ({ isOpen, on
 
         {/* Pulsing Visual Circle */}
         <div className="py-6 flex items-center justify-center">
-          <div
-            className={`relative flex h-48 w-48 items-center justify-center rounded-full border-4 shadow-2xl transition-all duration-1000 ${phaseColor} ${
-              phase === "Inhale" ? "scale-110" : phase === "Exhale" ? "scale-90" : "scale-100"
-            }`}
+          <motion.div
+            animate={{
+              scale: phase === "Inhale" ? 1.15 : phase === "Exhale" ? 0.88 : 1.0,
+            }}
+            transition={{
+              duration: phase === "Inhale" || phase === "Exhale" ? 3.8 : 0.8,
+              ease: "easeInOut",
+            }}
+            className={`relative flex h-48 w-48 items-center justify-center rounded-full border-4 shadow-2xl transition-colors duration-700 ${phaseColor}`}
           >
             <div className="text-center space-y-1">
               <span className="text-4xl font-black text-foreground tracking-tight">{seconds}s</span>
@@ -90,7 +109,7 @@ export const BoxBreathingModal: React.FC<BoxBreathingModalProps> = ({ isOpen, on
                 {phase}
               </div>
             </div>
-          </div>
+          </motion.div>
         </div>
 
         <p className="text-xs text-muted-foreground italic h-6">{phaseInstruction}</p>
@@ -101,7 +120,9 @@ export const BoxBreathingModal: React.FC<BoxBreathingModalProps> = ({ isOpen, on
         >
           Finish Breathing & Return
         </Button>
-      </div>
-    </div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 };

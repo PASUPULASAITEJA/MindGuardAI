@@ -63,6 +63,8 @@ import { EmergencySOSModal } from "@/components/EmergencySOSModal";
 import { ConsentBanner } from "@/components/ConsentBanner";
 import { OnboardingConsentModal } from "@/components/OnboardingConsentModal";
 import { MoodMicroCheckin } from "@/components/MoodMicroCheckin";
+import { motion } from "motion/react";
+import { pageVariants, staggerContainer, cardEntrance, cardHoverMotion, pillSelectMotion } from "@/utils/motion";
 
 export const StudentDashboard: React.FC = () => {
   const { user } = useAuth();
@@ -232,7 +234,12 @@ export const StudentDashboard: React.FC = () => {
   }
 
   return (
-    <div className="space-y-6 pb-12">
+    <motion.div 
+      variants={pageVariants}
+      initial="initial"
+      animate="animate"
+      className="space-y-6 pb-12"
+    >
       {/* 1. Welcoming Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-border/80 pb-4">
         <div>
@@ -254,42 +261,53 @@ export const StudentDashboard: React.FC = () => {
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={() => {
-              setSurveyType("phq-9");
-              setIsSurveyOpen(true);
-            }}
-            className="text-xs font-semibold gap-1.5 h-9 bg-card"
-          >
-            <CheckCircle2 className="h-3.5 w-3.5 text-primary" />
-            <span>Clinical Assessment</span>
-          </Button>
+          <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => {
+                setSurveyType("phq-9");
+                setIsSurveyOpen(true);
+              }}
+              className="text-xs font-semibold gap-1.5 h-9 bg-card"
+            >
+              <CheckCircle2 className="h-3.5 w-3.5 text-primary" />
+              <span>Clinical Assessment</span>
+            </Button>
+          </motion.div>
 
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={() => setIsBookingOpen(true)}
-            className="text-xs font-semibold gap-1.5 h-9 bg-card"
-          >
-            <HeartHandshake className="h-3.5 w-3.5 text-primary" />
-            <span>Request Counselling</span>
-          </Button>
+          <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => setIsBookingOpen(true)}
+              className="text-xs font-semibold gap-1.5 h-9 bg-card"
+            >
+              <HeartHandshake className="h-3.5 w-3.5 text-primary" />
+              <span>Request Counselling</span>
+            </Button>
+          </motion.div>
 
-          <Button
-            size="sm"
-            onClick={() => setIsSOSOpen(true)}
-            className="text-xs font-semibold gap-1.5 h-9 bg-rose-500/10 hover:bg-rose-500 text-rose-600 dark:text-rose-400 hover:text-white border border-rose-500/20"
-          >
-            <ShieldAlert className="h-3.5 w-3.5" />
-            <span>Crisis & SOS</span>
-          </Button>
+          <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+            <Button
+              size="sm"
+              onClick={() => setIsSOSOpen(true)}
+              className="text-xs font-semibold gap-1.5 h-9 bg-rose-500/10 hover:bg-rose-500 text-rose-600 dark:text-rose-400 hover:text-white border border-rose-500/20"
+            >
+              <ShieldAlert className="h-3.5 w-3.5" />
+              <span>Crisis & SOS</span>
+            </Button>
+          </motion.div>
         </div>
       </div>
 
       {/* 2. Prominent "How are you feeling today?" Interactive Hero Card */}
-      <div className="wellness-card p-6 bg-gradient-to-br from-primary/10 via-accent/30 to-card border-primary/20 relative overflow-hidden">
+      <motion.div 
+        initial={{ opacity: 0, y: 14 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+        className="wellness-card p-6 bg-gradient-to-br from-primary/10 via-accent/30 to-card border-primary/20 relative overflow-hidden"
+      >
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="space-y-2.5 max-w-xl">
             <div className="flex items-center gap-2 text-primary font-semibold text-xs tracking-wide uppercase">
@@ -312,38 +330,45 @@ export const StudentDashboard: React.FC = () => {
                 { score: 8, label: "Good", symbol: "🙂" },
                 { score: 10, label: "Great", symbol: "😊" },
               ].map((m) => (
-                <button
+                <motion.button
                   key={m.score}
                   type="button"
+                  whileHover={{ scale: 1.05, y: -2 }}
+                  whileTap={{ scale: 0.95 }}
+                  transition={{ duration: 0.15 }}
                   onClick={() => navigate(`/student/check-in?mood=${m.score}`)}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-card hover:bg-primary hover:text-white border border-border/80 shadow-xs text-xs font-medium transition-all transform hover:-translate-y-0.5"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-card hover:bg-primary hover:text-white border border-border/80 shadow-xs text-xs font-medium transition-colors"
                 >
                   <span className="text-base">{m.symbol}</span>
                   <span>{m.label}</span>
-                </button>
+                </motion.button>
               ))}
             </div>
           </div>
 
           <div className="flex flex-col sm:flex-row md:flex-col gap-2.5 shrink-0">
-            <Button
-              onClick={() => navigate("/student/check-in")}
-              className="text-xs font-semibold gap-2 h-10 px-5 shadow-sm"
-            >
-              <Smile className="h-4 w-4" />
-              <span>Complete Full Check-in</span>
-            </Button>
-            <Button
-              variant="outline"
-              onClick={() => navigate("/student/chat")}
-              className="text-xs font-semibold gap-2 h-10 px-5 bg-card"
-            >
-              <MessageSquare className="h-4 w-4 text-primary" />
-              <span>Talk to AI Companion</span>
-            </Button>
+            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+              <Button
+                onClick={() => navigate("/student/check-in")}
+                className="w-full text-xs font-semibold gap-2 h-10 px-5 shadow-sm"
+              >
+                <Smile className="h-4 w-4" />
+                <span>Complete Full Check-in</span>
+              </Button>
+            </motion.div>
+            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+              <Button
+                variant="outline"
+                onClick={() => navigate("/student/chat")}
+                className="w-full text-xs font-semibold gap-2 h-10 px-5 bg-card"
+              >
+                <MessageSquare className="h-4 w-4 text-primary" />
+                <span>Talk to AI Companion</span>
+              </Button>
+            </motion.div>
           </div>
         </div>
-      </div>
+      </motion.div>
 
       {/* Consent Notice if applicable */}
       <ConsentBanner />
@@ -815,7 +840,7 @@ export const StudentDashboard: React.FC = () => {
           </div>
         </div>
       )}
-    </div>
+    </motion.div>
   );
 };
 

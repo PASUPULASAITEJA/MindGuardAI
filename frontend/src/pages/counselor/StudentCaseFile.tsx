@@ -37,6 +37,8 @@ import { ExplainableAIFactors } from "@/components/ExplainableAIFactors";
 import { ShapExplanationCard } from "@/components/ShapExplanationCard";
 import WellnessTrendDashboard from "@/components/WellnessTrendDashboard";
 import { cn } from "@/utils/cn";
+import { motion } from "motion/react";
+import { pageVariants } from "@/utils/motion";
 
 export const StudentCaseFile: React.FC = () => {
   const { studentId } = useParams<{ studentId: string }>();
@@ -235,7 +237,12 @@ export const StudentCaseFile: React.FC = () => {
   const assessmentEvents = timeline.filter(ev => ev.event_type === "ASSESSMENT");
 
   return (
-    <div className="space-y-6 pb-12">
+    <motion.div 
+      variants={pageVariants}
+      initial="initial"
+      animate="animate"
+      className="space-y-6 pb-12"
+    >
       {/* Top Header with Breadcrumb & Student Identity */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border pb-4">
         <div className="space-y-1">
@@ -740,7 +747,7 @@ export const StudentCaseFile: React.FC = () => {
           </div>
         </div>
       )}
-    </div>
+    </motion.div>
   );
 };
 

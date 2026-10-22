@@ -15,10 +15,12 @@ import {
   Heart,
   BookOpen
 } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "../../components/ui/card";
-import { Button } from "../../components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { HabitRecoverySimulator } from "../../components/HabitRecoverySimulator";
 import { PersonalizedRecommendations } from "../../components/PersonalizedRecommendations";
+import { motion } from "motion/react";
+import { pageVariants, staggerContainer, cardEntrance } from "@/utils/motion";
 
 export const SelfCareResourcesPage: React.FC = () => {
   const navigate = useNavigate();
@@ -61,7 +63,12 @@ export const SelfCareResourcesPage: React.FC = () => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8 pb-12">
+    <motion.div 
+      variants={pageVariants}
+      initial="initial"
+      animate="animate"
+      className="max-w-4xl mx-auto space-y-8 pb-12"
+    >
       {/* Header */}
       <div className="flex items-center justify-between">
         <Button 
@@ -92,48 +99,67 @@ export const SelfCareResourcesPage: React.FC = () => {
       <PersonalizedRecommendations />
 
       {/* Grid of tools */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <motion.div 
+        variants={staggerContainer}
+        initial="initial"
+        animate="animate"
+        className="grid grid-cols-1 lg:grid-cols-2 gap-6"
+      >
         {/* 1. Box Breathing Interactive Widget */}
-        <Card className="border-border/60 shadow-sm overflow-hidden flex flex-col justify-between">
-          <CardHeader className="pb-2">
-            <div className="flex items-center gap-2">
-              <div className="h-8 w-8 rounded-xl bg-indigo-500/10 text-indigo-500 flex items-center justify-center">
-                <Wind className="h-4 w-4" />
+        <motion.div variants={cardEntrance} whileHover={{ y: -3 }}>
+          <Card className="border-border/60 shadow-sm overflow-hidden flex flex-col justify-between h-full">
+            <CardHeader className="pb-2">
+              <div className="flex items-center gap-2">
+                <div className="h-8 w-8 rounded-xl bg-indigo-500/10 text-indigo-500 flex items-center justify-center">
+                  <Wind className="h-4 w-4" />
+                </div>
+                <div>
+                  <CardTitle className="text-base font-bold text-foreground">
+                    Box Breathing Protocol (4-4-4-4)
+                  </CardTitle>
+                  <CardDescription className="text-xs text-muted-foreground">
+                    Navy SEAL technique to reset acute anxiety in under 2 minutes
+                  </CardDescription>
+                </div>
               </div>
-              <div>
-                <CardTitle className="text-base font-bold text-foreground">
-                  Box Breathing Protocol (4-4-4-4)
-                </CardTitle>
-                <CardDescription className="text-xs text-muted-foreground">
-                  Navy SEAL technique to reset acute anxiety in under 2 minutes
-                </CardDescription>
-              </div>
-            </div>
-          </CardHeader>
+            </CardHeader>
 
-          <CardContent className="flex flex-col items-center justify-center py-8 space-y-6">
-            {/* Animated breathing visual circle */}
-            <div className="relative flex items-center justify-center">
-              <div 
-                className={`w-44 h-44 rounded-full flex flex-col items-center justify-center border-4 transition-all duration-1000 ${
-                  breathingPhase === "Inhale" 
-                    ? "scale-110 border-indigo-500 bg-indigo-500/10 shadow-lg shadow-indigo-500/20" 
-                    : breathingPhase === "Exhale" 
-                    ? "scale-90 border-emerald-500 bg-emerald-500/10" 
-                    : "scale-100 border-amber-500 bg-amber-500/10"
-                }`}
-              >
-                <span className="text-xs uppercase tracking-widest font-extrabold text-muted-foreground">
-                  {breathingPhase}
-                </span>
-                <span className="text-4xl font-black text-foreground mt-1">
-                  {breathingSeconds}s
-                </span>
-                <span className="text-[10px] text-muted-foreground mt-1 font-semibold">
-                  {cyclesCompleted} Cycles Done
-                </span>
+            <CardContent className="flex flex-col items-center justify-center py-8 space-y-6">
+              {/* Animated breathing visual circle */}
+              <div className="relative flex items-center justify-center">
+                <motion.div 
+                  animate={{
+                    scale: isBreathingActive
+                      ? breathingPhase === "Inhale"
+                        ? 1.15
+                        : breathingPhase === "Exhale"
+                        ? 0.88
+                        : 1.0
+                      : 1.0,
+                  }}
+                  transition={{
+                    duration: breathingPhase === "Inhale" || breathingPhase === "Exhale" ? 3.8 : 0.8,
+                    ease: "easeInOut",
+                  }}
+                  className={`w-44 h-44 rounded-full flex flex-col items-center justify-center border-4 transition-colors duration-700 ${
+                    breathingPhase === "Inhale" 
+                      ? "border-indigo-500 bg-indigo-500/10 shadow-lg shadow-indigo-500/20" 
+                      : breathingPhase === "Exhale" 
+                      ? "border-emerald-500 bg-emerald-500/10" 
+                      : "border-amber-500 bg-amber-500/10"
+                  }`}
+                >
+                  <span className="text-xs uppercase tracking-widest font-extrabold text-muted-foreground">
+                    {breathingPhase}
+                  </span>
+                  <span className="text-4xl font-black text-foreground mt-1">
+                    {breathingSeconds}s
+                  </span>
+                  <span className="text-[10px] text-muted-foreground mt-1 font-semibold">
+                    {cyclesCompleted} Cycles Done
+                  </span>
+                </motion.div>
               </div>
-            </div>
 
             {/* Controls */}
             <div className="flex items-center gap-3">
@@ -165,69 +191,72 @@ export const SelfCareResourcesPage: React.FC = () => {
             </div>
           </CardContent>
         </Card>
+      </motion.div>
 
         {/* 2. 5-4-3-2-1 Sensory Grounding Tool */}
-        <Card className="border-border/60 shadow-sm overflow-hidden flex flex-col justify-between">
-          <CardHeader className="pb-3">
-            <div className="flex items-center gap-2">
-              <div className="h-8 w-8 rounded-xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center">
-                <Eye className="h-4 w-4" />
+        <motion.div variants={cardEntrance} whileHover={{ y: -3 }}>
+          <Card className="border-border/60 shadow-sm overflow-hidden flex flex-col justify-between h-full">
+            <CardHeader className="pb-3">
+              <div className="flex items-center gap-2">
+                <div className="h-8 w-8 rounded-xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center">
+                  <Eye className="h-4 w-4" />
+                </div>
+                <div>
+                  <CardTitle className="text-base font-bold text-foreground">
+                    5-4-3-2-1 Sensory Grounding
+                  </CardTitle>
+                  <CardDescription className="text-xs text-muted-foreground">
+                    Reconnect with your physical senses when thoughts are racing
+                  </CardDescription>
+                </div>
               </div>
-              <div>
-                <CardTitle className="text-base font-bold text-foreground">
-                  5-4-3-2-1 Sensory Grounding
-                </CardTitle>
-                <CardDescription className="text-xs text-muted-foreground">
-                  Reconnect with your physical senses when thoughts are racing
-                </CardDescription>
-              </div>
-            </div>
-          </CardHeader>
+            </CardHeader>
 
-          <CardContent className="space-y-3">
-            {[
-              { id: 1, count: "5", title: "Things you can SEE", desc: "Look around you: notice a pen, shadow, or texture." },
-              { id: 2, count: "4", title: "Things you can TOUCH", desc: "Feel the desk, your clothing, or the floor under your feet." },
-              { id: 3, count: "3", title: "Things you can HEAR", desc: "Listen for the AC hum, distant footsteps, or your breath." },
-              { id: 4, count: "2", title: "Things you can SMELL", desc: "Notice coffee, fresh paper, or crisp air." },
-              { id: 5, count: "1", title: "Thing you can TASTE", desc: "Sip water or notice the lingering taste in your mouth." },
-            ].map((step) => {
-              const checked = Boolean(groundingChecks[step.id]);
-              return (
-                <button
-                  key={step.id}
-                  type="button"
-                  onClick={() => toggleGrounding(step.id)}
-                  className={`w-full text-left p-3 rounded-xl border transition-all flex items-start justify-between gap-3 ${
-                    checked 
-                      ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-700 dark:text-emerald-300" 
-                      : "bg-background/60 border-border/70 hover:bg-muted/40 text-foreground"
-                  }`}
-                >
-                  <div className="flex items-start gap-3">
-                    <span className="h-6 w-6 rounded-lg bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-black text-xs flex items-center justify-center shrink-0">
-                      {step.count}
-                    </span>
-                    <div>
-                      <div className={`text-xs font-bold ${checked ? "line-through opacity-70" : ""}`}>
-                        {step.title}
-                      </div>
-                      <div className="text-[11px] text-muted-foreground mt-0.5">
-                        {step.desc}
+            <CardContent className="space-y-3">
+              {[
+                { id: 1, count: "5", title: "Things you can SEE", desc: "Look around you: notice a pen, shadow, or texture." },
+                { id: 2, count: "4", title: "Things you can TOUCH", desc: "Feel the desk, your clothing, or the floor under your feet." },
+                { id: 3, count: "3", title: "Things you can HEAR", desc: "Listen for the AC hum, distant footsteps, or your breath." },
+                { id: 4, count: "2", title: "Things you can SMELL", desc: "Notice coffee, fresh paper, or crisp air." },
+                { id: 5, count: "1", title: "Thing you can TASTE", desc: "Sip water or notice the lingering taste in your mouth." },
+              ].map((step) => {
+                const checked = Boolean(groundingChecks[step.id]);
+                return (
+                  <button
+                    key={step.id}
+                    type="button"
+                    onClick={() => toggleGrounding(step.id)}
+                    className={`w-full text-left p-3 rounded-xl border transition-all flex items-start justify-between gap-3 ${
+                      checked 
+                        ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-700 dark:text-emerald-300" 
+                        : "bg-background/60 border-border/70 hover:bg-muted/40 text-foreground"
+                    }`}
+                  >
+                    <div className="flex items-start gap-3">
+                      <span className="h-6 w-6 rounded-lg bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-black text-xs flex items-center justify-center shrink-0">
+                        {step.count}
+                      </span>
+                      <div>
+                        <div className={`text-xs font-bold ${checked ? "line-through opacity-70" : ""}`}>
+                          {step.title}
+                        </div>
+                        <div className="text-[11px] text-muted-foreground mt-0.5">
+                          {step.desc}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                  <div className={`h-5 w-5 rounded-md border flex items-center justify-center shrink-0 mt-0.5 ${
-                    checked ? "bg-emerald-500 border-emerald-500 text-white" : "border-border"
-                  }`}>
-                    {checked && <CheckCircle2 className="h-3.5 w-3.5" />}
-                  </div>
-                </button>
-              );
-            })}
-          </CardContent>
-        </Card>
-      </div>
+                    <div className={`h-5 w-5 rounded-md border flex items-center justify-center shrink-0 mt-0.5 ${
+                      checked ? "bg-emerald-500 border-emerald-500 text-white" : "border-border"
+                    }`}>
+                      {checked && <CheckCircle2 className="h-3.5 w-3.5" />}
+                    </div>
+                  </button>
+                );
+              })}
+            </CardContent>
+          </Card>
+        </motion.div>
+      </motion.div>
 
       {/* Habit Recovery Interactive Simulator */}
       <HabitRecoverySimulator currentScore={78} />
@@ -280,7 +309,7 @@ export const SelfCareResourcesPage: React.FC = () => {
           </div>
         </Card>
       </div>
-    </div>
+    </motion.div>
   );
 };
 

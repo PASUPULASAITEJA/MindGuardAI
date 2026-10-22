@@ -48,6 +48,8 @@ import {
   CalendarRange
 } from "lucide-react";
 import { cn } from "@/utils/cn";
+import { motion } from "motion/react";
+import { pageVariants, staggerContainer, cardEntrance } from "@/utils/motion";
 
 export const AdminDashboard: React.FC = () => {
   const location = useLocation();
@@ -133,7 +135,12 @@ export const AdminDashboard: React.FC = () => {
   const departmentsList: DepartmentRiskItem[] = deptRiskData?.departments || [];
 
   return (
-    <div className="space-y-6 pb-12">
+    <motion.div 
+      variants={pageVariants}
+      initial="initial"
+      animate="animate"
+      className="space-y-6 pb-12"
+    >
       {/* Toast Banner */}
       {statusMessage && (
         <div className={cn(
@@ -300,39 +307,44 @@ export const AdminDashboard: React.FC = () => {
           </div>
 
           {/* KPI Cards */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-            <div className="p-4 rounded-xl border border-border bg-card shadow-xs">
+          <motion.div 
+            variants={staggerContainer}
+            initial="initial"
+            animate="animate"
+            className="grid grid-cols-2 lg:grid-cols-4 gap-3"
+          >
+            <motion.div variants={cardEntrance} whileHover={{ y: -3 }} className="p-4 rounded-xl border border-border bg-card shadow-xs">
               <span className="text-[11px] text-muted-foreground uppercase font-medium block">Campus Wellness Index</span>
               <span className="text-2xl font-bold text-foreground font-sans mt-1 block">
                 {isReportLoading ? "--" : (report?.average_wellness_score ? report.average_wellness_score.toFixed(1) : "--")}
               </span>
               <span className="text-[11px] text-muted-foreground mt-0.5 block">Aggregated campus metric</span>
-            </div>
+            </motion.div>
 
-            <div className="p-4 rounded-xl border border-border bg-card shadow-xs">
+            <motion.div variants={cardEntrance} whileHover={{ y: -3 }} className="p-4 rounded-xl border border-border bg-card shadow-xs">
               <span className="text-[11px] text-muted-foreground uppercase font-medium block">Total Students</span>
               <span className="text-2xl font-bold text-foreground font-sans mt-1 block">
                 {report?.total_students_monitored ?? 0}
               </span>
               <span className="text-[11px] text-muted-foreground mt-0.5 block">Active registered cohort</span>
-            </div>
+            </motion.div>
 
-            <div className="p-4 rounded-xl border border-border bg-card shadow-xs">
+            <motion.div variants={cardEntrance} whileHover={{ y: -3 }} className="p-4 rounded-xl border border-border bg-card shadow-xs">
               <span className="text-[11px] text-muted-foreground uppercase font-medium block">Active Triage Flags</span>
               <span className="text-2xl font-bold text-rose-600 dark:text-rose-400 font-sans mt-1 block">
                 {pendingAlertCount}
               </span>
               <span className="text-[11px] text-muted-foreground mt-0.5 block">Under counsellor triage</span>
-            </div>
+            </motion.div>
 
-            <div className="p-4 rounded-xl border border-border bg-card shadow-xs">
+            <motion.div variants={cardEntrance} whileHover={{ y: -3 }} className="p-4 rounded-xl border border-border bg-card shadow-xs">
               <span className="text-[11px] text-muted-foreground uppercase font-medium block">Departments Monitored</span>
               <span className="text-2xl font-bold text-foreground font-sans mt-1 block">
                 {departmentsList.length}
               </span>
               <span className="text-[11px] text-muted-foreground mt-0.5 block">Active cohort departments</span>
-            </div>
-          </div>
+            </motion.div>
+          </motion.div>
 
           {/* Academic Calendar & Milestone Impact Section */}
           <Card className="p-5 space-y-4">
@@ -491,7 +503,7 @@ export const AdminDashboard: React.FC = () => {
           </Card>
         </div>
       )}
-    </div>
+    </motion.div>
   );
 };
 

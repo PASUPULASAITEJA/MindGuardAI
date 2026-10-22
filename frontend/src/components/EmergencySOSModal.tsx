@@ -3,6 +3,8 @@ import { PhoneCall, AlertTriangle, ShieldCheck, HeartHandshake, X, Loader2, Chec
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/toast";
 import { sosAPI, SOSHelpline } from "@/services/api";
+import { motion, AnimatePresence } from "motion/react";
+import { modalBackdropVariants, modalPanelVariants } from "@/utils/motion";
 
 interface EmergencySOSModalProps {
   isOpen: boolean;
@@ -35,9 +37,6 @@ export const EmergencySOSModal: React.FC<EmergencySOSModalProps> = ({ isOpen, on
   const [isDispatching, setIsDispatching] = useState(false);
   const [isDispatched, setIsDispatched] = useState(false);
   const [helplines, setHelplines] = useState<SOSHelpline[]>(DEFAULT_HELPLINES);
-
-  if (!isOpen) return null;
-
   const handleDispatchCounselorAlert = async () => {
     setIsDispatching(true);
     try {
@@ -76,9 +75,23 @@ export const EmergencySOSModal: React.FC<EmergencySOSModalProps> = ({ isOpen, on
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-in fade-in duration-200">
-      <div className="relative w-full max-w-lg rounded-2xl border-2 border-rose-500/50 bg-card p-6 shadow-2xl space-y-5 text-foreground">
-        {/* Header */}
+    <AnimatePresence>
+      {isOpen && (
+        <motion.div 
+          variants={modalBackdropVariants}
+          initial="initial"
+          animate="animate"
+          exit="exit"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md"
+        >
+          <motion.div 
+            variants={modalPanelVariants}
+            initial="initial"
+            animate="animate"
+            exit="exit"
+            className="relative w-full max-w-lg rounded-2xl border-2 border-rose-500/50 bg-card p-6 shadow-2xl space-y-5 text-foreground"
+          >
+            {/* Header */}
         <div className="flex items-start justify-between border-b border-border pb-4">
           <div className="flex items-center gap-3">
             <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-rose-500/10 text-rose-500 border border-rose-500/20 shadow-inner">
@@ -201,7 +214,9 @@ export const EmergencySOSModal: React.FC<EmergencySOSModalProps> = ({ isOpen, on
             Close Gateway
           </Button>
         </div>
-      </div>
-    </div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 };

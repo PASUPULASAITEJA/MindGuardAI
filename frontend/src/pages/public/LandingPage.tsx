@@ -25,6 +25,8 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { motion } from "motion/react";
+import { pageVariants, staggerContainer, cardEntrance, cardHoverMotion, buttonTapMotion } from "@/utils/motion";
 
 export const LandingPage: React.FC = () => {
   const { theme, toggleTheme } = useTheme();
@@ -95,7 +97,12 @@ export const LandingPage: React.FC = () => {
       </header>
 
       {/* 2. Hero Section */}
-      <section className="pt-16 pb-16 md:pt-24 md:pb-24 border-b border-border">
+      <motion.section 
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+        className="pt-16 pb-16 md:pt-24 md:pb-24 border-b border-border"
+      >
         <div className="max-w-4xl mx-auto px-4 text-center space-y-6">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-primary/20 bg-primary/5 text-primary text-xs font-semibold">
             <Shield className="w-3.5 h-3.5" />
@@ -111,32 +118,38 @@ export const LandingPage: React.FC = () => {
           </p>
 
           <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
-            <Link
-              to="/login"
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-semibold bg-primary text-primary-foreground hover:bg-primary/90 transition-all shadow-xs transform hover:-translate-y-0.5"
-            >
-              <GraduationCap className="w-4 h-4" />
-              <span>Student Portal</span>
-            </Link>
+            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+              <Link
+                to="/login"
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-semibold bg-primary text-primary-foreground hover:bg-primary/90 transition-all shadow-xs"
+              >
+                <GraduationCap className="w-4 h-4" />
+                <span>Student Portal</span>
+              </Link>
+            </motion.div>
 
-            <Link
-              to="/login"
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-semibold border border-border/80 bg-card text-foreground hover:bg-secondary transition-all shadow-xs transform hover:-translate-y-0.5"
-            >
-              <HeartHandshake className="w-4 h-4 text-primary" />
-              <span>Counsellor Portal</span>
-            </Link>
+            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+              <Link
+                to="/login"
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-semibold border border-border/80 bg-card text-foreground hover:bg-secondary transition-all shadow-xs"
+              >
+                <HeartHandshake className="w-4 h-4 text-primary" />
+                <span>Counsellor Portal</span>
+              </Link>
+            </motion.div>
 
-            <Link
-              to="/login"
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-semibold border border-border/80 bg-card text-foreground hover:bg-secondary transition-all shadow-xs transform hover:-translate-y-0.5"
-            >
-              <Building2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-              <span>University Overview</span>
-            </Link>
+            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+              <Link
+                to="/login"
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-semibold border border-border/80 bg-card text-foreground hover:bg-secondary transition-all shadow-xs"
+              >
+                <Building2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                <span>University Overview</span>
+              </Link>
+            </motion.div>
           </div>
         </div>
-      </section>
+      </motion.section>
 
       {/* 3. How It Works Section */}
       <section id="how-it-works" className="py-16 border-b border-border bg-secondary/30">
@@ -148,39 +161,34 @@ export const LandingPage: React.FC = () => {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <Card className="p-5 space-y-2.5">
-              <span className="text-xs font-mono font-bold text-primary">01</span>
-              <h3 className="text-sm font-semibold text-foreground">Daily Check-in</h3>
-              <p className="text-xs text-muted-foreground leading-relaxed">
-                Log momentary mood, sleep hours, and stress levels in under a minute without burden.
-              </p>
-            </Card>
-
-            <Card className="p-5 space-y-2.5">
-              <span className="text-xs font-mono font-bold text-primary">02</span>
-              <h3 className="text-sm font-semibold text-foreground">Understand Trends</h3>
-              <p className="text-xs text-muted-foreground leading-relaxed">
-                View longitudinal wellbeing trajectory and circadian balance calibrated to your baseline.
-              </p>
-            </Card>
-
-            <Card className="p-5 space-y-2.5">
-              <span className="text-xs font-mono font-bold text-primary">03</span>
-              <h3 className="text-sm font-semibold text-foreground">Guided Care</h3>
-              <p className="text-xs text-muted-foreground leading-relaxed">
-                Access structured breathing pacers, self-care resources, and conversational AI support.
-              </p>
-            </Card>
-
-            <Card className="p-5 space-y-2.5">
-              <span className="text-xs font-mono font-bold text-primary">04</span>
-              <h3 className="text-sm font-semibold text-foreground">Counsellor Connect</h3>
-              <p className="text-xs text-muted-foreground leading-relaxed">
-                Book confidential 1-on-1 consultations with campus psychologists whenever extra support is helpful.
-              </p>
-            </Card>
-          </div>
+          <motion.div 
+            variants={staggerContainer}
+            initial="initial"
+            whileInView="animate"
+            viewport={{ once: true, margin: "-40px" }}
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"
+          >
+            {[
+              { num: "01", title: "Daily Check-in", desc: "Log momentary mood, sleep hours, and stress levels in under a minute without burden." },
+              { num: "02", title: "Understand Trends", desc: "View longitudinal wellbeing trajectory and circadian balance calibrated to your baseline." },
+              { num: "03", title: "Guided Care", desc: "Access structured breathing pacers, self-care resources, and conversational AI support." },
+              { num: "04", title: "Counsellor Connect", desc: "Book confidential 1-on-1 consultations with campus psychologists whenever extra support is helpful." }
+            ].map((step) => (
+              <motion.div
+                key={step.num}
+                variants={cardEntrance}
+                whileHover={{ y: -4, transition: { duration: 0.2 } }}
+              >
+                <Card className="p-5 space-y-2.5 h-full">
+                  <span className="text-xs font-mono font-bold text-primary">{step.num}</span>
+                  <h3 className="text-sm font-semibold text-foreground">{step.title}</h3>
+                  <p className="text-xs text-muted-foreground leading-relaxed">
+                    {step.desc}
+                  </p>
+                </Card>
+              </motion.div>
+            ))}
+          </motion.div>
         </div>
       </section>
 
@@ -194,31 +202,43 @@ export const LandingPage: React.FC = () => {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Card className="p-5 space-y-3">
-              <Activity className="h-5 w-5 text-primary" />
-              <h3 className="text-sm font-semibold text-foreground">Multidimensional Wellbeing</h3>
-              <p className="text-xs text-muted-foreground leading-relaxed">
-                Tracks emotional vitality, academic load, and sleep architecture over 7-day to 1-year horizons.
-              </p>
-            </Card>
+          <motion.div 
+            variants={staggerContainer}
+            initial="initial"
+            whileInView="animate"
+            viewport={{ once: true, margin: "-40px" }}
+            className="grid grid-cols-1 md:grid-cols-3 gap-4"
+          >
+            <motion.div variants={cardEntrance} whileHover={{ y: -4, transition: { duration: 0.2 } }}>
+              <Card className="p-5 space-y-3 h-full">
+                <Activity className="h-5 w-5 text-primary" />
+                <h3 className="text-sm font-semibold text-foreground">Multidimensional Wellbeing</h3>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  Tracks emotional vitality, academic load, and sleep architecture over 7-day to 1-year horizons.
+                </p>
+              </Card>
+            </motion.div>
 
-            <Card className="p-5 space-y-3">
-              <Sparkles className="h-5 w-5 text-indigo-500" />
-              <h3 className="text-sm font-semibold text-foreground">Explainable AI Attributions</h3>
-              <p className="text-xs text-muted-foreground leading-relaxed">
-                Provides transparent SHAP factors so both students and counsellors understand why scores shift.
-              </p>
-            </Card>
+            <motion.div variants={cardEntrance} whileHover={{ y: -4, transition: { duration: 0.2 } }}>
+              <Card className="p-5 space-y-3 h-full">
+                <Sparkles className="h-5 w-5 text-indigo-500" />
+                <h3 className="text-sm font-semibold text-foreground">Explainable AI Attributions</h3>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  Provides transparent SHAP factors so both students and counsellors understand why scores shift.
+                </p>
+              </Card>
+            </motion.div>
 
-            <Card className="p-5 space-y-3">
-              <Users className="h-5 w-5 text-blue-500" />
-              <h3 className="text-sm font-semibold text-foreground">Case Management Console</h3>
-              <p className="text-xs text-muted-foreground leading-relaxed">
-                Equips campus counsellors with priority triage queues, appointment scheduling, and secure notes.
-              </p>
-            </Card>
-          </div>
+            <motion.div variants={cardEntrance} whileHover={{ y: -4, transition: { duration: 0.2 } }}>
+              <Card className="p-5 space-y-3 h-full">
+                <Users className="h-5 w-5 text-blue-500" />
+                <h3 className="text-sm font-semibold text-foreground">Case Management Console</h3>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  Equips campus counsellors with priority triage queues, appointment scheduling, and secure notes.
+                </p>
+              </Card>
+            </motion.div>
+          </motion.div>
         </div>
       </section>
 
