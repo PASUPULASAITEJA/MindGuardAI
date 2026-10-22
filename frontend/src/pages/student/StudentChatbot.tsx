@@ -32,6 +32,9 @@ import { useToast } from "@/components/ui/toast";
 import { EmergencySOSModal } from "@/components/EmergencySOSModal";
 import { motion, AnimatePresence } from "motion/react";
 import { chatBotMessageVariants, chatUserMessageVariants } from "@/utils/motion";
+import { LazyCanvasWrapper } from "@/components/3d/LazyCanvasWrapper";
+
+const AIAssistantAvatar3D = React.lazy(() => import("@/components/3d/AIAssistantAvatar3D"));
 
 interface QuickPrompt {
   title: string;
@@ -533,8 +536,10 @@ export const StudentChatbot: React.FC = () => {
         {/* Chat Header */}
         <div className="flex items-center justify-between border-b border-border/80 px-5 py-3.5 bg-card/50">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-tr from-primary to-indigo-600 text-primary-foreground shadow-md shadow-primary/20">
-              <Bot className="h-5 w-5" />
+            <div className="h-10 w-10 relative flex items-center justify-center shrink-0">
+              <LazyCanvasWrapper className="h-full w-full">
+                <AIAssistantAvatar3D isThinking={isSending} className="h-10 w-10" />
+              </LazyCanvasWrapper>
             </div>
             <div>
               <div className="flex items-center gap-2">
@@ -578,10 +583,12 @@ export const StudentChatbot: React.FC = () => {
         <div className="flex-1 space-y-4 overflow-y-auto p-4 sm:p-6">
           {messages.length === 0 ? (
             <div className="flex h-full flex-col items-center justify-center text-center py-6">
-              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary border border-primary/20 shadow-xs">
-                <Sparkles className="h-7 w-7 animate-pulse" />
+              <div className="h-28 w-28 relative flex items-center justify-center mb-1">
+                <LazyCanvasWrapper className="h-full w-full">
+                  <AIAssistantAvatar3D isThinking={isSending} className="h-28 w-28" />
+                </LazyCanvasWrapper>
               </div>
-              <h4 className="mt-4 text-base font-extrabold text-foreground">
+              <h4 className="mt-2 text-base font-extrabold text-foreground">
                 MindGuardAI Sanctuary Companion
               </h4>
               <p className="mt-1 max-w-md text-xs text-muted-foreground leading-relaxed">

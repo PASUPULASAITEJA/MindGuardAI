@@ -21,6 +21,9 @@ import { HabitRecoverySimulator } from "../../components/HabitRecoverySimulator"
 import { PersonalizedRecommendations } from "../../components/PersonalizedRecommendations";
 import { motion } from "motion/react";
 import { pageVariants, staggerContainer, cardEntrance } from "@/utils/motion";
+import { LazyCanvasWrapper } from "@/components/3d/LazyCanvasWrapper";
+
+const BreathingSphere3D = React.lazy(() => import("@/components/3d/BreathingSphere3D"));
 
 export const SelfCareResourcesPage: React.FC = () => {
   const navigate = useNavigate();
@@ -124,44 +127,36 @@ export const SelfCareResourcesPage: React.FC = () => {
               </div>
             </CardHeader>
 
-            <CardContent className="flex flex-col items-center justify-center py-8 space-y-6">
-              {/* Animated breathing visual circle */}
-              <div className="relative flex items-center justify-center">
-                <motion.div 
-                  animate={{
-                    scale: isBreathingActive
-                      ? breathingPhase === "Inhale"
-                        ? 1.25
-                        : breathingPhase === "Exhale"
-                        ? 0.80
-                        : 1.05
-                      : 1.0,
-                    boxShadow: isBreathingActive && breathingPhase === "Inhale"
-                      ? "0 0 35px rgba(99, 102, 241, 0.45)"
-                      : "0 0 10px rgba(0, 0, 0, 0.05)",
-                  }}
-                  transition={{
-                    duration: breathingPhase === "Inhale" || breathingPhase === "Exhale" ? 3.8 : 0.8,
-                    ease: "easeInOut",
-                  }}
-                  className={`w-44 h-44 rounded-full flex flex-col items-center justify-center border-4 transition-colors duration-700 ${
-                    breathingPhase === "Inhale" 
-                      ? "border-indigo-500 bg-indigo-500/10 shadow-lg shadow-indigo-500/20" 
-                      : breathingPhase === "Exhale" 
-                      ? "border-emerald-500 bg-emerald-500/10" 
-                      : "border-amber-500 bg-amber-500/10"
-                  }`}
-                >
-                  <span className="text-xs uppercase tracking-widest font-extrabold text-muted-foreground">
-                    {breathingPhase}
+            <CardContent className="flex flex-col items-center justify-center py-6 space-y-4">
+              {/* 3D Interactive Breathing Sphere */}
+              <div className="relative flex flex-col items-center justify-center">
+                <div className="h-52 w-52 relative flex items-center justify-center">
+                  <LazyCanvasWrapper className="h-full w-full">
+                    <BreathingSphere3D 
+                      phase={breathingPhase} 
+                      isActive={isBreathingActive} 
+                      className="h-full w-full"
+                    />
+                  </LazyCanvasWrapper>
+                  {/* Floating timer overlay */}
+                  <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none drop-shadow-md">
+                    <span className="text-3xl font-black text-white mix-blend-difference">
+                      {breathingSeconds}s
+                    </span>
+                    <span className="text-[11px] uppercase tracking-widest font-extrabold text-white mix-blend-difference mt-0.5">
+                      {breathingPhase}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2 mt-2">
+                  <span className="text-xs font-semibold px-3 py-1 rounded-full bg-secondary border border-border text-foreground">
+                    Phase: {breathingPhase} ({breathingSeconds}s)
                   </span>
-                  <span className="text-4xl font-black text-foreground mt-1">
-                    {breathingSeconds}s
-                  </span>
-                  <span className="text-[10px] text-muted-foreground mt-1 font-semibold">
+                  <span className="text-xs font-semibold px-3 py-1 rounded-full bg-primary/10 text-primary border border-primary/20">
                     {cyclesCompleted} Cycles Done
                   </span>
-                </motion.div>
+                </div>
               </div>
 
             {/* Controls */}

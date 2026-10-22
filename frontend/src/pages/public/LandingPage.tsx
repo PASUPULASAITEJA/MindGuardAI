@@ -27,6 +27,9 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { motion } from "motion/react";
 import { pageVariants, staggerContainer, cardEntrance, cardHoverMotion, buttonTapMotion } from "@/utils/motion";
+import { LazyCanvasWrapper } from "@/components/3d/LazyCanvasWrapper";
+
+const WellnessOrb3D = React.lazy(() => import("@/components/3d/WellnessOrb3D"));
 
 export const LandingPage: React.FC = () => {
   const { theme, toggleTheme } = useTheme();
@@ -96,57 +99,76 @@ export const LandingPage: React.FC = () => {
         </div>
       </header>
 
-      {/* 2. Hero Section */}
+      {/* 2. Hero Section with Interactive 3D Wellness Orb */}
       <motion.section 
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-        className="pt-16 pb-16 md:pt-24 md:pb-24 border-b border-border"
+        className="pt-12 pb-16 md:pt-16 md:pb-24 border-b border-border overflow-hidden"
       >
-        <div className="max-w-4xl mx-auto px-4 text-center space-y-6">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-primary/20 bg-primary/5 text-primary text-xs font-semibold">
-            <Shield className="w-3.5 h-3.5" />
-            <span>Student Wellbeing & Early Support Platform</span>
-          </div>
+        <div className="max-w-6xl mx-auto px-4">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+            {/* Left Content Column */}
+            <div className="lg:col-span-7 text-center lg:text-left space-y-6">
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-primary/20 bg-primary/5 text-primary text-xs font-semibold">
+                <Shield className="w-3.5 h-3.5" />
+                <span>Student Wellbeing & Early Support Platform</span>
+              </div>
 
-          <h1 className="text-3xl sm:text-5xl md:text-6xl font-extrabold tracking-tight text-foreground leading-[1.15]">
-            A smarter, dignified way to support student wellbeing.
-          </h1>
+              <h1 className="text-3xl sm:text-5xl md:text-6xl font-extrabold tracking-tight text-foreground leading-[1.15]">
+                A smarter, dignified way to support student wellbeing.
+              </h1>
 
-          <p className="max-w-2xl mx-auto text-sm sm:text-base text-muted-foreground leading-relaxed">
-            Track personal wellbeing, identify meaningful emotional trends, and connect students with appropriate university care—while keeping privacy and human oversight at the core.
-          </p>
+              <p className="max-w-2xl mx-auto lg:mx-0 text-sm sm:text-base text-muted-foreground leading-relaxed">
+                Track personal wellbeing, identify meaningful emotional trends, and connect students with appropriate university care—while keeping privacy and human oversight at the core.
+              </p>
 
-          <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
-            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-              <Link
-                to="/login"
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-semibold bg-primary text-primary-foreground hover:bg-primary/90 transition-all shadow-xs"
-              >
-                <GraduationCap className="w-4 h-4" />
-                <span>Student Portal</span>
-              </Link>
-            </motion.div>
+              <div className="flex flex-wrap items-center justify-center lg:justify-start gap-3 pt-2">
+                <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                  <Link
+                    to="/login"
+                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-semibold bg-primary text-primary-foreground hover:bg-primary/90 transition-all shadow-xs"
+                  >
+                    <GraduationCap className="w-4 h-4" />
+                    <span>Student Portal</span>
+                  </Link>
+                </motion.div>
 
-            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-              <Link
-                to="/login"
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-semibold border border-border/80 bg-card text-foreground hover:bg-secondary transition-all shadow-xs"
-              >
-                <HeartHandshake className="w-4 h-4 text-primary" />
-                <span>Counsellor Portal</span>
-              </Link>
-            </motion.div>
+                <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                  <Link
+                    to="/login"
+                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-semibold border border-border/80 bg-card text-foreground hover:bg-secondary transition-all shadow-xs"
+                  >
+                    <HeartHandshake className="w-4 h-4 text-primary" />
+                    <span>Counsellor Portal</span>
+                  </Link>
+                </motion.div>
 
-            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-              <Link
-                to="/login"
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-semibold border border-border/80 bg-card text-foreground hover:bg-secondary transition-all shadow-xs"
-              >
-                <Building2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-                <span>University Overview</span>
-              </Link>
-            </motion.div>
+                <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                  <Link
+                    to="/login"
+                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-semibold border border-border/80 bg-card text-foreground hover:bg-secondary transition-all shadow-xs"
+                  >
+                    <Building2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                    <span>University Overview</span>
+                  </Link>
+                </motion.div>
+              </div>
+            </div>
+
+            {/* Right 3D Interactive Wellness Orb Column */}
+            <div className="lg:col-span-5 flex flex-col items-center justify-center">
+              <div className="w-full max-w-sm md:max-w-md h-80 relative flex items-center justify-center">
+                <div className="absolute inset-0 bg-gradient-to-tr from-primary/10 via-transparent to-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
+                <LazyCanvasWrapper className="w-full h-full">
+                  <WellnessOrb3D className="w-full h-full" />
+                </LazyCanvasWrapper>
+              </div>
+              <span className="text-[11px] font-medium text-muted-foreground flex items-center gap-1.5 -mt-2">
+                <Sparkles className="w-3 h-3 text-primary" />
+                <span>Interactive 3D Wellness Sphere • Move cursor to interact</span>
+              </span>
+            </div>
           </div>
         </div>
       </motion.section>

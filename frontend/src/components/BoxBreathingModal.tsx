@@ -3,6 +3,9 @@ import { X, Wind, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "motion/react";
 import { modalBackdropVariants, modalPanelVariants } from "@/utils/motion";
+import { LazyCanvasWrapper } from "@/components/3d/LazyCanvasWrapper";
+
+const BreathingSphere3D = React.lazy(() => import("@/components/3d/BreathingSphere3D"));
 
 interface BoxBreathingModalProps {
   isOpen: boolean;
@@ -91,26 +94,23 @@ export const BoxBreathingModal: React.FC<BoxBreathingModalProps> = ({ isOpen, on
           </p>
         </div>
 
-        {/* Pulsing Visual Circle */}
-        <div className="py-6 flex items-center justify-center">
-          <motion.div
-            animate={{
-              scale: phase === "Inhale" ? 1.25 : phase === "Exhale" ? 0.80 : 1.05,
-              boxShadow: phase === "Inhale" ? "0 0 35px rgba(32, 150, 137, 0.45)" : "0 0 10px rgba(0, 0, 0, 0.08)",
-            }}
-            transition={{
-              duration: phase === "Inhale" || phase === "Exhale" ? 3.8 : 0.8,
-              ease: "easeInOut",
-            }}
-            className={`relative flex h-48 w-48 items-center justify-center rounded-full border-4 shadow-2xl transition-colors duration-700 ${phaseColor}`}
-          >
-            <div className="text-center space-y-1">
-              <span className="text-4xl font-black text-foreground tracking-tight">{seconds}s</span>
-              <div className="text-xs font-extrabold uppercase tracking-widest text-primary">
+        {/* 3D Interactive Breathing Sphere */}
+        <div className="py-2 flex flex-col items-center justify-center">
+          <div className="h-48 w-48 relative flex items-center justify-center">
+            <LazyCanvasWrapper className="h-full w-full">
+              <BreathingSphere3D 
+                phase={phase === "Hold After" ? "Hold" : phase} 
+                isActive={isOpen} 
+                className="h-full w-full"
+              />
+            </LazyCanvasWrapper>
+            <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none drop-shadow-md">
+              <span className="text-4xl font-black text-white mix-blend-difference">{seconds}s</span>
+              <span className="text-xs font-extrabold uppercase tracking-widest text-white mix-blend-difference mt-0.5">
                 {phase}
-              </div>
+              </span>
             </div>
-          </motion.div>
+          </div>
         </div>
 
         <p className="text-xs text-muted-foreground italic h-6">{phaseInstruction}</p>
