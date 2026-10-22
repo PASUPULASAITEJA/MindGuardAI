@@ -131,11 +131,14 @@ export const SelfCareResourcesPage: React.FC = () => {
                   animate={{
                     scale: isBreathingActive
                       ? breathingPhase === "Inhale"
-                        ? 1.15
+                        ? 1.25
                         : breathingPhase === "Exhale"
-                        ? 0.88
-                        : 1.0
+                        ? 0.80
+                        : 1.05
                       : 1.0,
+                    boxShadow: isBreathingActive && breathingPhase === "Inhale"
+                      ? "0 0 35px rgba(99, 102, 241, 0.45)"
+                      : "0 0 10px rgba(0, 0, 0, 0.05)",
                   }}
                   transition={{
                     duration: breathingPhase === "Inhale" || breathingPhase === "Exhale" ? 3.8 : 0.8,

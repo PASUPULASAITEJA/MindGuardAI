@@ -65,6 +65,7 @@ import { OnboardingConsentModal } from "@/components/OnboardingConsentModal";
 import { MoodMicroCheckin } from "@/components/MoodMicroCheckin";
 import { motion } from "motion/react";
 import { pageVariants, staggerContainer, cardEntrance, cardHoverMotion, pillSelectMotion } from "@/utils/motion";
+import { AnimatedCounter } from "@/components/ui/animated-counter";
 
 export const StudentDashboard: React.FC = () => {
   const { user } = useAuth();
@@ -235,13 +236,13 @@ export const StudentDashboard: React.FC = () => {
 
   return (
     <motion.div 
-      variants={pageVariants}
+      variants={staggerContainer}
       initial="initial"
       animate="animate"
       className="space-y-6 pb-12"
     >
       {/* 1. Welcoming Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-border/80 pb-4">
+      <motion.div variants={cardEntrance} className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-border/80 pb-4">
         <div>
           <div className="flex items-center gap-2 mb-1">
             <span className="wellness-pill">
@@ -299,13 +300,12 @@ export const StudentDashboard: React.FC = () => {
             </Button>
           </motion.div>
         </div>
-      </div>
+      </motion.div>
 
       {/* 2. Prominent "How are you feeling today?" Interactive Hero Card */}
       <motion.div 
-        initial={{ opacity: 0, y: 14 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+        variants={cardEntrance}
+        whileHover={{ y: -3, transition: { duration: 0.2 } }}
         className="wellness-card p-6 bg-gradient-to-br from-primary/10 via-accent/30 to-card border-primary/20 relative overflow-hidden"
       >
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
@@ -374,9 +374,9 @@ export const StudentDashboard: React.FC = () => {
       <ConsentBanner />
 
       {/* 2. Support Status & Personal Baseline Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      <motion.div variants={cardEntrance} className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* Current Support Status Card */}
-        <Card className="lg:col-span-1 p-5 flex flex-col justify-between">
+        <Card className="lg:col-span-1 p-5 flex flex-col justify-between hover:shadow-md transition-shadow">
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
@@ -389,7 +389,7 @@ export const StudentDashboard: React.FC = () => {
 
             <div className="flex items-baseline gap-2">
               <span className="text-4xl font-bold tracking-tight text-foreground font-sans">
-                {wellnessScore !== null ? wellnessScore.toFixed(0) : "—"}
+                {wellnessScore !== null ? <AnimatedCounter value={wellnessScore} /> : "—"}
               </span>
               <span className="text-xs text-muted-foreground">/ 100 Wellbeing Index</span>
             </div>
@@ -414,7 +414,7 @@ export const StudentDashboard: React.FC = () => {
         </Card>
 
         {/* Personal Baseline Analysis Panel */}
-        <Card className="lg:col-span-2 p-5 flex flex-col justify-between space-y-4">
+        <Card className="lg:col-span-2 p-5 flex flex-col justify-between space-y-4 hover:shadow-md transition-shadow">
           <div className="flex items-center justify-between">
             <div>
               <h3 className="text-sm font-semibold text-foreground">Personal Wellbeing Baseline</h3>
@@ -428,8 +428,10 @@ export const StudentDashboard: React.FC = () => {
           <div className="grid grid-cols-3 gap-3">
             <div className="p-3 rounded-lg bg-secondary/40 border border-border/60">
               <div className="text-[10px] text-muted-foreground font-medium uppercase">Usual Stress</div>
-              <div className="text-base font-bold text-foreground mt-0.5">
-                {trendData?.baseline?.usual_stress ? `${trendData.baseline.usual_stress} / 10` : "—"}
+              <div className="text-base font-bold text-foreground mt-0.5 font-sans">
+                {trendData?.baseline?.usual_stress ? (
+                  <><AnimatedCounter value={trendData.baseline.usual_stress} /> / 10</>
+                ) : "—"}
               </div>
               <div className="text-[10px] text-muted-foreground mt-0.5">
                 Recent: {trendData?.baseline?.recent_stress ? `${trendData.baseline.recent_stress} / 10` : "—"}
@@ -443,8 +445,10 @@ export const StudentDashboard: React.FC = () => {
 
             <div className="p-3 rounded-lg bg-secondary/40 border border-border/60">
               <div className="text-[10px] text-muted-foreground font-medium uppercase">Usual Sleep</div>
-              <div className="text-base font-bold text-foreground mt-0.5">
-                {trendData?.baseline?.usual_sleep_hours ? `${trendData.baseline.usual_sleep_hours}h` : "—"}
+              <div className="text-base font-bold text-foreground mt-0.5 font-sans">
+                {trendData?.baseline?.usual_sleep_hours ? (
+                  <><AnimatedCounter value={trendData.baseline.usual_sleep_hours} decimals={1} />h</>
+                ) : "—"}
               </div>
               <div className="text-[10px] text-muted-foreground mt-0.5">
                 Recent: {trendData?.baseline?.recent_sleep_hours ? `${trendData.baseline.recent_sleep_hours}h` : "—"}
@@ -458,8 +462,10 @@ export const StudentDashboard: React.FC = () => {
 
             <div className="p-3 rounded-lg bg-secondary/40 border border-border/60">
               <div className="text-[10px] text-muted-foreground font-medium uppercase">Usual Mood</div>
-              <div className="text-base font-bold text-foreground mt-0.5">
-                {trendData?.baseline?.usual_mood_score ? `${trendData.baseline.usual_mood_score} / 10` : "—"}
+              <div className="text-base font-bold text-foreground mt-0.5 font-sans">
+                {trendData?.baseline?.usual_mood_score ? (
+                  <><AnimatedCounter value={trendData.baseline.usual_mood_score} decimals={1} /> / 10</>
+                ) : "—"}
               </div>
               <div className="text-[10px] text-muted-foreground mt-0.5">
                 Recent: {trendData?.baseline?.recent_mood_score ? `${trendData.baseline.recent_mood_score} / 10` : "—"}
@@ -477,10 +483,11 @@ export const StudentDashboard: React.FC = () => {
             <span>{trendData?.baseline?.summary_message || "Continue checking in to establish your personal wellbeing baseline."}</span>
           </div>
         </Card>
-      </div>
+      </motion.div>
 
       {/* 3. My Wellbeing Journey Area Chart */}
-      <Card className="p-5 space-y-3">
+      <motion.div variants={cardEntrance}>
+        <Card className="p-5 space-y-3">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
             <h3 className="text-sm font-semibold text-foreground">My Wellbeing Journey</h3>
@@ -555,6 +562,9 @@ export const StudentDashboard: React.FC = () => {
                   strokeWidth={2} 
                   fillOpacity={1} 
                   fill="url(#wellGrad)" 
+                  isAnimationActive={true}
+                  animationDuration={1000}
+                  animationEasing="ease-out"
                 />
               </AreaChart>
             </ResponsiveContainer>
@@ -565,13 +575,16 @@ export const StudentDashboard: React.FC = () => {
             <p className="text-xs text-muted-foreground">Complete your daily check-in to generate trend data.</p>
           </div>
         )}
-      </Card>
+        </Card>
+      </motion.div>
 
       {/* 3. Today's Fast Micro Check-in Widget */}
-      <MoodMicroCheckin />
+      <motion.div variants={cardEntrance}>
+        <MoodMicroCheckin />
+      </motion.div>
 
       {/* 4. Digital Phenotyping & Telemetry Breakdown */}
-      <div className="space-y-4">
+      <motion.div variants={cardEntrance} className="space-y-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Clock className="h-4 w-4 text-primary" />
@@ -710,19 +723,19 @@ export const StudentDashboard: React.FC = () => {
                   />
                   <ReferenceLine y={6.0} stroke="#10b981" strokeDasharray="3 3" />
                   {screenChartMode === "total" ? (
-                    <Bar dataKey="totalHours" name="Total Hours" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]}>
+                    <Bar dataKey="totalHours" name="Total Hours" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} isAnimationActive={true} animationDuration={1000} animationEasing="ease-out">
                       <LabelList dataKey="totalHours" position="top" fontSize={10} formatter={(v: any) => v > 0 ? `${v}h` : ""} />
                     </Bar>
                   ) : screenChartMode === "circadian" ? (
                     <>
-                      <Bar dataKey="daytimeHours" name="Daytime Hours" stackId="s" fill="#38bdf8" />
-                      <Bar dataKey="lateNightHours" name="Late-Night Hours" stackId="s" fill="#f43f5e" radius={[4, 4, 0, 0]} />
+                      <Bar dataKey="daytimeHours" name="Daytime Hours" stackId="s" fill="#38bdf8" isAnimationActive={true} animationDuration={1000} animationEasing="ease-out" />
+                      <Bar dataKey="lateNightHours" name="Late-Night Hours" stackId="s" fill="#f43f5e" radius={[4, 4, 0, 0]} isAnimationActive={true} animationDuration={1000} animationEasing="ease-out" />
                     </>
                   ) : (
                     <>
-                      <Bar dataKey="academicHours" name="Study Hours" stackId="s" fill="hsl(var(--primary))" />
-                      <Bar dataKey="socialHours" name="Social Hours" stackId="s" fill="#10b981" />
-                      <Bar dataKey="entertainmentHours" name="Leisure Hours" stackId="s" fill="#a855f7" radius={[4, 4, 0, 0]} />
+                      <Bar dataKey="academicHours" name="Study Hours" stackId="s" fill="hsl(var(--primary))" isAnimationActive={true} animationDuration={1000} animationEasing="ease-out" />
+                      <Bar dataKey="socialHours" name="Social Hours" stackId="s" fill="#10b981" isAnimationActive={true} animationDuration={1000} animationEasing="ease-out" />
+                      <Bar dataKey="entertainmentHours" name="Leisure Hours" stackId="s" fill="#a855f7" radius={[4, 4, 0, 0]} isAnimationActive={true} animationDuration={1000} animationEasing="ease-out" />
                     </>
                   )}
                 </BarChart>
@@ -730,10 +743,10 @@ export const StudentDashboard: React.FC = () => {
             </div>
           )}
         </Card>
-      </div>
+      </motion.div>
 
       {/* 5. Recommended Support Pathways */}
-      <div className="space-y-3">
+      <motion.div variants={cardEntrance} className="space-y-3">
         <h2 className="text-sm font-semibold text-foreground">Recommended Care & Tools</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
           <Card className="p-4 flex flex-col justify-between space-y-3">
@@ -799,7 +812,7 @@ export const StudentDashboard: React.FC = () => {
             </Button>
           </Card>
         </div>
-      </div>
+      </motion.div>
 
       {/* Modals */}
       <EmergencySOSModal isOpen={isSOSOpen} onClose={() => setIsSOSOpen(false)} />

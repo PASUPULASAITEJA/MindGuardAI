@@ -95,7 +95,8 @@ export const BoxBreathingModal: React.FC<BoxBreathingModalProps> = ({ isOpen, on
         <div className="py-6 flex items-center justify-center">
           <motion.div
             animate={{
-              scale: phase === "Inhale" ? 1.15 : phase === "Exhale" ? 0.88 : 1.0,
+              scale: phase === "Inhale" ? 1.25 : phase === "Exhale" ? 0.80 : 1.05,
+              boxShadow: phase === "Inhale" ? "0 0 35px rgba(32, 150, 137, 0.45)" : "0 0 10px rgba(0, 0, 0, 0.08)",
             }}
             transition={{
               duration: phase === "Inhale" || phase === "Exhale" ? 3.8 : 0.8,

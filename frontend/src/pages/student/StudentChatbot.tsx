@@ -760,9 +760,18 @@ export const StudentChatbot: React.FC = () => {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
                 {/* Visual breathing ring */}
-                <div className="relative flex h-16 w-16 items-center justify-center rounded-full bg-indigo-600/10 border-2 border-indigo-500 text-indigo-600 dark:text-indigo-400 shadow-inner">
+                <motion.div
+                  animate={{
+                    scale: breathingPhase === "Inhale" ? 1.25 : breathingPhase === "Exhale" ? 0.85 : 1.05,
+                    boxShadow: breathingPhase === "Inhale" 
+                      ? "0 0 25px rgba(99, 102, 241, 0.45)" 
+                      : "0 0 6px rgba(99, 102, 241, 0.15)",
+                  }}
+                  transition={{ duration: 3.6, ease: "easeInOut" }}
+                  className="relative flex h-16 w-16 items-center justify-center rounded-full bg-indigo-600/10 border-2 border-indigo-500 text-indigo-600 dark:text-indigo-400 shadow-inner"
+                >
                   <span className="text-base font-black">{breathingCount}s</span>
-                </div>
+                </motion.div>
                 <div>
                   <div className="flex items-center gap-2">
                     <Wind className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />

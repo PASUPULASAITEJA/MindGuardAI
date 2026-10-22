@@ -24,6 +24,7 @@ import { Alert } from "@/components/ui/alert";
 import WellnessTrendDashboard from "@/components/WellnessTrendDashboard";
 import { motion } from "motion/react";
 import { pageVariants, staggerContainer, cardEntrance } from "@/utils/motion";
+import { AnimatedCounter } from "@/components/ui/animated-counter";
 
 export const MoodHistoryPage: React.FC = () => {
   const navigate = useNavigate();
@@ -117,7 +118,7 @@ export const MoodHistoryPage: React.FC = () => {
             <Smile className="h-3.5 w-3.5 text-emerald-500" />
           </div>
           <p className="text-xl font-black text-foreground font-mono">
-            {baseline?.recent_mood_score ? `${baseline.recent_mood_score}` : avgScore}
+            {baseline?.recent_mood_score ? <AnimatedCounter value={baseline.recent_mood_score} decimals={1} /> : (avgScore !== "—" ? <AnimatedCounter value={avgScore} decimals={1} /> : "—")}
             {avgScore !== "—" && <span className="text-xs font-normal text-muted-foreground">/10</span>}
           </p>
           <span className="text-[10px] font-bold text-muted-foreground">
@@ -131,7 +132,9 @@ export const MoodHistoryPage: React.FC = () => {
             <Activity className="h-3.5 w-3.5 text-indigo-500" />
           </div>
           <p className="text-xl font-black text-foreground font-mono">
-            {baseline?.recent_stress !== undefined && baseline?.recent_stress !== null ? `${baseline.recent_stress}/10` : "—"}
+            {baseline?.recent_stress !== undefined && baseline?.recent_stress !== null ? (
+              <><AnimatedCounter value={baseline.recent_stress} />/10</>
+            ) : "—"}
           </p>
           <span className="text-[10px] font-bold text-muted-foreground">
             {baseline?.usual_stress ? `Usual: ${baseline.usual_stress}/10` : "Check-in Trajectory"}
@@ -144,7 +147,9 @@ export const MoodHistoryPage: React.FC = () => {
             <Moon className="h-3.5 w-3.5 text-purple-500" />
           </div>
           <p className="text-xl font-black text-foreground font-mono">
-            {baseline?.recent_sleep_hours !== undefined && baseline?.recent_sleep_hours !== null ? `${baseline.recent_sleep_hours} hrs` : "—"}
+            {baseline?.recent_sleep_hours !== undefined && baseline?.recent_sleep_hours !== null ? (
+              <><AnimatedCounter value={baseline.recent_sleep_hours} decimals={1} /> hrs</>
+            ) : "—"}
           </p>
           <span className="text-[10px] font-bold text-muted-foreground">
             {baseline?.usual_sleep_hours ? `Usual: ${baseline.usual_sleep_hours}h` : "Logged Sleep"}
@@ -157,7 +162,9 @@ export const MoodHistoryPage: React.FC = () => {
             <ShieldCheck className="h-3.5 w-3.5 text-cyan-500" />
           </div>
           <p className="text-xl font-black text-foreground font-mono">
-            {latestAssessment?.mental_wellness_score ? `${Number(latestAssessment.mental_wellness_score).toFixed(0)}/100` : "—"}
+            {latestAssessment?.mental_wellness_score ? (
+              <><AnimatedCounter value={Number(latestAssessment.mental_wellness_score).toFixed(0)} />/100</>
+            ) : "—"}
           </p>
           <span className="text-[10px] font-bold text-muted-foreground">
             {latestAssessment?.risk_level ? `Risk: ${latestAssessment.risk_level}` : "Clinical Psychometric"}

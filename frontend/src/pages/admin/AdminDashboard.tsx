@@ -50,6 +50,7 @@ import {
 import { cn } from "@/utils/cn";
 import { motion } from "motion/react";
 import { pageVariants, staggerContainer, cardEntrance } from "@/utils/motion";
+import { AnimatedCounter } from "@/components/ui/animated-counter";
 
 export const AdminDashboard: React.FC = () => {
   const location = useLocation();
@@ -316,7 +317,7 @@ export const AdminDashboard: React.FC = () => {
             <motion.div variants={cardEntrance} whileHover={{ y: -3 }} className="p-4 rounded-xl border border-border bg-card shadow-xs">
               <span className="text-[11px] text-muted-foreground uppercase font-medium block">Campus Wellness Index</span>
               <span className="text-2xl font-bold text-foreground font-sans mt-1 block">
-                {isReportLoading ? "--" : (report?.average_wellness_score ? report.average_wellness_score.toFixed(1) : "--")}
+                {isReportLoading ? "--" : (report?.average_wellness_score ? <AnimatedCounter value={report.average_wellness_score} decimals={1} /> : "--")}
               </span>
               <span className="text-[11px] text-muted-foreground mt-0.5 block">Aggregated campus metric</span>
             </motion.div>
@@ -324,7 +325,7 @@ export const AdminDashboard: React.FC = () => {
             <motion.div variants={cardEntrance} whileHover={{ y: -3 }} className="p-4 rounded-xl border border-border bg-card shadow-xs">
               <span className="text-[11px] text-muted-foreground uppercase font-medium block">Total Students</span>
               <span className="text-2xl font-bold text-foreground font-sans mt-1 block">
-                {report?.total_students_monitored ?? 0}
+                <AnimatedCounter value={report?.total_students_monitored ?? 0} />
               </span>
               <span className="text-[11px] text-muted-foreground mt-0.5 block">Active registered cohort</span>
             </motion.div>
@@ -332,7 +333,7 @@ export const AdminDashboard: React.FC = () => {
             <motion.div variants={cardEntrance} whileHover={{ y: -3 }} className="p-4 rounded-xl border border-border bg-card shadow-xs">
               <span className="text-[11px] text-muted-foreground uppercase font-medium block">Active Triage Flags</span>
               <span className="text-2xl font-bold text-rose-600 dark:text-rose-400 font-sans mt-1 block">
-                {pendingAlertCount}
+                <AnimatedCounter value={pendingAlertCount} />
               </span>
               <span className="text-[11px] text-muted-foreground mt-0.5 block">Under counsellor triage</span>
             </motion.div>
@@ -340,7 +341,7 @@ export const AdminDashboard: React.FC = () => {
             <motion.div variants={cardEntrance} whileHover={{ y: -3 }} className="p-4 rounded-xl border border-border bg-card shadow-xs">
               <span className="text-[11px] text-muted-foreground uppercase font-medium block">Departments Monitored</span>
               <span className="text-2xl font-bold text-foreground font-sans mt-1 block">
-                {departmentsList.length}
+                <AnimatedCounter value={departmentsList.length} />
               </span>
               <span className="text-[11px] text-muted-foreground mt-0.5 block">Active cohort departments</span>
             </motion.div>

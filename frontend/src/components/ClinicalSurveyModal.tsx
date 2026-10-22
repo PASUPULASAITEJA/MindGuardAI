@@ -19,6 +19,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import api from "@/services/api";
 import { motion, AnimatePresence } from "motion/react";
 import { modalBackdropVariants, modalPanelVariants } from "@/utils/motion";
+import { AnimatedCounter } from "@/components/ui/animated-counter";
 
 export interface SurveyQuestionItem {
   id: number;
@@ -309,7 +310,7 @@ export const ClinicalSurveyModal: React.FC<ClinicalSurveyModalProps> = ({
                     Support Status Indicator
                   </span>
                   <span className="text-xs font-black px-3 py-1 rounded-full bg-primary/10 text-primary border border-primary/20">
-                    Score: {resultData.totalScore} / {questions.length * 3}
+                    Score: <AnimatedCounter value={resultData.totalScore} /> / {questions.length * 3}
                   </span>
                 </div>
                 <p className="text-sm font-medium text-foreground leading-relaxed">
@@ -413,10 +414,10 @@ export const ClinicalSurveyModal: React.FC<ClinicalSurveyModalProps> = ({
               <AnimatePresence mode="wait">
                 <motion.div
                   key={currentIdx}
-                  initial={{ opacity: 0, x: 10 }}
+                  initial={{ opacity: 0, x: 28 }}
                   animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -10 }}
-                  transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+                  exit={{ opacity: 0, x: -28 }}
+                  transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
                   className="space-y-4"
                 >
                   {/* Question Prompt */}
@@ -440,9 +441,9 @@ export const ClinicalSurveyModal: React.FC<ClinicalSurveyModalProps> = ({
                         <motion.button
                           key={opt.value}
                           type="button"
-                          whileHover={{ scale: 1.02 }}
-                          whileTap={{ scale: 0.98 }}
-                          transition={{ duration: 0.12 }}
+                          whileHover={{ scale: 1.03, y: -2 }}
+                          whileTap={{ scale: 0.95 }}
+                          transition={{ duration: 0.14 }}
                           onClick={() => handleSelectOption(opt.value)}
                           className={`flex flex-col items-start p-3.5 rounded-2xl border text-left transition-colors ${
                             isSelected

@@ -151,15 +151,11 @@
   }
 }
 
-/* Accessibility: Respect reduced motion */
+/* Accessibility: Clean reduced motion support without overriding necessary transitions */
 @media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
+  .motion-reduce-safe {
     animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
   }
 }
 

@@ -1,6 +1,8 @@
 import React from "react";
 import { cn } from "@/utils/cn";
 import { LucideIcon } from "lucide-react";
+import { motion } from "motion/react";
+import { AnimatedCounter } from "./animated-counter";
 
 interface StatCardProps {
   title: string;
@@ -46,8 +48,10 @@ export const StatCard: React.FC<StatCardProps> = ({
   };
 
   return (
-    <div
+    <motion.div
       onClick={onClick}
+      whileHover={{ y: -3, transition: { duration: 0.2, ease: "easeOut" } }}
+      whileTap={onClick ? { scale: 0.98 } : undefined}
       className={cn(
         "rounded-xl border border-border bg-card p-4 shadow-xs transition-colors",
         onClick && "cursor-pointer hover:border-border/80 hover:bg-secondary/20",
@@ -79,8 +83,8 @@ export const StatCard: React.FC<StatCardProps> = ({
 
       <div className="mt-3 flex items-baseline justify-between gap-2">
         <div className="flex items-baseline gap-1.5">
-          <span className="text-2xl font-bold tracking-tight text-foreground">
-            {value}
+          <span className="text-2xl font-bold tracking-tight text-foreground font-sans">
+            <AnimatedCounter value={value} />
           </span>
           {subtitle && (
             <span className="text-xs text-muted-foreground">
@@ -112,6 +116,6 @@ export const StatCard: React.FC<StatCardProps> = ({
           </div>
         )}
       </div>
-    </div>
+    </motion.div>
   );
 };

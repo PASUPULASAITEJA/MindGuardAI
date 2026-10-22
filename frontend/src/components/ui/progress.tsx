@@ -1,5 +1,6 @@
 import React from "react";
 import { cn } from "@/utils/cn";
+import { motion } from "motion/react";
 
 interface ProgressProps {
   value: number;
@@ -26,12 +27,14 @@ export const Progress: React.FC<ProgressProps> = ({
           className
         )}
       >
-        <div
+        <motion.div
           className={cn(
-            "h-full rounded-full bg-primary transition-all duration-300",
+            "h-full rounded-full bg-primary",
             indicatorClassName
           )}
-          style={{ width: `${percentage}%` }}
+          initial={{ width: 0 }}
+          animate={{ width: `${percentage}%` }}
+          transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
         />
       </div>
       {showValue && (

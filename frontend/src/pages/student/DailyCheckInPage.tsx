@@ -18,6 +18,7 @@ import { useToast } from "@/components/ui/toast";
 import { cn } from "@/utils/cn";
 import { motion, AnimatePresence } from "motion/react";
 import { pageVariants } from "@/utils/motion";
+import { AnimatedCounter } from "@/components/ui/animated-counter";
 
 const MOOD_OPTIONS = [
   { score: 2, label: "Difficult", symbol: "😔", helper: "Stressed or overwhelmed" },
@@ -116,7 +117,7 @@ export const DailyCheckInPage: React.FC = () => {
                   Updated Wellbeing Score
                 </span>
                 <span className="text-3xl font-bold text-foreground mt-1 block">
-                  {result.mental_wellness_score} <span className="text-xs text-muted-foreground font-normal">/ 100</span>
+                  <AnimatedCounter value={result.mental_wellness_score} /> <span className="text-xs text-muted-foreground font-normal">/ 100</span>
                 </span>
               </div>
 

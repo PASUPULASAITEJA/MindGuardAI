@@ -13,12 +13,10 @@ import {
   Settings,
   MessageSquare,
   ShieldCheck,
-  PhoneCall,
-  Calendar,
-  Layers
 } from "lucide-react";
 import { useAuth, UserRole } from "@/contexts/AuthContext";
 import { cn } from "@/utils/cn";
+import { motion } from "motion/react";
 
 type SidebarItem = {
   label: string;
@@ -73,7 +71,10 @@ const Sidebar: React.FC<SidebarProps> = ({ className, onCloseMobile }) => {
       <div className="space-y-6">
         {/* Brand Header */}
         <div className="flex items-center justify-between px-2 pt-1">
-          <div className="flex items-center gap-2.5">
+          <motion.div 
+            whileHover={{ scale: 1.02 }} 
+            className="flex items-center gap-2.5 cursor-pointer"
+          >
             <img
               src="/logo.png"
               alt="MindGuardAI Logo"
@@ -87,7 +88,7 @@ const Sidebar: React.FC<SidebarProps> = ({ className, onCloseMobile }) => {
               </div>
               <p className="text-[10px] text-muted-foreground font-medium">Wellbeing Platform</p>
             </div>
-          </div>
+          </motion.div>
           
           {onCloseMobile && (
             <button
@@ -100,8 +101,8 @@ const Sidebar: React.FC<SidebarProps> = ({ className, onCloseMobile }) => {
           )}
         </div>
 
-        {/* Navigation links */}
-        <nav className="space-y-1">
+        {/* Navigation links with smooth active-indicator sliding */}
+        <nav className="space-y-1 relative">
           {roleNavigation[user.role].map((item) => {
             const Icon = item.icon;
             return (
@@ -111,17 +112,37 @@ const Sidebar: React.FC<SidebarProps> = ({ className, onCloseMobile }) => {
                 onClick={onCloseMobile}
                 className={({ isActive }) =>
                   cn(
-                    "flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-xs font-medium transition-all",
+                    "relative flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-xs font-medium transition-all group overflow-hidden",
                     isActive
-                      ? "bg-primary/10 text-primary font-semibold border border-primary/20 shadow-2xs"
-                      : "text-muted-foreground hover:bg-secondary/80 hover:text-foreground"
+                      ? "text-primary font-bold shadow-2xs"
+                      : "text-muted-foreground hover:text-foreground hover:bg-secondary/60"
                   )
                 }
               >
                 {({ isActive }) => (
                   <>
-                    <Icon className={cn("h-4 w-4 shrink-0 transition-colors", isActive ? "text-primary" : "text-muted-foreground")} />
-                    <span className="truncate">{item.label}</span>
+                    {isActive && (
+                      <motion.div
+                        layoutId="sidebar-active-indicator"
+                        className="absolute inset-0 rounded-xl bg-primary/10 border border-primary/25 shadow-xs"
+                        transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                      />
+                    )}
+                    <motion.div
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.9 }}
+                      className="relative z-10"
+                    >
+                      <Icon className={cn("h-4 w-4 shrink-0 transition-colors", isActive ? "text-primary" : "text-muted-foreground group-hover:text-foreground")} />
+                    </motion.div>
+                    <span className="relative z-10 truncate">{item.label}</span>
+                    {isActive && (
+                      <motion.span
+                        layoutId="sidebar-active-dot"
+                        className="relative z-10 ml-auto h-1.5 w-1.5 rounded-full bg-primary"
+                        transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                      />
+                    )}
                   </>
                 )}
               </NavLink>
@@ -133,7 +154,9 @@ const Sidebar: React.FC<SidebarProps> = ({ className, onCloseMobile }) => {
       {/* Footer User Profile & Tele-MANAS */}
       <div className="space-y-3 pt-4 border-t border-border">
         {user.role === "STUDENT" && (
-          <a
+          <motion.a
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
             href="tel:14416"
             className="flex items-center justify-between p-2 rounded-lg border border-rose-500/20 bg-rose-500/5 hover:bg-rose-500/10 text-rose-600 dark:text-rose-400 text-xs transition-colors"
             title="Tele-MANAS 24/7 National Mental Health Helpline"
@@ -143,7 +166,7 @@ const Sidebar: React.FC<SidebarProps> = ({ className, onCloseMobile }) => {
               <span className="font-semibold text-[11px]">24/7 Crisis: 14416</span>
             </div>
             <span className="text-[10px] uppercase font-semibold text-rose-500">Call</span>
-          </a>
+          </motion.a>
         )}
 
         <div className="flex items-center gap-2.5 rounded-lg border border-border bg-secondary/40 p-2.5">
@@ -156,13 +179,15 @@ const Sidebar: React.FC<SidebarProps> = ({ className, onCloseMobile }) => {
             </p>
             <p className="truncate text-[10px] text-muted-foreground">{user.role}</p>
           </div>
-          <button
+          <motion.button
+            whileHover={{ scale: 1.15 }}
+            whileTap={{ scale: 0.9 }}
             onClick={() => logout()}
             className="p-1 rounded text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
             title="Sign Out"
           >
             <LogOut className="h-3.5 w-3.5" />
-          </button>
+          </motion.button>
         </div>
       </div>
     </aside>

@@ -1,6 +1,8 @@
 import React, { useState } from "react";
+import { useLocation } from "react-router-dom";
 import Sidebar from "@/components/layouts/Sidebar";
 import TopNav from "@/components/layouts/TopNav";
+import { motion, AnimatePresence } from "motion/react";
 
 interface DashboardLayoutProps {
   title: string;
@@ -10,6 +12,7 @@ interface DashboardLayoutProps {
 
 const DashboardLayout: React.FC<DashboardLayoutProps> = ({ title, subtitle, children }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const location = useLocation();
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-background text-foreground flex">
@@ -18,8 +21,11 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ title, subtitle, chil
 
       {/* Mobile Drawer Overlay */}
       {isMobileMenuOpen && (
-        <div 
-          className="fixed inset-0 z-40 bg-background/80 backdrop-blur-sm md:hidden transition-opacity duration-300"
+        <motion.div 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 z-40 bg-background/80 backdrop-blur-sm md:hidden"
           onClick={() => setIsMobileMenuOpen(false)}
         />
       )}
@@ -41,9 +47,18 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ title, subtitle, chil
           onMenuClick={() => setIsMobileMenuOpen(true)} 
         />
         <div className="flex-1 overflow-y-auto px-4 py-6 md:px-8 md:py-8">
-          <div className="mx-auto w-full max-w-7xl animate-in fade-in duration-300">
-            {children}
-          </div>
+          <AnimatePresence mode="wait" initial={false}>
+            <motion.div
+              key={location.pathname}
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -12 }}
+              transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+              className="mx-auto w-full max-w-7xl"
+            >
+              {children}
+            </motion.div>
+          </AnimatePresence>
         </div>
       </main>
     </div>
