@@ -1,466 +1,632 @@
-import React, { useRef, useEffect, useState, useCallback } from "react";
+import React, { useRef, useEffect, useState } from "react";
+import * as THREE from "three";
 import { Brain, Zap, Sparkles } from "lucide-react";
 
 export interface NeuralBrain3DProps {
   className?: string;
+  particleCount?: number;
   interactive?: boolean;
   autoRotate?: boolean;
+  rotationSpeed?: number;
   pulseSpeed?: number;
   showStatusBadge?: boolean;
 }
 
-interface SynapticNode {
-  id: number;
-  x: number; // 0 to 1 percentage
-  y: number; // 0 to 1 percentage
-  baseRadius: number;
-  color: string;
-  flashColor: string;
-  lobe: string;
+/**
+ * Generates an anatomically structured 3D point cloud of the human brain:
+ * - Dual cerebral hemispheres separated by the longitudinal fissure
+ * - Cortical gyri and sulci convolutions across Frontal, Parietal, Occipital, and Temporal lobes
+ * - Sylvian fissure and temporal lobe tuck
+ * - Posterior Cerebellum with distinct horizontal folia striations
+ * - Descending Brainstem into spinal cord
+ * - Active firing synaptic junction nodes (white/golden sparks)
+ */
+function generateAnatomicalBrainPointCloud(count: number) {
+  const positions = new Float32Array(count * 3);
+  const colors = new Float32Array(count * 3);
+  const traits = new Float32Array(count * 4); // [phase, isSynapse, hemi, speed]
+
+  let seed = 42891;
+  const rnd = () => {
+    seed = (16807 * seed) % 2147483647;
+    return seed / 2147483647;
+  };
+
+  const cyan = new THREE.Color("#22D3EE");      // Electric cyan
+  const teal = new THREE.Color("#2DD4BF");      // Soft healthcare teal
+  const sky = new THREE.Color("#38BDF8");       // Vibrant sky blue
+  const violet = new THREE.Color("#C084FC");    // Subtle holographic violet
+  const white = new THREE.Color("#FFFFFF");     // Hot action potential core
+  const gold = new THREE.Color("#FBBF24");      // Golden synaptic spark
+
+  let i = 0;
+  let attempts = 0;
+  const maxAttempts = count * 6;
+
+  while (i < count && attempts < maxAttempts) {
+    attempts++;
+    const hemi = rnd() < 0.5 ? -1 : 1;
+    const regionChoice = rnd();
+    let x = 0;
+    let y = 0;
+    let z = 0;
+    let isSynapse = rnd() < 0.085 ? 1.0 : 0.0;
+    let col = cyan.clone();
+
+    if (regionChoice < 0.77) {
+      // 1. CEREBRAL CORTEX (Frontal, Parietal, Occipital, Temporal lobes)
+      const u = (rnd() - 0.5) * 2; // -1 to 1 (anterior to posterior)
+      const v = (rnd() - 0.5) * 2; // -1 to 1 (inferior to superior)
+
+      // Anatomic lateral boundary profile of human cerebrum
+      const radSq = (u * 1.14) * (u * 1.14) + (v * 1.26) * (v * 1.26);
+      if (radSq > 0.94) continue; // outside cerebrum contour
+
+      // Sylvian fissure indentation between frontal and temporal lobes
+      if (u > -0.38 && u < 0.12 && v > -0.28 && v < -0.06 && rnd() < 0.55) {
+        continue;
+      }
+
+      // Procedural cortical gyri and sulci convolutions
+      const sulci =
+        0.07 * Math.sin(u * 20.0 + v * 12.0) +
+        0.045 * Math.cos(u * 14.0 - v * 24.0) +
+        0.025 * Math.sin(u * 32.0);
+
+      const zMax = Math.sqrt(Math.max(0, 1.0 - radSq)) * 0.54 * (1.0 + sulci);
+
+      // Depth distribution: heavier density on outer cortical surface, lighter in white matter
+      const depth = Math.pow(rnd(), 0.38);
+      z = hemi * (0.055 + zMax * (0.2 + 0.8 * depth));
+      x = u * 1.34;
+      y = (v + 0.14) * 1.14;
+
+      // Color scheme: Glowing cyan, electric-blue, white, and subtle violet
+      if (isSynapse > 0.5) {
+        col = rnd() < 0.4 ? gold.clone() : white.clone();
+      } else if (hemi < 0) {
+        // Left hemisphere: electric cyan & sky blue
+        col = rnd() < 0.55 ? cyan.clone() : sky.clone();
+        if (rnd() < 0.15) col.lerp(white, 0.4);
+      } else {
+        // Right hemisphere: cyan with subtle violet accents
+        col = rnd() < 0.35 ? violet.clone() : sky.clone();
+        if (rnd() < 0.2) col.lerp(teal, 0.35);
+      }
+    } else if (regionChoice < 0.91) {
+      // 2. CEREBELLUM (Posterior lower lobes with distinct horizontal folia)
+      const cu = (rnd() - 0.5) * 0.72;
+      const cv = (rnd() - 0.5) * 0.52;
+      if (cu * cu * 4.2 + cv * cv * 5.4 > 0.52) continue;
+
+      // Horizontal folia striations
+      const folia = 0.035 * Math.sin(cv * 68.0);
+      const czMax = Math.sqrt(Math.max(0, 0.48 - cu * cu * 4.2 - cv * cv * 5.4)) * 0.46;
+
+      x = 0.44 + cu * 1.12;
+      y = -0.42 + cv * 0.88 + folia;
+      z = hemi * (0.11 + czMax * (0.25 + 0.75 * rnd()));
+
+      col = isSynapse > 0.5 ? white.clone() : teal.clone().lerp(cyan, rnd() * 0.5);
+    } else {
+      // 3. BRAINSTEM (Pons and Medulla descending into spinal cord)
+      const t = rnd();
+      const ang = rnd() * Math.PI * 2;
+      const rad = 0.09 * (0.3 + 0.7 * Math.sqrt(rnd()));
+
+      x = 0.14 - t * 0.08 + rad * Math.cos(ang);
+      y = -0.46 - t * 0.54;
+      z = (rnd() - 0.5) * 0.14 + rad * Math.sin(ang);
+
+      col = isSynapse > 0.5 ? gold.clone() : teal.clone().lerp(sky, 0.4);
+    }
+
+    positions[i * 3] = x;
+    positions[i * 3 + 1] = y;
+    positions[i * 3 + 2] = z;
+
+    colors[i * 3] = col.r;
+    colors[i * 3 + 1] = col.g;
+    colors[i * 3 + 2] = col.b;
+
+    traits[i * 4] = rnd() * Math.PI * 2; // phase
+    traits[i * 4 + 1] = isSynapse;
+    traits[i * 4 + 2] = hemi;
+    traits[i * 4 + 3] = 0.6 + rnd() * 1.4; // oscillation speed
+
+    i++;
+  }
+
+  return { positions, colors, traits, actualCount: i };
 }
 
-interface ActionSignal {
-  fromNode: number;
-  toNode: number;
-  progress: number; // 0 to 1
-  speed: number;
-  color: string;
-  size: number;
+/**
+ * Generates synaptic connector axon lines between neighboring cortical neurons
+ */
+function generateSynapticFibers(positions: Float32Array, count: number, maxFibers = 1100) {
+  const linePositions: number[] = [];
+  const lineColors: number[] = [];
+  const stride = 16;
+
+  const cyan = new THREE.Color("#22D3EE");
+  const sky = new THREE.Color("#38BDF8");
+  const gold = new THREE.Color("#FBBF24");
+
+  for (let i = 0; i < count; i += stride) {
+    const x1 = positions[i * 3];
+    const y1 = positions[i * 3 + 1];
+    const z1 = positions[i * 3 + 2];
+
+    let connections = 0;
+    for (let j = i + stride; j < count; j += stride) {
+      if (linePositions.length / 6 >= maxFibers) break;
+      const x2 = positions[j * 3];
+      const y2 = positions[j * 3 + 1];
+      const z2 = positions[j * 3 + 2];
+
+      const dx = x2 - x1;
+      const dy = y2 - y1;
+      const dz = z2 - z1;
+      const distSq = dx * dx + dy * dy + dz * dz;
+
+      // Connect if within dendritic radius and same hemisphere
+      if (distSq < 0.046 && distSq > 0.003 && Math.sign(z1) === Math.sign(z2)) {
+        linePositions.push(x1, y1, z1, x2, y2, z2);
+        const col = (i + j) % 9 === 0 ? gold : (x1 < 0 ? cyan : sky);
+        lineColors.push(col.r, col.g, col.b, col.r, col.g, col.b);
+        connections++;
+        if (connections >= 2) break;
+      }
+    }
+  }
+
+  return {
+    positions: new Float32Array(linePositions),
+    colors: new Float32Array(lineColors),
+  };
 }
 
-interface AmbientParticle {
-  x: number;
-  y: number;
-  vx: number;
-  vy: number;
-  radius: number;
-  color: string;
-  alpha: number;
-  phase: number;
+/**
+ * Background particle field (deep space stars & cosmic dust)
+ */
+function generateCosmicField(count = 2200) {
+  const positions = new Float32Array(count * 3);
+  const colors = new Float32Array(count * 3);
+  const cyan = new THREE.Color("#38BDF8");
+  const blue = new THREE.Color("#1E40AF");
+  const white = new THREE.Color("#E0F2FE");
+
+  for (let i = 0; i < count; i++) {
+    const r = 2.0 + Math.random() * 4.5;
+    const theta = Math.random() * Math.PI;
+    const phi = Math.random() * Math.PI * 2;
+
+    positions[i * 3] = r * Math.sin(theta) * Math.cos(phi);
+    positions[i * 3 + 1] = r * Math.cos(theta) * 0.9;
+    positions[i * 3 + 2] = r * Math.sin(theta) * Math.sin(phi);
+
+    const rndColor = Math.random();
+    const col = rndColor < 0.6 ? cyan : rndColor < 0.85 ? blue : white;
+    colors[i * 3] = col.r;
+    colors[i * 3 + 1] = col.g;
+    colors[i * 3 + 2] = col.b;
+  }
+
+  return { positions, colors };
 }
 
-// 24 Anatomically placed synaptic nodes across the cerebral cortex, cerebellum & brainstem
-const ANATOMICAL_NODES: SynapticNode[] = [
-  // Frontal Lobe (Executive function, cognition)
-  { id: 0, x: 0.28, y: 0.38, baseRadius: 4.5, color: "#38BDF8", flashColor: "#FBBF24", lobe: "Frontal Pole" },
-  { id: 1, x: 0.35, y: 0.28, baseRadius: 5.0, color: "#22D3EE", flashColor: "#FFFFFF", lobe: "Prefrontal Cortex" },
-  { id: 2, x: 0.44, y: 0.22, baseRadius: 4.0, color: "#38BDF8", flashColor: "#F59E0B", lobe: "Superior Frontal" },
-  { id: 3, x: 0.24, y: 0.48, baseRadius: 3.5, color: "#2DD4BF", flashColor: "#38BDF8", lobe: "Orbitofrontal" },
+/**
+ * Custom GLSL Vertex Shader for the 3D Particle Brain
+ */
+const brainVertexShader = `
+uniform float uTime;
+uniform float uPixelRatio;
+uniform float uBaseSize;
+uniform float uPulseSpeed;
+uniform vec3 uPointer;
+uniform float uPointerActive;
+uniform float uActionShockwave;
 
-  // Motor & Somatosensory Strip
-  { id: 4, x: 0.48, y: 0.32, baseRadius: 5.5, color: "#818CF8", flashColor: "#FBBF24", lobe: "Motor Cortex" },
-  { id: 5, x: 0.54, y: 0.26, baseRadius: 4.5, color: "#C084FC", flashColor: "#FFFFFF", lobe: "Somatosensory" },
-  { id: 6, x: 0.42, y: 0.42, baseRadius: 4.0, color: "#38BDF8", flashColor: "#22D3EE", lobe: "Broca Area" },
+attribute vec4 aTraits;
+attribute vec3 aColor;
 
-  // Parietal Lobe (Sensory integration)
-  { id: 7, x: 0.62, y: 0.24, baseRadius: 4.0, color: "#C084FC", flashColor: "#FBBF24", lobe: "Superior Parietal" },
-  { id: 8, x: 0.70, y: 0.30, baseRadius: 4.5, color: "#E879F9", flashColor: "#FFFFFF", lobe: "Inferior Parietal" },
-  { id: 9, x: 0.60, y: 0.38, baseRadius: 4.0, color: "#A855F7", flashColor: "#38BDF8", lobe: "Precuneus" },
+varying vec3 vColor;
+varying float vGain;
+varying float vIsSynapse;
 
-  // Occipital Lobe (Visual cortex)
-  { id: 10, x: 0.78, y: 0.42, baseRadius: 5.0, color: "#C084FC", flashColor: "#FBBF24", lobe: "Visual Cortex" },
-  { id: 11, x: 0.83, y: 0.52, baseRadius: 4.5, color: "#E879F9", flashColor: "#FFFFFF", lobe: "Occipital Pole" },
-  { id: 12, x: 0.75, y: 0.58, baseRadius: 3.8, color: "#818CF8", flashColor: "#22D3EE", lobe: "Lateral Occipital" },
+void main() {
+  vec3 p = position;
+  float phase = aTraits.x;
+  float isSynapse = aTraits.y;
+  float hemi = aTraits.z;
+  float speed = aTraits.w;
 
-  // Temporal Lobe (Memory, emotional regulation, auditory)
-  { id: 13, x: 0.36, y: 0.56, baseRadius: 4.5, color: "#2DD4BF", flashColor: "#FBBF24", lobe: "Temporal Pole" },
-  { id: 14, x: 0.46, y: 0.58, baseRadius: 5.0, color: "#38BDF8", flashColor: "#FFFFFF", lobe: "Hippocampus Lobe" },
-  { id: 15, x: 0.58, y: 0.54, baseRadius: 4.5, color: "#818CF8", flashColor: "#F59E0B", lobe: "Wernicke Area" },
-  { id: 16, x: 0.50, y: 0.48, baseRadius: 4.0, color: "#22D3EE", flashColor: "#FBBF24", lobe: "Insular Cortex" },
+  // 1. Subtle particle oscillations (Brownian surface jitter)
+  vec3 osc = vec3(
+    sin(uTime * 2.2 * speed + phase) * 0.016,
+    cos(uTime * 1.8 * speed + phase * 1.3) * 0.016,
+    sin(uTime * 2.5 * speed + phase * 0.7) * 0.016
+  );
+  p += osc;
 
-  // Cerebellum (Coordination, balance, fine tuning)
-  { id: 17, x: 0.68, y: 0.68, baseRadius: 5.0, color: "#38BDF8", flashColor: "#FFFFFF", lobe: "Cerebellar Folia" },
-  { id: 18, x: 0.76, y: 0.72, baseRadius: 4.5, color: "#2DD4BF", flashColor: "#FBBF24", lobe: "Posterior Lobe" },
-  { id: 19, x: 0.62, y: 0.76, baseRadius: 4.0, color: "#22D3EE", flashColor: "#FFFFFF", lobe: "Flocculonodular" },
+  // 2. Cognitive Breathing Rhythm (gentle alpha wave expansion ~0.2Hz)
+  float breath = sin(uTime * uPulseSpeed * 1.3 + phase * 0.25) * 0.028;
+  p *= 1.0 + breath;
 
-  // Brainstem (Autonomic equilibrium, circadian rhythms)
-  { id: 20, x: 0.53, y: 0.70, baseRadius: 4.5, color: "#2DD4BF", flashColor: "#FBBF24", lobe: "Midbrain" },
-  { id: 21, x: 0.55, y: 0.78, baseRadius: 4.8, color: "#38BDF8", flashColor: "#FFFFFF", lobe: "Pons" },
-  { id: 22, x: 0.57, y: 0.86, baseRadius: 4.0, color: "#22D3EE", flashColor: "#F59E0B", lobe: "Medulla" },
-  { id: 23, x: 0.60, y: 0.94, baseRadius: 3.5, color: "#2DD4BF", flashColor: "#FBBF24", lobe: "Spinal Cord Root" },
-];
+  // 3. Traveling Neural Action Potential Wave (signal races from frontal to occipital lobe)
+  float waveFront = fract(uTime * 0.32 + phase * 0.08);
+  float waveDist = abs(p.x * 0.45 + p.y * 0.35 - (waveFront * 2.2 - 1.1));
+  float neuralPulse = smoothstep(0.18, 0.0, waveDist);
 
-// Synaptic circuits linking nodes together
-const SYNAPTIC_CIRCUITS: [number, number][] = [
-  // Frontal circuits
-  [0, 1], [1, 2], [0, 3], [1, 4], [3, 13], [1, 6],
-  // Motor-Sensory & Parietal pathways
-  [4, 5], [4, 6], [5, 7], [7, 8], [7, 9], [5, 9],
-  // Parieto-Occipital pathways
-  [8, 10], [9, 10], [10, 11], [11, 12], [9, 15],
-  // Temporal & Limbic pathways
-  [13, 14], [14, 15], [14, 16], [6, 16], [16, 15], [15, 12],
-  // Cerebellar & Brainstem pathways
-  [12, 17], [15, 17], [17, 18], [17, 19], [19, 20],
-  [16, 20], [20, 21], [21, 22], [22, 23],
-];
+  // 4. Cursor Proximity Excitation
+  float cursorDist = length(p - uPointer);
+  float cursorExcitement = smoothstep(0.72, 0.0, cursorDist) * uPointerActive;
+
+  // 5. Interactive Click Shockwave
+  float shockDist = abs(length(p) - uActionShockwave);
+  float shockPulse = smoothstep(0.25, 0.0, shockDist) * (uActionShockwave > 0.01 ? 1.5 : 0.0);
+
+  // Model-view transform
+  vec4 mvPosition = modelViewMatrix * vec4(p, 1.0);
+  gl_Position = projectionMatrix * mvPosition;
+
+  // Depth-attenuated particle size with soft scaling
+  float sizeBoost = isSynapse > 0.5 ? 1.8 : 1.0;
+  float pSize = uBaseSize * uPixelRatio * (2.85 / -mvPosition.z) * sizeBoost;
+  pSize *= 1.0 + neuralPulse * 1.35 + cursorExcitement * 1.8 + shockPulse * 1.6;
+  gl_PointSize = clamp(pSize, 1.4, 28.0);
+
+  // Color dynamics: flare with hot white and gold when signals pass through
+  vec3 col = aColor;
+  vec3 firingCol = isSynapse > 0.5 ? vec3(1.0, 0.96, 0.75) : vec3(0.65, 0.95, 1.0);
+  col = mix(col, firingCol, neuralPulse * 0.7 + cursorExcitement * 0.6 + shockPulse * 0.8);
+  col += vec3(1.0, 1.0, 1.0) * (neuralPulse * 0.35 + cursorExcitement * 0.45 + shockPulse * 0.6);
+
+  // Independent brightness twinkle
+  float twinkle = 0.82 + 0.18 * sin(uTime * 3.6 + phase * 6.28);
+
+  vColor = col;
+  vGain = (0.75 + neuralPulse * 1.4 + cursorExcitement * 1.5 + shockPulse * 1.8) * twinkle;
+  vIsSynapse = isSynapse;
+}
+`;
+
+/**
+ * Custom GLSL Fragment Shader for Gaussian Core & Luminous Bloom
+ */
+const brainFragmentShader = `
+precision highp float;
+
+varying vec3 vColor;
+varying float vGain;
+varying float vIsSynapse;
+
+void main() {
+  vec2 coord = gl_PointCoord * 2.0 - 1.0;
+  float r2 = dot(coord, coord);
+  if (r2 > 1.0) discard;
+
+  // Soft Gaussian nucleus + glowing radiant corona
+  float core = exp(-r2 * (vIsSynapse > 0.5 ? 8.5 : 6.8));
+  float corona = exp(-r2 * 2.0) * (vIsSynapse > 0.5 ? 0.65 : 0.42);
+  float alpha = (core * 1.5 + corona) * vGain;
+
+  gl_FragColor = vec4(vColor * (core * 1.4 + corona), clamp(alpha, 0.0, 1.0));
+}
+`;
 
 export const NeuralBrain3D: React.FC<NeuralBrain3DProps> = ({
   className = "",
+  particleCount = 28000,
   interactive = true,
   autoRotate = true,
+  rotationSpeed = 0.36,
   pulseSpeed = 1.0,
   showStatusBadge = true,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [webGlSupported, setWebGlSupported] = useState(true);
   const [isFiringBurst, setIsFiringBurst] = useState(false);
-  const [activeLobe, setActiveLobe] = useState<string>("Bilateral Neural Network");
 
-  // 3D Parallax Tilt state
-  const [tilt, setTilt] = useState({ rotateX: 0, rotateY: 0, scale: 1 });
-  const mousePos = useRef({ x: 0, y: 0, targetX: 0, targetY: 0, isHovered: false });
-
-  // Reduced motion preference
-  const isReducedMotion =
-    typeof window !== "undefined" &&
-    window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
-  // Trigger action potential burst
-  const triggerBurst = useCallback(() => {
-    setIsFiringBurst(true);
-    setTimeout(() => setIsFiringBurst(false), 900);
-  }, []);
-
-  // Mouse Parallax handlers
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!interactive || isReducedMotion) return;
-    const rect = containerRef.current?.getBoundingClientRect();
-    if (!rect) return;
-    const nx = (e.clientX - rect.left) / rect.width - 0.5; // -0.5 to 0.5
-    const ny = (e.clientY - rect.top) / rect.height - 0.5;
-    mousePos.current.targetX = nx;
-    mousePos.current.targetY = ny;
-    mousePos.current.isHovered = true;
-  };
-
-  const handleMouseEnter = () => {
-    mousePos.current.isHovered = true;
-  };
-
-  const handleMouseLeave = () => {
-    mousePos.current.isHovered = false;
-    mousePos.current.targetX = 0;
-    mousePos.current.targetY = 0;
-  };
-
-  const handleClick = (e: React.MouseEvent) => {
-    if (!interactive) return;
-    triggerBurst();
-  };
-
-  // Canvas Animation: Synaptic Signals, Action Potentials & Cosmic Sparks
   useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
+    const container = containerRef.current;
+    if (!container) return;
 
-    let animId = 0;
-    let width = (canvas.width = canvas.offsetWidth * (window.devicePixelRatio || 1));
-    let height = (canvas.height = canvas.offsetHeight * (window.devicePixelRatio || 1));
+    // Check reduced motion preference
+    const reducedMotion =
+      typeof window !== "undefined" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-    const resize = () => {
-      if (!canvas) return;
-      width = canvas.width = canvas.offsetWidth * (window.devicePixelRatio || 1);
-      height = canvas.height = canvas.offsetHeight * (window.devicePixelRatio || 1);
-    };
+    // Responsive particle count (optimize on mobile / smaller viewports)
+    const isMobile = window.innerWidth < 768;
+    const effectiveCount = isMobile ? Math.min(particleCount, 15000) : particleCount;
 
-    window.addEventListener("resize", resize);
+    // 1. Scene, Camera & WebGL Renderer Setup
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(40, 1, 0.1, 100);
+    camera.position.set(0, 0.18, 3.55);
 
-    // Initialize Active Action Signals
-    const signals: ActionSignal[] = [];
-    const signalColors = ["#38BDF8", "#FBBF24", "#22D3EE", "#E879F9", "#FFFFFF"];
-
-    const spawnSignal = () => {
-      const circuit = SYNAPTIC_CIRCUITS[Math.floor(Math.random() * SYNAPTIC_CIRCUITS.length)];
-      const [from, to] = Math.random() < 0.5 ? [circuit[0], circuit[1]] : [circuit[1], circuit[0]];
-      signals.push({
-        fromNode: from,
-        toNode: to,
-        progress: 0,
-        speed: (0.012 + Math.random() * 0.018) * pulseSpeed,
-        color: signalColors[Math.floor(Math.random() * signalColors.length)],
-        size: 3.0 + Math.random() * 2.5,
+    let renderer: THREE.WebGLRenderer;
+    try {
+      renderer = new THREE.WebGLRenderer({
+        alpha: true,
+        antialias: true,
+        powerPreference: "high-performance",
       });
-    };
-
-    // Pre-populate initial signals
-    for (let i = 0; i < 8; i++) spawnSignal();
-
-    // Initialize Cosmic Ambient Sparks
-    const sparks: AmbientParticle[] = [];
-    const sparkPalette = ["#38BDF8", "#FBBF24", "#2DD4BF", "#C084FC"];
-    for (let i = 0; i < 48; i++) {
-      sparks.push({
-        x: Math.random() * width,
-        y: Math.random() * height,
-        vx: (Math.random() - 0.5) * 0.45,
-        vy: (Math.random() - 0.5) * 0.45,
-        radius: 1.2 + Math.random() * 2.2,
-        color: sparkPalette[Math.floor(Math.random() * sparkPalette.length)],
-        alpha: 0.2 + Math.random() * 0.6,
-        phase: Math.random() * Math.PI * 2,
-      });
+    } catch {
+      setWebGlSupported(false);
+      return;
     }
 
-    let lastTime = performance.now();
-    let shockwaveRadius = 0;
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    renderer.setSize(container.clientWidth || 440, container.clientHeight || 440);
+    container.appendChild(renderer.domElement);
 
-    const render = (time: number) => {
-      animId = requestAnimationFrame(render);
-      const dt = (time - lastTime) / 1000;
-      lastTime = time;
+    // Master Brain Group
+    const brainGroup = new THREE.Group();
+    // Default lateral 3/4 anatomical pitch
+    brainGroup.rotation.x = 0.16;
+    brainGroup.rotation.y = 0.42;
+    scene.add(brainGroup);
 
-      ctx.clearRect(0, 0, width, height);
+    // 2. Anatomical Human Brain Point Cloud
+    const brainData = generateAnatomicalBrainPointCloud(effectiveCount);
+    const geometry = new THREE.BufferGeometry();
+    geometry.setAttribute(
+      "position",
+      new THREE.BufferAttribute(brainData.positions.slice(0, brainData.actualCount * 3), 3)
+    );
+    geometry.setAttribute(
+      "aColor",
+      new THREE.BufferAttribute(brainData.colors.slice(0, brainData.actualCount * 3), 3)
+    );
+    geometry.setAttribute(
+      "aTraits",
+      new THREE.BufferAttribute(brainData.traits.slice(0, brainData.actualCount * 4), 4)
+    );
 
-      // Smooth mouse parallax lerp
-      mousePos.current.x += (mousePos.current.targetX - mousePos.current.x) * 0.08;
-      mousePos.current.y += (mousePos.current.targetY - mousePos.current.y) * 0.08;
+    const brainMaterial = new THREE.ShaderMaterial({
+      vertexShader: brainVertexShader,
+      fragmentShader: brainFragmentShader,
+      uniforms: {
+        uTime: { value: 0 },
+        uPixelRatio: { value: renderer.getPixelRatio() },
+        uBaseSize: { value: isMobile ? 2.1 : 2.4 },
+        uPulseSpeed: { value: pulseSpeed },
+        uPointer: { value: new THREE.Vector3(100, 100, 100) },
+        uPointerActive: { value: 0 },
+        uActionShockwave: { value: 0 },
+      },
+      transparent: true,
+      depthWrite: false,
+      blending: THREE.AdditiveBlending,
+    });
 
-      setTilt({
-        rotateX: -mousePos.current.y * 18,
-        rotateY: mousePos.current.x * 22,
-        scale: mousePos.current.isHovered ? 1.03 : 1.0,
-      });
+    const brainPoints = new THREE.Points(geometry, brainMaterial);
+    brainGroup.add(brainPoints);
 
-      // 1. Render Ambient Cosmic Dust Sparks
-      for (const spark of sparks) {
-        spark.x += spark.vx;
-        spark.y += spark.vy;
-        if (spark.x < 0) spark.x = width;
-        if (spark.x > width) spark.x = 0;
-        if (spark.y < 0) spark.y = height;
-        if (spark.y > height) spark.y = 0;
+    // 3. Synaptic Connector Axon Fibers
+    const fiberData = generateSynapticFibers(brainData.positions, brainData.actualCount, isMobile ? 650 : 1200);
+    const lineGeom = new THREE.BufferGeometry();
+    lineGeom.setAttribute("position", new THREE.BufferAttribute(fiberData.positions, 3));
+    lineGeom.setAttribute("color", new THREE.BufferAttribute(fiberData.colors, 3));
 
-        const pulse = Math.sin(time * 0.003 + spark.phase) * 0.25;
-        const currentAlpha = Math.max(0.1, spark.alpha + pulse);
+    const lineMat = new THREE.LineBasicMaterial({
+      vertexColors: true,
+      transparent: true,
+      opacity: 0.26,
+      blending: THREE.AdditiveBlending,
+    });
+    const fiberLines = new THREE.LineSegments(lineGeom, lineMat);
+    brainGroup.add(fiberLines);
 
-        ctx.save();
-        ctx.fillStyle = spark.color;
-        ctx.globalAlpha = currentAlpha;
-        ctx.beginPath();
-        ctx.arc(spark.x, spark.y, spark.radius, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.restore();
-      }
+    // 4. Background Cosmic Star Field (Particles distributed in depth)
+    const cosmicData = generateCosmicField(isMobile ? 1200 : 2500);
+    const cosmicGeom = new THREE.BufferGeometry();
+    cosmicGeom.setAttribute("position", new THREE.BufferAttribute(cosmicData.positions, 3));
+    cosmicGeom.setAttribute("color", new THREE.BufferAttribute(cosmicData.colors, 3));
 
-      // 2. Render Synaptic Circuit Pathways
-      ctx.save();
-      for (const [fromIdx, toIdx] of SYNAPTIC_CIRCUITS) {
-        const from = ANATOMICAL_NODES[fromIdx];
-        const to = ANATOMICAL_NODES[toIdx];
+    const cosmicMat = new THREE.PointsMaterial({
+      size: 0.032,
+      vertexColors: true,
+      transparent: true,
+      opacity: 0.48,
+      blending: THREE.AdditiveBlending,
+    });
+    const cosmicPoints = new THREE.Points(cosmicGeom, cosmicMat);
+    scene.add(cosmicPoints);
 
-        const x1 = from.x * width;
-        const y1 = from.y * height;
-        const x2 = to.x * width;
-        const y2 = to.y * height;
+    // 5. Atmospheric Core Glow
+    const coreGlowGeom = new THREE.SphereGeometry(0.38, 16, 16);
+    const coreGlowMat = new THREE.MeshBasicMaterial({
+      color: new THREE.Color("#0284C7"),
+      transparent: true,
+      opacity: 0.12,
+      blending: THREE.AdditiveBlending,
+    });
+    const coreGlow = new THREE.Mesh(coreGlowGeom, coreGlowMat);
+    brainGroup.add(coreGlow);
 
-        const grad = ctx.createLinearGradient(x1, y1, x2, y2);
-        grad.addColorStop(0, from.color + "33"); // 20% opacity
-        grad.addColorStop(0.5, "#38BDF866");     // 40% opacity
-        grad.addColorStop(1, to.color + "33");
+    // Pointer Interactivity & 3D Rotation Physics
+    const targetRotation = { x: 0.16, y: 0.42 };
+    const currentRotation = { x: 0.16, y: 0.42 };
+    let isDragging = false;
+    let prevMouseX = 0;
+    let prevMouseY = 0;
+    let shockwaveProgress = 0;
+    const raycaster = new THREE.Raycaster();
+    const mouseNDC = new THREE.Vector2(-100, -100);
 
-        ctx.strokeStyle = grad;
-        ctx.lineWidth = 1.4 * (window.devicePixelRatio || 1);
-        ctx.beginPath();
-        // Subtle curved synaptic arc
-        const mx = (x1 + x2) / 2 + (Math.sin(fromIdx) * 12);
-        const my = (y1 + y2) / 2 + (Math.cos(toIdx) * 12);
-        ctx.quadraticCurveTo(mx, my, x2, y2);
-        ctx.stroke();
-      }
-      ctx.restore();
+    const onPointerMove = (e: MouseEvent) => {
+      if (!interactive) return;
+      const rect = container.getBoundingClientRect();
+      const x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+      const y = -(((e.clientY - rect.top) / rect.height) * 2 - 1);
+      mouseNDC.set(x, y);
 
-      // 3. Update & Render Traveling Action Potential Signal Pulses
-      if (Math.random() < 0.12 && signals.length < 24) {
-        spawnSignal();
-      }
-
-      for (let i = signals.length - 1; i >= 0; i--) {
-        const sig = signals[i];
-        sig.progress += sig.speed;
-
-        if (sig.progress >= 1.0) {
-          signals.splice(i, 1);
-          continue;
-        }
-
-        const from = ANATOMICAL_NODES[sig.fromNode];
-        const to = ANATOMICAL_NODES[sig.toNode];
-
-        const x1 = from.x * width;
-        const y1 = from.y * height;
-        const x2 = to.x * width;
-        const y2 = to.y * height;
-
-        // Signal position along path
-        const px = x1 + (x2 - x1) * sig.progress;
-        const py = y1 + (y2 - y1) * sig.progress;
-
-        ctx.save();
-        ctx.shadowColor = sig.color;
-        ctx.shadowBlur = 12 * (window.devicePixelRatio || 1);
-
-        // Core light pulse
-        ctx.fillStyle = sig.color;
-        ctx.beginPath();
-        ctx.arc(px, py, sig.size * (window.devicePixelRatio || 1), 0, Math.PI * 2);
-        ctx.fill();
-
-        // Inner hot white nucleus
-        ctx.fillStyle = "#FFFFFF";
-        ctx.beginPath();
-        ctx.arc(px, py, sig.size * 0.45 * (window.devicePixelRatio || 1), 0, Math.PI * 2);
-        ctx.fill();
-        ctx.restore();
-      }
-
-      // 4. Render Synaptic Junction Nodes
-      for (const node of ANATOMICAL_NODES) {
-        const nx = node.x * width;
-        const ny = node.y * height;
-
-        // Periodic synaptic firing rhythm
-        const firingPhase = Math.sin(time * 0.0035 + node.id * 1.3);
-        const isFlashing = firingPhase > 0.85 || isFiringBurst;
-        const currentRadius = (node.baseRadius + (isFlashing ? 3.5 : 0)) * (window.devicePixelRatio || 1);
-
-        ctx.save();
-        // Radiant outer glow halo
-        const haloGrad = ctx.createRadialGradient(nx, ny, 1, nx, ny, currentRadius * 3.2);
-        haloGrad.addColorStop(0, (isFlashing ? node.flashColor : node.color) + "CC");
-        haloGrad.addColorStop(1, (isFlashing ? node.flashColor : node.color) + "00");
-
-        ctx.fillStyle = haloGrad;
-        ctx.beginPath();
-        ctx.arc(nx, ny, currentRadius * 3.2, 0, Math.PI * 2);
-        ctx.fill();
-
-        // Core synaptic node
-        ctx.fillStyle = isFlashing ? node.flashColor : node.color;
-        ctx.shadowColor = node.color;
-        ctx.shadowBlur = 10 * (window.devicePixelRatio || 1);
-        ctx.beginPath();
-        ctx.arc(nx, ny, currentRadius, 0, Math.PI * 2);
-        ctx.fill();
-
-        // White hot center
-        ctx.fillStyle = "#FFFFFF";
-        ctx.beginPath();
-        ctx.arc(nx, ny, currentRadius * 0.4, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.restore();
-      }
-
-      // 5. Render Electric Shockwave on Click
-      if (isFiringBurst) {
-        shockwaveRadius += dt * 480 * (window.devicePixelRatio || 1);
-        ctx.save();
-        ctx.strokeStyle = "#38BDF8";
-        ctx.lineWidth = 3.0 * (window.devicePixelRatio || 1);
-        ctx.shadowColor = "#FBBF24";
-        ctx.shadowBlur = 18 * (window.devicePixelRatio || 1);
-        ctx.globalAlpha = Math.max(0, 1.0 - shockwaveRadius / (width * 0.65));
-
-        ctx.beginPath();
-        ctx.arc(width * 0.5, height * 0.5, shockwaveRadius, 0, Math.PI * 2);
-        ctx.stroke();
-        ctx.restore();
+      if (isDragging) {
+        const deltaX = e.clientX - prevMouseX;
+        const deltaY = e.clientY - prevMouseY;
+        targetRotation.y += deltaX * 0.0075;
+        targetRotation.x += deltaY * 0.0075;
+        prevMouseX = e.clientX;
+        prevMouseY = e.clientY;
       } else {
-        shockwaveRadius = 0;
+        // Smooth parallax gaze
+        targetRotation.y = 0.42 + x * 0.65;
+        targetRotation.x = 0.16 - y * 0.45;
       }
+
+      // Map 2D pointer into brain's local 3D coordinate space
+      raycaster.setFromCamera(mouseNDC, camera);
+      const plane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0);
+      const intersection = new THREE.Vector3();
+      raycaster.ray.intersectPlane(plane, intersection);
+      brainGroup.worldToLocal(intersection);
+
+      brainMaterial.uniforms.uPointer.value.copy(intersection);
+      brainMaterial.uniforms.uPointerActive.value = 1.0;
     };
 
-    animId = requestAnimationFrame(render);
+    const triggerActionBurst = () => {
+      shockwaveProgress = 0.01;
+      lineMat.opacity = 0.65;
+      setIsFiringBurst(true);
+      setTimeout(() => {
+        lineMat.opacity = 0.26;
+        setIsFiringBurst(false);
+      }, 850);
+    };
+
+    const onPointerDown = (e: MouseEvent) => {
+      isDragging = true;
+      prevMouseX = e.clientX;
+      prevMouseY = e.clientY;
+      triggerActionBurst();
+    };
+
+    const onPointerUp = () => {
+      isDragging = false;
+    };
+
+    const onPointerLeave = () => {
+      isDragging = false;
+      brainMaterial.uniforms.uPointerActive.value = 0;
+      targetRotation.y = 0.42;
+      targetRotation.x = 0.16;
+    };
+
+    container.addEventListener("mousemove", onPointerMove);
+    container.addEventListener("mousedown", onPointerDown);
+    window.addEventListener("mouseup", onPointerUp);
+    container.addEventListener("mouseleave", onPointerLeave);
+
+    // Responsive Resize Handler
+    const handleResize = () => {
+      if (!container) return;
+      const width = container.clientWidth || 440;
+      const height = container.clientHeight || 440;
+      camera.aspect = width / height;
+      camera.updateProjectionMatrix();
+      renderer.setSize(width, height);
+      brainMaterial.uniforms.uPixelRatio.value = renderer.getPixelRatio();
+    };
+
+    const resizeObserver = new ResizeObserver(handleResize);
+    resizeObserver.observe(container);
+
+    // Animation Loop
+    let animId = 0;
+    const clock = new THREE.Clock();
+
+    const animate = () => {
+      animId = requestAnimationFrame(animate);
+      const elapsed = clock.getElapsedTime();
+
+      brainMaterial.uniforms.uTime.value = elapsed;
+
+      // Auto rotation with damping
+      if (autoRotate && !isDragging && !reducedMotion) {
+        targetRotation.y += rotationSpeed * 0.007;
+      }
+
+      currentRotation.x += (targetRotation.x - currentRotation.x) * 0.055;
+      currentRotation.y += (targetRotation.y - currentRotation.y) * 0.055;
+
+      brainGroup.rotation.x = currentRotation.x;
+      brainGroup.rotation.y = currentRotation.y;
+
+      // Atmospheric elevation float & cosmic star drift
+      if (!reducedMotion) {
+        brainGroup.position.y = Math.sin(elapsed * 1.15) * 0.045;
+        cosmicPoints.rotation.y = elapsed * 0.025;
+        cosmicPoints.rotation.x = Math.sin(elapsed * 0.015) * 0.05;
+      }
+
+      // Shockwave burst propagation
+      if (shockwaveProgress > 0) {
+        shockwaveProgress += 0.055;
+        brainMaterial.uniforms.uActionShockwave.value = shockwaveProgress;
+        if (shockwaveProgress > 2.2) {
+          shockwaveProgress = 0;
+          brainMaterial.uniforms.uActionShockwave.value = 0;
+        }
+      }
+
+      // Synapse line rhythmic breathing opacity
+      lineMat.opacity = 0.22 + 0.12 * Math.sin(elapsed * 2.2);
+
+      renderer.render(scene, camera);
+    };
+
+    animate();
 
     return () => {
       cancelAnimationFrame(animId);
-      window.removeEventListener("resize", resize);
+      resizeObserver.disconnect();
+      container.removeEventListener("mousemove", onPointerMove);
+      container.removeEventListener("mousedown", onPointerDown);
+      window.removeEventListener("mouseup", onPointerUp);
+      container.removeEventListener("mouseleave", onPointerLeave);
+      geometry.dispose();
+      lineGeom.dispose();
+      cosmicGeom.dispose();
+      coreGlowGeom.dispose();
+      brainMaterial.dispose();
+      lineMat.dispose();
+      cosmicMat.dispose();
+      coreGlowMat.dispose();
+      renderer.dispose();
+      renderer.forceContextLoss();
+      if (renderer.domElement.parentNode) {
+        renderer.domElement.parentNode.removeChild(renderer.domElement);
+      }
     };
-  }, [pulseSpeed, isFiringBurst]);
+  }, [particleCount, interactive, autoRotate, rotationSpeed, pulseSpeed]);
 
-  return (
-    <div
-      ref={containerRef}
-      onMouseMove={handleMouseMove}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
-      onClick={handleClick}
-      className={`relative flex items-center justify-center select-none cursor-pointer ${className}`}
-      style={{
-        perspective: "1200px",
-        minHeight: "380px",
-        minWidth: "320px",
-      }}
-      title="Interactive Holographic Neural Brain • Move cursor to tilt, click to fire action potentials"
-    >
-      {/* 1. Deep Atmospheric Cyan/Violet Radial Bloom Backing */}
-      <div
-        className="absolute inset-0 pointer-events-none rounded-full blur-3xl transition-transform duration-700 ease-out"
-        style={{
-          background:
-            "radial-gradient(circle at 50% 50%, rgba(56, 189, 248, 0.22) 0%, rgba(192, 132, 252, 0.16) 45%, rgba(6, 182, 212, 0.08) 70%, transparent 85%)",
-          transform: `scale(${isFiringBurst ? 1.25 : 1.0})`,
-        }}
-        aria-hidden="true"
-      />
-
-      {/* 2. Rotating Holographic Outer Aura Ring */}
-      <div
-        className="absolute w-[92%] h-[92%] pointer-events-none rounded-full border border-cyan-500/20 blur-[1px] animate-[spin_24s_linear_infinite]"
-        style={{
-          borderTopColor: "rgba(56, 189, 248, 0.6)",
-          borderRightColor: "rgba(192, 132, 252, 0.4)",
-          borderBottomColor: "rgba(45, 212, 191, 0.5)",
-          borderLeftColor: "rgba(251, 191, 36, 0.3)",
-        }}
-        aria-hidden="true"
-      />
-
-      {/* 3. 3D Tilt Wrapper with Floating Elevation Bob */}
-      <div
-        className="relative w-full h-full max-w-[480px] max-h-[480px] flex items-center justify-center transition-transform duration-150 ease-out"
-        style={{
-          transform: `perspective(1000px) rotateX(${tilt.rotateX}deg) rotateY(${tilt.rotateY}deg) scale3d(${tilt.scale}, ${tilt.scale}, ${tilt.scale})`,
-          transformStyle: "preserve-3d",
-        }}
-      >
-        {/* Floating Animation Layer */}
-        <div className="relative w-full h-full flex items-center justify-center animate-[float_6s_ease-in-out_infinite]">
-          {/* Exact Holographic Brain Asset (Matching User Reference Image 2) */}
-          <img
-            src="/images/holographic-neural-brain.jpg"
-            alt="MindGuardAI Holographic Neural Brain"
-            className="w-full h-full object-contain rounded-2xl drop-shadow-[0_0_35px_rgba(56,189,248,0.45)] select-none pointer-events-none"
-            style={{
-              mixBlendMode: "screen",
-              filter: isFiringBurst
-                ? "brightness(1.35) contrast(1.15) saturate(1.2)"
-                : "brightness(1.05) contrast(1.08)",
-              transition: "filter 0.25s ease-out",
-            }}
-          />
-
-          {/* Holographic Diagnostic Shimmer Light Sweep */}
-          <div
-            className="absolute inset-0 rounded-2xl pointer-events-none overflow-hidden"
-            style={{ mixBlendMode: "color-dodge" }}
-            aria-hidden="true"
-          >
-            <div className="w-[45%] h-full bg-gradient-to-r from-transparent via-cyan-400/25 to-transparent skew-x-[-25deg] animate-[shimmer_5s_ease-in-out_infinite]" />
-          </div>
-
-          {/* Interactive HTML5 Canvas: Synaptic Axons, Action Signals & Golden Spark Nodes */}
-          <canvas
-            ref={canvasRef}
-            className="absolute inset-0 w-full h-full pointer-events-none"
-            style={{ mixBlendMode: "screen" }}
-          />
+  if (!webGlSupported) {
+    return (
+      <div className={`relative flex items-center justify-center ${className}`}>
+        <div className="w-full h-full max-w-md flex flex-col items-center justify-center p-6 text-center text-muted-foreground border border-border/60 rounded-2xl bg-card/40">
+          <Brain className="w-12 h-12 text-primary animate-pulse mb-3" />
+          <p className="text-sm font-semibold text-foreground">3D Neural System Active</p>
+          <p className="text-xs mt-1">WebGL hardware acceleration disabled or unsupported.</p>
         </div>
       </div>
+    );
+  }
 
-      {/* 4. Floating Scientific Status HUD */}
+  return (
+    <div className={`relative flex flex-col items-center justify-center select-none ${className}`}>
+      {/* 3D WebGL Canvas Container */}
+      <div
+        ref={containerRef}
+        className="w-full h-full relative cursor-grab active:cursor-grabbing"
+        style={{ minHeight: "360px", minWidth: "300px" }}
+        title="Interactive 3D Particle Brain • Drag to rotate, click to fire action potentials"
+      />
+
+      {/* Floating Status HUD */}
       {showStatusBadge && (
         <div className="absolute -bottom-2 flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-card/85 backdrop-blur-md border border-border/80 text-[11px] font-medium text-muted-foreground shadow-md pointer-events-none transition-all">
           <Brain
@@ -469,11 +635,11 @@ export const NeuralBrain3D: React.FC<NeuralBrain3DProps> = ({
             }`}
           />
           <span className="flex items-center gap-1.5">
-            <span className="text-foreground font-semibold">Holographic Neural Brain</span>
+            <span className="text-foreground font-semibold">3D Particle Brain</span>
             <span className="inline-block w-1 h-1 rounded-full bg-border" />
             <span className={isFiringBurst ? "text-amber-400 font-bold" : "text-primary flex items-center gap-1"}>
               <Zap className="w-3 h-3 inline" />
-              {isFiringBurst ? "Action Potential Fired!" : "Synaptic Pathways Active"}
+              {isFiringBurst ? "Action Potential Fired!" : "28k Neural Particles"}
             </span>
           </span>
         </div>
