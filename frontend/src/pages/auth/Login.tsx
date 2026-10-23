@@ -6,17 +6,16 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/components/ui/toast";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Eye,
   EyeOff,
   Loader2,
-  ArrowLeft,
   Brain,
-  ShieldCheck,
-  CheckCircle2,
+  Shield,
+  Heart,
+  PhoneCall,
   Sparkles,
-  Lock,
-  Mail,
 } from "lucide-react";
 import ThemeToggle from "@/components/layouts/ThemeToggle";
 
@@ -40,6 +39,7 @@ export const Login: React.FC = () => {
     register,
     handleSubmit,
     setValue,
+    watch,
     formState: { errors },
   } = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -49,6 +49,9 @@ export const Login: React.FC = () => {
       password: "",
     },
   });
+
+  const emailValue = watch("email");
+  const passwordValue = watch("password");
 
   const onSubmit = async (data: LoginFormValues) => {
     setIsSubmitting(true);
@@ -88,231 +91,259 @@ export const Login: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen w-full flex bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans transition-colors duration-200">
-      {/* LEFT PANEL: Branded Gradient Experience with Inspirational Quote */}
-      <div className="hidden lg:flex lg:w-1/2 relative bg-gradient-to-br from-indigo-950 via-slate-900 to-purple-950 text-white p-12 flex-col justify-between overflow-hidden">
-        {/* Subtle decorative glowing orbs */}
-        <div className="absolute -top-24 -left-24 w-96 h-96 bg-indigo-500/20 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute bottom-12 -right-24 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl pointer-events-none" />
+    <div className="min-h-screen w-full flex bg-background text-foreground font-sans antialiased transition-colors duration-200">
+      {/* LEFT PANEL (hidden on mobile, w-1/2, bg-primary text-primary-foreground) */}
+      <div className="hidden md:flex md:w-1/2 relative bg-gradient-to-b from-primary to-primary/80 text-primary-foreground p-10 lg:p-14 flex-col justify-between overflow-hidden shadow-2xl">
+        {/* Subtle decorative background blur */}
+        <div className="absolute -top-24 -left-24 w-96 h-96 bg-white/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-24 -right-24 w-96 h-96 bg-black/10 rounded-full blur-3xl pointer-events-none" />
 
-        {/* Brand Header */}
+        {/* Top: MindGuardAI logo + name */}
         <div className="relative z-10 flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-500 to-purple-500 flex items-center justify-center text-white shadow-lg shadow-indigo-500/30">
-            <Brain className="w-5 h-5" />
+          <div className="w-10 h-10 rounded-lg bg-white/15 backdrop-blur-sm border border-white/20 flex items-center justify-center text-white shadow-sm">
+            <Brain className="w-6 h-6" />
           </div>
           <div>
-            <span className="font-bold text-xl tracking-tight text-white">MindGuardAI</span>
-            <span className="block text-[11px] text-indigo-300 font-medium -mt-1 uppercase tracking-wider">
-              Campus Wellbeing
+            <span className="font-extrabold text-xl tracking-tight text-white block">
+              MindGuardAI
+            </span>
+            <span className="text-[11px] font-medium text-white/80 uppercase tracking-wider block">
+              Higher Education Wellbeing
             </span>
           </div>
         </div>
 
-        {/* Hero Quote and Value Proposition */}
-        <div className="relative z-10 my-auto max-w-lg">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-900/60 border border-indigo-700/60 text-xs font-semibold text-indigo-300 mb-6">
-            <Sparkles className="w-3.5 h-3.5 text-amber-300" />
-            <span>Confidential & Evidence-Based</span>
+        {/* Center: Quote + 3 bullet points with shield/heart/brain icons */}
+        <div className="relative z-10 space-y-8 max-w-md my-auto py-8">
+          <div className="space-y-3">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/15 backdrop-blur-sm border border-white/20 text-xs font-semibold text-white">
+              <Sparkles className="w-3.5 h-3.5" />
+              <span>Campus Wellness Intelligence</span>
+            </div>
+            <blockquote className="text-2xl lg:text-3xl font-extrabold leading-snug text-white">
+              &ldquo;Your wellbeing matters. MindGuardAI is here before you reach out.&rdquo;
+            </blockquote>
           </div>
-          <h2 className="text-3xl font-extrabold leading-tight text-white tracking-tight">
-            "Your wellbeing isn't an afterthought — it's the foundation of your academic journey."
-          </h2>
-          <p className="mt-4 text-slate-300 text-sm leading-relaxed">
-            MindGuardAI helps students, counselors, and campus leadership identify early signs of stress and burnout with
-            transparent, privacy-first telemetry.
-          </p>
 
-          <div className="mt-8 space-y-3">
-            <div className="flex items-center gap-3 text-xs text-slate-200">
-              <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-              <span>Zero keystroke logging — guaranteed student privacy</span>
+          <div className="space-y-4 pt-2">
+            <div className="flex items-start gap-3">
+              <div className="w-8 h-8 rounded-lg bg-white/15 flex items-center justify-center shrink-0 mt-0.5 text-white">
+                <Shield className="w-4 h-4" />
+              </div>
+              <div>
+                <p className="text-sm font-bold text-white">Zero-Keystroke Privacy</p>
+                <p className="text-xs text-white/80 mt-0.5">
+                  Full cryptographic client anonymity with strictly zero keystroke or screen monitoring.
+                </p>
+              </div>
             </div>
-            <div className="flex items-center gap-3 text-xs text-slate-200">
-              <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-              <span>Standardized PHQ-9 & GAD-7 clinical instruments</span>
+
+            <div className="flex items-start gap-3">
+              <div className="w-8 h-8 rounded-lg bg-white/15 flex items-center justify-center shrink-0 mt-0.5 text-white">
+                <Brain className="w-4 h-4" />
+              </div>
+              <div>
+                <p className="text-sm font-bold text-white">Explainable Clinical AI</p>
+                <p className="text-xs text-white/80 mt-0.5">
+                  Validated psychometric screeners (PHQ-9/GAD-7) and SHAP factor attribution.
+                </p>
+              </div>
             </div>
-            <div className="flex items-center gap-3 text-xs text-slate-200">
-              <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-              <span>24/7 instant crisis helpline routing</span>
+
+            <div className="flex items-start gap-3">
+              <div className="w-8 h-8 rounded-lg bg-white/15 flex items-center justify-center shrink-0 mt-0.5 text-white">
+                <Heart className="w-4 h-4" />
+              </div>
+              <div>
+                <p className="text-sm font-bold text-white">Compassionate Triage Pathway</p>
+                <p className="text-xs text-white/80 mt-0.5">
+                  Direct connection to university counselors before burnout becomes a crisis.
+                </p>
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Footer Note */}
-        <div className="relative z-10 text-xs text-slate-400 flex items-center justify-between">
-          <span>Encrypted with AES-256 & k-Anonymity</span>
-          <span>© {new Date().getFullYear()} MindGuardAI</span>
+        {/* Bottom: 24/7 Crisis Support Available with PhoneCall icon */}
+        <div className="relative z-10 pt-4 border-t border-white/20 flex items-center justify-between text-xs text-white/90">
+          <div className="flex items-center gap-2">
+            <PhoneCall className="w-4 h-4 text-white" />
+            <span className="font-semibold">24/7 Crisis Support Available</span>
+          </div>
+          <span className="font-mono text-[11px] bg-white/15 px-2.5 py-0.5 rounded-full font-medium">
+            Tele-MANAS: 14416
+          </span>
         </div>
       </div>
 
-      {/* RIGHT PANEL: Authentication Form */}
-      <div className="w-full lg:w-1/2 flex flex-col justify-between p-6 sm:p-12 relative overflow-y-auto">
-        {/* Top Navigation */}
-        <div className="flex items-center justify-between mb-8">
+      {/* RIGHT PANEL (w-full md:w-1/2, bg-background) */}
+      <div className="w-full md:w-1/2 flex flex-col justify-between p-6 sm:p-10 relative">
+        {/* Top bar with ThemeToggle in top-right corner of right panel */}
+        <div className="w-full flex items-center justify-between">
           <Link
             to="/"
-            className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-800"
+            className="text-xs font-semibold text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1.5"
           >
-            <ArrowLeft className="w-3.5 h-3.5" />
-            <span>Back to Home</span>
+            ← Back to Home
           </Link>
           <ThemeToggle />
         </div>
 
-        {/* Form Container */}
-        <div className="max-w-md w-full mx-auto my-auto animate-fade-in">
-          <div className="mb-8">
-            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
+        {/* Centered form with max-w-sm */}
+        <div className="w-full max-w-sm mx-auto my-auto py-8 animate-fade-in-up">
+          <div className="text-center sm:text-left space-y-1.5 mb-6">
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-foreground tracking-tight">
               Welcome back
             </h1>
-            <p className="text-sm text-slate-500 dark:text-slate-400 mt-2">
-              Sign in with your institutional email or student credentials.
+            <p className="text-xs sm:text-sm text-muted-foreground">
+              Sign in with your university email
             </p>
           </div>
 
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             {/* Email Field with Floating Label feel */}
-            <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5">
-                University Email or Username
+            <div className="relative">
+              <label
+                htmlFor="email"
+                className={`text-xs font-medium transition-all ${
+                  emailValue ? "text-primary font-semibold" : "text-muted-foreground"
+                } block mb-1`}
+              >
+                Institutional Email or Username
               </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-                  <Mail className="w-4 h-4" />
-                </div>
-                <input
-                  type="text"
-                  placeholder="student@nmims.edu or username"
-                  {...register("email")}
-                  className={`w-full pl-10 pr-4 py-2.5 rounded-xl text-sm border bg-white dark:bg-slate-900 text-slate-900 dark:text-white transition-all focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
-                    errors.email
-                      ? "border-rose-500 focus:ring-rose-500"
-                      : "border-slate-300 dark:border-slate-800"
-                  }`}
-                />
-              </div>
-              {errors.email ? (
-                <p className="text-xs text-rose-500 font-medium mt-1.5">{errors.email.message}</p>
-              ) : (
-                <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1.5">
-                  Continue with institutional email (@nmims.edu, @campus.edu)
+              <Input
+                id="email"
+                type="text"
+                autoComplete="email"
+                placeholder="student@campus.edu or roll number"
+                className={`h-11 rounded-lg ${errors.email ? "border-destructive focus-visible:ring-destructive" : ""}`}
+                {...register("email")}
+              />
+              {errors.email && (
+                <p className="text-[11px] text-destructive mt-1 font-medium">
+                  {errors.email.message}
                 </p>
               )}
             </div>
 
-            {/* Password Field */}
-            <div>
-              <div className="flex items-center justify-between mb-1.5">
-                <label className="block text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400">
+            {/* Password Field with Floating Label feel + Show/Hide Toggle */}
+            <div className="relative">
+              <div className="flex items-center justify-between mb-1">
+                <label
+                  htmlFor="password"
+                  className={`text-xs font-medium transition-all ${
+                    passwordValue ? "text-primary font-semibold" : "text-muted-foreground"
+                  }`}
+                >
                   Password
                 </label>
                 <Link
                   to="/forgot-password"
-                  className="text-xs font-medium text-indigo-600 dark:text-indigo-400 hover:underline"
+                  className="text-[11px] text-primary hover:underline font-medium"
                 >
                   Forgot password?
                 </Link>
               </div>
               <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-                  <Lock className="w-4 h-4" />
-                </div>
-                <input
+                <Input
+                  id="password"
                   type={showPassword ? "text" : "password"}
-                  placeholder="••••••••••••"
-                  {...register("password")}
-                  className={`w-full pl-10 pr-10 py-2.5 rounded-xl text-sm border bg-white dark:bg-slate-900 text-slate-900 dark:text-white transition-all focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
-                    errors.password
-                      ? "border-rose-500 focus:ring-rose-500"
-                      : "border-slate-300 dark:border-slate-800"
+                  autoComplete="current-password"
+                  placeholder="••••••••"
+                  className={`h-11 rounded-lg pr-10 ${
+                    errors.password ? "border-destructive focus-visible:ring-destructive" : ""
                   }`}
+                  {...register("password")}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
-                  title={showPassword ? "Hide password" : "Show password"}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground p-1 rounded-md transition-colors"
+                  aria-label={showPassword ? "Hide password" : "Show password"}
                 >
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
               {errors.password && (
-                <p className="text-xs text-rose-500 font-medium mt-1.5">{errors.password.message}</p>
+                <p className="text-[11px] text-destructive mt-1 font-medium">
+                  {errors.password.message}
+                </p>
               )}
             </div>
 
-            {/* Remember Me Checkbox */}
-            <div className="flex items-center justify-between pt-1">
-              <label className="flex items-center gap-2 cursor-pointer text-xs text-slate-600 dark:text-slate-400 select-none">
-                <input
-                  type="checkbox"
-                  checked={rememberMe}
-                  onChange={(e) => setRememberMe(e.target.checked)}
-                  className="w-4 h-4 rounded text-indigo-600 border-slate-300 focus:ring-indigo-500"
-                />
-                <span>Remember this workstation for 30 days</span>
+            {/* Remember Me */}
+            <div className="flex items-center space-x-2 pt-1">
+              <input
+                id="remember"
+                type="checkbox"
+                checked={rememberMe}
+                onChange={(e) => setRememberMe(e.target.checked)}
+                className="w-4 h-4 rounded border-border text-primary focus:ring-primary accent-primary"
+              />
+              <label htmlFor="remember" className="text-xs text-muted-foreground select-none cursor-pointer">
+                Keep me signed in on this device
               </label>
             </div>
 
-            {/* Submit Button */}
+            {/* Submit Button full width, bg-primary */}
             <Button
               type="submit"
               disabled={isSubmitting}
-              className="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold shadow-md shadow-indigo-600/20 transition-all hover:scale-[1.02] flex items-center justify-center gap-2"
+              className="w-full h-11 bg-primary text-primary-foreground hover:bg-primary/90 font-semibold rounded-lg shadow-sm transition-all"
             >
               {isSubmitting ? (
-                <>
+                <span className="flex items-center justify-center gap-2">
                   <Loader2 className="w-4 h-4 animate-spin" />
-                  <span>Verifying credentials...</span>
-                </>
+                  <span>Verifying Credentials...</span>
+                </span>
               ) : (
-                <span>Sign In to Dashboard</span>
+                "Sign In"
               )}
             </Button>
           </form>
 
-          {/* Quick Demo Fill Buttons */}
-          <div className="mt-6 pt-6 border-t border-slate-200 dark:border-slate-800">
-            <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-2.5">
-              Quick Test Personas:
-            </p>
+          {/* Quick Persona Demo Fill */}
+          <div className="mt-6 pt-5 border-t border-border">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground block text-center mb-2.5">
+              Quick Test Personas
+            </span>
             <div className="grid grid-cols-3 gap-2">
               <button
                 type="button"
-                onClick={() => setDemoCredentials("student1@nmims.edu", "Student@123")}
-                className="px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-slate-800 text-[11px] font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                onClick={() => setDemoCredentials("student1@mindguard.edu", "Student@123")}
+                className="px-2 py-1.5 rounded-lg border border-border bg-secondary/50 hover:bg-secondary text-[11px] font-medium text-foreground transition-colors text-center"
               >
                 Student
               </button>
               <button
                 type="button"
-                onClick={() => setDemoCredentials("counselor1@nmims.edu", "Counselor@123")}
-                className="px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-slate-800 text-[11px] font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                onClick={() => setDemoCredentials("counselor1@mindguard.edu", "Counselor@123")}
+                className="px-2 py-1.5 rounded-lg border border-border bg-secondary/50 hover:bg-secondary text-[11px] font-medium text-foreground transition-colors text-center"
               >
                 Counselor
               </button>
               <button
                 type="button"
-                onClick={() => setDemoCredentials("admin@nmims.edu", "Admin@123")}
-                className="px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-slate-800 text-[11px] font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                onClick={() => setDemoCredentials("admin@mindguard.edu", "Admin@123")}
+                className="px-2 py-1.5 rounded-lg border border-border bg-secondary/50 hover:bg-secondary text-[11px] font-medium text-foreground transition-colors text-center"
               >
                 Admin
               </button>
             </div>
           </div>
 
-          <p className="mt-8 text-center text-xs text-slate-500 dark:text-slate-400">
-            Don't have an active account yet?{" "}
-            <Link to="/register" className="font-semibold text-indigo-600 dark:text-indigo-400 hover:underline">
-              Create an Account
+          {/* Link to Register at bottom */}
+          <p className="text-center text-xs text-muted-foreground mt-6">
+            Don&apos;t have an account?{" "}
+            <Link to="/register" className="font-semibold text-primary hover:underline">
+              Register here
             </Link>
           </p>
         </div>
 
-        {/* Bottom Security Badge */}
-        <div className="mt-8 pt-4 flex items-center justify-center gap-2 text-xs text-slate-400">
-          <ShieldCheck className="w-4 h-4 text-emerald-500" />
-          <span>Zero-Knowledge Campus Encryption Active</span>
+        {/* Footer info */}
+        <div className="text-center text-[11px] text-muted-foreground">
+          MindGuardAI • Encrypted & Protected by Institutional FERPA Policy
         </div>
       </div>
     </div>

@@ -4,50 +4,51 @@
 
 @layer base {
   :root {
-    /* Global Design System - Indigo & Slate Palette */
-    --background: 0 0% 100%;             /* White / Slate-50 */
-    --foreground: 222 47% 11%;           /* Slate-900 */
-    --card: 0 0% 100%;                   /* White */
+    /* Existing MindGuardAI Design System */
+    /* Background: #F8FAFC, Card: #FFFFFF, Border: #E2E8F0, Muted: #64748B */
+    --background: 210 40% 98%;          /* #F8FAFC */
+    --foreground: 222 47% 11%;          /* #0F172A */
+    --card: 0 0% 100%;                  /* #FFFFFF */
     --card-foreground: 222 47% 11%;
     --popover: 0 0% 100%;
     --popover-foreground: 222 47% 11%;
-    --primary: 243 75% 59%;              /* Indigo-600 #4F46E5 */
-    --primary-foreground: 0 0% 100%;
-    --secondary: 258 90% 66%;            /* Purple-500 #8B5CF6 */
-    --secondary-foreground: 0 0% 100%;
-    --muted: 210 40% 96.1%;              /* Slate-100 */
-    --muted-foreground: 215 16% 47%;     /* Slate-500 */
-    --accent: 158 64% 52%;               /* Emerald-500 #10B981 */
-    --accent-foreground: 0 0% 100%;
-    --destructive: 347 87% 60%;          /* Rose-500 #F43F5E */
-    --destructive-foreground: 0 0% 100%;
-    --border: 214 32% 91%;               /* Slate-200 */
+    --primary: 221 83% 53%;             /* Royal Indigo hsl(221, 83%, 53%) */
+    --primary-foreground: 210 40% 98%;
+    --secondary: 210 40% 96%;           /* #F1F5F9 */
+    --secondary-foreground: 222 47% 11%;
+    --muted: 210 40% 96%;               /* #F1F5F9 */
+    --muted-foreground: 215 16% 47%;    /* #64748B */
+    --accent: 210 40% 96%;
+    --accent-foreground: 222 47% 11%;
+    --destructive: 347 87% 60%;         /* Rose-500 #F43F5E */
+    --destructive-foreground: 210 40% 98%;
+    --border: 214 32% 91%;              /* #E2E8F0 */
     --input: 214 32% 91%;
-    --ring: 243 75% 59%;
-    --radius: 1rem;                      /* 16px rounded-2xl feel */
+    --ring: 221 83% 53%;
+    --radius: 0.5rem;                   /* 8px base border radius */
   }
 
   .dark {
-    /* Global Design System - Dark Mode Slate-950 / Slate-900 */
-    --background: 224 71% 4%;            /* Slate-950 #020617 */
-    --foreground: 210 40% 98%;           /* Slate-50 */
-    --card: 222 47% 11%;                 /* Slate-900 #0F172A */
+    /* Dark Mode (deep midnight): Background: #070A11, Card: #0D1322, Border: #1E293B, Muted: #94A3B8 */
+    --background: 225 43% 5%;           /* #070A11 */
+    --foreground: 210 40% 98%;          /* #F8FAFC */
+    --card: 223 45% 9%;                 /* #0D1322 */
     --card-foreground: 210 40% 98%;
-    --popover: 222 47% 11%;
+    --popover: 223 45% 9%;
     --popover-foreground: 210 40% 98%;
-    --primary: 243 75% 59%;              /* Indigo-600 */
-    --primary-foreground: 0 0% 100%;
-    --secondary: 258 90% 66%;            /* Purple-500 */
-    --secondary-foreground: 0 0% 100%;
-    --muted: 217 33% 17%;                /* Slate-800 */
-    --muted-foreground: 215 20% 65%;     /* Slate-400 */
-    --accent: 158 64% 52%;               /* Emerald-500 */
-    --accent-foreground: 0 0% 100%;
-    --destructive: 347 87% 60%;          /* Rose-500 */
-    --destructive-foreground: 0 0% 100%;
-    --border: 217 33% 17%;               /* Slate-800 */
+    --primary: 217 91% 60%;             /* Royal Indigo dark hsl(217, 91%, 60%) */
+    --primary-foreground: 225 43% 5%;
+    --secondary: 217 33% 14%;           /* #172033 */
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217 33% 14%;
+    --muted-foreground: 215 20% 65%;    /* #94A3B8 */
+    --accent: 217 33% 14%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 347 87% 60%;         /* Rose-500 */
+    --destructive-foreground: 210 40% 98%;
+    --border: 217 33% 17%;              /* #1E293B */
     --input: 217 33% 17%;
-    --ring: 243 75% 59%;
+    --ring: 217 91% 60%;
   }
 }
 
@@ -57,7 +58,7 @@
   }
   
   html {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
@@ -87,25 +88,25 @@
 }
 
 @layer components {
-  /* Clean Healthcare & Wellness Surface Panels */
+  /* Clean Surface Panels */
   .wellness-card {
-    @apply bg-card border border-border/80 rounded-2xl shadow-xs transition-all duration-200;
+    @apply bg-card border border-border rounded-lg shadow-xs transition-all duration-200;
   }
 
   .wellness-card-hover {
-    @apply bg-card border border-border/80 rounded-2xl shadow-xs transition-all duration-200 hover:border-primary/40 hover:shadow-sm;
+    @apply bg-card border border-border rounded-lg shadow-xs transition-all duration-200 hover:border-primary/40 hover:shadow-sm;
   }
 
   .wellness-pill {
-    @apply inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-accent text-accent-foreground border border-primary/20;
+    @apply inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-primary/10 text-primary border border-primary/20;
   }
 
   .saas-panel {
-    @apply bg-card border border-border/80 rounded-2xl shadow-xs transition-all duration-150;
+    @apply bg-card border border-border rounded-lg shadow-xs transition-all duration-150;
   }
 
   .saas-panel-hover {
-    @apply bg-card border border-border/80 rounded-2xl shadow-xs transition-all duration-150 hover:border-border hover:shadow-sm;
+    @apply bg-card border border-border rounded-lg shadow-xs transition-all duration-150 hover:border-border hover:shadow-sm;
   }
 
   .saas-table {
@@ -123,58 +124,56 @@
   .saas-table tr:hover td {
     @apply bg-secondary/30;
   }
+}
 
-  /* Refined Semantic Badges */
-  .badge-stable {
-    @apply bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20 font-semibold px-2.5 py-0.5 rounded-full text-[11px];
+/* Pure CSS Keyframes for Page & Section Animations */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
   }
-
-  .badge-moderate {
-    @apply bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-500/20 font-semibold px-2.5 py-0.5 rounded-full text-[11px];
-  }
-
-  .badge-elevated {
-    @apply bg-rose-500/10 text-rose-700 dark:text-rose-400 border border-rose-500/20 font-semibold px-2.5 py-0.5 rounded-full text-[11px];
-  }
-
-  .badge-neutral {
-    @apply bg-secondary text-secondary-foreground border border-border/80 font-semibold px-2.5 py-0.5 rounded-full text-[11px];
-  }
-
-  /* Clinical Signal Indicator Tags */
-  .tag-clinical-fact {
-    @apply inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider bg-primary/10 text-primary border border-primary/20;
-  }
-
-  .tag-ai-insight {
-    @apply inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider bg-purple-500/10 text-purple-700 dark:text-purple-300 border border-purple-500/20;
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
-/* Dynamic Keyframe Animations for Holographic Neural Systems */
+.animate-fade-in-up {
+  animation: fadeInUp 0.4s ease-out forwards;
+}
+
+@keyframes pulse-soft {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
+}
+
+.animate-pulse-soft {
+  animation: pulse-soft 2s ease-in-out infinite;
+}
+
 @keyframes float {
   0%, 100% {
     transform: translateY(0px) rotate(0deg);
   }
   50% {
-    transform: translateY(-9px) rotate(0.5deg);
+    transform: translateY(-8px) rotate(0.5deg);
   }
 }
 
-@keyframes shimmer {
-  0% {
-    transform: translateX(-150%) skewX(-25deg);
-  }
-  100% {
-    transform: translateX(250%) skewX(-25deg);
-  }
+.animate-float {
+  animation: float 4s ease-in-out infinite;
 }
 
-/* Accessibility: Clean reduced motion support without overriding necessary transitions */
+/* Accessibility: Reduced motion support */
 @media (prefers-reduced-motion: reduce) {
-  .motion-reduce-safe {
-    animation-duration: 0.01ms !important;
-    transition-duration: 0.01ms !important;
+  .animate-fade-in-up,
+  .animate-pulse-soft,
+  .animate-float {
+    animation: none !important;
+    transform: none !important;
   }
 }
-

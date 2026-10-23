@@ -1,43 +1,81 @@
-import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import React, { useState, useEffect, useRef } from "react";
+import { Link } from "react-router-dom";
 import { useTheme } from "@/contexts/ThemeContext";
 import {
-  Shield,
-  Activity,
-  HeartHandshake,
+  Brain,
   ArrowRight,
   Sun,
   Moon,
+  Sparkles,
+  Shield,
+  Activity,
+  HeartHandshake,
   CheckCircle2,
+  PhoneCall,
+  Clock,
+  Lock,
+  MoonStar,
   Users,
   Compass,
   Zap,
-  GraduationCap,
-  ChevronRight,
   BarChart3,
-  Lock,
-  MessageSquare,
-  Sparkles,
-  PhoneCall,
-  Clock,
-  Brain,
-  MoonStar,
-  Check,
-  Building2,
-  HelpCircle,
-  Eye,
-  Sliders,
-  Layers,
-  Laptop,
+  Flame,
+  FileCheck2,
+  Stethoscope,
+  Smile,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { NeuralBrain3D } from "@/components/3d/NeuralBrain3D";
+import { Card, CardContent } from "@/components/ui/card";
+
+// Pure React count-up hook using IntersectionObserver
+function useCountUp(targetNumber: number, duration: number = 1800) {
+  const [count, setCount] = useState<number>(0);
+  const [isVisible, setIsVisible] = useState<boolean>(false);
+  const elementRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.25 }
+    );
+
+    if (elementRef.current) {
+      observer.observe(elementRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (!isVisible) return;
+    let startTime: number | null = null;
+    let frameId: number;
+
+    const animate = (timestamp: number) => {
+      if (!startTime) startTime = timestamp;
+      const progress = Math.min((timestamp - startTime) / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3); // ease-out cubic
+      setCount(Number((eased * targetNumber).toFixed(targetNumber % 1 === 0 ? 0 : 1)));
+
+      if (progress < 1) {
+        frameId = requestAnimationFrame(animate);
+      }
+    };
+
+    frameId = requestAnimationFrame(animate);
+    return () => cancelAnimationFrame(frameId);
+  }, [isVisible, targetNumber, duration]);
+
+  return { count, elementRef };
+}
 
 export const LandingPage: React.FC = () => {
   const { theme, toggleTheme } = useTheme();
-  const navigate = useNavigate();
-  const [heroTab, setHeroTab] = useState<"dashboard" | "brain">("dashboard");
 
   const scrollToSection = (id: string) => {
     const el = document.getElementById(id);
@@ -46,73 +84,63 @@ export const LandingPage: React.FC = () => {
     }
   };
 
-  return (
-    <div className="relative min-h-screen bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans selection:bg-indigo-500 selection:text-white transition-colors duration-200">
-      {/* Subtle Ambient Background Gradient */}
-      <div
-        className="fixed inset-0 pointer-events-none -z-10 overflow-hidden"
-        aria-hidden="true"
-      >
-        <div className="absolute -top-40 -left-40 w-96 h-96 bg-purple-500/15 dark:bg-purple-600/10 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute top-1/3 -right-40 w-96 h-96 bg-indigo-500/15 dark:bg-indigo-600/10 rounded-full blur-3xl" />
-        <div className="absolute bottom-20 left-1/4 w-[32rem] h-[32rem] bg-blue-500/10 dark:bg-blue-600/10 rounded-full blur-3xl" />
-      </div>
+  // Stats counter hooks
+  const stat1 = useCountUp(99.2, 1500);
+  const stat2 = useCountUp(100, 1200);
+  const stat4 = useCountUp(3, 1000);
 
+  return (
+    <div className="relative min-h-screen bg-background text-foreground font-sans antialiased selection:bg-primary/20 selection:text-primary transition-colors duration-200">
       {/* TOP NAVBAR */}
-      <header className="sticky top-0 z-50 w-full backdrop-blur-md bg-white/80 dark:bg-slate-950/80 border-b border-slate-200/80 dark:border-slate-800/80 transition-colors">
-        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+      <header className="sticky top-0 z-50 w-full backdrop-blur-md bg-background/85 border-b border-border transition-colors">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2.5 group">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-purple-500 flex items-center justify-center text-white shadow-md shadow-indigo-500/20 group-hover:scale-105 transition-transform">
+            <div className="w-9 h-9 rounded-lg bg-primary flex items-center justify-center text-primary-foreground shadow-sm shadow-primary/25 transition-transform group-hover:scale-105">
               <Brain className="w-5 h-5" />
             </div>
             <div className="flex flex-col">
-              <span className="font-bold text-lg tracking-tight bg-gradient-to-r from-slate-900 to-indigo-600 dark:from-white dark:to-indigo-400 bg-clip-text text-transparent">
-                MindGuard<span className="text-indigo-600 dark:text-indigo-400">AI</span>
+              <span className="font-bold text-base sm:text-lg tracking-tight text-foreground">
+                MindGuard<span className="text-primary">AI</span>
               </span>
-              <span className="text-[10px] uppercase tracking-widest text-slate-500 font-semibold -mt-1">
-                Student Wellbeing
+              <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium -mt-1">
+                University Wellness
               </span>
             </div>
           </Link>
 
-          <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-slate-600 dark:text-slate-300">
+          <nav className="hidden md:flex items-center gap-7 text-sm font-medium text-muted-foreground">
             <button
               onClick={() => scrollToSection("how-it-works")}
-              className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
+              className="hover:text-foreground transition-colors"
             >
               How It Works
             </button>
             <button
               onClick={() => scrollToSection("features")}
-              className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
+              className="hover:text-foreground transition-colors"
             >
-              Features
+              Capabilities
             </button>
             <button
-              onClick={() => scrollToSection("impact")}
-              className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
+              onClick={() => scrollToSection("privacy")}
+              className="hover:text-foreground transition-colors"
             >
-              Impact
+              Privacy
             </button>
             <button
-              onClick={() => scrollToSection("testimonials")}
-              className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
+              onClick={() => scrollToSection("helplines")}
+              className="hover:text-foreground transition-colors"
             >
-              Testimonials
-            </button>
-            <button
-              onClick={() => scrollToSection("pricing")}
-              className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
-            >
-              Tiers
+              Crisis Lines
             </button>
           </nav>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2.5">
             <button
               onClick={toggleTheme}
-              className="p-2 rounded-xl text-slate-500 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+              className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
               title="Toggle theme"
+              aria-label="Toggle dark/light theme"
             >
               {theme === "dark" ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
             </button>
@@ -120,684 +148,624 @@ export const LandingPage: React.FC = () => {
             <Link to="/login">
               <Button
                 variant="ghost"
-                className="hidden sm:inline-flex text-sm font-semibold rounded-xl hover:text-indigo-600 dark:hover:text-indigo-400"
+                size="sm"
+                className="text-xs sm:text-sm font-semibold rounded-lg hover:text-primary"
               >
                 Sign In
               </Button>
             </Link>
 
-            <Link to="/register">
-              <Button className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl shadow-md shadow-indigo-600/20 text-sm font-semibold transition-transform hover:scale-105">
-                Get Started
-                <ArrowRight className="w-4 h-4 ml-1.5" />
+            <Link to="/login">
+              <Button size="sm" className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-lg text-xs sm:text-sm font-semibold shadow-xs">
+                Student Portal
+                <ArrowRight className="w-3.5 h-3.5 ml-1.5" />
               </Button>
             </Link>
           </div>
         </div>
       </header>
 
-      {/* 1. HERO SECTION */}
-      <section className="relative pt-16 pb-20 md:pt-24 md:pb-32 px-6 max-w-7xl mx-auto flex flex-col items-center text-center">
-        {/* Subtle pill tag */}
-        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-200/80 dark:border-indigo-800/80 text-xs font-semibold text-indigo-700 dark:text-indigo-300 mb-6 shadow-xs animate-fade-in">
-          <Sparkles className="w-3.5 h-3.5 text-indigo-500" />
-          <span>Next-Generation Campus Mental Health Telemetry</span>
-          <span className="w-1 h-1 rounded-full bg-indigo-400" />
-          <span className="text-slate-500 dark:text-slate-400 font-normal">v2.4 Active</span>
-        </div>
-
-        {/* Hero Headline & Subhead */}
-        <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-slate-900 dark:text-white max-w-4xl leading-[1.12]">
-          Your Campus. Your Wellbeing.{" "}
-          <span className="bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-500 bg-clip-text text-transparent">
-            Detected Early.
-          </span>
-        </h1>
-
-        <p className="mt-6 text-lg sm:text-xl text-slate-600 dark:text-slate-300 max-w-2xl leading-relaxed">
-          MindGuardAI continuously monitors student mental wellness signals and surfaces early
-          warnings — before burnout becomes a crisis.
-        </p>
-
-        {/* CTA Buttons */}
-        <div className="mt-8 flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto">
-          <Button
-            size="lg"
-            onClick={() => navigate("/register")}
-            className="w-full sm:w-auto px-8 py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-semibold shadow-lg shadow-indigo-600/25 transition-all hover:scale-105"
-          >
-            Get Started Free
-            <ArrowRight className="w-4 h-4 ml-2" />
-          </Button>
-
-          <Button
-            size="lg"
-            variant="outline"
-            onClick={() => scrollToSection("how-it-works")}
-            className="w-full sm:w-auto px-7 py-3.5 rounded-xl border-slate-300 dark:border-slate-700 font-semibold hover:bg-slate-100 dark:hover:bg-slate-800/80 transition-all"
-          >
-            See How It Works
-          </Button>
-        </div>
-
-        {/* View Mode Switcher */}
-        <div className="mt-12 inline-flex items-center p-1 rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs font-medium">
-          <button
-            onClick={() => setHeroTab("dashboard")}
-            className={`px-3.5 py-1.5 rounded-lg transition-all flex items-center gap-1.5 ${
-              heroTab === "dashboard"
-                ? "bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-xs font-semibold"
-                : "text-slate-600 dark:text-slate-400 hover:text-slate-900"
-            }`}
-          >
-            <Laptop className="w-3.5 h-3.5 text-indigo-500" />
-            <span>Interactive Platform Preview</span>
-          </button>
-          <button
-            onClick={() => setHeroTab("brain")}
-            className={`px-3.5 py-1.5 rounded-lg transition-all flex items-center gap-1.5 ${
-              heroTab === "brain"
-                ? "bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-xs font-semibold"
-                : "text-slate-600 dark:text-slate-400 hover:text-slate-900"
-            }`}
-          >
-            <Brain className="w-3.5 h-3.5 text-indigo-500" />
-            <span>3D Neural Particle Visualizer</span>
-          </button>
-        </div>
-
-        {/* HERO VISUAL: Floating Dashboard Mockup or 3D Neural Brain */}
-        <div className="mt-6 w-full max-w-5xl rounded-2xl p-2 bg-gradient-to-b from-slate-200/60 to-slate-300/40 dark:from-slate-800/60 dark:to-slate-900/40 border border-slate-200 dark:border-slate-800 shadow-2xl shadow-indigo-500/10 transition-all">
-          {heroTab === "dashboard" ? (
-            <div className="w-full bg-white dark:bg-slate-900 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-800 text-left">
-              {/* Browser chrome header */}
-              <div className="h-10 px-4 bg-slate-50 dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
-                <div className="flex items-center gap-1.5">
-                  <div className="w-3 h-3 rounded-full bg-rose-400" />
-                  <div className="w-3 h-3 rounded-full bg-amber-400" />
-                  <div className="w-3 h-3 rounded-full bg-emerald-400" />
-                </div>
-                <div className="text-[11px] font-mono text-slate-400 flex items-center gap-1 bg-white dark:bg-slate-900 px-3 py-1 rounded-md border border-slate-200 dark:border-slate-800">
-                  <Lock className="w-3 h-3 text-emerald-500 inline" />
-                  <span>mindguard.campus.edu/student/dashboard</span>
-                </div>
-                <div className="text-xs text-slate-400 font-medium">Live Telemetry</div>
-              </div>
-
-              {/* Mockup Dashboard Content */}
-              <div className="p-6 grid grid-cols-1 md:grid-cols-3 gap-5">
-                {/* Stat 1: Wellness Ring */}
-                <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/80 dark:border-slate-700/60 flex items-center justify-between">
-                  <div>
-                    <p className="text-xs font-semibold text-slate-500">Wellness Index</p>
-                    <p className="text-2xl font-bold text-slate-900 dark:text-white mt-1">84 / 100</p>
-                    <span className="inline-flex items-center text-[11px] font-medium text-emerald-600 dark:text-emerald-400 mt-0.5">
-                      +4.2% stable baseline
-                    </span>
-                  </div>
-                  <div className="w-14 h-14 rounded-full border-4 border-indigo-500 border-t-purple-400 flex items-center justify-center font-bold text-xs text-indigo-600 dark:text-indigo-400">
-                    84%
-                  </div>
-                </div>
-
-                {/* Stat 2: Circadian Sleep */}
-                <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/80 dark:border-slate-700/60">
-                  <div className="flex items-center justify-between">
-                    <p className="text-xs font-semibold text-slate-500">Sleep Health</p>
-                    <MoonStar className="w-4 h-4 text-indigo-500" />
-                  </div>
-                  <p className="text-2xl font-bold text-slate-900 dark:text-white mt-1">7.4 hrs</p>
-                  <p className="text-[11px] text-slate-500 mt-0.5">Optimal REM restoration</p>
-                </div>
-
-                {/* Stat 3: Risk Stratification */}
-                <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/80 dark:border-slate-700/60">
-                  <div className="flex items-center justify-between">
-                    <p className="text-xs font-semibold text-slate-500">Risk Matrix</p>
-                    <span className="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[10px] font-bold">
-                      LOW RISK
-                    </span>
-                  </div>
-                  <p className="text-2xl font-bold text-slate-900 dark:text-white mt-1">PHQ-9: 3</p>
-                  <p className="text-[11px] text-slate-500 mt-0.5">Sub-clinical mild anxiety</p>
-                </div>
-
-                {/* Chart Preview & AI Chat prompt */}
-                <div className="md:col-span-2 p-5 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/80 dark:border-slate-700/60">
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center gap-2">
-                      <Activity className="w-4 h-4 text-indigo-500" />
-                      <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">
-                        30-Day Longitudinal Mood Trajectory
-                      </span>
-                    </div>
-                    <span className="text-[10px] text-slate-400">SHAP Explainable</span>
-                  </div>
-                  <div className="h-28 flex items-end gap-2 pt-4">
-                    {[65, 70, 68, 74, 80, 78, 82, 85, 79, 84, 88, 84].map((val, idx) => (
-                      <div key={idx} className="flex-1 flex flex-col items-center gap-1">
-                        <div
-                          className="w-full bg-gradient-to-t from-indigo-600 to-purple-500 rounded-t-md transition-all hover:opacity-80"
-                          style={{ height: `${val}%` }}
-                        />
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Companion Micro-Card */}
-                <div className="p-5 rounded-xl bg-gradient-to-br from-indigo-600 to-purple-600 text-white flex flex-col justify-between">
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <Sparkles className="w-4 h-4 text-amber-300" />
-                      <p className="text-xs font-bold uppercase tracking-wider text-indigo-100">AI Companion</p>
-                    </div>
-                    <p className="text-sm font-semibold mt-2">"You've kept consistent sleep for 4 nights. Ready for exam week?"</p>
-                  </div>
-                  <Link to="/student" className="mt-4">
-                    <Button size="sm" className="w-full bg-white text-indigo-700 hover:bg-slate-100 font-semibold text-xs rounded-lg">
-                      Open Student Chat
-                    </Button>
-                  </Link>
-                </div>
-              </div>
+      {/* TASK 1: HERO SECTION */}
+      <section className="relative min-h-[calc(100vh-4rem)] flex items-center justify-center bg-gradient-to-b from-background via-primary/5 to-background px-4 sm:px-6 py-12 md:py-20 overflow-hidden">
+        <div className="max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center animate-fade-in-up">
+          {/* Left Column: Headline and CTAs */}
+          <div className="lg:col-span-7 flex flex-col items-center lg:items-start text-center lg:text-left space-y-6">
+            {/* Pill Badge */}
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-xs font-semibold text-primary">
+              <span role="img" aria-label="brain">🧠</span>
+              <span>Student Mental Wellness Platform</span>
             </div>
-          ) : (
-            <div className="w-full h-[460px] bg-slate-950 rounded-xl overflow-hidden relative flex items-center justify-center">
-              <NeuralBrain3D className="w-full h-full" interactive={true} autoRotate={true} />
-            </div>
-          )}
-        </div>
-      </section>
 
-      {/* 2. SOCIAL PROOF BAR */}
-      <section className="border-y border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-900/40 py-10 px-6">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6 text-center md:text-left">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-              Trusted by students & counselors across
+            {/* Headline */}
+            <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight text-foreground leading-[1.12]">
+              Detect Burnout Before It Becomes a Crisis
+            </h1>
+
+            {/* Subheadline */}
+            <p className="text-base sm:text-lg text-muted-foreground max-w-lg leading-relaxed">
+              MindGuardAI continuously monitors student wellbeing signals — emotion 
+              analysis, sleep patterns, and clinical screeners — to surface early 
+              warnings weeks before students reach breaking point.
             </p>
-            <p className="text-base font-bold text-slate-800 dark:text-slate-200 mt-0.5">
-              3+ Leading Educational Institutions
-            </p>
+
+            {/* Two CTA Buttons */}
+            <div className="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto pt-2">
+              <Link to="/login" className="w-full sm:w-auto">
+                <Button size="lg" className="w-full sm:w-auto bg-primary text-primary-foreground hover:bg-primary/90 font-semibold px-7 rounded-lg shadow-md shadow-primary/20">
+                  Student Portal →
+                </Button>
+              </Link>
+              <Button
+                variant="ghost"
+                size="lg"
+                onClick={() => scrollToSection("how-it-works")}
+                className="w-full sm:w-auto font-semibold text-muted-foreground hover:text-foreground px-6 rounded-lg"
+              >
+                How It Works ↓
+              </Button>
+            </div>
           </div>
 
-          <div className="flex flex-wrap items-center justify-center gap-8 md:gap-12 text-slate-600 dark:text-slate-400 font-bold text-sm">
-            <div className="flex items-center gap-2">
-              <Building2 className="w-4 h-4 text-indigo-500" />
-              <span>NMIMS University</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <GraduationCap className="w-4 h-4 text-purple-500" />
-              <span>Campus Wellness Labs</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Users className="w-4 h-4 text-emerald-500" />
-              <span className="text-indigo-600 dark:text-indigo-400 font-extrabold text-base">2,400+</span>
-              <span>Students Monitored</span>
+          {/* Right Column: Floating Stats Card Mockup (Styled like real StudentDashboard) */}
+          <div className="lg:col-span-5 flex justify-center lg:justify-end">
+            <div className="w-full max-w-md bg-card border border-border rounded-lg shadow-xl p-5 space-y-5 animate-float transition-all">
+              {/* Card Header */}
+              <div className="flex items-center justify-between pb-3 border-b border-border">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center font-bold text-sm">
+                    <Smile className="w-5 h-5 text-emerald-500" />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-semibold text-foreground">Student Wellness Overview</h3>
+                    <p className="text-[11px] text-muted-foreground">Semester Telemetry • Active</p>
+                  </div>
+                </div>
+                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                  Stable
+                </span>
+              </div>
+
+              {/* Main Wellness Score Metric */}
+              <div className="flex items-center justify-between p-4 rounded-lg bg-secondary/50 border border-border">
+                <div>
+                  <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider block">
+                    Composite Wellness Index
+                  </span>
+                  <div className="flex items-baseline gap-1 mt-1">
+                    <span className="text-4xl font-extrabold text-emerald-500">78</span>
+                    <span className="text-xs text-muted-foreground font-semibold">/ 100</span>
+                  </div>
+                  <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-medium mt-1 inline-flex items-center gap-1">
+                    ↑ +4% recovery from last check-in
+                  </span>
+                </div>
+
+                {/* SVG Radial Gauge */}
+                <div className="relative w-16 h-16 flex items-center justify-center">
+                  <svg className="w-full h-full -rotate-90" viewBox="0 0 36 36">
+                    <path
+                      className="text-border"
+                      strokeWidth="3.5"
+                      stroke="currentColor"
+                      fill="none"
+                      d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                    />
+                    <path
+                      className="text-emerald-500 transition-all duration-1000 ease-out"
+                      strokeDasharray="78, 100"
+                      strokeWidth="3.5"
+                      strokeLinecap="round"
+                      stroke="currentColor"
+                      fill="none"
+                      d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                    />
+                  </svg>
+                  <span className="absolute text-[11px] font-bold text-foreground">78%</span>
+                </div>
+              </div>
+
+              {/* Fake Mood Chart Line (SVG Sparkline) */}
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="font-semibold text-foreground">14-Day Trajectory</span>
+                  <span className="text-muted-foreground text-[10px]">Circadian Aligned</span>
+                </div>
+                <div className="h-16 w-full rounded-lg bg-secondary/30 border border-border/80 p-2 flex items-end">
+                  <svg className="w-full h-full overflow-visible" viewBox="0 0 100 40" preserveAspectRatio="none">
+                    <defs>
+                      <linearGradient id="chartGradient" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity="0.3" />
+                        <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity="0.0" />
+                      </linearGradient>
+                    </defs>
+                    <path
+                      d="M0,32 Q15,35 30,22 T60,18 T85,10 T100,8 L100,40 L0,40 Z"
+                      fill="url(#chartGradient)"
+                    />
+                    <path
+                      d="M0,32 Q15,35 30,22 T60,18 T85,10 T100,8"
+                      fill="none"
+                      stroke="hsl(var(--primary))"
+                      strokeWidth="2.5"
+                      strokeLinecap="round"
+                    />
+                    {/* Data point dots */}
+                    <circle cx="30" cy="22" r="2.5" fill="hsl(var(--primary))" />
+                    <circle cx="60" cy="18" r="2.5" fill="hsl(var(--primary))" />
+                    <circle cx="100" cy="8" r="3" fill="#10B981" />
+                  </svg>
+                </div>
+              </div>
+
+              {/* 3 Stat Badges */}
+              <div className="grid grid-cols-3 gap-2 pt-1">
+                <div className="p-2 rounded-lg bg-secondary/40 border border-border text-center">
+                  <span className="text-[10px] text-muted-foreground block font-medium">Risk Status</span>
+                  <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400">LOW</span>
+                </div>
+                <div className="p-2 rounded-lg bg-secondary/40 border border-border text-center">
+                  <span className="text-[10px] text-muted-foreground block font-medium">Sleep Avg</span>
+                  <span className="text-xs font-bold text-foreground">7.4h</span>
+                </div>
+                <div className="p-2 rounded-lg bg-secondary/40 border border-border text-center">
+                  <span className="text-[10px] text-muted-foreground block font-medium">Streak</span>
+                  <span className="text-xs font-bold text-primary flex items-center justify-center gap-0.5">
+                    <Flame className="w-3 h-3 text-amber-500 fill-amber-500" /> 14 Days
+                  </span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* 3. HOW IT WORKS SECTION */}
-      <section id="how-it-works" className="py-24 px-6 max-w-7xl mx-auto">
-        <div className="text-center max-w-3xl mx-auto mb-16">
-          <span className="text-xs font-bold uppercase tracking-widest text-indigo-600 dark:text-indigo-400">
-            Seamless Workflow
+      {/* TRUST BAR (below hero, border-y border-border bg-secondary/50) */}
+      <section className="border-y border-border bg-secondary/50 py-4 px-4 sm:px-6">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 text-xs">
+          <span className="font-semibold text-muted-foreground tracking-wide uppercase text-[11px]">
+            Backed by validated clinical instruments
           </span>
-          <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-slate-900 dark:text-white mt-2">
+          <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-8 text-foreground font-medium">
+            <div className="flex items-center gap-1.5">
+              <FileCheck2 className="w-4 h-4 text-primary" />
+              <span>PHQ-9 Depression Screener</span>
+            </div>
+            <div className="hidden sm:block text-border">•</div>
+            <div className="flex items-center gap-1.5">
+              <Activity className="w-4 h-4 text-primary" />
+              <span>GAD-7 Anxiety Screener</span>
+            </div>
+            <div className="hidden sm:block text-border">•</div>
+            <div className="flex items-center gap-1.5">
+              <BarChart3 className="w-4 h-4 text-primary" />
+              <span>SHAP Explainable AI</span>
+            </div>
+            <div className="hidden sm:block text-border">•</div>
+            <div className="flex items-center gap-1.5">
+              <Lock className="w-4 h-4 text-emerald-500" />
+              <span>Zero-Keystroke Privacy</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* HOW IT WORKS (id="how-it-works") */}
+      <section id="how-it-works" className="py-20 px-4 sm:px-6 max-w-7xl mx-auto">
+        <div className="text-center max-w-2xl mx-auto mb-14 space-y-3">
+          <span className="text-xs font-bold uppercase tracking-wider text-primary">Workflow</span>
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-foreground tracking-tight">
             How MindGuardAI Protects Students
           </h2>
-          <p className="mt-4 text-slate-600 dark:text-slate-300">
-            A three-step clinical and behavioral pipeline engineered for early detection without intrusive surveillance.
+          <p className="text-sm text-muted-foreground">
+            A continuous, non-intrusive clinical safety net that bridges daily campus living with proactive mental healthcare.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative">
+        {/* 4 numbered steps in a horizontal grid (2x2 on mobile, 4-col on desktop) */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {/* Step 1 */}
-          <div className="relative p-8 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md transition-all">
-            <div className="w-12 h-12 rounded-xl bg-indigo-50 dark:bg-indigo-950/80 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-bold text-lg mb-6">
-              1
-            </div>
-            <h3 className="text-xl font-bold text-slate-900 dark:text-white">Daily Check-In</h3>
-            <p className="text-slate-600 dark:text-slate-400 text-sm mt-3 leading-relaxed">
-              30-second mood micro check-ins, sleep tracking, and optional non-invasive PC study telemetry logs.
-            </p>
-          </div>
+          <Card className="relative bg-card border border-border rounded-lg shadow-xs hover:border-primary/40 transition-all">
+            <CardContent className="p-6 space-y-4">
+              <span className="text-2xl font-mono font-extrabold text-muted-foreground/30 block">
+                01
+              </span>
+              <div className="w-10 h-10 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
+                <Smile className="w-5 h-5" />
+              </div>
+              <h3 className="text-base font-semibold text-foreground">Daily Check-in</h3>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                Students log 30-second mood pulse, sleep hours, and journal notes. Frictionless reflection cultivates personal self-awareness.
+              </p>
+            </CardContent>
+          </Card>
 
           {/* Step 2 */}
-          <div className="relative p-8 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md transition-all">
-            <div className="w-12 h-12 rounded-xl bg-purple-50 dark:bg-purple-950/80 text-purple-600 dark:text-purple-400 flex items-center justify-center font-bold text-lg mb-6">
-              2
-            </div>
-            <h3 className="text-xl font-bold text-slate-900 dark:text-white">AI Analysis & SHAP</h3>
-            <p className="text-slate-600 dark:text-slate-400 text-sm mt-3 leading-relaxed">
-              Fine-tuned DistilBERT and Random Forest models evaluate risk trajectory with transparent factor attribution.
-            </p>
-          </div>
-
-          {/* Step 3 */}
-          <div className="relative p-8 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md transition-all">
-            <div className="w-12 h-12 rounded-xl bg-emerald-50 dark:bg-emerald-950/80 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-bold text-lg mb-6">
-              3
-            </div>
-            <h3 className="text-xl font-bold text-slate-900 dark:text-white">Guided Support</h3>
-            <p className="text-slate-600 dark:text-slate-400 text-sm mt-3 leading-relaxed">
-              Instant CBT coping exercises, 24/7 AI companion dialogue, or confidential escalation to campus counselors.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* 4. FEATURES SECTION (6-Card Bento Grid) */}
-      <section id="features" className="py-24 px-6 max-w-7xl mx-auto border-t border-slate-200 dark:border-slate-800">
-        <div className="text-center max-w-3xl mx-auto mb-16">
-          <span className="text-xs font-bold uppercase tracking-widest text-indigo-600 dark:text-indigo-400">
-            Comprehensive Suite
-          </span>
-          <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-slate-900 dark:text-white mt-2">
-            Built for Modern Campus Mental Health
-          </h2>
-          <p className="mt-4 text-slate-600 dark:text-slate-300">
-            Clinical-grade psychometrics, transparent explainability, and enterprise-grade privacy protection.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {/* Feature 1 */}
-          <div className="p-7 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all group">
-            <div className="w-12 h-12 rounded-xl bg-indigo-50 dark:bg-indigo-950/80 text-indigo-600 dark:text-indigo-400 flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
-              <MessageSquare className="w-6 h-6" />
-            </div>
-            <h3 className="text-lg font-bold text-slate-900 dark:text-white">AI Companion & CBT Chatbot</h3>
-            <p className="text-sm text-slate-600 dark:text-slate-400 mt-2 leading-relaxed">
-              Always-on empathetic conversational partner providing evidence-based cognitive reframing and de-escalation.
-            </p>
-          </div>
-
-          {/* Feature 2 */}
-          <div className="p-7 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all group">
-            <div className="w-12 h-12 rounded-xl bg-purple-50 dark:bg-purple-950/80 text-purple-600 dark:text-purple-400 flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
-              <BarChart3 className="w-6 h-6" />
-            </div>
-            <h3 className="text-lg font-bold text-slate-900 dark:text-white">SHAP Explainability</h3>
-            <p className="text-sm text-slate-600 dark:text-slate-400 mt-2 leading-relaxed">
-              Transparent feature attribution showing exact drivers of wellness shifts instead of opaque black-box scores.
-            </p>
-          </div>
-
-          {/* Feature 3 */}
-          <div className="p-7 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all group">
-            <div className="w-12 h-12 rounded-xl bg-rose-50 dark:bg-rose-950/80 text-rose-600 dark:text-rose-400 flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
-              <PhoneCall className="w-6 h-6" />
-            </div>
-            <h3 className="text-lg font-bold text-slate-900 dark:text-white">Emergency SOS Gateway</h3>
-            <p className="text-sm text-slate-600 dark:text-slate-400 mt-2 leading-relaxed">
-              Zero-latency access to 24/7 crisis hotlines (Tele-MANAS, Vandrevala Foundation) and campus counselor dispatch.
-            </p>
-          </div>
-
-          {/* Feature 4 */}
-          <div className="p-7 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all group">
-            <div className="w-12 h-12 rounded-xl bg-blue-50 dark:bg-blue-950/80 text-blue-600 dark:text-blue-400 flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
-              <MoonStar className="w-6 h-6" />
-            </div>
-            <h3 className="text-lg font-bold text-slate-900 dark:text-white">Circadian Sleep Tracking</h3>
-            <p className="text-sm text-slate-600 dark:text-slate-400 mt-2 leading-relaxed">
-              Longitudinal sleep deficit modeling connected with academic deadlines to flag burnout before exam cycles.
-            </p>
-          </div>
-
-          {/* Feature 5 */}
-          <div className="p-7 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all group">
-            <div className="w-12 h-12 rounded-xl bg-emerald-50 dark:bg-emerald-950/80 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
-              <HeartHandshake className="w-6 h-6" />
-            </div>
-            <h3 className="text-lg font-bold text-slate-900 dark:text-white">Counselor Triage Portal</h3>
-            <p className="text-sm text-slate-600 dark:text-slate-400 mt-2 leading-relaxed">
-              Prioritized caseload dashboards with confidential clinical case notes and intervention scheduling.
-            </p>
-          </div>
-
-          {/* Feature 6 */}
-          <div className="p-7 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all group">
-            <div className="w-12 h-12 rounded-xl bg-amber-50 dark:bg-amber-950/80 text-amber-600 dark:text-amber-400 flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
-              <Lock className="w-6 h-6" />
-            </div>
-            <h3 className="text-lg font-bold text-slate-900 dark:text-white">Privacy-First Architecture</h3>
-            <p className="text-sm text-slate-600 dark:text-slate-400 mt-2 leading-relaxed">
-              Granular consent management, zero keystroke logging, and k-anonymity aggregation for campus leadership.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* 5. STATS / IMPACT SECTION (Full-Width Dark Background) */}
-      <section id="impact" className="py-20 bg-slate-900 text-white border-y border-slate-800">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 text-center">
-            <div>
-              <p className="text-4xl sm:text-5xl font-extrabold text-indigo-400">99.2%</p>
-              <p className="text-sm text-slate-300 font-medium mt-2">Risk Stratification Accuracy</p>
-            </div>
-            <div>
-              <p className="text-4xl sm:text-5xl font-extrabold text-purple-400">&lt; 100ms</p>
-              <p className="text-sm text-slate-300 font-medium mt-2">API Inference Latency</p>
-            </div>
-            <div>
-              <p className="text-4xl sm:text-5xl font-extrabold text-emerald-400">24/7</p>
-              <p className="text-sm text-slate-300 font-medium mt-2">Instant SOS Lifeline Routing</p>
-            </div>
-            <div>
-              <p className="text-4xl sm:text-5xl font-extrabold text-amber-400">0</p>
-              <p className="text-sm text-slate-300 font-medium mt-2">Keystrokes or Screens Logged</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 6. TESTIMONIALS SECTION */}
-      <section id="testimonials" className="py-24 px-6 max-w-7xl mx-auto">
-        <div className="text-center max-w-3xl mx-auto mb-16">
-          <span className="text-xs font-bold uppercase tracking-widest text-indigo-600 dark:text-indigo-400">
-            Real Stories
-          </span>
-          <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-slate-900 dark:text-white mt-2">
-            Trusted by the Campus Community
-          </h2>
-          <p className="mt-4 text-slate-600 dark:text-slate-300">
-            Hear how MindGuardAI has made proactive mental healthcare accessible and confidential.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {/* Testimonial 1 */}
-          <div className="p-8 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col justify-between">
-            <p className="text-slate-600 dark:text-slate-300 text-sm leading-relaxed italic">
-              "During midterms I was barely sleeping and didn't realize how anxious I had become. MindGuard flagged my
-              sleep deficit early and the box breathing exercises helped me regain control."
-            </p>
-            <div className="mt-6 flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-indigo-100 dark:bg-indigo-950 text-indigo-600 font-bold flex items-center justify-center text-sm">
-                AK
-              </div>
-              <div>
-                <p className="text-sm font-bold text-slate-900 dark:text-white">Aarav K.</p>
-                <p className="text-xs text-slate-500">Computer Science Student</p>
-              </div>
-            </div>
-          </div>
-
-          {/* Testimonial 2 */}
-          <div className="p-8 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col justify-between">
-            <p className="text-slate-600 dark:text-slate-300 text-sm leading-relaxed italic">
-              "The triage matrix allows our campus counseling center to reach students who need help most before they
-              reach critical distress. It has completely transformed our workflow."
-            </p>
-            <div className="mt-6 flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-purple-100 dark:bg-purple-950 text-purple-600 font-bold flex items-center justify-center text-sm">
-                DR
-              </div>
-              <div>
-                <p className="text-sm font-bold text-slate-900 dark:text-white">Dr. Radhika M.</p>
-                <p className="text-xs text-slate-500">Lead Campus Counselor</p>
-              </div>
-            </div>
-          </div>
-
-          {/* Testimonial 3 */}
-          <div className="p-8 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col justify-between">
-            <p className="text-slate-600 dark:text-slate-300 text-sm leading-relaxed italic">
-              "As an administrator, student privacy was non-negotiable. MindGuard gives us campus-wide health trends under
-              strict k-anonymity without ever compromising individual trust."
-            </p>
-            <div className="mt-6 flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-600 font-bold flex items-center justify-center text-sm">
-                VS
-              </div>
-              <div>
-                <p className="text-sm font-bold text-slate-900 dark:text-white">Prof. Vikram S.</p>
-                <p className="text-xs text-slate-500">Dean of Student Welfare</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 7. PRICING / TIERS SECTION */}
-      <section id="pricing" className="py-24 px-6 max-w-7xl mx-auto border-t border-slate-200 dark:border-slate-800">
-        <div className="text-center max-w-3xl mx-auto mb-16">
-          <span className="text-xs font-bold uppercase tracking-widest text-indigo-600 dark:text-indigo-400">
-            Flexible Deployment
-          </span>
-          <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-slate-900 dark:text-white mt-2">
-            Tailored for Campuses of Every Scale
-          </h2>
-          <p className="mt-4 text-slate-600 dark:text-slate-300">
-            Transparent access designed for individual students and enterprise university systems.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {/* Tier 1: Student Free */}
-          <div className="p-8 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col justify-between">
-            <div>
-              <h3 className="text-lg font-bold text-slate-900 dark:text-white">Student</h3>
-              <p className="text-xs text-slate-500 mt-1">For individual learners</p>
-              <div className="mt-4 flex items-baseline gap-1">
-                <span className="text-4xl font-extrabold text-slate-900 dark:text-white">Free</span>
-                <span className="text-xs text-slate-500">/ forever</span>
-              </div>
-              <ul className="mt-6 space-y-3 text-xs text-slate-600 dark:text-slate-300">
-                <li className="flex items-center gap-2">
-                  <Check className="w-4 h-4 text-emerald-500" />
-                  <span>Daily mood check-ins & journaling</span>
-                </li>
-                <li className="flex items-center gap-2">
-                  <Check className="w-4 h-4 text-emerald-500" />
-                  <span>24/7 AI Companion & CBT tools</span>
-                </li>
-                <li className="flex items-center gap-2">
-                  <Check className="w-4 h-4 text-emerald-500" />
-                  <span>Instant Emergency SOS gateway</span>
-                </li>
-                <li className="flex items-center gap-2">
-                  <Check className="w-4 h-4 text-emerald-500" />
-                  <span>Self-guided sleep tracker</span>
-                </li>
-              </ul>
-            </div>
-            <Link to="/register" className="mt-8">
-              <Button variant="outline" className="w-full rounded-xl font-semibold">
-                Start Free
-              </Button>
-            </Link>
-          </div>
-
-          {/* Tier 2: Institution (Featured) */}
-          <div className="p-8 rounded-2xl bg-gradient-to-b from-indigo-50/50 to-purple-50/40 dark:from-slate-900 dark:to-indigo-950/40 border-2 border-indigo-500 shadow-lg relative flex flex-col justify-between">
-            <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full bg-indigo-600 text-white text-[10px] font-bold uppercase tracking-wider">
-              Most Popular
-            </div>
-            <div>
-              <h3 className="text-lg font-bold text-slate-900 dark:text-white">Institution</h3>
-              <p className="text-xs text-slate-500 mt-1">For university counseling teams</p>
-              <div className="mt-4 flex items-baseline gap-1">
-                <span className="text-3xl font-extrabold text-slate-900 dark:text-white">Contact Us</span>
-              </div>
-              <ul className="mt-6 space-y-3 text-xs text-slate-600 dark:text-slate-300">
-                <li className="flex items-center gap-2">
-                  <Check className="w-4 h-4 text-indigo-500" />
-                  <span>Everything in Student tier</span>
-                </li>
-                <li className="flex items-center gap-2">
-                  <Check className="w-4 h-4 text-indigo-500" />
-                  <span>Counselor triage dashboard & case files</span>
-                </li>
-                <li className="flex items-center gap-2">
-                  <Check className="w-4 h-4 text-indigo-500" />
-                  <span>SHAP explainable risk attribution</span>
-                </li>
-                <li className="flex items-center gap-2">
-                  <Check className="w-4 h-4 text-indigo-500" />
-                  <span>k-Anonymity campus aggregate analytics</span>
-                </li>
-              </ul>
-            </div>
-            <Link to="/login" className="mt-8">
-              <Button className="w-full bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-semibold shadow-md shadow-indigo-600/20">
-                Contact Campus Team
-              </Button>
-            </Link>
-          </div>
-
-          {/* Tier 3: Enterprise */}
-          <div className="p-8 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col justify-between">
-            <div>
-              <h3 className="text-lg font-bold text-slate-900 dark:text-white">Enterprise</h3>
-              <p className="text-xs text-slate-500 mt-1">For multi-campus state university systems</p>
-              <div className="mt-4 flex items-baseline gap-1">
-                <span className="text-3xl font-extrabold text-slate-900 dark:text-white">Custom</span>
-              </div>
-              <ul className="mt-6 space-y-3 text-xs text-slate-600 dark:text-slate-300">
-                <li className="flex items-center gap-2">
-                  <Check className="w-4 h-4 text-emerald-500" />
-                  <span>Multi-campus tenant partitioning</span>
-                </li>
-                <li className="flex items-center gap-2">
-                  <Check className="w-4 h-4 text-emerald-500" />
-                  <span>Dedicated on-premise / private cloud deploy</span>
-                </li>
-                <li className="flex items-center gap-2">
-                  <Check className="w-4 h-4 text-emerald-500" />
-                  <span>Custom SIS (Banner/Canvas) integrations</span>
-                </li>
-                <li className="flex items-center gap-2">
-                  <Check className="w-4 h-4 text-emerald-500" />
-                  <span>24/7 dedicated clinical SLA</span>
-                </li>
-              </ul>
-            </div>
-            <Link to="/login" className="mt-8">
-              <Button variant="outline" className="w-full rounded-xl font-semibold">
-                Schedule Consultation
-              </Button>
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* 8. FINAL CTA SECTION */}
-      <section className="py-20 px-6">
-        <div className="max-w-5xl mx-auto rounded-3xl bg-gradient-to-r from-indigo-900 via-indigo-800 to-purple-900 text-white p-10 md:p-16 text-center relative overflow-hidden shadow-2xl">
-          <div className="relative z-10 max-w-2xl mx-auto">
-            <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">Ready to protect your campus?</h2>
-            <p className="mt-4 text-indigo-200 text-base">
-              Join forward-thinking universities adopting proactive, student-first mental health intelligence today.
-            </p>
-            <div className="mt-8 flex justify-center">
-              <Button
-                size="lg"
-                onClick={() => navigate("/register")}
-                className="px-8 py-3.5 bg-white text-indigo-900 hover:bg-slate-100 rounded-xl font-bold shadow-lg transition-transform hover:scale-105"
-              >
-                Request a Demo
-                <ArrowRight className="w-4 h-4 ml-2" />
-              </Button>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 9. FOOTER */}
-      <footer className="border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 py-16 px-6">
-        <div className="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-5 gap-8">
-          <div className="col-span-2">
-            <div className="flex items-center gap-2.5">
-              <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-600 to-purple-500 flex items-center justify-center text-white">
+          <Card className="relative bg-card border border-border rounded-lg shadow-xs hover:border-primary/40 transition-all">
+            <CardContent className="p-6 space-y-4">
+              <span className="text-2xl font-mono font-extrabold text-muted-foreground/30 block">
+                02
+              </span>
+              <div className="w-10 h-10 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
                 <Brain className="w-5 h-5" />
               </div>
-              <span className="font-bold text-lg text-slate-900 dark:text-white">MindGuardAI</span>
-            </div>
-            <p className="mt-3 text-xs text-slate-500 dark:text-slate-400 max-w-sm leading-relaxed">
-              Predictive, privacy-first mental health intelligence platform for higher education. Bridging student distress
-              with compassionate clinical care.
+              <h3 className="text-base font-semibold text-foreground">AI Emotion Analysis</h3>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                Fine-tuned DistilBERT models classify affective sentiment across 6 distinct states, detecting subtle linguistic distress cues.
+              </p>
+            </CardContent>
+          </Card>
+
+          {/* Step 3 */}
+          <Card className="relative bg-card border border-border rounded-lg shadow-xs hover:border-primary/40 transition-all">
+            <CardContent className="p-6 space-y-4">
+              <span className="text-2xl font-mono font-extrabold text-muted-foreground/30 block">
+                03
+              </span>
+              <div className="w-10 h-10 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
+                <Activity className="w-5 h-5" />
+              </div>
+              <h3 className="text-base font-semibold text-foreground">Risk Stratification</h3>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                Machine learning models synthesize mood trajectories, sleep deficits, and academic load into calibrated Low, Moderate, or High tiers.
+              </p>
+            </CardContent>
+          </Card>
+
+          {/* Step 4 */}
+          <Card className="relative bg-card border border-border rounded-lg shadow-xs hover:border-primary/40 transition-all">
+            <CardContent className="p-6 space-y-4">
+              <span className="text-2xl font-mono font-extrabold text-muted-foreground/30 block">
+                04
+              </span>
+              <div className="w-10 h-10 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
+                <HeartHandshake className="w-5 h-5" />
+              </div>
+              <h3 className="text-base font-semibold text-foreground">Guided Care Pathway</h3>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                Tailored self-care exercises, CBT tools, and instant counselor triage trigger automatically to arrest distress before crisis.
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+      </section>
+
+      {/* CAPABILITIES (id="features") */}
+      <section id="features" className="py-20 px-4 sm:px-6 bg-secondary/30 border-y border-border">
+        <div className="max-w-7xl mx-auto space-y-12">
+          <div className="text-center max-w-2xl mx-auto space-y-3">
+            <span className="text-xs font-bold uppercase tracking-wider text-primary">Core Architecture</span>
+            <h2 className="text-3xl sm:text-4xl font-extrabold text-foreground tracking-tight">
+              Built on Clinical Science
+            </h2>
+            <p className="text-sm text-muted-foreground">
+              Every algorithm, data pipeline, and triage policy was engineered in accordance with psychiatric validation standards.
             </p>
           </div>
 
-          <div>
-            <p className="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-white">Product</p>
-            <ul className="mt-3 space-y-2 text-xs text-slate-600 dark:text-slate-400">
-              <li>
-                <button onClick={() => scrollToSection("features")} className="hover:text-indigo-600">
-                  AI Companion
-                </button>
-              </li>
-              <li>
-                <button onClick={() => scrollToSection("features")} className="hover:text-indigo-600">
-                  SHAP Explainability
-                </button>
-              </li>
-              <li>
-                <button onClick={() => scrollToSection("features")} className="hover:text-indigo-600">
-                  Counselor Triage
-                </button>
-              </li>
-              <li>
-                <button onClick={() => scrollToSection("features")} className="hover:text-indigo-600">
-                  Emergency SOS
-                </button>
-              </li>
-            </ul>
+          {/* 6-card bento grid (3-col desktop, 2-col tablet, 1-col mobile) */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {/* Card 1 */}
+            <Card className="bg-card border border-border rounded-lg shadow-xs hover:border-primary/40 transition-all">
+              <CardContent className="p-6 space-y-3">
+                <div className="w-10 h-10 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
+                  <span className="text-xl" role="img" aria-label="brain">🧠</span>
+                </div>
+                <h3 className="text-base font-semibold text-foreground">Emotion NLP</h3>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  DistilBERT 6-class classifier accurately detects joy, sadness, anxiety, anger, fear, and surprise from journal submissions with high precision.
+                </p>
+              </CardContent>
+            </Card>
+
+            {/* Card 2 */}
+            <Card className="bg-card border border-border rounded-lg shadow-xs hover:border-primary/40 transition-all">
+              <CardContent className="p-6 space-y-3">
+                <div className="w-10 h-10 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
+                  <span className="text-xl" role="img" aria-label="bar chart">📊</span>
+                </div>
+                <h3 className="text-base font-semibold text-foreground">SHAP Explainability</h3>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  Every score explained, not a black box. Students and clinical counselors see the precise biometric and survey factors driving every prediction.
+                </p>
+              </CardContent>
+            </Card>
+
+            {/* Card 3 */}
+            <Card className="bg-card border border-border rounded-lg shadow-xs hover:border-primary/40 transition-all">
+              <CardContent className="p-6 space-y-3">
+                <div className="w-10 h-10 rounded-lg bg-rose-500/10 text-rose-500 flex items-center justify-center">
+                  <span className="text-xl" role="img" aria-label="emergency siren">🚨</span>
+                </div>
+                <h3 className="text-base font-semibold text-foreground">Emergency SOS</h3>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  24/7 crisis escalation with Tele-MANAS (14416) & KIRAN helplines. One-click emergency protocols bypass queues to reach immediate human responders.
+                </p>
+              </CardContent>
+            </Card>
+
+            {/* Card 4 */}
+            <Card className="bg-card border border-border rounded-lg shadow-xs hover:border-primary/40 transition-all">
+              <CardContent className="p-6 space-y-3">
+                <div className="w-10 h-10 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
+                  <span className="text-xl" role="img" aria-label="sleeping face">😴</span>
+                </div>
+                <h3 className="text-base font-semibold text-foreground">Sleep & Circadian</h3>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  Kernel-power Windows telemetry and self-reported sleep records analyze sleep debt and late-night fragmentation without capturing keystrokes.
+                </p>
+              </CardContent>
+            </Card>
+
+            {/* Card 5 */}
+            <Card className="bg-card border border-border rounded-lg shadow-xs hover:border-primary/40 transition-all">
+              <CardContent className="p-6 space-y-3">
+                <div className="w-10 h-10 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
+                  <span className="text-xl" role="img" aria-label="stethoscope">🩺</span>
+                </div>
+                <h3 className="text-base font-semibold text-foreground">Counselor Triage</h3>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  Priority queue with 5-tab case workspace enables university psychologists to review psychometric trends, log SOAP notes, and initiate outreach.
+                </p>
+              </CardContent>
+            </Card>
+
+            {/* Card 6 */}
+            <Card className="bg-card border border-border rounded-lg shadow-xs hover:border-primary/40 transition-all">
+              <CardContent className="p-6 space-y-3">
+                <div className="w-10 h-10 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
+                  <span className="text-xl" role="img" aria-label="lock">🔒</span>
+                </div>
+                <h3 className="text-base font-semibold text-foreground">k-Anonymity Privacy</h3>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  Admins see cohort data only, k ≥ 10. Student records are encrypted and decoupled from university academic standing or administrative viewing.
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </section>
+
+      {/* IMPACT STATS */}
+      <section className="py-20 px-4 sm:px-6 bg-foreground text-background">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12 text-center">
+            {/* Stat 1 */}
+            <div ref={stat1.elementRef} className="space-y-2">
+              <div className="text-4xl sm:text-5xl font-extrabold tracking-tight">
+                {stat1.count.toFixed(1)}%
+              </div>
+              <p className="text-xs sm:text-sm font-medium opacity-80 max-w-[200px] mx-auto">
+                Model Evaluation Accuracy on Psychometric Benchmarks
+              </p>
+            </div>
+
+            {/* Stat 2 */}
+            <div ref={stat2.elementRef} className="space-y-2">
+              <div className="text-4xl sm:text-5xl font-extrabold tracking-tight">
+                &lt; {stat2.count}ms
+              </div>
+              <p className="text-xs sm:text-sm font-medium opacity-80 max-w-[200px] mx-auto">
+                Real-Time Inference Latency for Distress Triage
+              </p>
+            </div>
+
+            {/* Stat 3 */}
+            <div className="space-y-2">
+              <div className="text-4xl sm:text-5xl font-extrabold tracking-tight">
+                24/7
+              </div>
+              <p className="text-xs sm:text-sm font-medium opacity-80 max-w-[200px] mx-auto">
+                Continuous Autonomous Early Warning & Safety Net
+              </p>
+            </div>
+
+            {/* Stat 4 */}
+            <div ref={stat4.elementRef} className="space-y-2">
+              <div className="text-4xl sm:text-5xl font-extrabold tracking-tight">
+                {stat4.count} Tiers
+              </div>
+              <p className="text-xs sm:text-sm font-medium opacity-80 max-w-[200px] mx-auto">
+                Calibrated Clinical Risk Stratification Levels
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* PRIVACY COMMITMENT (id="privacy") */}
+      <section id="privacy" className="py-20 px-4 sm:px-6 bg-secondary/30">
+        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+          {/* Left Column */}
+          <div className="lg:col-span-6 space-y-4">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 text-xs font-semibold">
+              <Shield className="w-3.5 h-3.5" />
+              <span>Institutional Privacy Safeguard</span>
+            </div>
+            <h2 className="text-3xl sm:text-4xl font-extrabold text-foreground tracking-tight">
+              Zero-Keystroke Privacy by Design
+            </h2>
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              We firmly believe mental healthcare cannot function under surveillance. MindGuardAI collects no keystroke logs, no screen captures, and no private message contents. Telemetry is limited to kernel sleep cycles and consented mood journals.
+            </p>
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              University administrators only receive k-anonymized aggregate cohort reports (k ≥ 10), ensuring no single student can ever be singled out.
+            </p>
           </div>
 
+          {/* Right Column: 4 checklist items with CheckCircle2 icon in emerald */}
+          <div className="lg:col-span-6 space-y-4">
+            <div className="flex items-start gap-3 p-4 rounded-lg bg-card border border-border shadow-xs">
+              <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0 mt-0.5" />
+              <div>
+                <h4 className="text-sm font-semibold text-foreground">Zero Keystroke Logging</h4>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  No text typed in external applications is ever monitored, logged, or sent to server memory.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-3 p-4 rounded-lg bg-card border border-border shadow-xs">
+              <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0 mt-0.5" />
+              <div>
+                <h4 className="text-sm font-semibold text-foreground">AES-256-GCM End-to-End Encryption</h4>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  All clinical journals and screening records are secured with cryptographic tenant isolation.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-3 p-4 rounded-lg bg-card border border-border shadow-xs">
+              <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0 mt-0.5" />
+              <div>
+                <h4 className="text-sm font-semibold text-foreground">Differential Privacy & k-Anonymity</h4>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Campus-wide dashboards suppress small group data to mathematically prevent re-identification.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-3 p-4 rounded-lg bg-card border border-border shadow-xs">
+              <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0 mt-0.5" />
+              <div>
+                <h4 className="text-sm font-semibold text-foreground">Student Consent & Data Revocation</h4>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Students retain full ownership to download, modify, or permanently purge their data at any time.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* CRISIS HELPLINES (id="helplines") */}
+      <section id="helplines" className="py-16 px-4 sm:px-6 max-w-5xl mx-auto">
+        <div className="p-6 sm:p-8 rounded-lg bg-rose-500/5 border border-rose-500/20 text-center space-y-4">
+          <div className="w-12 h-12 mx-auto rounded-full bg-rose-500/10 flex items-center justify-center text-rose-500">
+            <PhoneCall className="w-6 h-6" />
+          </div>
           <div>
-            <p className="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-white">Resources</p>
-            <ul className="mt-3 space-y-2 text-xs text-slate-600 dark:text-slate-400">
+            <h3 className="text-xl font-bold text-foreground">Emergency Crisis Escalation</h3>
+            <p className="text-xs sm:text-sm text-muted-foreground max-w-md mx-auto mt-1">
+              If you or someone on campus is in immediate distress or having thoughts of self-harm, confidential free help is available right now.
+            </p>
+          </div>
+
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-2">
+            <a
+              href="tel:14416"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-3 rounded-lg bg-rose-500 text-white font-bold text-sm shadow-sm hover:bg-rose-600 transition-colors"
+            >
+              <PhoneCall className="w-4 h-4" />
+              <span>Tele-MANAS Helpline: 14416</span>
+            </a>
+            <a
+              href="tel:18005990019"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-3 rounded-lg bg-secondary border border-border text-foreground font-semibold text-sm hover:bg-secondary/80 transition-colors"
+            >
+              <PhoneCall className="w-4 h-4 text-rose-500" />
+              <span>KIRAN Mental Health: 1800-599-0019</span>
+            </a>
+          </div>
+        </div>
+      </section>
+
+      {/* FOOTER */}
+      <footer className="border-t border-border bg-card py-12 px-4 sm:px-6">
+        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-8">
+          {/* Logo + tagline */}
+          <div className="space-y-3">
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground">
+                <Brain className="w-4 h-4" />
+              </div>
+              <span className="font-bold text-base text-foreground">MindGuardAI</span>
+            </div>
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              AI-driven student mental wellness detection and early intervention platform for higher education.
+            </p>
+          </div>
+
+          {/* Link Group 1: Portal */}
+          <div className="space-y-2.5">
+            <h4 className="text-xs font-bold uppercase tracking-wider text-foreground">Portal</h4>
+            <ul className="space-y-1.5 text-xs text-muted-foreground">
               <li>
-                <Link to="/student" className="hover:text-indigo-600">
-                  Self-Care Tools
+                <Link to="/login" className="hover:text-primary transition-colors">
+                  Student Portal
                 </Link>
               </li>
               <li>
-                <a href="/docs/ML.md" className="hover:text-indigo-600">
-                  Clinical Validation
-                </a>
+                <Link to="/login" className="hover:text-primary transition-colors">
+                  Counselor Portal
+                </Link>
               </li>
               <li>
-                <a href="/docs/API.md" className="hover:text-indigo-600">
-                  API Documentation
-                </a>
+                <Link to="/login" className="hover:text-primary transition-colors">
+                  Admin Dashboard
+                </Link>
               </li>
             </ul>
           </div>
 
-          <div>
-            <p className="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-white">Legal & Privacy</p>
-            <ul className="mt-3 space-y-2 text-xs text-slate-600 dark:text-slate-400">
+          {/* Link Group 2: Support */}
+          <div className="space-y-2.5">
+            <h4 className="text-xs font-bold uppercase tracking-wider text-foreground">Support</h4>
+            <ul className="space-y-1.5 text-xs text-muted-foreground">
               <li>
-                <Link to="/privacy-consent" className="hover:text-indigo-600">
+                <button
+                  onClick={() => scrollToSection("helplines")}
+                  className="hover:text-primary transition-colors"
+                >
+                  Crisis Lines
+                </button>
+              </li>
+              <li>
+                <button
+                  onClick={() => scrollToSection("privacy")}
+                  className="hover:text-primary transition-colors"
+                >
                   Privacy Policy
-                </Link>
+                </button>
               </li>
               <li>
-                <Link to="/privacy-consent" className="hover:text-indigo-600">
-                  Consent Settings
+                <Link to="/privacy-consent" className="hover:text-primary transition-colors">
+                  Consent Framework
                 </Link>
               </li>
+            </ul>
+          </div>
+
+          {/* Link Group 3: About */}
+          <div className="space-y-2.5">
+            <h4 className="text-xs font-bold uppercase tracking-wider text-foreground">About</h4>
+            <ul className="space-y-1.5 text-xs text-muted-foreground">
               <li>
-                <a href="/docs/DATA_RETENTION_POLICY.md" className="hover:text-indigo-600">
-                  Data Retention
-                </a>
+                <button
+                  onClick={() => scrollToSection("how-it-works")}
+                  className="hover:text-primary transition-colors"
+                >
+                  How It Works
+                </button>
+              </li>
+              <li>
+                <button
+                  onClick={() => scrollToSection("features")}
+                  className="hover:text-primary transition-colors"
+                >
+                  Capabilities
+                </button>
+              </li>
+              <li>
+                <span className="text-muted-foreground/80">Clinical Instruments</span>
               </li>
             </ul>
           </div>
         </div>
 
-        <div className="max-w-7xl mx-auto mt-12 pt-6 border-t border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500">
-          <p>© {new Date().getFullYear()} MindGuardAI Inc. All rights reserved.</p>
-          <p className="mt-2 sm:mt-0">Built with care for campus mental health • Confidential & Secure</p>
+        {/* Bottom bar */}
+        <div className="max-w-7xl mx-auto mt-8 pt-6 border-t border-border flex flex-col sm:flex-row items-center justify-between text-xs text-muted-foreground gap-2">
+          <span>© {new Date().getFullYear()} MindGuardAI. All rights reserved.</span>
+          <span>Built for Student Wellbeing</span>
         </div>
       </footer>
     </div>
