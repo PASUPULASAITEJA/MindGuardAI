@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useTheme } from "@/contexts/ThemeContext";
 import {
@@ -21,7 +21,8 @@ import {
   MessageSquare,
   Sparkles,
   PhoneCall,
-  Clock
+  Clock,
+  Brain,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -30,10 +31,12 @@ import { pageVariants, staggerContainer, cardEntrance, cardHoverMotion, buttonTa
 import { WellnessOrb } from "@/components/3d/WellnessOrb";
 import { AmbientParticles } from "@/components/3d/AmbientParticles";
 import { BinaryOrbits } from "@/components/3d/BinaryOrbits";
+import { NeuralBrain3D } from "@/components/3d/NeuralBrain3D";
 
 export const LandingPage: React.FC = () => {
   const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
+  const [heroVisualMode, setHeroVisualMode] = useState<"brain" | "orb">("brain");
 
   const faqs = [
     {
@@ -195,16 +198,51 @@ export const LandingPage: React.FC = () => {
               </div>
             </div>
 
-            {/* Right 3D Interactive Wellness Orb Column */}
+            {/* Right 3D Interactive Neural Brain Centerpiece Column */}
             <div className="lg:col-span-5 flex flex-col items-center justify-center">
-              <div className="w-full max-w-sm md:max-w-md h-80 relative flex items-center justify-center">
-                <div className="absolute inset-0 bg-gradient-to-tr from-primary/10 via-transparent to-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
-                <WellnessOrb className="w-full h-full" />
+              {/* Visual Mode Selector */}
+              <div className="mb-2 flex items-center bg-card/80 backdrop-blur-md border border-border/80 rounded-full p-1 gap-1 shadow-xs">
+                <button
+                  type="button"
+                  onClick={() => setHeroVisualMode("brain")}
+                  className={`px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-1.5 transition-all ${
+                    heroVisualMode === "brain"
+                      ? "bg-primary text-primary-foreground shadow-xs"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                  title="Dual Cerebral Hemispheres • 14,000 Neural Synaptic Points"
+                >
+                  <Brain className="w-3.5 h-3.5" />
+                  <span>3D Neural Brain</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setHeroVisualMode("orb")}
+                  className={`px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-1.5 transition-all ${
+                    heroVisualMode === "orb"
+                      ? "bg-primary text-primary-foreground shadow-xs"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                  title="Circadian Wellness Orb"
+                >
+                  <Sparkles className="w-3.5 h-3.5" />
+                  <span>Wellness Orb</span>
+                </button>
               </div>
-              <span className="text-[11px] font-medium text-muted-foreground flex items-center gap-1.5 -mt-2">
-                <Sparkles className="w-3 h-3 text-primary" />
-                <span>Interactive 3D Wellness Sphere • Move cursor to interact</span>
-              </span>
+
+              <div className="w-full max-w-sm md:max-w-md h-84 relative flex items-center justify-center">
+                <div className="absolute inset-0 bg-gradient-to-tr from-cyan-500/15 via-primary/10 to-violet-500/15 rounded-full blur-3xl pointer-events-none" />
+                {heroVisualMode === "brain" ? (
+                  <NeuralBrain3D
+                    className="w-full h-full"
+                    particleCount={14000}
+                    autoRotate={true}
+                    rotationSpeed={0.35}
+                  />
+                ) : (
+                  <WellnessOrb className="w-full h-full" />
+                )}
+              </div>
             </div>
           </div>
         </div>

@@ -5,6 +5,8 @@ export { AmbientParticles } from "./AmbientParticles";
 export { AICompanionVisual } from "./AICompanionVisual";
 export { BinaryOrbits } from "./BinaryOrbits";
 export type { BinaryOrbitsProps, BinaryOrbitsHandle } from "./BinaryOrbits";
+export { NeuralBrain3D } from "./NeuralBrain3D";
+export type { NeuralBrain3DProps } from "./NeuralBrain3D";
 export { LazyCanvasWrapper, ThreeErrorBoundary } from "./LazyCanvasWrapper";
 
 // Legacy exports
