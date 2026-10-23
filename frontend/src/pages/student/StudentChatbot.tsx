@@ -33,8 +33,7 @@ import { EmergencySOSModal } from "@/components/EmergencySOSModal";
 import { motion, AnimatePresence } from "motion/react";
 import { chatBotMessageVariants, chatUserMessageVariants } from "@/utils/motion";
 import { LazyCanvasWrapper } from "@/components/3d/LazyCanvasWrapper";
-
-const AIAssistantAvatar3D = React.lazy(() => import("@/components/3d/AIAssistantAvatar3D"));
+import { AICompanionVisual } from "@/components/3d/AICompanionVisual";
 
 interface QuickPrompt {
   title: string;
@@ -537,9 +536,7 @@ export const StudentChatbot: React.FC = () => {
         <div className="flex items-center justify-between border-b border-border/80 px-5 py-3.5 bg-card/50">
           <div className="flex items-center gap-3">
             <div className="h-10 w-10 relative flex items-center justify-center shrink-0">
-              <LazyCanvasWrapper className="h-full w-full">
-                <AIAssistantAvatar3D isThinking={isSending} className="h-10 w-10" />
-              </LazyCanvasWrapper>
+              <AICompanionVisual isThinking={isSending} size="sm" />
             </div>
             <div>
               <div className="flex items-center gap-2">
@@ -584,9 +581,7 @@ export const StudentChatbot: React.FC = () => {
           {messages.length === 0 ? (
             <div className="flex h-full flex-col items-center justify-center text-center py-6">
               <div className="h-28 w-28 relative flex items-center justify-center mb-1">
-                <LazyCanvasWrapper className="h-full w-full">
-                  <AIAssistantAvatar3D isThinking={isSending} className="h-28 w-28" />
-                </LazyCanvasWrapper>
+                <AICompanionVisual isThinking={isSending} size="lg" />
               </div>
               <h4 className="mt-2 text-base font-extrabold text-foreground">
                 MindGuardAI Sanctuary Companion

@@ -21,4 +21,19 @@ export default defineConfig({
       },
     },
   },
+  build: {
+    chunkSizeWarningLimit: 2000,
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes('node_modules')) {
+            if (id.includes('three')) return 'three';
+            if (id.includes('recharts')) return 'recharts';
+            if (id.includes('motion')) return 'motion';
+            return 'vendor';
+          }
+        },
+      },
+    },
+  },
 })

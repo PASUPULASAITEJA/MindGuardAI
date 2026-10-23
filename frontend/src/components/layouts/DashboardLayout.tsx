@@ -3,6 +3,7 @@ import { useLocation } from "react-router-dom";
 import Sidebar from "@/components/layouts/Sidebar";
 import TopNav from "@/components/layouts/TopNav";
 import { motion, AnimatePresence } from "motion/react";
+import { AmbientParticles } from "@/components/3d/AmbientParticles";
 
 interface DashboardLayoutProps {
   title: string;
@@ -16,6 +17,9 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ title, subtitle, chil
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-background text-foreground flex">
+      {/* Background Ambient Particles & Atmospheric Lighting */}
+      <AmbientParticles intensity="subtle" particleCount={38} />
+
       {/* Desktop Sidebar (hidden on mobile, fixed width on md screens) */}
       <Sidebar className="hidden md:flex md:w-72 shrink-0" />
 

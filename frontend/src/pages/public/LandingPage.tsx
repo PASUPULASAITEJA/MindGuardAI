@@ -28,8 +28,8 @@ import { Card } from "@/components/ui/card";
 import { motion } from "motion/react";
 import { pageVariants, staggerContainer, cardEntrance, cardHoverMotion, buttonTapMotion } from "@/utils/motion";
 import { LazyCanvasWrapper } from "@/components/3d/LazyCanvasWrapper";
-
-const WellnessOrb3D = React.lazy(() => import("@/components/3d/WellnessOrb3D"));
+import { WellnessOrb } from "@/components/3d/WellnessOrb";
+import { AmbientParticles } from "@/components/3d/AmbientParticles";
 
 export const LandingPage: React.FC = () => {
   const { theme, toggleTheme } = useTheme();
@@ -55,7 +55,10 @@ export const LandingPage: React.FC = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-background text-foreground flex flex-col font-sans">
+    <div className="relative min-h-screen bg-background text-foreground flex flex-col font-sans overflow-hidden">
+      {/* Background Ambient Particles & Atmospheric Illumination */}
+      <AmbientParticles intensity="calm" particleCount={45} />
+
       {/* 1. Header Navigation Bar */}
       <header className="sticky top-0 z-50 bg-card/95 backdrop-blur-md border-b border-border">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between">
@@ -160,9 +163,7 @@ export const LandingPage: React.FC = () => {
             <div className="lg:col-span-5 flex flex-col items-center justify-center">
               <div className="w-full max-w-sm md:max-w-md h-80 relative flex items-center justify-center">
                 <div className="absolute inset-0 bg-gradient-to-tr from-primary/10 via-transparent to-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
-                <LazyCanvasWrapper className="w-full h-full">
-                  <WellnessOrb3D className="w-full h-full" />
-                </LazyCanvasWrapper>
+                <WellnessOrb className="w-full h-full" />
               </div>
               <span className="text-[11px] font-medium text-muted-foreground flex items-center gap-1.5 -mt-2">
                 <Sparkles className="w-3 h-3 text-primary" />

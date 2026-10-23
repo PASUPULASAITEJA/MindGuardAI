@@ -21,9 +21,7 @@ import { HabitRecoverySimulator } from "../../components/HabitRecoverySimulator"
 import { PersonalizedRecommendations } from "../../components/PersonalizedRecommendations";
 import { motion } from "motion/react";
 import { pageVariants, staggerContainer, cardEntrance } from "@/utils/motion";
-import { LazyCanvasWrapper } from "@/components/3d/LazyCanvasWrapper";
-
-const BreathingSphere3D = React.lazy(() => import("@/components/3d/BreathingSphere3D"));
+import { BreathingSphere } from "@/components/3d/BreathingSphere";
 
 export const SelfCareResourcesPage: React.FC = () => {
   const navigate = useNavigate();
@@ -108,7 +106,7 @@ export const SelfCareResourcesPage: React.FC = () => {
         animate="animate"
         className="grid grid-cols-1 lg:grid-cols-2 gap-6"
       >
-        {/* 1. Box Breathing Interactive Widget */}
+        {/* 1. Breathing Sphere Interactive Widget */}
         <motion.div variants={cardEntrance} whileHover={{ y: -3 }}>
           <Card className="border-border/60 shadow-sm overflow-hidden flex flex-col justify-between h-full">
             <CardHeader className="pb-2">
@@ -118,78 +116,20 @@ export const SelfCareResourcesPage: React.FC = () => {
                 </div>
                 <div>
                   <CardTitle className="text-base font-bold text-foreground">
-                    Box Breathing Protocol (4-4-4-4)
+                    MindBridge Breath Pacer
                   </CardTitle>
                   <CardDescription className="text-xs text-muted-foreground">
-                    Navy SEAL technique to reset acute anxiety in under 2 minutes
+                    Vagus nerve calming protocols to ease acute anxiety & restore focus
                   </CardDescription>
                 </div>
               </div>
             </CardHeader>
 
-            <CardContent className="flex flex-col items-center justify-center py-6 space-y-4">
-              {/* 3D Interactive Breathing Sphere */}
-              <div className="relative flex flex-col items-center justify-center">
-                <div className="h-52 w-52 relative flex items-center justify-center">
-                  <LazyCanvasWrapper className="h-full w-full">
-                    <BreathingSphere3D 
-                      phase={breathingPhase} 
-                      isActive={isBreathingActive} 
-                      className="h-full w-full"
-                    />
-                  </LazyCanvasWrapper>
-                  {/* Floating timer overlay */}
-                  <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none drop-shadow-md">
-                    <span className="text-3xl font-black text-white mix-blend-difference">
-                      {breathingSeconds}s
-                    </span>
-                    <span className="text-[11px] uppercase tracking-widest font-extrabold text-white mix-blend-difference mt-0.5">
-                      {breathingPhase}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-2 mt-2">
-                  <span className="text-xs font-semibold px-3 py-1 rounded-full bg-secondary border border-border text-foreground">
-                    Phase: {breathingPhase} ({breathingSeconds}s)
-                  </span>
-                  <span className="text-xs font-semibold px-3 py-1 rounded-full bg-primary/10 text-primary border border-primary/20">
-                    {cyclesCompleted} Cycles Done
-                  </span>
-                </div>
-              </div>
-
-            {/* Controls */}
-            <div className="flex items-center gap-3">
-              <Button
-                onClick={() => setIsBreathingActive(!isBreathingActive)}
-                className={`rounded-xl font-bold gap-2 px-5 ${
-                  isBreathingActive 
-                    ? "bg-amber-500 hover:bg-amber-600 text-white" 
-                    : "bg-primary hover:bg-primary/90 text-primary-foreground"
-                }`}
-              >
-                {isBreathingActive ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
-                {isBreathingActive ? "Pause Exercise" : "Begin Breathing"}
-              </Button>
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={() => {
-                  setIsBreathingActive(false);
-                  setBreathingPhase("Inhale");
-                  setBreathingSeconds(4);
-                  setCyclesCompleted(0);
-                }}
-                className="rounded-xl"
-                title="Reset"
-              >
-                <RotateCcw className="h-4 w-4" />
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      </motion.div>
+            <CardContent className="flex flex-col items-center justify-center py-4">
+              <BreathingSphere showPresets={true} showControls={true} />
+            </CardContent>
+          </Card>
+        </motion.div>
 
         {/* 2. 5-4-3-2-1 Sensory Grounding Tool */}
         <motion.div variants={cardEntrance} whileHover={{ y: -3 }}>
