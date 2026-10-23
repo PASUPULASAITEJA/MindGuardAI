@@ -58,7 +58,13 @@ export const LandingPage: React.FC = () => {
   ];
 
   return (
-    <div className="relative min-h-screen bg-background text-foreground flex flex-col font-sans overflow-hidden">
+    <div className="relative min-h-screen bg-transparent text-foreground flex flex-col font-sans overflow-hidden">
+      {/* Deep Navy-to-Midnight-Blue Cosmic Gradient (Reference Palette) */}
+      <div 
+        className="fixed inset-0 pointer-events-none -z-20 bg-gradient-to-b from-[#060B18] via-[#0A0F1D] to-[#070D1B]" 
+        aria-hidden="true"
+      />
+
       {/* Interactive 3D WebGL Binary Orbits Galaxy & Particle System (Reference Inspired) */}
       <div 
         className="fixed inset-0 pointer-events-none -z-10 overflow-hidden" 
@@ -67,7 +73,7 @@ export const LandingPage: React.FC = () => {
       >
         <BinaryOrbits
           colors={theme === "dark" ? ["#2dd4bf", "#38bdf8"] : ["#0d9488", "#0284c7"]}
-          backgroundColor={theme === "dark" ? "#0A0F1D" : "#F8FAFC"}
+          backgroundColor="transparent"
           stars={42000}
           starSize={1.6}
           sparkle={0.5}
@@ -230,14 +236,14 @@ export const LandingPage: React.FC = () => {
                 </button>
               </div>
 
-              <div className="w-full max-w-sm md:max-w-md h-84 relative flex items-center justify-center">
-                <div className="absolute inset-0 bg-gradient-to-tr from-cyan-500/15 via-primary/10 to-violet-500/15 rounded-full blur-3xl pointer-events-none" />
+              <div className="w-full max-w-md lg:max-w-lg h-[400px] lg:h-[440px] relative flex items-center justify-center">
+                <div className="absolute inset-0 bg-gradient-to-tr from-cyan-500/20 via-sky-500/10 to-violet-500/20 rounded-full blur-3xl pointer-events-none" />
                 {heroVisualMode === "brain" ? (
                   <NeuralBrain3D
                     className="w-full h-full"
-                    particleCount={14000}
+                    particleCount={18000}
                     autoRotate={true}
-                    rotationSpeed={0.35}
+                    rotationSpeed={0.32}
                   />
                 ) : (
                   <WellnessOrb className="w-full h-full" />
