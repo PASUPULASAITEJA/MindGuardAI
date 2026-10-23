@@ -366,13 +366,18 @@ class BehavioralService:
             behavioral_risk_level = "HIGH"
             risk_reasons.append(f"Critical late-night circadian disruption ({late_night_mins} mins past midnight). Severe melatonin suppression and high sleep deficit.")
         elif late_night_mins >= 90 or (late_night_deviation_z >= 1.8 and late_night_mins >= 60):
-            if behavioral_risk_level == "LOW":
-                behavioral_risk_level = "MEDIUM"
-            risk_reasons.append(f"Moderate late-night circadian delay ({late_night_mins} mins after midnight). Sleep debt recovery advised.")
+            if is_academic_heavy and non_academic_mins <= 90:
+                # Context Override: Late-night academic study crunch (exams/deadlines)
+                risk_reasons.append(f"Late-night academic focus ({late_night_mins}m past midnight, {int(academic_ratio * 100)}% study). Contextualized as LOW risk without false alarm.")
+            else:
+                if behavioral_risk_level == "LOW":
+                    behavioral_risk_level = "MEDIUM"
+                risk_reasons.append(f"Moderate late-night circadian delay ({late_night_mins} mins after midnight). Sleep debt recovery advised.")
         elif late_night_mins >= 45:
-            if behavioral_risk_level == "LOW":
-                behavioral_risk_level = "MEDIUM"
-            risk_reasons.append(f"Mild-to-moderate late screen usage ({late_night_mins}m after midnight).")
+            if not (is_academic_heavy and non_academic_mins <= 90):
+                if behavioral_risk_level == "LOW":
+                    behavioral_risk_level = "MEDIUM"
+                risk_reasons.append(f"Mild-to-moderate late screen usage ({late_night_mins}m after midnight).")
 
 
 
