@@ -27,9 +27,9 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { motion } from "motion/react";
 import { pageVariants, staggerContainer, cardEntrance, cardHoverMotion, buttonTapMotion } from "@/utils/motion";
-import { LazyCanvasWrapper } from "@/components/3d/LazyCanvasWrapper";
 import { WellnessOrb } from "@/components/3d/WellnessOrb";
 import { AmbientParticles } from "@/components/3d/AmbientParticles";
+import { BinaryOrbits } from "@/components/3d/BinaryOrbits";
 
 export const LandingPage: React.FC = () => {
   const { theme, toggleTheme } = useTheme();
@@ -56,8 +56,44 @@ export const LandingPage: React.FC = () => {
 
   return (
     <div className="relative min-h-screen bg-background text-foreground flex flex-col font-sans overflow-hidden">
-      {/* Background Ambient Particles & Atmospheric Illumination */}
-      <AmbientParticles intensity="calm" particleCount={45} />
+      {/* Interactive 3D WebGL Binary Orbits Galaxy & Particle System (Reference Inspired) */}
+      <div 
+        className="fixed inset-0 pointer-events-none -z-10 overflow-hidden" 
+        style={{ width: "100vw", height: "100vh" }}
+        aria-hidden="true"
+      >
+        <BinaryOrbits
+          colors={theme === "dark" ? ["#2dd4bf", "#38bdf8"] : ["#0d9488", "#0284c7"]}
+          backgroundColor={theme === "dark" ? "#0A0F1D" : "#F8FAFC"}
+          stars={42000}
+          starSize={1.6}
+          sparkle={0.5}
+          arms={3}
+          twist={3.5}
+          armStrength={0.5}
+          dust={0.5}
+          core={1}
+          coreSize={0.07}
+          thickness={0.02}
+          tilt={58}
+          roll={-8}
+          scale={1}
+          centerX={0.5}
+          centerY={0.5}
+          speed={1}
+          twinkle={0.35}
+          depth={0.4}
+          glow={0.5}
+          intensity={1.05}
+          interactive={true}
+          hoverWake={true}
+          clickRipple={true}
+          wakeStrength={1}
+          rippleStrength={1}
+          hoverBoost={0.5}
+          style={{ width: "100%", height: "100%" }}
+        />
+      </div>
 
       {/* 1. Header Navigation Bar */}
       <header className="sticky top-0 z-50 bg-card/95 backdrop-blur-md border-b border-border">

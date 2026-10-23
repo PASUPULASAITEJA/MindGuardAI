@@ -3,6 +3,8 @@ export { BreathingSphere, PRESET_CADENCES } from "./BreathingSphere";
 export type { BreathingPhase, BreathingTimingConfig } from "./BreathingSphere";
 export { AmbientParticles } from "./AmbientParticles";
 export { AICompanionVisual } from "./AICompanionVisual";
+export { BinaryOrbits } from "./BinaryOrbits";
+export type { BinaryOrbitsProps, BinaryOrbitsHandle } from "./BinaryOrbits";
 export { LazyCanvasWrapper, ThreeErrorBoundary } from "./LazyCanvasWrapper";
 
 // Legacy exports
