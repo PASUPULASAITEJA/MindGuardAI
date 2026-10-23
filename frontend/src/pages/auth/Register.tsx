@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -6,22 +6,30 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth, UserRole } from "@/contexts/AuthContext";
 import { useToast } from "@/components/ui/toast";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label, FormItem } from "@/components/ui/label";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
-import { Eye, EyeOff, Loader2, Sparkles, CheckCircle2, ArrowLeft, ShieldCheck, Lock } from "lucide-react";
+import {
+  Eye,
+  EyeOff,
+  Loader2,
+  Sparkles,
+  CheckCircle2,
+  ArrowLeft,
+  ShieldCheck,
+  Brain,
+  Mail,
+  User,
+  Lock,
+} from "lucide-react";
 import ThemeToggle from "@/components/layouts/ThemeToggle";
 import api from "@/services/api";
 
-// Registration validation schema
 const registerSchema = z
   .object({
-    full_name: z.string().min(2, "Please enter your full name or username."),
+    full_name: z.string().min(2, "Please enter your full name or preferred username."),
     email: z.string().email("Please enter a valid university email address."),
     password: z.string().min(8, "Password must be at least 8 characters long."),
     role: z.enum(["STUDENT", "COUNSELOR", "ADMIN"], {
-      errorMap: () => ({ message: "Please select an account type." })
-    })
+      errorMap: () => ({ message: "Please select an account type." }),
+    }),
   })
   .superRefine((data, ctx) => {
     const email = data.email.toLowerCase().trim();
@@ -55,7 +63,7 @@ export const Register: React.FC = () => {
     handleSubmit,
     setValue,
     watch,
-    formState: { errors, isValid }
+    formState: { errors },
   } = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
     mode: "onChange",
@@ -63,15 +71,15 @@ export const Register: React.FC = () => {
       full_name: "",
       email: "",
       password: "",
-      role: "STUDENT"
-    }
+      role: "STUDENT",
+    },
   });
 
   const selectedRole = watch("role");
   const typedEmail = watch("email");
 
-  // Check roster when email changes
-  React.useEffect(() => {
+  // Roster check
+  useEffect(() => {
     const checkEmail = async () => {
       const email = (typedEmail || "").trim().toLowerCase();
       if (email.includes("@") && email.includes(".")) {
@@ -81,40 +89,48 @@ export const Register: React.FC = () => {
             setRosterStatus({
               checked: true,
               isAuthorized: true,
-              assignedRole: res.data.assigned_role as UserRole
+              assignedRole: res.data.role,
             });
-            if (res.data.assigned_role) {
-              setValue("role", res.data.assigned_role as UserRole, { shouldValidate: true });
+            if (res.data.role) {
+              setValue("role", res.data.role);
             }
-            return;
+          } else {
+            setRosterStatus({ checked: true, isAuthorized: false, assignedRole: null });
           }
-        } catch (e) {
-          // Ignored
+        } catch {
+          setRosterStatus({ checked: false, isAuthorized: false, assignedRole: null });
         }
+      } else {
+        setRosterStatus({ checked: false, isAuthorized: false, assignedRole: null });
       }
-      setRosterStatus({ checked: false, isAuthorized: false, assignedRole: null });
     };
 
-    const timer = setTimeout(checkEmail, 300);
-    return () => clearTimeout(timer);
+    const timeout = setTimeout(checkEmail, 400);
+    return () => clearTimeout(timeout);
   }, [typedEmail, setValue]);
 
   const onSubmit = async (data: RegisterFormValues) => {
     setIsSubmitting(true);
     try {
-      await registerUser(data.email, data.password, data.role, data.full_name);
+      await registerUser(data.email, data.password, data.role as UserRole, data.full_name);
       toast({
-        title: "Account Created!",
-        description: `Welcome, ${data.full_name}! Registration completed successfully. You can now log in.`,
-        variant: "success"
+        title: "Account Created Successfully",
+        description: `Welcome to MindGuardAI, ${data.full_name}!`,
+        variant: "success",
       });
-      navigate("/login");
+      navigate(
+        data.role === "STUDENT"
+          ? "/student/dashboard"
+          : data.role === "COUNSELOR"
+          ? "/counselor/dashboard"
+          : "/admin/dashboard"
+      );
     } catch (error: any) {
-      const apiError = error.response?.data?.detail || {};
+      const msg = error.response?.data?.detail?.message || "Registration failed. Please check details.";
       toast({
-        title: "Registration Failed",
-        description: apiError.message || "Failed to create account. Please ensure your email is on the institutional roster.",
-        variant: "destructive"
+        title: "Registration Error",
+        description: msg,
+        variant: "destructive",
       });
     } finally {
       setIsSubmitting(false);
@@ -122,181 +138,221 @@ export const Register: React.FC = () => {
   };
 
   return (
-    <div className="relative min-h-screen flex items-center justify-center bg-background px-4 py-12 transition-colors duration-300">
-      {/* Calm Ambient Lighting */}
-      <div className="absolute top-12 left-1/2 -translate-x-1/2 w-[600px] h-[350px] bg-primary/10 rounded-full blur-[120px] pointer-events-none" />
-      <div className="absolute bottom-10 left-10 w-[300px] h-[300px] bg-emerald-500/5 rounded-full blur-[100px] pointer-events-none" />
+    <div className="min-h-screen w-full flex bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans transition-colors duration-200">
+      {/* LEFT PANEL: Branded Gradient Experience */}
+      <div className="hidden lg:flex lg:w-1/2 relative bg-gradient-to-br from-indigo-950 via-slate-900 to-purple-950 text-white p-12 flex-col justify-between overflow-hidden">
+        <div className="absolute -top-24 -left-24 w-96 h-96 bg-indigo-500/20 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute bottom-12 -right-24 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl pointer-events-none" />
 
-      {/* Top Controls */}
-      <div className="absolute top-6 left-6 right-6 flex items-center justify-between z-10 max-w-5xl mx-auto">
-        <Link
-          to="/"
-          className="inline-flex items-center gap-2 text-xs font-semibold text-muted-foreground hover:text-foreground transition-colors px-3 py-1.5 rounded-xl border border-border/60 bg-card/60 backdrop-blur-md group"
-        >
-          <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-1 transition-transform" />
-          <span>Home</span>
-        </Link>
-        <ThemeToggle />
-      </div>
-
-      <div className="w-full max-w-md z-10 pt-4">
-        {/* Brand Header */}
-        <div className="flex flex-col items-center mb-7 text-center">
-          <div className="h-14 w-14 rounded-2xl bg-gradient-to-tr from-indigo-500 via-indigo-600 to-emerald-400 p-0.5 shadow-xl shadow-indigo-500/15 mb-3.5 flex items-center justify-center">
-            <div className="w-full h-full rounded-[14px] bg-card overflow-hidden flex items-center justify-center">
-              <img src="/favicon.jpg" alt="MindGuardAI Logo" className="h-full w-full object-cover" />
-            </div>
+        <div className="relative z-10 flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-500 to-purple-500 flex items-center justify-center text-white shadow-lg shadow-indigo-500/30">
+            <Brain className="w-5 h-5" />
           </div>
-          <h1 className="text-3xl font-extrabold tracking-tight text-foreground">
-            MindGuard<span className="text-primary">AI</span>
-          </h1>
-          <p className="text-xs text-muted-foreground mt-1.5 font-medium">Join the University Wellness Network</p>
+          <div>
+            <span className="font-bold text-xl tracking-tight text-white">MindGuardAI</span>
+            <span className="block text-[11px] text-indigo-300 font-medium -mt-1 uppercase tracking-wider">
+              Student Registration
+            </span>
+          </div>
         </div>
 
-        {/* Auth Glass Card */}
-        <Card className="border-border/80 bg-card/85 dark:bg-card/80 backdrop-blur-2xl shadow-xl shadow-black/5 dark:shadow-black/20 rounded-3xl">
-          <CardHeader className="space-y-1 pb-4">
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-xl font-bold tracking-tight">Create Account</CardTitle>
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
-                <ShieldCheck className="w-3 h-3" />
-                Verified Campus
-              </span>
+        <div className="relative z-10 my-auto max-w-lg">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-900/60 border border-indigo-700/60 text-xs font-semibold text-indigo-300 mb-6">
+            <Sparkles className="w-3.5 h-3.5 text-amber-300" />
+            <span>Join 2,400+ Students</span>
+          </div>
+          <h2 className="text-3xl font-extrabold leading-tight text-white tracking-tight">
+            "Prioritize your mental space before the academic semester catches up."
+          </h2>
+          <p className="mt-4 text-slate-300 text-sm leading-relaxed">
+            Create your confidential student account to track wellness habits, access 24/7 AI cognitive support, and connect
+            seamlessly with campus health resources.
+          </p>
+
+          <div className="mt-8 space-y-3">
+            <div className="flex items-center gap-3 text-xs text-slate-200">
+              <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+              <span>Full confidentiality — no academic records linked</span>
             </div>
-            <CardDescription className="text-xs text-muted-foreground">
-              Register using your authorized institutional email
-            </CardDescription>
-          </CardHeader>
+            <div className="flex items-center gap-3 text-xs text-slate-200">
+              <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+              <span>Personalized circadian sleep deficit recovery</span>
+            </div>
+            <div className="flex items-center gap-3 text-xs text-slate-200">
+              <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+              <span>Immediate de-escalation & SOS crisis support</span>
+            </div>
+          </div>
+        </div>
 
-          <form onSubmit={handleSubmit(onSubmit)}>
-            <CardContent className="space-y-4">
-              {/* Account Type Selector */}
-              <FormItem>
-                <Label className="text-xs font-semibold text-foreground">Account Type</Label>
-                <div className="grid grid-cols-3 gap-1.5 bg-muted/50 p-1 rounded-xl border border-border/60">
-                  {(["STUDENT", "COUNSELOR", "ADMIN"] as UserRole[]).map((r) => (
-                    <button
-                      key={r}
-                      type="button"
-                      onClick={() => setValue("role", r, { shouldValidate: true })}
-                      className={`py-2 px-2.5 rounded-lg text-xs font-semibold tracking-wide transition-all ${
-                        selectedRole === r
-                          ? "bg-primary text-primary-foreground shadow-sm font-bold"
-                          : "text-muted-foreground hover:text-foreground hover:bg-card/50"
-                      }`}
-                    >
-                      {r}
-                    </button>
-                  ))}
-                </div>
-                {errors.role && (
-                  <p className="text-xs text-destructive font-medium mt-1">{errors.role.message}</p>
-                )}
-              </FormItem>
+        <div className="relative z-10 text-xs text-slate-400 flex items-center justify-between">
+          <span>Enterprise Campus Protection</span>
+          <span>© {new Date().getFullYear()} MindGuardAI</span>
+        </div>
+      </div>
 
-              {/* Full Name / Username */}
-              <FormItem>
-                <Label htmlFor="full_name" className="text-xs font-semibold text-foreground">Full Name or Username</Label>
-                <Input
-                  id="full_name"
-                  type="text"
-                  autoComplete="name"
-                  placeholder="e.g. Alex Sharma or alex37"
-                  className="h-11 rounded-xl border-border/80 bg-background/60 text-sm focus-visible:ring-primary focus-visible:ring-1"
-                  {...register("full_name")}
-                />
-                {errors.full_name && (
-                  <p className="text-xs text-destructive font-medium mt-1">{errors.full_name.message}</p>
-                )}
-              </FormItem>
+      {/* RIGHT PANEL: Form */}
+      <div className="w-full lg:w-1/2 flex flex-col justify-between p-6 sm:p-12 relative overflow-y-auto">
+        <div className="flex items-center justify-between mb-8">
+          <Link
+            to="/"
+            className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-800"
+          >
+            <ArrowLeft className="w-3.5 h-3.5" />
+            <span>Back to Home</span>
+          </Link>
+          <ThemeToggle />
+        </div>
 
-              {/* Email Address */}
-              <FormItem>
-                <div className="flex justify-between items-center">
-                  <Label htmlFor="email" className="text-xs font-semibold text-foreground">Institutional Email</Label>
-                  <span className="text-[10px] text-primary font-medium">
-                    {selectedRole === "STUDENT" ? "Student Domain" : "Staff Domain"}
-                  </span>
-                </div>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder={
-                    selectedRole === "STUDENT"
-                      ? "student.name@university.edu"
-                      : selectedRole === "COUNSELOR"
-                      ? "counselor.name@university.edu"
-                      : "admin.name@university.edu"
-                  }
-                  className="h-11 rounded-xl border-border/80 bg-background/60 text-sm focus-visible:ring-primary focus-visible:ring-1"
-                  {...register("email")}
-                />
-                {rosterStatus.isAuthorized && (
-                  <div className="flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 py-1.5 px-3 rounded-xl mt-1.5 font-medium">
-                    <CheckCircle2 className="h-3.5 w-3.5 shrink-0" />
-                    <span>Authorized Institutional Roster — Assigned: <strong>{rosterStatus.assignedRole}</strong></span>
-                  </div>
-                )}
-                {errors.email && (
-                  <p className="text-xs text-destructive font-medium mt-1">{errors.email.message}</p>
-                )}
-              </FormItem>
+        <div className="max-w-md w-full mx-auto my-auto animate-fade-in">
+          <div className="mb-6">
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
+              Create an account
+            </h1>
+            <p className="text-sm text-slate-500 dark:text-slate-400 mt-1.5">
+              Enter your details to activate your campus wellness profile.
+            </p>
+          </div>
 
-              {/* Password */}
-              <FormItem>
-                <Label htmlFor="password" className="text-xs font-semibold text-foreground">Password</Label>
-                <div className="relative">
-                  <Input
-                    id="password"
-                    type={showPassword ? "text" : "password"}
-                    placeholder="Min. 8 characters"
-                    className="h-11 rounded-xl border-border/80 bg-background/60 text-sm pr-10 focus-visible:ring-primary focus-visible:ring-1"
-                    {...register("password")}
-                  />
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            {/* Account Role Selector */}
+            <div>
+              <label className="block text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5">
+                Account Type
+              </label>
+              <div className="grid grid-cols-3 gap-2">
+                {(["STUDENT", "COUNSELOR", "ADMIN"] as UserRole[]).map((r) => (
                   <button
+                    key={r}
                     type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3.5 top-3.5 text-muted-foreground hover:text-foreground transition-colors"
+                    onClick={() => setValue("role", r, { shouldValidate: true })}
+                    className={`py-2 rounded-xl text-xs font-bold border transition-all ${
+                      selectedRole === r
+                        ? "bg-indigo-600 border-indigo-600 text-white shadow-xs"
+                        : "border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-900"
+                    }`}
                   >
-                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    {r === "STUDENT" ? "Student" : r === "COUNSELOR" ? "Counselor" : "Admin"}
                   </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Full Name */}
+            <div>
+              <label className="block text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5">
+                Full Name or Preferred Handle
+              </label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                  <User className="w-4 h-4" />
                 </div>
-                {errors.password && (
-                  <p className="text-xs text-destructive font-medium mt-1">{errors.password.message}</p>
-                )}
-              </FormItem>
-            </CardContent>
-
-            <CardFooter className="flex flex-col gap-4 pt-2">
-              <Button
-                type="submit"
-                disabled={isSubmitting || !isValid}
-                className="w-full h-11 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground font-bold shadow-md shadow-primary/20 transition-all active:scale-[0.99]"
-              >
-                {isSubmitting ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Creating Profile...
-                  </>
-                ) : (
-                  "Create Account"
-                )}
-              </Button>
-
-              <div className="w-full p-3 rounded-xl bg-muted/40 border border-border/60 text-[11px] text-muted-foreground flex items-center gap-2.5">
-                <Lock className="w-4 h-4 text-primary shrink-0" />
-                <span>Protected by end-to-end data encryption and strict campus privacy charters.</span>
+                <input
+                  type="text"
+                  placeholder="e.g. Aarav Sharma"
+                  {...register("full_name")}
+                  className={`w-full pl-10 pr-4 py-2.5 rounded-xl text-sm border bg-white dark:bg-slate-900 text-slate-900 dark:text-white transition-all focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
+                    errors.full_name ? "border-rose-500" : "border-slate-300 dark:border-slate-800"
+                  }`}
+                />
               </div>
+              {errors.full_name && (
+                <p className="text-xs text-rose-500 font-medium mt-1">{errors.full_name.message}</p>
+              )}
+            </div>
 
-              <div className="text-xs text-center text-muted-foreground">
-                Already registered?{" "}
-                <Link to="/login" className="text-primary hover:underline font-bold">
-                  Sign In
-                </Link>
+            {/* Email Field */}
+            <div>
+              <label className="block text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5">
+                Institutional Email Address
+              </label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                  <Mail className="w-4 h-4" />
+                </div>
+                <input
+                  type="email"
+                  placeholder="your.name@nmims.edu"
+                  {...register("email")}
+                  className={`w-full pl-10 pr-4 py-2.5 rounded-xl text-sm border bg-white dark:bg-slate-900 text-slate-900 dark:text-white transition-all focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
+                    errors.email ? "border-rose-500" : "border-slate-300 dark:border-slate-800"
+                  }`}
+                />
               </div>
-            </CardFooter>
+              {rosterStatus.isAuthorized && (
+                <div className="mt-1.5 flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400 font-semibold">
+                  <CheckCircle2 className="w-3.5 h-3.5" />
+                  <span>Institutional roster match verified ({rosterStatus.assignedRole})</span>
+                </div>
+              )}
+              {errors.email ? (
+                <p className="text-xs text-rose-500 font-medium mt-1">{errors.email.message}</p>
+              ) : (
+                <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
+                  Continue with your university-issued email
+                </p>
+              )}
+            </div>
+
+            {/* Password */}
+            <div>
+              <label className="block text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5">
+                Create Secure Password
+              </label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                  <Lock className="w-4 h-4" />
+                </div>
+                <input
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Min 8 chars with letters & numbers"
+                  {...register("password")}
+                  className={`w-full pl-10 pr-10 py-2.5 rounded-xl text-sm border bg-white dark:bg-slate-900 text-slate-900 dark:text-white transition-all focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
+                    errors.password ? "border-rose-500" : "border-slate-300 dark:border-slate-800"
+                  }`}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
+                >
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
+              {errors.password && (
+                <p className="text-xs text-rose-500 font-medium mt-1">{errors.password.message}</p>
+              )}
+            </div>
+
+            {/* Submit */}
+            <Button
+              type="submit"
+              disabled={isSubmitting}
+              className="w-full mt-2 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold shadow-md shadow-indigo-600/20 transition-all hover:scale-[1.02] flex items-center justify-center gap-2"
+            >
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <span>Creating your account...</span>
+                </>
+              ) : (
+                <span>Complete Registration</span>
+              )}
+            </Button>
           </form>
-        </Card>
+
+          <p className="mt-6 text-center text-xs text-slate-500 dark:text-slate-400">
+            Already registered on campus?{" "}
+            <Link to="/login" className="font-semibold text-indigo-600 dark:text-indigo-400 hover:underline">
+              Sign In Here
+            </Link>
+          </p>
+        </div>
+
+        <div className="mt-8 pt-4 flex items-center justify-center gap-2 text-xs text-slate-400">
+          <ShieldCheck className="w-4 h-4 text-emerald-500" />
+          <span>Protected under Campus Student Privacy Charter</span>
+        </div>
       </div>
     </div>
   );
