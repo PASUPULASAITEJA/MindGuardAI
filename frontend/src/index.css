@@ -151,6 +151,25 @@
   }
 }
 
+/* Dynamic Keyframe Animations for Holographic Neural Systems */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-9px) rotate(0.5deg);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-150%) skewX(-25deg);
+  }
+  100% {
+    transform: translateX(250%) skewX(-25deg);
+  }
+}
+
 /* Accessibility: Clean reduced motion support without overriding necessary transitions */
 @media (prefers-reduced-motion: reduce) {
   .motion-reduce-safe {

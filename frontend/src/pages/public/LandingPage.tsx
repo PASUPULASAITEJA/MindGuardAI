@@ -241,9 +241,9 @@ export const LandingPage: React.FC = () => {
                 {heroVisualMode === "brain" ? (
                   <NeuralBrain3D
                     className="w-full h-full"
-                    particleCount={18000}
-                    autoRotate={true}
-                    rotationSpeed={0.32}
+                    interactive={true}
+                    pulseSpeed={1.0}
+                    showStatusBadge={true}
                   />
                 ) : (
                   <WellnessOrb className="w-full h-full" />
