@@ -188,7 +188,7 @@ export const StudentDashboard: React.FC = () => {
   const studentFirstName = user?.full_name ? user.full_name.split(" ")[0] : "Student";
 
   return (
-    <div className="space-y-8 pb-16 font-sans text-foreground animate-fade-in-up">
+    <div className="fade-up space-y-6 pb-16 font-sans text-foreground">
       {/* 1. WELCOME HEADER */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
@@ -240,7 +240,7 @@ export const StudentDashboard: React.FC = () => {
       {/* 2. TOP STAT ROW: 4 Cards in a grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Stat 1: Wellness Score */}
-        <Card className="rounded-lg border border-border bg-card p-5 shadow-xs">
+        <Card className="rounded-lg border border-border bg-card p-5 shadow-xs hover-lift">
           <CardContent className="p-0 flex items-center justify-between">
             <div className="space-y-1">
               <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider block">
@@ -260,7 +260,7 @@ export const StudentDashboard: React.FC = () => {
         </Card>
 
         {/* Stat 2: Risk Level */}
-        <Card className="rounded-lg border border-border bg-card p-5 shadow-xs">
+        <Card className="rounded-lg border border-border bg-card p-5 shadow-xs hover-lift">
           <CardContent className="p-0 flex items-center justify-between">
             <div className="space-y-1.5">
               <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider block">
@@ -283,7 +283,7 @@ export const StudentDashboard: React.FC = () => {
         </Card>
 
         {/* Stat 3: Last Check-In */}
-        <Card className="rounded-lg border border-border bg-card p-5 shadow-xs">
+        <Card className="rounded-lg border border-border bg-card p-5 shadow-xs hover-lift">
           <CardContent className="p-0 flex items-center justify-between">
             <div className="space-y-1">
               <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider block">
@@ -303,7 +303,7 @@ export const StudentDashboard: React.FC = () => {
         </Card>
 
         {/* Stat 4: Streak Days */}
-        <Card className="rounded-lg border border-border bg-card p-5 shadow-xs">
+        <Card className="rounded-lg border border-border bg-card p-5 shadow-xs hover-lift">
           <CardContent className="p-0 flex items-center justify-between">
             <div className="space-y-1">
               <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider block">
@@ -329,7 +329,7 @@ export const StudentDashboard: React.FC = () => {
         {/* Action 1: Start Check-in (primary) */}
         <button
           onClick={() => navigate("/student/daily-check-in")}
-          className="w-full text-left p-4 rounded-xl border border-primary/30 bg-primary/5 hover:bg-primary/10 hover:border-primary transition-all duration-200 shadow-xs group"
+          className="w-full text-left p-4 rounded-xl border border-primary/30 bg-primary/5 hover:bg-primary/10 hover:border-primary transition-all duration-200 shadow-xs group hover-lift"
         >
           <div className="flex items-center gap-3.5">
             <div className="w-12 h-12 rounded-xl bg-primary text-primary-foreground flex items-center justify-center shrink-0 shadow-sm shadow-primary/25 group-hover:scale-105 transition-transform">
@@ -349,7 +349,7 @@ export const StudentDashboard: React.FC = () => {
         {/* Action 2: Talk to AI (indigo) */}
         <button
           onClick={() => navigate("/student/chatbot")}
-          className="w-full text-left p-4 rounded-xl border border-indigo-500/30 bg-indigo-500/5 hover:bg-indigo-500/10 hover:border-indigo-500 transition-all duration-200 shadow-xs group"
+          className="w-full text-left p-4 rounded-xl border border-indigo-500/30 bg-indigo-500/5 hover:bg-indigo-500/10 hover:border-indigo-500 transition-all duration-200 shadow-xs group hover-lift"
         >
           <div className="flex items-center gap-3.5">
             <div className="w-12 h-12 rounded-xl bg-indigo-600 text-white flex items-center justify-center shrink-0 shadow-sm group-hover:scale-105 transition-transform">
@@ -369,7 +369,7 @@ export const StudentDashboard: React.FC = () => {
         {/* Action 3: Book Counselor (blue) */}
         <button
           onClick={() => setIsBookingOpen(true)}
-          className="w-full text-left p-4 rounded-xl border border-blue-500/30 bg-blue-500/5 hover:bg-blue-500/10 hover:border-blue-500 transition-all duration-200 shadow-xs group"
+          className="w-full text-left p-4 rounded-xl border border-blue-500/30 bg-blue-500/5 hover:bg-blue-500/10 hover:border-blue-500 transition-all duration-200 shadow-xs group hover-lift"
         >
           <div className="flex items-center gap-3.5">
             <div className="w-12 h-12 rounded-xl bg-blue-600 text-white flex items-center justify-center shrink-0 shadow-sm group-hover:scale-105 transition-transform">
@@ -389,7 +389,7 @@ export const StudentDashboard: React.FC = () => {
         {/* Action 4: Crisis Support (rose) */}
         <button
           onClick={() => setIsSOSOpen(true)}
-          className="w-full text-left p-4 rounded-xl border border-rose-500/30 bg-rose-500/5 hover:bg-rose-500/10 hover:border-rose-500 transition-all duration-200 shadow-xs group"
+          className="w-full text-left p-4 rounded-xl border border-rose-500/30 bg-rose-500/5 hover:bg-rose-500/10 hover:border-rose-500 transition-all duration-200 shadow-xs group hover-lift"
         >
           <div className="flex items-center gap-3.5">
             <div className="w-12 h-12 rounded-xl bg-rose-600 text-white flex items-center justify-center shrink-0 shadow-sm shadow-rose-600/20 group-hover:scale-105 transition-transform">

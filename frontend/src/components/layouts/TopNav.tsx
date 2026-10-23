@@ -60,7 +60,7 @@ const TopNav: React.FC<TopNavProps> = ({ title, subtitle, onMenuClick }) => {
                 className="inline-flex items-center gap-1.5 rounded-full bg-rose-500 text-white hover:bg-rose-600 px-3 py-1.5 text-xs font-bold transition-all shadow-sm"
                 title="Immediate 24/7 Crisis Support"
               >
-                <AlertTriangle className="h-3.5 w-3.5 text-white animate-pulse" />
+                <AlertTriangle className="h-3.5 w-3.5 text-white animate-pulse-soft" />
                 <span>Crisis Support</span>
               </button>
             )}

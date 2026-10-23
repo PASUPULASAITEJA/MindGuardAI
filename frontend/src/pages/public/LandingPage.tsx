@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React from "react";
 import { Link } from "react-router-dom";
 import { useTheme } from "@/contexts/ThemeContext";
 import {
@@ -26,53 +26,8 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-
-// Pure React count-up hook using IntersectionObserver
-function useCountUp(targetNumber: number, duration: number = 1800) {
-  const [count, setCount] = useState<number>(0);
-  const [isVisible, setIsVisible] = useState<boolean>(false);
-  const elementRef = useRef<HTMLDivElement | null>(null);
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setIsVisible(true);
-          observer.disconnect();
-        }
-      },
-      { threshold: 0.25 }
-    );
-
-    if (elementRef.current) {
-      observer.observe(elementRef.current);
-    }
-
-    return () => observer.disconnect();
-  }, []);
-
-  useEffect(() => {
-    if (!isVisible) return;
-    let startTime: number | null = null;
-    let frameId: number;
-
-    const animate = (timestamp: number) => {
-      if (!startTime) startTime = timestamp;
-      const progress = Math.min((timestamp - startTime) / duration, 1);
-      const eased = 1 - Math.pow(1 - progress, 3); // ease-out cubic
-      setCount(Number((eased * targetNumber).toFixed(targetNumber % 1 === 0 ? 0 : 1)));
-
-      if (progress < 1) {
-        frameId = requestAnimationFrame(animate);
-      }
-    };
-
-    frameId = requestAnimationFrame(animate);
-    return () => cancelAnimationFrame(frameId);
-  }, [isVisible, targetNumber, duration]);
-
-  return { count, elementRef };
-}
+import { useScrollReveal } from "@/hooks/useScrollReveal";
+import { useCountUp } from "@/hooks/useCountUp";
 
 export const LandingPage: React.FC = () => {
   const { theme, toggleTheme } = useTheme();
@@ -84,10 +39,16 @@ export const LandingPage: React.FC = () => {
     }
   };
 
-  // Stats counter hooks
-  const stat1 = useCountUp(99.2, 1500);
-  const stat2 = useCountUp(100, 1200);
-  const stat4 = useCountUp(3, 1000);
+  // Scroll reveal refs — one per section
+  const howItWorksRef = useScrollReveal();
+  const featuresRef = useScrollReveal();
+  const privacyRef = useScrollReveal();
+
+  // Count-up for stats section
+  const accuracy = useCountUp(99);
+  const students = useCountUp(2400);
+  const uptime = useCountUp(24);
+  const tiers = useCountUp(3);
 
   return (
     <div className="relative min-h-screen bg-background text-foreground font-sans antialiased selection:bg-primary/20 selection:text-primary transition-colors duration-200">
@@ -165,31 +126,31 @@ export const LandingPage: React.FC = () => {
         </div>
       </header>
 
-      {/* TASK 1: HERO SECTION */}
-      <section className="relative min-h-[calc(100vh-4rem)] flex items-center justify-center bg-gradient-to-b from-background via-primary/5 to-background px-4 sm:px-6 py-12 md:py-20 overflow-hidden">
-        <div className="max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center animate-fade-in-up">
+      {/* HERO SECTION — shimmer background + float on mockup card */}
+      <section className="animate-shimmer-bg pt-16 pb-16 md:pt-24 md:pb-24 border-b border-border relative min-h-[calc(100vh-4rem)] flex items-center justify-center px-4 sm:px-6 overflow-hidden">
+        <div className="max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
           {/* Left Column: Headline and CTAs */}
           <div className="lg:col-span-7 flex flex-col items-center lg:items-start text-center lg:text-left space-y-6">
             {/* Pill Badge */}
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-xs font-semibold text-primary">
+            <div className="fade-up inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-xs font-semibold text-primary">
               <span role="img" aria-label="brain">🧠</span>
               <span>Student Mental Wellness Platform</span>
             </div>
 
             {/* Headline */}
-            <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight text-foreground leading-[1.12]">
+            <h1 className="fade-up-d1 text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight text-foreground leading-[1.12]">
               Detect Burnout Before It Becomes a Crisis
             </h1>
 
             {/* Subheadline */}
-            <p className="text-base sm:text-lg text-muted-foreground max-w-lg leading-relaxed">
+            <p className="fade-up-d2 text-base sm:text-lg text-muted-foreground max-w-lg leading-relaxed">
               MindGuardAI continuously monitors student wellbeing signals — emotion 
               analysis, sleep patterns, and clinical screeners — to surface early 
               warnings weeks before students reach breaking point.
             </p>
 
             {/* Two CTA Buttons */}
-            <div className="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto pt-2">
+            <div className="fade-up-d3 flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto pt-2">
               <Link to="/login" className="w-full sm:w-auto">
                 <Button size="lg" className="w-full sm:w-auto bg-primary text-primary-foreground hover:bg-primary/90 font-semibold px-7 rounded-lg shadow-md shadow-primary/20">
                   Student Portal →
@@ -206,9 +167,9 @@ export const LandingPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Right Column: Floating Stats Card Mockup (Styled like real StudentDashboard) */}
+          {/* Right Column: Floating Stats Card Mockup */}
           <div className="lg:col-span-5 flex justify-center lg:justify-end">
-            <div className="w-full max-w-md bg-card border border-border rounded-lg shadow-xl p-5 space-y-5 animate-float transition-all">
+            <div className="animate-float fade-up-d4 w-full max-w-md bg-card border border-border rounded-lg shadow-xl p-5 space-y-5 transition-all">
               {/* Card Header */}
               <div className="flex items-center justify-between pb-3 border-b border-border">
                 <div className="flex items-center gap-2.5">
@@ -274,8 +235,8 @@ export const LandingPage: React.FC = () => {
                   <svg className="w-full h-full overflow-visible" viewBox="0 0 100 40" preserveAspectRatio="none">
                     <defs>
                       <linearGradient id="chartGradient" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity="0.3" />
-                        <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity="0.0" />
+                        <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.3} />
+                        <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0.0} />
                       </linearGradient>
                     </defs>
                     <path
@@ -319,7 +280,7 @@ export const LandingPage: React.FC = () => {
         </div>
       </section>
 
-      {/* TRUST BAR (below hero, border-y border-border bg-secondary/50) */}
+      {/* TRUST BAR */}
       <section className="border-y border-border bg-secondary/50 py-4 px-4 sm:px-6">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 text-xs">
           <span className="font-semibold text-muted-foreground tracking-wide uppercase text-[11px]">
@@ -349,22 +310,26 @@ export const LandingPage: React.FC = () => {
         </div>
       </section>
 
-      {/* HOW IT WORKS (id="how-it-works") */}
-      <section id="how-it-works" className="py-20 px-4 sm:px-6 max-w-7xl mx-auto">
+      {/* HOW IT WORKS — staggered card reveal */}
+      <section
+        id="how-it-works"
+        ref={howItWorksRef}
+        className="py-20 px-4 sm:px-6 max-w-7xl mx-auto"
+      >
         <div className="text-center max-w-2xl mx-auto mb-14 space-y-3">
-          <span className="text-xs font-bold uppercase tracking-wider text-primary">Workflow</span>
-          <h2 className="text-3xl sm:text-4xl font-extrabold text-foreground tracking-tight">
+          <span className="scroll-reveal text-xs font-bold uppercase tracking-wider text-primary block">Workflow</span>
+          <h2 className="scroll-reveal text-3xl sm:text-4xl font-extrabold text-foreground tracking-tight">
             How MindGuardAI Protects Students
           </h2>
-          <p className="text-sm text-muted-foreground">
+          <p className="scroll-reveal text-sm text-muted-foreground">
             A continuous, non-intrusive clinical safety net that bridges daily campus living with proactive mental healthcare.
           </p>
         </div>
 
-        {/* 4 numbered steps in a horizontal grid (2x2 on mobile, 4-col on desktop) */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        {/* 4 numbered steps in a horizontal grid */}
+        <div className="stagger-group grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {/* Step 1 */}
-          <Card className="relative bg-card border border-border rounded-lg shadow-xs hover:border-primary/40 transition-all">
+          <Card className="scroll-reveal hover-lift relative bg-card border border-border rounded-lg shadow-xs transition-all">
             <CardContent className="p-6 space-y-4">
               <span className="text-2xl font-mono font-extrabold text-muted-foreground/30 block">
                 01
@@ -380,7 +345,7 @@ export const LandingPage: React.FC = () => {
           </Card>
 
           {/* Step 2 */}
-          <Card className="relative bg-card border border-border rounded-lg shadow-xs hover:border-primary/40 transition-all">
+          <Card className="scroll-reveal hover-lift relative bg-card border border-border rounded-lg shadow-xs transition-all">
             <CardContent className="p-6 space-y-4">
               <span className="text-2xl font-mono font-extrabold text-muted-foreground/30 block">
                 02
@@ -396,7 +361,7 @@ export const LandingPage: React.FC = () => {
           </Card>
 
           {/* Step 3 */}
-          <Card className="relative bg-card border border-border rounded-lg shadow-xs hover:border-primary/40 transition-all">
+          <Card className="scroll-reveal hover-lift relative bg-card border border-border rounded-lg shadow-xs transition-all">
             <CardContent className="p-6 space-y-4">
               <span className="text-2xl font-mono font-extrabold text-muted-foreground/30 block">
                 03
@@ -412,7 +377,7 @@ export const LandingPage: React.FC = () => {
           </Card>
 
           {/* Step 4 */}
-          <Card className="relative bg-card border border-border rounded-lg shadow-xs hover:border-primary/40 transition-all">
+          <Card className="scroll-reveal hover-lift relative bg-card border border-border rounded-lg shadow-xs transition-all">
             <CardContent className="p-6 space-y-4">
               <span className="text-2xl font-mono font-extrabold text-muted-foreground/30 block">
                 04
@@ -429,23 +394,27 @@ export const LandingPage: React.FC = () => {
         </div>
       </section>
 
-      {/* CAPABILITIES (id="features") */}
-      <section id="features" className="py-20 px-4 sm:px-6 bg-secondary/30 border-y border-border">
+      {/* CAPABILITIES (FEATURES) — staggered 6-card bento */}
+      <section
+        id="features"
+        ref={featuresRef}
+        className="py-20 px-4 sm:px-6 bg-secondary/30 border-y border-border"
+      >
         <div className="max-w-7xl mx-auto space-y-12">
           <div className="text-center max-w-2xl mx-auto space-y-3">
-            <span className="text-xs font-bold uppercase tracking-wider text-primary">Core Architecture</span>
-            <h2 className="text-3xl sm:text-4xl font-extrabold text-foreground tracking-tight">
+            <span className="scroll-reveal text-xs font-bold uppercase tracking-wider text-primary block">Core Architecture</span>
+            <h2 className="scroll-reveal text-3xl sm:text-4xl font-extrabold text-foreground tracking-tight">
               Built on Clinical Science
             </h2>
-            <p className="text-sm text-muted-foreground">
+            <p className="scroll-reveal text-sm text-muted-foreground">
               Every algorithm, data pipeline, and triage policy was engineered in accordance with psychiatric validation standards.
             </p>
           </div>
 
-          {/* 6-card bento grid (3-col desktop, 2-col tablet, 1-col mobile) */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {/* 6-card bento grid */}
+          <div className="stagger-group grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {/* Card 1 */}
-            <Card className="bg-card border border-border rounded-lg shadow-xs hover:border-primary/40 transition-all">
+            <Card className="scroll-reveal hover-lift bg-card border border-border rounded-lg shadow-xs transition-all">
               <CardContent className="p-6 space-y-3">
                 <div className="w-10 h-10 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
                   <span className="text-xl" role="img" aria-label="brain">🧠</span>
@@ -458,7 +427,7 @@ export const LandingPage: React.FC = () => {
             </Card>
 
             {/* Card 2 */}
-            <Card className="bg-card border border-border rounded-lg shadow-xs hover:border-primary/40 transition-all">
+            <Card className="scroll-reveal hover-lift bg-card border border-border rounded-lg shadow-xs transition-all">
               <CardContent className="p-6 space-y-3">
                 <div className="w-10 h-10 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
                   <span className="text-xl" role="img" aria-label="bar chart">📊</span>
@@ -471,7 +440,7 @@ export const LandingPage: React.FC = () => {
             </Card>
 
             {/* Card 3 */}
-            <Card className="bg-card border border-border rounded-lg shadow-xs hover:border-primary/40 transition-all">
+            <Card className="scroll-reveal hover-lift bg-card border border-border rounded-lg shadow-xs transition-all">
               <CardContent className="p-6 space-y-3">
                 <div className="w-10 h-10 rounded-lg bg-rose-500/10 text-rose-500 flex items-center justify-center">
                   <span className="text-xl" role="img" aria-label="emergency siren">🚨</span>
@@ -484,7 +453,7 @@ export const LandingPage: React.FC = () => {
             </Card>
 
             {/* Card 4 */}
-            <Card className="bg-card border border-border rounded-lg shadow-xs hover:border-primary/40 transition-all">
+            <Card className="scroll-reveal hover-lift bg-card border border-border rounded-lg shadow-xs transition-all">
               <CardContent className="p-6 space-y-3">
                 <div className="w-10 h-10 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
                   <span className="text-xl" role="img" aria-label="sleeping face">😴</span>
@@ -497,7 +466,7 @@ export const LandingPage: React.FC = () => {
             </Card>
 
             {/* Card 5 */}
-            <Card className="bg-card border border-border rounded-lg shadow-xs hover:border-primary/40 transition-all">
+            <Card className="scroll-reveal hover-lift bg-card border border-border rounded-lg shadow-xs transition-all">
               <CardContent className="p-6 space-y-3">
                 <div className="w-10 h-10 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
                   <span className="text-xl" role="img" aria-label="stethoscope">🩺</span>
@@ -510,7 +479,7 @@ export const LandingPage: React.FC = () => {
             </Card>
 
             {/* Card 6 */}
-            <Card className="bg-card border border-border rounded-lg shadow-xs hover:border-primary/40 transition-all">
+            <Card className="scroll-reveal hover-lift bg-card border border-border rounded-lg shadow-xs transition-all">
               <CardContent className="p-6 space-y-3">
                 <div className="w-10 h-10 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
                   <span className="text-xl" role="img" aria-label="lock">🔒</span>
@@ -525,76 +494,58 @@ export const LandingPage: React.FC = () => {
         </div>
       </section>
 
-      {/* IMPACT STATS */}
-      <section className="py-20 px-4 sm:px-6 bg-foreground text-background">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12 text-center">
-            {/* Stat 1 */}
-            <div ref={stat1.elementRef} className="space-y-2">
-              <div className="text-4xl sm:text-5xl font-extrabold tracking-tight">
-                {stat1.count.toFixed(1)}%
-              </div>
-              <p className="text-xs sm:text-sm font-medium opacity-80 max-w-[200px] mx-auto">
-                Model Evaluation Accuracy on Psychometric Benchmarks
-              </p>
-            </div>
-
-            {/* Stat 2 */}
-            <div ref={stat2.elementRef} className="space-y-2">
-              <div className="text-4xl sm:text-5xl font-extrabold tracking-tight">
-                &lt; {stat2.count}ms
-              </div>
-              <p className="text-xs sm:text-sm font-medium opacity-80 max-w-[200px] mx-auto">
-                Real-Time Inference Latency for Distress Triage
-              </p>
-            </div>
-
-            {/* Stat 3 */}
-            <div className="space-y-2">
-              <div className="text-4xl sm:text-5xl font-extrabold tracking-tight">
-                24/7
-              </div>
-              <p className="text-xs sm:text-sm font-medium opacity-80 max-w-[200px] mx-auto">
-                Continuous Autonomous Early Warning & Safety Net
-              </p>
-            </div>
-
-            {/* Stat 4 */}
-            <div ref={stat4.elementRef} className="space-y-2">
-              <div className="text-4xl sm:text-5xl font-extrabold tracking-tight">
-                {stat4.count} Tiers
-              </div>
-              <p className="text-xs sm:text-sm font-medium opacity-80 max-w-[200px] mx-auto">
-                Calibrated Clinical Risk Stratification Levels
-              </p>
-            </div>
+      {/* STATS — count-up numbers */}
+      <section
+        ref={accuracy.ref as React.RefObject<HTMLDivElement>}
+        className="py-16 border-y border-border bg-foreground"
+      >
+        <div className="max-w-4xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+          <div>
+            <p className="text-4xl font-extrabold text-background">{accuracy.count}%</p>
+            <p className="text-xs text-background/60 mt-1">Risk Accuracy</p>
+          </div>
+          <div>
+            <p className="text-4xl font-extrabold text-background">{students.count.toLocaleString()}+</p>
+            <p className="text-xs text-background/60 mt-1">Students Monitored</p>
+          </div>
+          <div>
+            <p className="text-4xl font-extrabold text-background">{uptime.count}/7</p>
+            <p className="text-xs text-background/60 mt-1">Crisis Support</p>
+          </div>
+          <div>
+            <p className="text-4xl font-extrabold text-background">{tiers.count}</p>
+            <p className="text-xs text-background/60 mt-1">Risk Tiers</p>
           </div>
         </div>
       </section>
 
-      {/* PRIVACY COMMITMENT (id="privacy") */}
-      <section id="privacy" className="py-20 px-4 sm:px-6 bg-secondary/30">
+      {/* PRIVACY — reveal */}
+      <section
+        id="privacy"
+        ref={privacyRef}
+        className="py-20 px-4 sm:px-6 bg-secondary/30"
+      >
         <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
           {/* Left Column */}
           <div className="lg:col-span-6 space-y-4">
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 text-xs font-semibold">
+            <div className="scroll-reveal inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 text-xs font-semibold">
               <Shield className="w-3.5 h-3.5" />
               <span>Institutional Privacy Safeguard</span>
             </div>
-            <h2 className="text-3xl sm:text-4xl font-extrabold text-foreground tracking-tight">
+            <h2 className="scroll-reveal text-3xl sm:text-4xl font-extrabold text-foreground tracking-tight">
               Zero-Keystroke Privacy by Design
             </h2>
-            <p className="text-sm text-muted-foreground leading-relaxed">
+            <p className="scroll-reveal text-sm text-muted-foreground leading-relaxed">
               We firmly believe mental healthcare cannot function under surveillance. MindGuardAI collects no keystroke logs, no screen captures, and no private message contents. Telemetry is limited to kernel sleep cycles and consented mood journals.
             </p>
-            <p className="text-sm text-muted-foreground leading-relaxed">
+            <p className="scroll-reveal text-sm text-muted-foreground leading-relaxed">
               University administrators only receive k-anonymized aggregate cohort reports (k ≥ 10), ensuring no single student can ever be singled out.
             </p>
           </div>
 
-          {/* Right Column: 4 checklist items with CheckCircle2 icon in emerald */}
-          <div className="lg:col-span-6 space-y-4">
-            <div className="flex items-start gap-3 p-4 rounded-lg bg-card border border-border shadow-xs">
+          {/* Right Column: 4 checklist items */}
+          <div className="stagger-group lg:col-span-6 space-y-4">
+            <div className="scroll-reveal hover-lift flex items-start gap-3 p-4 rounded-lg bg-card border border-border shadow-xs">
               <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0 mt-0.5" />
               <div>
                 <h4 className="text-sm font-semibold text-foreground">Zero Keystroke Logging</h4>
@@ -604,7 +555,7 @@ export const LandingPage: React.FC = () => {
               </div>
             </div>
 
-            <div className="flex items-start gap-3 p-4 rounded-lg bg-card border border-border shadow-xs">
+            <div className="scroll-reveal hover-lift flex items-start gap-3 p-4 rounded-lg bg-card border border-border shadow-xs">
               <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0 mt-0.5" />
               <div>
                 <h4 className="text-sm font-semibold text-foreground">AES-256-GCM End-to-End Encryption</h4>
@@ -614,7 +565,7 @@ export const LandingPage: React.FC = () => {
               </div>
             </div>
 
-            <div className="flex items-start gap-3 p-4 rounded-lg bg-card border border-border shadow-xs">
+            <div className="scroll-reveal hover-lift flex items-start gap-3 p-4 rounded-lg bg-card border border-border shadow-xs">
               <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0 mt-0.5" />
               <div>
                 <h4 className="text-sm font-semibold text-foreground">Differential Privacy & k-Anonymity</h4>
@@ -624,7 +575,7 @@ export const LandingPage: React.FC = () => {
               </div>
             </div>
 
-            <div className="flex items-start gap-3 p-4 rounded-lg bg-card border border-border shadow-xs">
+            <div className="scroll-reveal hover-lift flex items-start gap-3 p-4 rounded-lg bg-card border border-border shadow-xs">
               <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0 mt-0.5" />
               <div>
                 <h4 className="text-sm font-semibold text-foreground">Student Consent & Data Revocation</h4>
@@ -641,7 +592,7 @@ export const LandingPage: React.FC = () => {
       <section id="helplines" className="py-16 px-4 sm:px-6 max-w-5xl mx-auto">
         <div className="p-6 sm:p-8 rounded-lg bg-rose-500/5 border border-rose-500/20 text-center space-y-4">
           <div className="w-12 h-12 mx-auto rounded-full bg-rose-500/10 flex items-center justify-center text-rose-500">
-            <PhoneCall className="w-6 h-6" />
+            <PhoneCall className="w-6 h-6 animate-pulse-soft" />
           </div>
           <div>
             <h3 className="text-xl font-bold text-foreground">Emergency Crisis Escalation</h3>
