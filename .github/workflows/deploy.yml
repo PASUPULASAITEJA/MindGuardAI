@@ -1,0 +1,91 @@
+name: MindGuardAI Production CI/CD (us-east-1)
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+env:
+  AWS_REGION: us-east-1
+  ECR_REPOSITORY: mindguard-api
+  ECS_CLUSTER: mindguard-cluster
+  ECS_SERVICE: mindguard-api-service
+  ECS_TASK_FAMILY: mindguard-api
+
+jobs:
+  build-and-deploy:
+    name: Build, Migrate and Deploy to AWS us-east-1
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 1. Checkout repository
+        uses: actions/checkout@v4
+
+      - name: 2. Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: 3. Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: 4. Build, tag, and push Docker image
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          echo "Building image $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG in ${{ env.AWS_REGION }}..."
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -t $ECR_REGISTRY/$ECR_REPOSITORY:latest ./backend
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
+
+      - name: 5. Execute Database Migrations (One-Off ECS Fargate Task)
+        run: |
+          OVERRIDE_JSON=$(cat <<EOF
+          {
+            "containerOverrides": [
+              {
+                "name": "mindguard-api",
+                "command": ["alembic", "upgrade", "head"]
+              }
+            ]
+          }
+          EOF
+          )
+          SUBNET_ID=$(aws ec2 describe-subnets --filters "Name=tag:Name,Values=mindguard-private-subnet-1a" --region ${{ env.AWS_REGION }} --query "Subnets[0].SubnetId" --output text)
+          SG_ID=$(aws ec2 describe-security-groups --filters "Name=group-name,Values=sg-api" --region ${{ env.AWS_REGION }} --query "SecurityGroups[0].GroupId" --output text)
+
+          echo "Running migration task in Subnet: $SUBNET_ID with SG: $SG_ID..."
+          TASK_ARN=$(aws ecs run-task \
+            --cluster ${{ env.ECS_CLUSTER }} \
+            --task-definition ${{ env.ECS_TASK_FAMILY }} \
+            --launch-type FARGATE \
+            --region ${{ env.AWS_REGION }} \
+            --network-configuration "awsvpcConfiguration={subnets=[\"$SUBNET_ID\"],securityGroups=[\"$SG_ID\"],assignPublicIp=DISABLED}" \
+            --overrides "$OVERRIDE_JSON" \
+            --query "tasks[0].taskArn" --output text)
+
+          echo "Launched migration task: $TASK_ARN"
+          aws ecs wait tasks-stopped --cluster ${{ env.ECS_CLUSTER }} --tasks "$TASK_ARN" --region ${{ env.AWS_REGION }}
+          echo "Migrations applied successfully."
+
+      - name: 6. Force ECS Service Redeployment
+        run: |
+          echo "Triggering rolling deployment for service ${{ env.ECS_SERVICE }}..."
+          aws ecs update-service \
+            --cluster ${{ env.ECS_CLUSTER }} \
+            --service ${{ env.ECS_SERVICE }} \
+            --force-new-deployment \
+            --region ${{ env.AWS_REGION }}
+
+      - name: 7. Wait for Service Stability
+        run: |
+          echo "Waiting for ECS service to stabilize..."
+          aws ecs wait services-stable \
+            --cluster ${{ env.ECS_CLUSTER }} \
+            --services ${{ env.ECS_SERVICE }} \
+            --region ${{ env.AWS_REGION }}
+          echo "Service is live and healthy in ${{ env.AWS_REGION }}!"

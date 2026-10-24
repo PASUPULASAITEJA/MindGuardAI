@@ -1,0 +1,21 @@
+{
+  "BudgetLimit": {
+    "Amount": "5.0",
+    "Unit": "USD"
+  },
+  "BudgetName": "MindGuard-FreeTier-Safety-Budget",
+  "BudgetType": "COST",
+  "CostTypes": {
+    "IncludeCredit": false,
+    "IncludeDiscount": true,
+    "IncludeOtherSubscription": true,
+    "IncludeRecurring": true,
+    "IncludeRefund": false,
+    "IncludeSubscription": true,
+    "IncludeSupport": true,
+    "IncludeTax": true,
+    "IncludeUpfront": true,
+    "UseBlended": false
+  },
+  "TimeUnit": "MONTHLY"
+}

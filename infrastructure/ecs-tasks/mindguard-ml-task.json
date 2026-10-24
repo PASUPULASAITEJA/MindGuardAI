@@ -1,0 +1,36 @@
+{
+  "family": "mindguard-ml",
+  "networkMode": "awsvpc",
+  "requiresCompatibilities": ["FARGATE"],
+  "cpu": "1024",
+  "memory": "2048",
+  "executionRoleArn": "arn:aws:iam::<ACCOUNT_ID>:role/ecsTaskExecutionRole",
+  "taskRoleArn": "arn:aws:iam::<ACCOUNT_ID>:role/ecsTaskRole",
+  "containerDefinitions": [
+    {
+      "name": "mindguard-ml-worker",
+      "image": "<ACCOUNT_ID>.dkr.ecr.us-east-1.amazonaws.com/mindguard-api:latest",
+      "command": ["python", "-m", "app.ml.worker"],
+      "essential": true,
+      "environment": [
+        { "name": "ENVIRONMENT", "value": "production" },
+        { "name": "AWS_DEFAULT_REGION", "value": "us-east-1" },
+        { "name": "S3_MODEL_BUCKET", "value": "mindguard-ml-models-prod-<ACCOUNT_ID>" }
+      ],
+      "secrets": [
+        {
+          "name": "DATABASE_URL",
+          "valueFrom": "arn:aws:secretsmanager:us-east-1:<ACCOUNT_ID>:secret:mindguard/database-url"
+        }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/mindguard/ml-worker",
+          "awslogs-region": "us-east-1",
+          "awslogs-stream-prefix": "ecs"
+        }
+      }
+    }
+  ]
+}
