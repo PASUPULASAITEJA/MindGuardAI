@@ -201,7 +201,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     title={isCollapsed ? item.label : undefined}
                     className={({ isActive }) =>
                       cn(
-                        "flex items-center gap-2.5 py-2 rounded-md text-xs font-medium transition-colors",
+                        "flex items-center gap-2.5 py-2 rounded-md text-xs font-medium transition-all duration-150",
                         isCollapsed ? "justify-center px-0" : "px-2.5",
                         isActive
                           ? "border-l-2 border-primary bg-primary/10 text-primary font-semibold"
