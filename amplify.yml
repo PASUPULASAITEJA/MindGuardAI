@@ -3,14 +3,17 @@ frontend:
   phases:
     preBuild:
       commands:
-        - cd frontend && npm ci
+        - nvm use 20 2>/dev/null || nvm use 18 2>/dev/null || true
+        - if [ -d "frontend" ]; then cd frontend; fi
+        - npm ci
     build:
       commands:
-        - cd frontend && npm run build
+        - if [ -d "frontend" ]; then cd frontend; fi
+        - npm run build
   artifacts:
-    baseDirectory: frontend/dist
+    baseDirectory: dist
     files:
       - '**/*'
   cache:
     paths:
-      - frontend/node_modules/**/*
+      - node_modules/**/*
