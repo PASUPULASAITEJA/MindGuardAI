@@ -12,10 +12,10 @@ import {
   EyeOff,
   Loader2,
   Brain,
-  Shield,
-  Heart,
-  PhoneCall,
+  ShieldCheck,
   Sparkles,
+  Lock,
+  PhoneCall,
 } from "lucide-react";
 import ThemeToggle from "@/components/layouts/ThemeToggle";
 
@@ -39,7 +39,6 @@ export const Login: React.FC = () => {
     register,
     handleSubmit,
     setValue,
-    watch,
     formState: { errors },
   } = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -49,9 +48,6 @@ export const Login: React.FC = () => {
       password: "",
     },
   });
-
-  const emailValue = watch("email");
-  const passwordValue = watch("password");
 
   const onSubmit = async (data: LoginFormValues) => {
     setIsSubmitting(true);
@@ -90,260 +86,243 @@ export const Login: React.FC = () => {
     setValue("password", pass, { shouldValidate: true });
   };
 
+  const handleDemoNav = (path: string, email: string) => {
+    setDemoCredentials(email, "Student@123");
+    navigate(path);
+  };
+
   return (
-    <div className="min-h-screen w-full flex bg-background text-foreground font-sans antialiased transition-colors duration-200">
-      {/* LEFT PANEL (hidden on mobile, w-1/2, bg-primary text-primary-foreground) */}
-      <div className="hidden md:flex md:w-1/2 relative bg-gradient-to-b from-primary to-primary/80 text-primary-foreground p-10 lg:p-14 flex-col justify-between overflow-hidden shadow-2xl">
-        {/* Subtle decorative background blur */}
-        <div className="absolute -top-24 -left-24 w-96 h-96 bg-white/10 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute -bottom-24 -right-24 w-96 h-96 bg-black/10 rounded-full blur-3xl pointer-events-none" />
-
-        {/* Top: MindGuardAI logo + name */}
-        <div className="relative z-10 flex items-center gap-3">
-          <div className="w-10 h-10 rounded-lg bg-white/15 backdrop-blur-sm border border-white/20 flex items-center justify-center text-white shadow-sm">
-            <Brain className="w-6 h-6" />
-          </div>
-          <div>
-            <span className="font-extrabold text-xl tracking-tight text-white block">
-              MindGuardAI
-            </span>
-            <span className="text-[11px] font-medium text-white/80 uppercase tracking-wider block">
-              Higher Education Wellbeing
-            </span>
-          </div>
-        </div>
-
-        {/* Center: Quote + 3 bullet points with shield/heart/brain icons */}
-        <div className="relative z-10 space-y-8 max-w-md my-auto py-8">
-          <div className="space-y-3">
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/15 backdrop-blur-sm border border-white/20 text-xs font-semibold text-white">
-              <Sparkles className="w-3.5 h-3.5" />
-              <span>Campus Wellness Intelligence</span>
+    <div className="min-h-screen w-full flex bg-background text-foreground font-sans antialiased">
+      {/* LEFT PANEL — hidden below lg, lg:flex, w-1/2 */}
+      <div className="hidden lg:flex w-1/2 bg-primary flex-col justify-between p-12 text-white relative select-none">
+        {/* TOP */}
+        <div>
+          {/* Logo */}
+          <Link to="/" className="inline-flex items-center gap-2.5 group">
+            <div className="w-9 h-9 rounded-xl bg-white/15 backdrop-blur-sm border border-white/20 flex items-center justify-center text-white shadow-sm transition-transform group-hover:scale-105">
+              <Brain className="w-5 h-5 text-white" />
             </div>
-            <blockquote className="text-2xl lg:text-3xl font-extrabold leading-snug text-white">
-              &ldquo;Your wellbeing matters. MindGuardAI is here before you reach out.&rdquo;
-            </blockquote>
+            <div className="flex items-center gap-1 font-extrabold text-xl tracking-tight text-white">
+              <span>MindGuard</span>
+              <span className="text-white/90">AI</span>
+            </div>
+          </Link>
+
+          {/* Headline & Body */}
+          <div className="mt-14 max-w-md">
+            <h2 className="text-3xl font-extrabold text-white leading-snug">
+              Protecting student wellbeing — before crisis hits.
+            </h2>
+            <p className="text-sm text-white/70 mt-3 max-w-xs leading-relaxed">
+              MindGuardAI detects burnout early using emotion NLP, sleep analysis, and validated PHQ-9 & GAD-7 screeners.
+            </p>
           </div>
 
-          <div className="space-y-4 pt-2">
+          {/* MIDDLE — 3 bullet points */}
+          <div className="mt-10 space-y-5">
             <div className="flex items-start gap-3">
-              <div className="w-8 h-8 rounded-lg bg-white/15 flex items-center justify-center shrink-0 mt-0.5 text-white">
-                <Shield className="w-4 h-4" />
+              <div className="rounded-xl bg-white/10 p-2 w-9 h-9 flex items-center justify-center shrink-0">
+                <ShieldCheck className="w-5 h-5 text-white" />
               </div>
-              <div>
-                <p className="text-sm font-bold text-white">Zero-Keystroke Privacy</p>
-                <p className="text-xs text-white/80 mt-0.5">
-                  Full cryptographic client anonymity with strictly zero keystroke or screen monitoring.
-                </p>
-              </div>
+              <span className="text-sm text-white/85 font-medium self-center">
+                PHQ-9 & GAD-7 validated screeners
+              </span>
             </div>
 
             <div className="flex items-start gap-3">
-              <div className="w-8 h-8 rounded-lg bg-white/15 flex items-center justify-center shrink-0 mt-0.5 text-white">
-                <Brain className="w-4 h-4" />
+              <div className="rounded-xl bg-white/10 p-2 w-9 h-9 flex items-center justify-center shrink-0">
+                <Sparkles className="w-5 h-5 text-white" />
               </div>
-              <div>
-                <p className="text-sm font-bold text-white">Explainable Clinical AI</p>
-                <p className="text-xs text-white/80 mt-0.5">
-                  Validated psychometric screeners (PHQ-9/GAD-7) and SHAP factor attribution.
-                </p>
-              </div>
+              <span className="text-sm text-white/85 font-medium self-center">
+                SHAP explainable risk scores
+              </span>
             </div>
 
             <div className="flex items-start gap-3">
-              <div className="w-8 h-8 rounded-lg bg-white/15 flex items-center justify-center shrink-0 mt-0.5 text-white">
-                <Heart className="w-4 h-4" />
+              <div className="rounded-xl bg-white/10 p-2 w-9 h-9 flex items-center justify-center shrink-0">
+                <Lock className="w-5 h-5 text-white" />
               </div>
-              <div>
-                <p className="text-sm font-bold text-white">Compassionate Triage Pathway</p>
-                <p className="text-xs text-white/80 mt-0.5">
-                  Direct connection to university counselors before burnout becomes a crisis.
-                </p>
-              </div>
+              <span className="text-sm text-white/85 font-medium self-center">
+                Zero keystroke surveillance
+              </span>
             </div>
           </div>
         </div>
 
-        {/* Bottom: 24/7 Crisis Support Available with PhoneCall icon */}
-        <div className="relative z-10 pt-4 border-t border-white/20 flex items-center justify-between text-xs text-white/90">
-          <div className="flex items-center gap-2">
-            <PhoneCall className="w-4 h-4 text-white" />
-            <span className="font-semibold">24/7 Crisis Support Available</span>
-          </div>
-          <span className="font-mono text-[11px] bg-white/15 px-2.5 py-0.5 rounded-full font-medium">
-            Tele-MANAS: 14416
-          </span>
+        {/* BOTTOM */}
+        <div className="mt-auto pt-8 border-t border-white/20 flex items-center gap-2 text-xs text-white/55">
+          <PhoneCall className="w-4 h-4 text-white/60 shrink-0 inline" />
+          <span>24/7 Crisis Support &middot; Tele-MANAS: 14416</span>
         </div>
       </div>
 
-      {/* RIGHT PANEL (w-full md:w-1/2, bg-background) */}
-      <div className="w-full md:w-1/2 flex flex-col justify-between p-6 sm:p-10 relative">
-        {/* Top bar with ThemeToggle in top-right corner of right panel */}
-        <div className="w-full flex items-center justify-between">
-          <Link
-            to="/"
-            className="text-xs font-semibold text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1.5"
-          >
-            ← Back to Home
-          </Link>
+      {/* RIGHT PANEL — flex-1, flex flex-col items-center justify-center min-h-screen bg-background px-8 */}
+      <div className="flex-1 flex flex-col items-center justify-center min-h-screen bg-background px-6 sm:px-8 relative">
+        {/* ThemeToggle absolute top-4 right-4 */}
+        <div className="absolute top-4 right-4 z-20">
           <ThemeToggle />
         </div>
 
-        {/* Centered form with max-w-sm */}
-        <div className="w-full max-w-sm mx-auto my-auto py-8 animate-fade-in-up">
-          <div className="text-center sm:text-left space-y-1.5 mb-6">
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-foreground tracking-tight">
+        {/* Mobile logo (lg:hidden) */}
+        <Link to="/" className="lg:hidden flex items-center gap-2 mb-8 group">
+          <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center text-primary-foreground shadow-sm shadow-primary/25">
+            <Brain className="w-5 h-5" />
+          </div>
+          <div className="flex items-center gap-1 font-bold text-lg tracking-tight text-foreground">
+            <span>MindGuard</span>
+            <span className="text-primary">AI</span>
+          </div>
+        </Link>
+
+        {/* Form wrapper */}
+        <div className="w-full max-w-sm space-y-6">
+          {/* Header */}
+          <div className="space-y-1 text-center sm:text-left">
+            <h1 className="text-2xl font-extrabold tracking-tight text-foreground">
               Welcome back
             </h1>
-            <p className="text-xs sm:text-sm text-muted-foreground">
+            <p className="text-sm text-muted-foreground mt-1">
               Sign in with your university email
             </p>
           </div>
 
+          {/* Form */}
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            {/* Email Field with Floating Label feel */}
-            <div className="relative">
+            {/* Email field */}
+            <div className="space-y-1.5">
               <label
                 htmlFor="email"
-                className={`text-xs font-medium transition-all ${
-                  emailValue ? "text-primary font-semibold" : "text-muted-foreground"
-                } block mb-1`}
+                className="text-xs font-semibold text-foreground block"
               >
-                Institutional Email or Username
+                University Email
               </label>
               <Input
                 id="email"
-                type="text"
+                type="email"
                 autoComplete="email"
-                placeholder="student@campus.edu or roll number"
-                className={`h-11 rounded-lg ${errors.email ? "border-destructive focus-visible:ring-destructive" : ""}`}
+                placeholder="you@university.edu"
+                className="rounded-xl h-10 text-sm focus:ring-2 focus:ring-primary/30"
                 {...register("email")}
               />
               {errors.email && (
-                <p className="text-[11px] text-destructive mt-1 font-medium">
+                <p className="text-xs text-destructive font-medium">
                   {errors.email.message}
                 </p>
               )}
             </div>
 
-            {/* Password Field with Floating Label feel + Show/Hide Toggle */}
-            <div className="relative">
-              <div className="flex items-center justify-between mb-1">
-                <label
-                  htmlFor="password"
-                  className={`text-xs font-medium transition-all ${
-                    passwordValue ? "text-primary font-semibold" : "text-muted-foreground"
-                  }`}
-                >
-                  Password
-                </label>
-                <Link
-                  to="/forgot-password"
-                  className="text-[11px] text-primary hover:underline font-medium"
-                >
-                  Forgot password?
-                </Link>
-              </div>
+            {/* Password field */}
+            <div className="space-y-1.5">
+              <label
+                htmlFor="password"
+                className="text-xs font-semibold text-foreground block"
+              >
+                Password
+              </label>
               <div className="relative">
                 <Input
                   id="password"
                   type={showPassword ? "text" : "password"}
                   autoComplete="current-password"
                   placeholder="••••••••"
-                  className={`h-11 rounded-lg pr-10 ${
-                    errors.password ? "border-destructive focus-visible:ring-destructive" : ""
-                  }`}
+                  className="rounded-xl h-10 text-sm pr-10 focus:ring-2 focus:ring-primary/30"
                   {...register("password")}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground p-1 rounded-md transition-colors"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground p-1 transition-colors"
                   aria-label={showPassword ? "Hide password" : "Show password"}
                 >
-                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  {showPassword ? (
+                    <EyeOff className="w-4 h-4 text-muted-foreground" />
+                  ) : (
+                    <Eye className="w-4 h-4 text-muted-foreground" />
+                  )}
                 </button>
               </div>
               {errors.password && (
-                <p className="text-[11px] text-destructive mt-1 font-medium">
+                <p className="text-xs text-destructive font-medium">
                   {errors.password.message}
                 </p>
               )}
             </div>
 
-            {/* Remember Me */}
-            <div className="flex items-center space-x-2 pt-1">
-              <input
-                id="remember"
-                type="checkbox"
-                checked={rememberMe}
-                onChange={(e) => setRememberMe(e.target.checked)}
-                className="w-4 h-4 rounded border-border text-primary focus:ring-primary accent-primary"
-              />
-              <label htmlFor="remember" className="text-xs text-muted-foreground select-none cursor-pointer">
-                Keep me signed in on this device
+            {/* Row: Remember me + Forgot password? */}
+            <div className="flex justify-between items-center pt-0.5">
+              <label className="flex items-center gap-2 cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  checked={rememberMe}
+                  onChange={(e) => setRememberMe(e.target.checked)}
+                  className="w-4 h-4 rounded border-border text-primary focus:ring-primary accent-primary"
+                />
+                <span className="text-xs text-muted-foreground">Remember me</span>
               </label>
+              <Link
+                to="/forgot-password"
+                className="text-xs text-primary font-medium hover:underline"
+              >
+                Forgot password?
+              </Link>
             </div>
 
-            {/* Submit Button full width, bg-primary */}
+            {/* Submit button */}
             <Button
               type="submit"
               disabled={isSubmitting}
-              className="w-full h-11 bg-primary text-primary-foreground hover:bg-primary/90 font-semibold rounded-lg shadow-sm transition-all"
+              className="w-full h-10 rounded-xl bg-primary text-primary-foreground text-sm font-semibold hover:bg-primary/90 transition-all shadow-sm"
             >
               {isSubmitting ? (
-                <span className="flex items-center justify-center gap-2">
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  <span>Verifying Credentials...</span>
-                </span>
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                  Signing in...
+                </>
               ) : (
                 "Sign In"
               )}
             </Button>
           </form>
 
-          {/* Quick Persona Demo Fill */}
-          <div className="mt-6 pt-5 border-t border-border">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground block text-center mb-2.5">
-              Quick Test Personas
-            </span>
-            <div className="grid grid-cols-3 gap-2">
-              <button
-                type="button"
-                onClick={() => setDemoCredentials("student1@mindguard.edu", "Student@123")}
-                className="px-2 py-1.5 rounded-lg border border-border bg-secondary/50 hover:bg-secondary text-[11px] font-medium text-foreground transition-colors text-center"
-              >
-                Student
-              </button>
-              <button
-                type="button"
-                onClick={() => setDemoCredentials("counselor1@mindguard.edu", "Counselor@123")}
-                className="px-2 py-1.5 rounded-lg border border-border bg-secondary/50 hover:bg-secondary text-[11px] font-medium text-foreground transition-colors text-center"
-              >
-                Counselor
-              </button>
-              <button
-                type="button"
-                onClick={() => setDemoCredentials("admin@mindguard.edu", "Admin@123")}
-                className="px-2 py-1.5 rounded-lg border border-border bg-secondary/50 hover:bg-secondary text-[11px] font-medium text-foreground transition-colors text-center"
-              >
-                Admin
-              </button>
-            </div>
+          {/* Divider */}
+          <div className="relative flex items-center gap-3 my-2">
+            <div className="flex-1 border-t border-border" />
+            <span className="text-xs text-muted-foreground">or continue as</span>
+            <div className="flex-1 border-t border-border" />
           </div>
 
-          {/* Link to Register at bottom */}
-          <p className="text-center text-xs text-muted-foreground mt-6">
+          {/* 3 demo role buttons */}
+          <div className="flex gap-2 justify-center">
+            <button
+              type="button"
+              onClick={() => handleDemoNav("/student/dashboard", "student1@mindguard.edu")}
+              className="px-3 py-1.5 rounded-lg border border-border text-xs font-medium hover:bg-secondary transition-colors"
+            >
+              Student Demo
+            </button>
+            <button
+              type="button"
+              onClick={() => handleDemoNav("/counselor/dashboard", "counselor1@mindguard.edu")}
+              className="px-3 py-1.5 rounded-lg border border-border text-xs font-medium hover:bg-secondary transition-colors"
+            >
+              Counsellor Demo
+            </button>
+            <button
+              type="button"
+              onClick={() => handleDemoNav("/admin/dashboard", "admin@mindguard.edu")}
+              className="px-3 py-1.5 rounded-lg border border-border text-xs font-medium hover:bg-secondary transition-colors"
+            >
+              Admin Demo
+            </button>
+          </div>
+
+          {/* Bottom register link */}
+          <p className="text-xs text-muted-foreground text-center mt-4">
             Don&apos;t have an account?{" "}
-            <Link to="/register" className="font-semibold text-primary hover:underline">
-              Register here
+            <Link to="/register" className="text-primary font-semibold hover:underline">
+              Register &rarr;
             </Link>
           </p>
-        </div>
-
-        {/* Footer info */}
-        <div className="text-center text-[11px] text-muted-foreground">
-          MindGuardAI • Encrypted & Protected by Institutional FERPA Policy
         </div>
       </div>
     </div>

@@ -15,7 +15,7 @@ import { ConsentSettingsManager } from "@/components/ConsentSettingsManager";
 
 export const Settings: React.FC = () => {
   const { user } = useAuth();
-  const { theme, setTheme } = useTheme();
+  const { theme, setTheme, themeMode, setThemeMode } = useTheme();
   const { toast } = useToast();
 
   // Profile fields state
@@ -269,39 +269,63 @@ export const Settings: React.FC = () => {
             <CardHeader className="pb-4">
               <CardTitle className="text-foreground text-sm md:text-base font-bold flex items-center gap-2">
                 {theme === "dark" ? (
-                  <Moon className="h-4.5 w-4.5 text-primary" />
+                  <Moon className="h-4.5 w-4.5 text-indigo-400" />
                 ) : (
-                  <Sun className="h-4.5 w-4.5 text-primary" />
+                  <Sun className="h-4.5 w-4.5 text-amber-500" />
                 )}
-                Appearance
+                Circadian Mood & Appearance
               </CardTitle>
-              <CardDescription className="text-xs md:text-sm">Select your dashboard theme</CardDescription>
+              <CardDescription className="text-xs md:text-sm">
+                Adapt visual palette for daytime focus or calming nighttime eye rest
+              </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-3 gap-2">
                 <button
+                  type="button"
                   onClick={() => setTheme("light")}
-                  className={`flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl border text-xs md:text-sm font-bold transition-all duration-200 ${
+                  className={`flex flex-col sm:flex-row items-center justify-center gap-1.5 py-2.5 px-2 rounded-xl border text-xs font-bold transition-all duration-200 ${
                     theme === "light"
-                      ? "border-primary bg-primary/5 text-primary"
+                      ? "border-amber-500/50 bg-amber-500/10 text-amber-600 dark:text-amber-400 shadow-xs"
                       : "border-border/70 text-muted-foreground hover:bg-accent/40"
                   }`}
                 >
-                  <Sun className="h-4 w-4" />
-                  Light
+                  <Sun className="h-4 w-4 text-amber-500 shrink-0" />
+                  <span>Day Mood</span>
                 </button>
                 <button
+                  type="button"
                   onClick={() => setTheme("dark")}
-                  className={`flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl border text-xs md:text-sm font-bold transition-all duration-200 ${
+                  className={`flex flex-col sm:flex-row items-center justify-center gap-1.5 py-2.5 px-2 rounded-xl border text-xs font-bold transition-all duration-200 ${
                     theme === "dark"
-                      ? "border-primary bg-primary/5 text-primary"
+                      ? "border-indigo-500/50 bg-indigo-500/10 text-indigo-400 shadow-xs"
                       : "border-border/70 text-muted-foreground hover:bg-accent/40"
                   }`}
                 >
-                  <Moon className="h-4 w-4" />
-                  Dark
+                  <Moon className="h-4 w-4 text-indigo-400 shrink-0" />
+                  <span>Night Mood</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setThemeMode("circadian")}
+                  className={`flex flex-col sm:flex-row items-center justify-center gap-1.5 py-2.5 px-2 rounded-xl border text-xs font-bold transition-all duration-200 ${
+                    themeMode === "circadian"
+                      ? "border-primary/50 bg-primary/10 text-primary shadow-xs"
+                      : "border-border/70 text-muted-foreground hover:bg-accent/40"
+                  }`}
+                  title="Automatically shifts from Day Mood (06:00-18:00) to Night Mood (18:00-06:00)"
+                >
+                  <span className="text-sm">⏰</span>
+                  <span>Circadian</span>
                 </button>
               </div>
+              <p className="text-[11px] text-muted-foreground mt-2.5 leading-relaxed">
+                {themeMode === "circadian"
+                  ? "Circadian Auto Mode active: syncing with local time (Day Mood 6 AM - 6 PM, Night Mood 6 PM - 6 AM)."
+                  : theme === "dark"
+                  ? "Night Mood active: calm, sleep-friendly deep palette to minimize screen glare."
+                  : "Day Mood active: crisp, bright daylight contrast for active university work."}
+              </p>
             </CardContent>
           </Card>
         </div>

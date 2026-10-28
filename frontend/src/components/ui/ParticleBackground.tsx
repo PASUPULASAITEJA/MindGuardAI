@@ -14,7 +14,7 @@ interface Particle {
 
 const PARTICLE_COUNT = 55;
 const CONNECTION_DISTANCE = 130;
-const DOT_OPACITY = 0.35;
+const DOT_OPACITY = 0.30;
 const LINE_WIDTH = 0.7;
 
 export function ParticleBackground({ className = "" }: ParticleBackgroundProps) {
@@ -102,7 +102,7 @@ export function ParticleBackground({ className = "" }: ParticleBackgroundProps) 
           const dist = Math.sqrt(dx * dx + dy * dy);
 
           if (dist < CONNECTION_DISTANCE) {
-            const lineOpacity = (1 - dist / CONNECTION_DISTANCE) * 0.12;
+            const lineOpacity = (1 - dist / CONNECTION_DISTANCE) * 0.10;
             ctx.beginPath();
             ctx.moveTo(particles[i].x, particles[i].y);
             ctx.lineTo(particles[j].x, particles[j].y);

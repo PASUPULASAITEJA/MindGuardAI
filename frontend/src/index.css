@@ -70,8 +70,13 @@
   }
 
   body {
-    @apply bg-background text-foreground transition-colors duration-150;
+    @apply bg-background text-foreground transition-colors duration-200;
     font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  }
+
+  /* Smooth Day/Night mood transitions across common container surfaces */
+  .bg-card, .bg-background, .bg-secondary, header, aside, .wellness-card {
+    transition: background-color 0.25s ease, border-color 0.25s ease, color 0.2s ease, box-shadow 0.25s ease;
   }
 
   /* Custom Clean Minimal Scrollbar */
@@ -123,6 +128,20 @@
 
   .saas-table tr:hover td {
     @apply bg-secondary/30;
+  }
+
+  /* Status Badges */
+  .badge-stable {
+    @apply bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20;
+  }
+  .badge-moderate {
+    @apply bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20;
+  }
+  .badge-elevated {
+    @apply bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20;
+  }
+  .badge-neutral {
+    @apply bg-secondary text-muted-foreground border-border;
   }
 }
 

@@ -105,8 +105,28 @@ async def verify_student_consent(db: AsyncSession, student_id: UUID) -> bool:
     res = await db.execute(stmt)
     consent = res.scalars().first()
 
-    if not consent or consent.status != ConsentStatus.GRANTED:
-        if consent and consent.status == ConsentStatus.REVOKED:
+    if not consent:
+        from app.models.users import User
+        from datetime import datetime, timezone
+        user_res = await db.execute(select(User).where(User.id == student_id))
+        user_obj = user_res.scalars().first()
+        if user_obj and user_obj.consent_counselor_sharing:
+            auto_consent = Consent(
+                student_id=student_id,
+                consent_type="COUNSELOR_DATA_ACCESS",
+                status=ConsentStatus.GRANTED,
+                granted_at=datetime.now(timezone.utc)
+            )
+            db.add(auto_consent)
+            await db.commit()
+            return True
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Consent required: Active consent (GRANTED) is required to access or process this data."
+        )
+
+    if consent.status != ConsentStatus.GRANTED:
+        if consent.status == ConsentStatus.REVOKED:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="Consent revoked: Student has not granted access to their wellness data."

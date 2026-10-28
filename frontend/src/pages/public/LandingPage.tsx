@@ -25,6 +25,7 @@ import { useCountUp } from "@/hooks/useCountUp";
 import { ParticleBackground } from "@/components/ui/ParticleBackground";
 import { BreathingBlob } from "@/components/ui/BreathingBlob";
 import { GlowOrb } from "@/components/ui/GlowOrb";
+import { BrainAnimation } from "@/components/ui/BrainAnimation";
 
 interface FAQItem {
   question: string;
@@ -168,7 +169,7 @@ export const LandingPage: React.FC = () => {
       {/* ── HERO SECTION ── */}
       <section className="hero-gradient relative min-h-screen flex items-center border-b border-border overflow-hidden">
         {/* Particle network fills entire hero */}
-        <ParticleBackground className="opacity-60" />
+        <ParticleBackground className="opacity-50" />
 
         {/* Glow orbs — decorative depth */}
         <GlowOrb
@@ -239,121 +240,40 @@ export const LandingPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Right: floating mockup card + blob behind it */}
-          <div className="relative fade-up-2 flex justify-center lg:justify-end">
-            <BreathingBlob
-              size={350}
-              variant="primary"
-              className="absolute -z-10 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-25"
-            />
-            <div className="animate-float w-full max-w-sm">
-              {/* fake dashboard mockup card */}
-              <div className="bg-card border border-border rounded-2xl shadow-2xl p-5 mx-auto card-hover space-y-5">
-                {/* Card Header */}
-                <div className="flex items-center justify-between pb-3 border-b border-border">
-                  <div className="flex items-center gap-2.5">
-                    <div className="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center font-bold text-sm">
-                      <Smile className="w-5 h-5 text-emerald-500" />
-                    </div>
-                    <div>
-                      <h3 className="text-sm font-semibold text-foreground">Student Wellness Overview</h3>
-                      <p className="text-[11px] text-muted-foreground">Semester Telemetry • Active</p>
-                    </div>
-                  </div>
-                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
-                    Stable
-                  </span>
-                </div>
+          {/* RIGHT COLUMN — 3D Brain */}
+          <div className="hidden lg:flex items-center justify-center relative fade-up-2">
+            {/* Soft glow ring behind brain */}
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+              <div className="w-72 h-72 rounded-full bg-primary/5 dark:bg-primary/10 blur-3xl animate-pulse" />
+            </div>
 
-                {/* Main Wellness Score Metric */}
-                <div className="flex items-center justify-between p-4 rounded-xl bg-secondary/50 border border-border">
-                  <div>
-                    <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider block">
-                      Composite Wellness Index
-                    </span>
-                    <div className="flex items-baseline gap-1 mt-1">
-                      <span className="text-4xl font-extrabold text-emerald-500">78</span>
-                      <span className="text-xs text-muted-foreground font-semibold">/ 100</span>
-                    </div>
-                    <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-medium mt-1 inline-flex items-center gap-1">
-                      ↑ +4% recovery from last check-in
-                    </span>
-                  </div>
+            {/* The brain animation */}
+            <BrainAnimation className="relative z-10" />
 
-                  {/* SVG Radial Gauge */}
-                  <div className="relative w-16 h-16 flex items-center justify-center">
-                    <svg className="w-full h-full -rotate-90" viewBox="0 0 36 36">
-                      <path
-                        className="text-border"
-                        strokeWidth="3.5"
-                        stroke="currentColor"
-                        fill="none"
-                        d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                      />
-                      <path
-                        className="text-emerald-500 transition-all duration-1000 ease-out"
-                        strokeDasharray="78, 100"
-                        strokeWidth="3.5"
-                        strokeLinecap="round"
-                        stroke="currentColor"
-                        fill="none"
-                        d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                      />
-                    </svg>
-                    <span className="absolute text-[11px] font-bold text-foreground">78%</span>
-                  </div>
-                </div>
+            {/* Small floating stat cards around the brain */}
 
-                {/* Fake Mood Chart Line (SVG Sparkline) */}
-                <div className="space-y-1.5">
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="font-semibold text-foreground">14-Day Trajectory</span>
-                    <span className="text-muted-foreground text-[10px]">Circadian Aligned</span>
-                  </div>
-                  <div className="h-16 w-full rounded-lg bg-secondary/30 border border-border/80 p-2 flex items-end">
-                    <svg className="w-full h-full overflow-visible" viewBox="0 0 100 40" preserveAspectRatio="none">
-                      <defs>
-                        <linearGradient id="chartGradient" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.3} />
-                          <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0.0} />
-                        </linearGradient>
-                      </defs>
-                      <path
-                        d="M0,32 Q15,35 30,22 T60,18 T85,10 T100,8 L100,40 L0,40 Z"
-                        fill="url(#chartGradient)"
-                      />
-                      <path
-                        d="M0,32 Q15,35 30,22 T60,18 T85,10 T100,8"
-                        fill="none"
-                        stroke="hsl(var(--primary))"
-                        strokeWidth="2.5"
-                        strokeLinecap="round"
-                      />
-                      <circle cx="30" cy="22" r="2.5" fill="hsl(var(--primary))" />
-                      <circle cx="60" cy="18" r="2.5" fill="hsl(var(--primary))" />
-                      <circle cx="100" cy="8" r="3" fill="#10B981" />
-                    </svg>
-                  </div>
-                </div>
+            {/* Top-left card */}
+            <div className="absolute top-8 -left-4 bg-card border border-border rounded-xl shadow-lg px-3 py-2 text-xs font-medium fade-up-3 card-hover z-20">
+              <p className="text-muted-foreground">Wellness Score</p>
+              <p className="text-2xl font-extrabold text-primary">78</p>
+            </div>
 
-                {/* 3 Stat Badges */}
-                <div className="grid grid-cols-3 gap-2 pt-1">
-                  <div className="p-2 rounded-lg bg-secondary/40 border border-border text-center">
-                    <span className="text-[10px] text-muted-foreground block font-medium">Risk Status</span>
-                    <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400">LOW</span>
-                  </div>
-                  <div className="p-2 rounded-lg bg-secondary/40 border border-border text-center">
-                    <span className="text-[10px] text-muted-foreground block font-medium">Sleep Avg</span>
-                    <span className="text-xs font-bold text-foreground">7.4h</span>
-                  </div>
-                  <div className="p-2 rounded-lg bg-secondary/40 border border-border text-center">
-                    <span className="text-[10px] text-muted-foreground block font-medium">Streak</span>
-                    <span className="text-xs font-bold text-primary flex items-center justify-center gap-0.5">
-                      <Flame className="w-3 h-3 text-amber-500 fill-amber-500" /> 14 Days
-                    </span>
-                  </div>
-                </div>
-              </div>
+            {/* Top-right card */}
+            <div className="absolute top-12 -right-4 bg-card border border-border rounded-xl shadow-lg px-3 py-2 text-xs font-medium fade-up-3 card-hover z-20">
+              <p className="text-muted-foreground">Risk Level</p>
+              <p className="text-sm font-bold text-emerald-500">● Low</p>
+            </div>
+
+            {/* Bottom-left card */}
+            <div className="absolute bottom-12 -left-6 bg-card border border-border rounded-xl shadow-lg px-3 py-2 text-xs font-medium fade-up-4 card-hover z-20">
+              <p className="text-muted-foreground">Mood Today</p>
+              <p className="text-sm font-bold text-foreground">😊 Good</p>
+            </div>
+
+            {/* Bottom-right card */}
+            <div className="absolute bottom-8 -right-6 bg-card border border-border rounded-xl shadow-lg px-3 py-2 text-xs font-medium fade-up-4 card-hover z-20">
+              <p className="text-muted-foreground">Sleep</p>
+              <p className="text-sm font-bold text-blue-500">7.2h ↑</p>
             </div>
           </div>
         </div>

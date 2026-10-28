@@ -5,33 +5,15 @@ import ThemeToggle from "@/components/layouts/ThemeToggle";
 import { EmergencySOSModal } from "@/components/EmergencySOSModal";
 import NotificationBell from "@/components/NotificationBell";
 
-interface TopNavProps {
+export interface TopNavProps {
   title: string;
   subtitle: string;
   onMenuClick?: () => void;
 }
 
-const TopNav: React.FC<TopNavProps> = ({ title, subtitle, onMenuClick }) => {
+export const TopNav: React.FC<TopNavProps> = ({ title, subtitle, onMenuClick }) => {
   const { user } = useAuth();
   const [isSOSOpen, setIsSOSOpen] = useState(false);
-
-  // Extract initials and first name
-  const getInitials = (name?: string) => {
-    if (!name) return "MG";
-    const parts = name.trim().split(/\s+/);
-    if (parts.length >= 2) {
-      return (parts[0][0] + parts[1][0]).toUpperCase();
-    }
-    return name.slice(0, 2).toUpperCase();
-  };
-
-  const getFirstName = (name?: string) => {
-    if (!name) return "User";
-    return name.trim().split(/\s+/)[0];
-  };
-
-  const initials = getInitials(user?.full_name);
-  const firstName = getFirstName(user?.full_name);
 
   return (
     <>
@@ -48,8 +30,12 @@ const TopNav: React.FC<TopNavProps> = ({ title, subtitle, onMenuClick }) => {
               </button>
             )}
             <div>
-              <h2 className="leading-tight text-sm md:text-base font-semibold text-foreground">{title}</h2>
-              <p className="text-[11px] text-muted-foreground hidden sm:block">{subtitle}</p>
+              <h2 className="leading-tight text-sm md:text-base font-semibold text-foreground">
+                {title}
+              </h2>
+              <p className="text-[11px] text-muted-foreground hidden sm:block">
+                {subtitle}
+              </p>
             </div>
           </div>
 
@@ -57,26 +43,26 @@ const TopNav: React.FC<TopNavProps> = ({ title, subtitle, onMenuClick }) => {
             {user?.role === "STUDENT" && (
               <button
                 onClick={() => setIsSOSOpen(true)}
-                className="inline-flex items-center gap-1.5 rounded-full bg-rose-500 text-white hover:bg-rose-600 px-3 py-1.5 text-xs font-bold transition-all shadow-sm"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-rose-500 text-white text-xs font-bold hover:bg-rose-600 transition-all shadow-sm shadow-rose-500/20 hover:shadow-rose-500/30"
                 title="Immediate 24/7 Crisis Support"
               >
-                <AlertTriangle className="h-3.5 w-3.5 text-white pulse-soft" />
-                <span>Crisis Support</span>
+                <AlertTriangle className="w-3 h-3 pulse-soft" />
+                <span>Crisis</span>
               </button>
             )}
 
-            <NotificationBell />
-            <ThemeToggle />
-
-            {/* Desktop User Avatar Circle + First Name */}
-            <div className="hidden sm:flex items-center gap-2 pl-2 border-l border-border">
-              <div className="w-8 h-8 rounded-full bg-primary/20 text-primary flex items-center justify-center font-bold text-xs select-none">
-                {initials}
+            {/* User Avatar + First Name before NotificationBell */}
+            <div className="hidden sm:flex items-center gap-2 border-r border-border pr-3 mr-1">
+              <div className="w-7 h-7 rounded-full bg-primary/15 text-primary text-xs font-bold flex items-center justify-center shrink-0">
+                {user?.full_name?.slice(0, 2).toUpperCase() || "?"}
               </div>
-              <span className="text-xs font-semibold text-foreground truncate max-w-[120px]">
-                {firstName}
+              <span className="text-xs font-semibold text-foreground max-w-[90px] truncate">
+                {user?.full_name?.split(" ")[0] || "User"}
               </span>
             </div>
+
+            <NotificationBell />
+            <ThemeToggle />
           </div>
         </div>
       </header>

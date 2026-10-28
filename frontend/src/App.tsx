@@ -86,6 +86,10 @@ function App() {
                 </ProtectedRoute>
               }
             />
+            {/* Convenient Aliases */}
+            <Route path="/student/daily-check-in" element={<Navigate to="/student/check-in" replace />} />
+            <Route path="/student/chatbot" element={<Navigate to="/student/chat" replace />} />
+
             <Route
               path="/student/history"
               element={

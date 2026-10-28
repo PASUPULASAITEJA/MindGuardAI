@@ -16,8 +16,6 @@ import {
   ChevronLeft,
   ChevronRight,
   Brain,
-  Sparkles,
-  PhoneCall,
 } from "lucide-react";
 import { useAuth, UserRole } from "@/contexts/AuthContext";
 import { cn } from "@/utils/cn";
@@ -100,7 +98,7 @@ const getRoleNavSections = (role: UserRole): NavSection[] => {
   ];
 };
 
-interface SidebarProps {
+export interface SidebarProps {
   className?: string;
   onClose?: () => void;
   onCloseMobile?: () => void;
@@ -143,19 +141,22 @@ export const Sidebar: React.FC<SidebarProps> = ({
     return name.slice(0, 2).toUpperCase();
   };
 
-  const initials = getUserInitials(user?.full_name);
-
   return (
     <aside
       className={cn(
-        "h-screen flex flex-col justify-between bg-card border-r border-border transition-all duration-200 select-none z-30",
+        "flex flex-col h-full border-r border-border bg-card transition-all duration-200 select-none z-30",
         isCollapsed ? "w-14" : "w-56",
         className
       )}
     >
       {/* Top Header / Logo */}
       <div>
-        <div className={cn("h-16 flex items-center border-b border-border px-3", isCollapsed ? "justify-center" : "justify-between")}>
+        <div
+          className={cn(
+            "h-16 flex items-center border-b border-border px-3",
+            isCollapsed ? "justify-center" : "justify-between"
+          )}
+        >
           <div className="flex items-center gap-2.5 overflow-hidden">
             <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground shrink-0 shadow-xs">
               <Brain className="w-4 h-4" />
@@ -183,13 +184,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
         </div>
 
         {/* Navigation Sections */}
-        <div className="py-4 px-2 space-y-5 overflow-y-auto max-h-[calc(100vh-14rem)]">
+        <div className="py-2 px-2 space-y-1 overflow-y-auto max-h-[calc(100vh-14rem)]">
           {sections.map((sec, secIdx) => (
             <div key={secIdx} className="space-y-1">
               {!isCollapsed && (
-                <div className="px-2 pb-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                <p className="px-3 pt-5 pb-1 text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
                   {sec.title}
-                </div>
+                </p>
               )}
               {sec.items.map((item) => {
                 const IconComponent = item.icon;
@@ -200,17 +201,25 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     onClick={handleClose}
                     title={isCollapsed ? item.label : undefined}
                     className={({ isActive }) =>
-                      cn(
-                        "flex items-center gap-2.5 py-2 rounded-md text-xs font-medium transition-all duration-150",
-                        isCollapsed ? "justify-center px-0" : "px-2.5",
-                        isActive
-                          ? "border-l-2 border-primary bg-primary/10 text-primary font-semibold"
-                          : "text-muted-foreground hover:text-foreground hover:bg-secondary/80"
-                      )
+                      isActive
+                        ? cn(
+                            "flex items-center rounded-lg text-xs font-semibold transition-all bg-primary/10 text-primary border-l-2 border-primary",
+                            isCollapsed
+                              ? "justify-center p-2"
+                              : "gap-2.5 px-3 py-2 ml-0 pl-[10px]"
+                          )
+                        : cn(
+                            "flex items-center rounded-lg text-xs font-medium transition-colors text-muted-foreground hover:text-foreground hover:bg-secondary/80",
+                            isCollapsed ? "justify-center p-2" : "gap-2.5 px-3 py-2"
+                          )
                     }
                   >
-                    <IconComponent className={cn("w-4 h-4 shrink-0")} />
-                    {!isCollapsed && <span className="truncate">{item.label}</span>}
+                    <IconComponent className="w-4 h-4 shrink-0" />
+                    {isCollapsed ? (
+                      <span className="sr-only">{item.label}</span>
+                    ) : (
+                      <span className="truncate">{item.label}</span>
+                    )}
                   </NavLink>
                 );
               })}
@@ -220,33 +229,23 @@ export const Sidebar: React.FC<SidebarProps> = ({
       </div>
 
       {/* Bottom Area: User Footer & Collapse Toggle */}
-      <div className="border-t border-border p-2 space-y-2">
+      <div className="border-t border-border p-2 space-y-1 mt-auto">
         {/* User profile info */}
-        <div
-          className={cn(
-            "flex items-center gap-2.5 p-1.5 rounded-lg bg-secondary/40 border border-border/60",
-            isCollapsed ? "justify-center" : "justify-between"
-          )}
-          title={isCollapsed ? `${user?.full_name || "User"} (${role})` : undefined}
-        >
-          <div className="flex items-center gap-2 min-w-0">
-            {/* Avatar circle (first 2 letters of name, bg-primary/20 text-primary) */}
-            <div className="w-8 h-8 rounded-full bg-primary/20 text-primary flex items-center justify-center font-bold text-xs shrink-0">
-              {initials}
-            </div>
-            {!isCollapsed && (
-              <div className="flex flex-col min-w-0">
-                <span className="text-xs font-semibold text-foreground truncate leading-tight">
-                  {user?.full_name || "Active User"}
-                </span>
-                <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
-                  {role}
-                </span>
+        {!isCollapsed ? (
+          <div className="flex items-center justify-between gap-2.5 px-3 py-2">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className="w-7 h-7 rounded-full bg-primary/15 text-primary text-xs font-bold flex items-center justify-center shrink-0">
+                {getUserInitials(user?.full_name)}
               </div>
-            )}
-          </div>
-
-          {!isCollapsed && (
+              <div className="min-w-0">
+                <p className="text-xs font-semibold text-foreground truncate max-w-[110px]">
+                  {user?.full_name || "User"}
+                </p>
+                <p className="text-[10px] text-muted-foreground capitalize">
+                  {user?.role?.toLowerCase() || "student"}
+                </p>
+              </div>
+            </div>
             <button
               onClick={() => logout()}
               className="p-1 rounded-md text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
@@ -255,25 +254,32 @@ export const Sidebar: React.FC<SidebarProps> = ({
             >
               <LogOut className="w-3.5 h-3.5" />
             </button>
-          )}
-        </div>
+          </div>
+        ) : (
+          <div
+            className="flex items-center justify-center py-2"
+            title={`${user?.full_name || "User"} (${user?.role || "STUDENT"})`}
+          >
+            <div className="w-7 h-7 rounded-full bg-primary/15 text-primary text-xs font-bold flex items-center justify-center shrink-0">
+              {getUserInitials(user?.full_name)}
+            </div>
+          </div>
+        )}
 
-        {/* Collapsible Toggle button at bottom of sidebar: ChevronLeft/ChevronRight */}
+        {/* Collapse toggle button at very bottom */}
         <button
           onClick={handleToggle}
-          className={cn(
-            "w-full flex items-center justify-center py-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors text-xs font-medium"
-          )}
+          className="w-full flex items-center justify-center p-2 mt-1 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary/80 transition-colors text-xs gap-1.5 font-medium"
           aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
           title={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
         >
           {isCollapsed ? (
-            <ChevronRight className="w-4 h-4" />
+            <ChevronRight className="w-3.5 h-3.5" />
           ) : (
-            <div className="flex items-center gap-1.5">
-              <ChevronLeft className="w-4 h-4" />
-              <span className="text-[11px]">Collapse</span>
-            </div>
+            <>
+              <ChevronLeft className="w-3.5 h-3.5" />
+              <span>Collapse</span>
+            </>
           )}
         </button>
       </div>

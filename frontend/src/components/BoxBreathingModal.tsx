@@ -3,32 +3,48 @@ import { X, Wind } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "motion/react";
 import { modalBackdropVariants, modalPanelVariants } from "@/utils/motion";
-import { BreathingBlob } from "@/components/ui/BreathingBlob";
+import { cn } from "@/utils/cn";
 
 interface BoxBreathingModalProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
+type Phase = "inhale" | "hold" | "exhale" | "holdOut";
+
+const PHASE_LABELS: Record<Phase, string> = {
+  inhale: "Inhale",
+  hold: "Hold",
+  exhale: "Exhale",
+  holdOut: "Hold",
+};
+
+const PHASE_INSTRUCTIONS: Record<Phase, string> = {
+  inhale: "Slowly breathe in through your nose...",
+  hold: "Gently hold your breath, relax your shoulders...",
+  exhale: "Slowly breathe out through your mouth...",
+  holdOut: "Pause in stillness before the next breath...",
+};
+
 export const BoxBreathingModal: React.FC<BoxBreathingModalProps> = ({ isOpen, onClose }) => {
-  const [phase, setPhase] = useState<"Inhale" | "Hold" | "Exhale" | "Hold After">("Inhale");
-  const [seconds, setSeconds] = useState(4);
+  const [phase, setPhase] = useState<Phase>("inhale");
+  const [countdown, setCountdown] = useState(4);
 
   useEffect(() => {
     if (!isOpen) {
-      setPhase("Inhale");
-      setSeconds(4);
+      setPhase("inhale");
+      setCountdown(4);
       return;
     }
 
     const timer = setInterval(() => {
-      setSeconds((prev) => {
+      setCountdown((prev) => {
         if (prev <= 1) {
           setPhase((current) => {
-            if (current === "Inhale") return "Hold";
-            if (current === "Hold") return "Exhale";
-            if (current === "Exhale") return "Hold After";
-            return "Inhale";
+            if (current === "inhale") return "hold";
+            if (current === "hold") return "exhale";
+            if (current === "exhale") return "holdOut";
+            return "inhale";
           });
           return 4;
         }
@@ -39,14 +55,8 @@ export const BoxBreathingModal: React.FC<BoxBreathingModalProps> = ({ isOpen, on
     return () => clearInterval(timer);
   }, [isOpen]);
 
-  const phaseInstruction =
-    phase === "Inhale"
-      ? "Slowly breathe in through your nose..."
-      : phase === "Hold"
-      ? "Gently hold your breath, relax your shoulders..."
-      : phase === "Exhale"
-      ? "Slowly breathe out through your mouth..."
-      : "Pause in stillness before the next breath...";
+  const phaseLabel = PHASE_LABELS[phase];
+  const phaseInstruction = PHASE_INSTRUCTIONS[phase];
 
   return (
     <AnimatePresence>
@@ -85,18 +95,33 @@ export const BoxBreathingModal: React.FC<BoxBreathingModalProps> = ({ isOpen, on
               </p>
             </div>
 
-            {/* Breathing Blob Visual Guide */}
-            <div className="py-2 flex flex-col items-center justify-center">
-              <BreathingBlob size={160} variant="calm">
-                <div className="flex flex-col items-center justify-center pointer-events-none select-none">
-                  <span className="text-4xl font-black text-foreground drop-shadow-xs">
-                    {seconds}s
-                  </span>
-                  <span className="text-xs font-extrabold uppercase tracking-widest text-emerald-600 dark:text-emerald-400 mt-1">
-                    {phase}
-                  </span>
+            {/* Concentric Animated Breathing Circle Guide */}
+            <div className="relative flex items-center justify-center w-48 h-48 mx-auto my-6">
+              {/* Outer pulse ring */}
+              <div
+                className={cn(
+                  "absolute inset-0 rounded-full border-2 transition-all duration-1000",
+                  phase === "inhale" && "scale-110 border-blue-400/50",
+                  phase === "hold" && "scale-110 border-emerald-400/50",
+                  phase === "exhale" && "scale-90 border-purple-400/50",
+                  phase === "holdOut" && "scale-90 border-amber-400/50"
+                )}
+              />
+              {/* Main breathing circle */}
+              <div
+                className={cn(
+                  "rounded-full flex items-center justify-center transition-all duration-1000 ease-in-out",
+                  phase === "inhale" && "w-36 h-36 bg-blue-500/20 border-2 border-blue-400",
+                  phase === "hold" && "w-36 h-36 bg-emerald-500/20 border-2 border-emerald-400",
+                  phase === "exhale" && "w-28 h-28 bg-purple-500/20 border-2 border-purple-400",
+                  phase === "holdOut" && "w-28 h-28 bg-amber-500/20 border-2 border-amber-400"
+                )}
+              >
+                <div className="text-center">
+                  <p className="text-xs font-bold text-foreground uppercase tracking-widest">{phaseLabel}</p>
+                  <p className="text-3xl font-extrabold text-foreground mt-1">{countdown}</p>
                 </div>
-              </BreathingBlob>
+              </div>
             </div>
 
             <p className="text-xs text-muted-foreground italic h-6">{phaseInstruction}</p>

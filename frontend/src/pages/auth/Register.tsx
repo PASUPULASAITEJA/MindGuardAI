@@ -12,10 +12,9 @@ import {
   EyeOff,
   Loader2,
   Brain,
-  Shield,
-  Heart,
+  BarChart3,
+  HeartHandshake,
   PhoneCall,
-  Sparkles,
   CheckCircle2,
 } from "lucide-react";
 import ThemeToggle from "@/components/layouts/ThemeToggle";
@@ -23,12 +22,13 @@ import api from "@/services/api";
 
 const registerSchema = z
   .object({
-    full_name: z.string().min(2, "Please enter your full name or preferred username."),
+    full_name: z.string().min(2, "Please enter your full name."),
     email: z.string().email("Please enter a valid university email address."),
-    password: z.string().min(8, "Password must be at least 8 characters long."),
     role: z.enum(["STUDENT", "COUNSELOR", "ADMIN"], {
       errorMap: () => ({ message: "Please select an account type." }),
     }),
+    password: z.string().min(8, "Password must be at least 8 characters long."),
+    confirm_password: z.string().min(1, "Please confirm your password."),
   })
   .superRefine((data, ctx) => {
     const email = data.email.toLowerCase().trim();
@@ -38,6 +38,13 @@ const registerSchema = z
         code: z.ZodIssueCode.custom,
         path: ["email"],
         message: "Please enter a valid institutional or university email address.",
+      });
+    }
+    if (data.password !== data.confirm_password) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["confirm_password"],
+        message: "Passwords do not match.",
       });
     }
   });
@@ -50,6 +57,7 @@ export const Register: React.FC = () => {
   const navigate = useNavigate();
 
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [rosterStatus, setRosterStatus] = useState<{
     checked: boolean;
@@ -69,15 +77,13 @@ export const Register: React.FC = () => {
     defaultValues: {
       full_name: "",
       email: "",
-      password: "",
       role: "STUDENT",
+      password: "",
+      confirm_password: "",
     },
   });
 
-  const selectedRole = watch("role");
   const typedEmail = watch("email");
-  const typedName = watch("full_name");
-  const typedPassword = watch("password");
 
   // Roster verification check
   useEffect(() => {
@@ -139,201 +145,184 @@ export const Register: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen w-full flex bg-background text-foreground font-sans antialiased transition-colors duration-200">
-      {/* LEFT PANEL (hidden on mobile, w-1/2, bg-primary text-primary-foreground) */}
-      <div className="hidden md:flex md:w-1/2 relative bg-gradient-to-b from-primary to-primary/80 text-primary-foreground p-10 lg:p-14 flex-col justify-between overflow-hidden shadow-2xl">
-        <div className="absolute -top-24 -left-24 w-96 h-96 bg-white/10 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute -bottom-24 -right-24 w-96 h-96 bg-black/10 rounded-full blur-3xl pointer-events-none" />
-
-        {/* Top: MindGuardAI logo + name */}
-        <div className="relative z-10 flex items-center gap-3">
-          <div className="w-10 h-10 rounded-lg bg-white/15 backdrop-blur-sm border border-white/20 flex items-center justify-center text-white shadow-sm">
-            <Brain className="w-6 h-6" />
-          </div>
-          <div>
-            <span className="font-extrabold text-xl tracking-tight text-white block">
-              MindGuardAI
-            </span>
-            <span className="text-[11px] font-medium text-white/80 uppercase tracking-wider block">
-              Higher Education Wellbeing
-            </span>
-          </div>
-        </div>
-
-        {/* Center: Quote + 3 bullet points with shield/heart/brain icons */}
-        <div className="relative z-10 space-y-8 max-w-md my-auto py-8">
-          <div className="space-y-3">
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/15 backdrop-blur-sm border border-white/20 text-xs font-semibold text-white">
-              <Sparkles className="w-3.5 h-3.5" />
-              <span>Campus Wellness Intelligence</span>
+    <div className="min-h-screen w-full flex bg-background text-foreground font-sans antialiased">
+      {/* LEFT PANEL — hidden below lg, lg:flex, w-1/2 */}
+      <div className="hidden lg:flex w-1/2 bg-primary flex-col justify-between p-12 text-white relative select-none">
+        {/* TOP */}
+        <div>
+          {/* Logo */}
+          <Link to="/" className="inline-flex items-center gap-2.5 group">
+            <div className="w-9 h-9 rounded-xl bg-white/15 backdrop-blur-sm border border-white/20 flex items-center justify-center text-white shadow-sm transition-transform group-hover:scale-105">
+              <Brain className="w-5 h-5 text-white" />
             </div>
-            <blockquote className="text-2xl lg:text-3xl font-extrabold leading-snug text-white">
-              &ldquo;Your wellbeing matters. MindGuardAI is here before you reach out.&rdquo;
-            </blockquote>
-          </div>
-
-          <div className="space-y-4 pt-2">
-            <div className="flex items-start gap-3">
-              <div className="w-8 h-8 rounded-lg bg-white/15 flex items-center justify-center shrink-0 mt-0.5 text-white">
-                <Shield className="w-4 h-4" />
-              </div>
-              <div>
-                <p className="text-sm font-bold text-white">Zero-Keystroke Privacy</p>
-                <p className="text-xs text-white/80 mt-0.5">
-                  Full cryptographic client anonymity with strictly zero keystroke or screen monitoring.
-                </p>
-              </div>
+            <div className="flex items-center gap-1 font-extrabold text-xl tracking-tight text-white">
+              <span>MindGuard</span>
+              <span className="text-white/90">AI</span>
             </div>
-
-            <div className="flex items-start gap-3">
-              <div className="w-8 h-8 rounded-lg bg-white/15 flex items-center justify-center shrink-0 mt-0.5 text-white">
-                <Brain className="w-4 h-4" />
-              </div>
-              <div>
-                <p className="text-sm font-bold text-white">Explainable Clinical AI</p>
-                <p className="text-xs text-white/80 mt-0.5">
-                  Validated psychometric screeners (PHQ-9/GAD-7) and SHAP factor attribution.
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-start gap-3">
-              <div className="w-8 h-8 rounded-lg bg-white/15 flex items-center justify-center shrink-0 mt-0.5 text-white">
-                <Heart className="w-4 h-4" />
-              </div>
-              <div>
-                <p className="text-sm font-bold text-white">Compassionate Triage Pathway</p>
-                <p className="text-xs text-white/80 mt-0.5">
-                  Direct connection to university counselors before burnout becomes a crisis.
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Bottom: 24/7 Crisis Support Available with PhoneCall icon */}
-        <div className="relative z-10 pt-4 border-t border-white/20 flex items-center justify-between text-xs text-white/90">
-          <div className="flex items-center gap-2">
-            <PhoneCall className="w-4 h-4 text-white" />
-            <span className="font-semibold">24/7 Crisis Support Available</span>
-          </div>
-          <span className="font-mono text-[11px] bg-white/15 px-2.5 py-0.5 rounded-full font-medium">
-            Tele-MANAS: 14416
-          </span>
-        </div>
-      </div>
-
-      {/* RIGHT PANEL (w-full md:w-1/2, bg-background) */}
-      <div className="w-full md:w-1/2 flex flex-col justify-between p-6 sm:p-10 relative">
-        {/* Top bar with ThemeToggle in top-right corner */}
-        <div className="w-full flex items-center justify-between">
-          <Link
-            to="/"
-            className="text-xs font-semibold text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1.5"
-          >
-            ← Back to Home
           </Link>
-          <ThemeToggle />
-        </div>
 
-        {/* Centered form with max-w-sm */}
-        <div className="w-full max-w-sm mx-auto my-auto py-8 animate-fade-in-up">
-          <div className="text-center sm:text-left space-y-1.5 mb-6">
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-foreground tracking-tight">
-              Create your account
-            </h1>
-            <p className="text-xs sm:text-sm text-muted-foreground">
-              Sign in with your university email
+          {/* Headline & Body */}
+          <div className="mt-14 max-w-md">
+            <h2 className="text-3xl font-extrabold text-white leading-snug">
+              Join thousands of students protecting their wellbeing.
+            </h2>
+            <p className="text-sm text-white/70 mt-3 max-w-xs leading-relaxed">
+              Create your account and start tracking your wellness journey with clinical-grade AI support.
             </p>
           </div>
 
+          {/* MIDDLE — 3 bullet points */}
+          <div className="mt-10 space-y-5">
+            <div className="flex items-start gap-3">
+              <div className="rounded-xl bg-white/10 p-2 w-9 h-9 flex items-center justify-center shrink-0">
+                <Brain className="w-5 h-5 text-white" />
+              </div>
+              <span className="text-sm text-white/85 font-medium self-center">
+                AI-powered emotion detection
+              </span>
+            </div>
+
+            <div className="flex items-start gap-3">
+              <div className="rounded-xl bg-white/10 p-2 w-9 h-9 flex items-center justify-center shrink-0">
+                <BarChart3 className="w-5 h-5 text-white" />
+              </div>
+              <span className="text-sm text-white/85 font-medium self-center">
+                30-day wellness trend tracking
+              </span>
+            </div>
+
+            <div className="flex items-start gap-3">
+              <div className="rounded-xl bg-white/10 p-2 w-9 h-9 flex items-center justify-center shrink-0">
+                <HeartHandshake className="w-5 h-5 text-white" />
+              </div>
+              <span className="text-sm text-white/85 font-medium self-center">
+                Connect with campus counsellors
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* BOTTOM */}
+        <div className="mt-auto pt-8 border-t border-white/20 flex items-center gap-2 text-xs text-white/55">
+          <PhoneCall className="w-4 h-4 text-white/60 shrink-0 inline" />
+          <span>24/7 Crisis Support &middot; Tele-MANAS: 14416</span>
+        </div>
+      </div>
+
+      {/* RIGHT PANEL — flex-1, flex flex-col items-center justify-center min-h-screen bg-background px-8 py-10 */}
+      <div className="flex-1 flex flex-col items-center justify-center min-h-screen bg-background px-6 sm:px-8 py-10 relative">
+        {/* ThemeToggle absolute top-4 right-4 */}
+        <div className="absolute top-4 right-4 z-20">
+          <ThemeToggle />
+        </div>
+
+        {/* Mobile logo (lg:hidden) */}
+        <Link to="/" className="lg:hidden flex items-center gap-2 mb-8 group">
+          <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center text-primary-foreground shadow-sm shadow-primary/25">
+            <Brain className="w-5 h-5" />
+          </div>
+          <div className="flex items-center gap-1 font-bold text-lg tracking-tight text-foreground">
+            <span>MindGuard</span>
+            <span className="text-primary">AI</span>
+          </div>
+        </Link>
+
+        {/* Form wrapper */}
+        <div className="w-full max-w-sm space-y-6">
+          {/* Header */}
+          <div className="space-y-1 text-center sm:text-left">
+            <h1 className="text-2xl font-extrabold tracking-tight text-foreground">
+              Create your account
+            </h1>
+            <p className="text-sm text-muted-foreground mt-1">
+              Start your wellbeing journey today
+            </p>
+          </div>
+
+          {/* Form */}
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            {/* Full Name with floating label */}
-            <div className="relative">
+            {/* Full Name field */}
+            <div className="space-y-1.5">
               <label
                 htmlFor="full_name"
-                className={`text-xs font-medium transition-all ${
-                  typedName ? "text-primary font-semibold" : "text-muted-foreground"
-                } block mb-1`}
+                className="text-xs font-semibold text-foreground block"
               >
-                Full Name or Preferred Name
+                Full Name
               </label>
               <Input
                 id="full_name"
                 type="text"
-                placeholder="Jane Doe"
-                className={`h-11 rounded-lg ${errors.full_name ? "border-destructive focus-visible:ring-destructive" : ""}`}
+                placeholder="Your full name"
+                className="rounded-xl h-10 text-sm focus:ring-2 focus:ring-primary/30"
                 {...register("full_name")}
               />
               {errors.full_name && (
-                <p className="text-[11px] text-destructive mt-1 font-medium">
+                <p className="text-xs text-destructive font-medium">
                   {errors.full_name.message}
                 </p>
               )}
             </div>
 
-            {/* University Email with floating label */}
-            <div className="relative">
+            {/* University Email field */}
+            <div className="space-y-1.5">
               <label
                 htmlFor="email"
-                className={`text-xs font-medium transition-all ${
-                  typedEmail ? "text-primary font-semibold" : "text-muted-foreground"
-                } block mb-1`}
+                className="text-xs font-semibold text-foreground block"
               >
-                Institutional Email
+                University Email
               </label>
               <Input
                 id="email"
                 type="email"
-                placeholder="student@campus.edu"
-                className={`h-11 rounded-lg ${errors.email ? "border-destructive focus-visible:ring-destructive" : ""}`}
+                autoComplete="email"
+                placeholder="you@university.edu"
+                className="rounded-xl h-10 text-sm focus:ring-2 focus:ring-primary/30"
                 {...register("email")}
               />
               {rosterStatus.checked && rosterStatus.isAuthorized && (
-                <div className="mt-1 flex items-center gap-1.5 text-[11px] text-emerald-600 dark:text-emerald-400 font-medium">
+                <div className="flex items-center gap-1.5 text-[11px] text-emerald-600 dark:text-emerald-400 font-medium pt-0.5">
                   <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
-                  <span>Authorized Campus Roster Member ({rosterStatus.assignedRole})</span>
+                  <span>Verified Campus Roster ({rosterStatus.assignedRole})</span>
                 </div>
               )}
               {errors.email && (
-                <p className="text-[11px] text-destructive mt-1 font-medium">
+                <p className="text-xs text-destructive font-medium">
                   {errors.email.message}
                 </p>
               )}
             </div>
 
-            {/* Role Selection */}
-            <div>
-              <label className="text-xs font-medium text-muted-foreground block mb-1.5">
+            {/* Role select dropdown */}
+            <div className="space-y-1.5">
+              <label
+                htmlFor="role"
+                className="text-xs font-semibold text-foreground block"
+              >
                 Account Role
               </label>
-              <div className="grid grid-cols-3 gap-2">
-                {(["STUDENT", "COUNSELOR", "ADMIN"] as const).map((r) => (
-                  <button
-                    key={r}
-                    type="button"
-                    onClick={() => setValue("role", r, { shouldValidate: true })}
-                    className={`py-2 px-1 text-xs font-bold rounded-lg border transition-all text-center ${
-                      selectedRole === r
-                        ? "border-primary bg-primary text-primary-foreground shadow-xs"
-                        : "border-border bg-secondary/50 text-foreground hover:bg-secondary"
-                    }`}
-                  >
-                    {r === "STUDENT" ? "Student" : r === "COUNSELOR" ? "Counselor" : "Admin"}
-                  </button>
-                ))}
-              </div>
+              <select
+                id="role"
+                className="w-full rounded-xl h-10 border border-input bg-background text-sm px-3 focus:outline-none focus:ring-2 focus:ring-primary/30 text-foreground cursor-pointer"
+                {...register("role")}
+              >
+                <option value="STUDENT">Student</option>
+                <option value="COUNSELOR">Counsellor</option>
+                <option value="ADMIN">Administrator</option>
+              </select>
+              {errors.role && (
+                <p className="text-xs text-destructive font-medium">
+                  {errors.role.message}
+                </p>
+              )}
             </div>
 
-            {/* Password with floating label + Show/Hide Toggle */}
-            <div className="relative">
+            {/* Password field */}
+            <div className="space-y-1.5">
               <label
                 htmlFor="password"
-                className={`text-xs font-medium transition-all ${
-                  typedPassword ? "text-primary font-semibold" : "text-muted-foreground"
-                } block mb-1`}
+                className="text-xs font-semibold text-foreground block"
               >
-                Password (min. 8 characters)
+                Password
               </label>
               <div className="relative">
                 <Input
@@ -341,56 +330,90 @@ export const Register: React.FC = () => {
                   type={showPassword ? "text" : "password"}
                   autoComplete="new-password"
                   placeholder="••••••••"
-                  className={`h-11 rounded-lg pr-10 ${
-                    errors.password ? "border-destructive focus-visible:ring-destructive" : ""
-                  }`}
+                  className="rounded-xl h-10 text-sm pr-10 focus:ring-2 focus:ring-primary/30"
                   {...register("password")}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground p-1 rounded-md transition-colors"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground p-1 transition-colors"
                   aria-label={showPassword ? "Hide password" : "Show password"}
                 >
-                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  {showPassword ? (
+                    <EyeOff className="w-4 h-4 text-muted-foreground" />
+                  ) : (
+                    <Eye className="w-4 h-4 text-muted-foreground" />
+                  )}
                 </button>
               </div>
               {errors.password && (
-                <p className="text-[11px] text-destructive mt-1 font-medium">
+                <p className="text-xs text-destructive font-medium">
                   {errors.password.message}
                 </p>
               )}
             </div>
 
-            {/* Submit Button full width, bg-primary */}
+            {/* Confirm Password field */}
+            <div className="space-y-1.5">
+              <label
+                htmlFor="confirm_password"
+                className="text-xs font-semibold text-foreground block"
+              >
+                Confirm Password
+              </label>
+              <div className="relative">
+                <Input
+                  id="confirm_password"
+                  type={showConfirmPassword ? "text" : "password"}
+                  autoComplete="new-password"
+                  placeholder="••••••••"
+                  className="rounded-xl h-10 text-sm pr-10 focus:ring-2 focus:ring-primary/30"
+                  {...register("confirm_password")}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground p-1 transition-colors"
+                  aria-label={showConfirmPassword ? "Hide password" : "Show password"}
+                >
+                  {showConfirmPassword ? (
+                    <EyeOff className="w-4 h-4 text-muted-foreground" />
+                  ) : (
+                    <Eye className="w-4 h-4 text-muted-foreground" />
+                  )}
+                </button>
+              </div>
+              {errors.confirm_password && (
+                <p className="text-xs text-destructive font-medium">
+                  {errors.confirm_password.message}
+                </p>
+              )}
+            </div>
+
+            {/* Submit button */}
             <Button
               type="submit"
               disabled={isSubmitting}
-              className="w-full h-11 bg-primary text-primary-foreground hover:bg-primary/90 font-semibold rounded-lg shadow-sm transition-all mt-2"
+              className="w-full h-10 rounded-xl bg-primary text-primary-foreground text-sm font-semibold hover:bg-primary/90 transition-all shadow-sm mt-2"
             >
               {isSubmitting ? (
-                <span className="flex items-center justify-center gap-2">
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  <span>Creating Account...</span>
-                </span>
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                  Creating account...
+                </>
               ) : (
                 "Create Account"
               )}
             </Button>
           </form>
 
-          {/* Link to Login at bottom */}
-          <p className="text-center text-xs text-muted-foreground mt-6">
+          {/* Bottom link */}
+          <p className="text-xs text-muted-foreground text-center mt-4">
             Already have an account?{" "}
-            <Link to="/login" className="font-semibold text-primary hover:underline">
-              Sign in here
+            <Link to="/login" className="text-primary font-semibold hover:underline">
+              Sign in &rarr;
             </Link>
           </p>
-        </div>
-
-        {/* Footer info */}
-        <div className="text-center text-[11px] text-muted-foreground">
-          MindGuardAI • Encrypted & Protected by Institutional FERPA Policy
         </div>
       </div>
     </div>

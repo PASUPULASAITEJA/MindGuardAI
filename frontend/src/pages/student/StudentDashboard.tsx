@@ -15,7 +15,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/ui/empty-state";
-import { RiskBadge } from "@/components/ui/risk-badge";
 import {
   ResponsiveContainer,
   AreaChart,
@@ -31,21 +30,14 @@ import {
   Sparkles,
   MessageSquare,
   Clock,
-  Moon,
-  Laptop,
   RefreshCw,
   Activity,
-  ArrowRight,
   Wind,
   Calendar,
-  HeartHandshake,
   CheckCircle2,
-  AlertTriangle,
   Flame,
   ShieldAlert,
   MoonStar,
-  Brain,
-  Sliders,
   ChevronRight,
   Smile,
   Meh,
@@ -138,7 +130,7 @@ export const StudentDashboard: React.FC = () => {
       ? "MODERATE"
       : "LOW";
 
-  // Score color based on prompt rules: ≥65 text-emerald-500, 35-64 text-amber-500, <35 text-rose-500
+  // Score color: ≥65 text-emerald-500, 35-64 text-amber-500, <35 text-rose-500
   const scoreColorClass =
     wellnessScore >= 65
       ? "text-emerald-500"
@@ -188,7 +180,7 @@ export const StudentDashboard: React.FC = () => {
   const studentFirstName = user?.full_name ? user.full_name.split(" ")[0] : "Student";
 
   return (
-    <div className="fade-up space-y-6 pb-16 font-sans text-foreground">
+    <div className="fade-up space-y-5 p-4 md:p-6 pb-16 font-sans text-foreground">
       {/* 1. WELCOME HEADER */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
@@ -240,34 +232,55 @@ export const StudentDashboard: React.FC = () => {
       {/* 2. TOP STAT ROW: 4 Cards in a grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Stat 1: Wellness Score */}
-        <Card className="rounded-lg border border-border bg-card p-5 shadow-xs card-hover">
+        <Card className="rounded-2xl border border-border bg-card p-5 shadow-xs card-hover">
           <CardContent className="p-0 flex items-center justify-between">
             <div className="space-y-1">
-              <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider block">
+              <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block">
                 Wellness Score
               </span>
               <div className={cn("text-5xl font-extrabold tracking-tight", scoreColorClass)}>
                 {wellnessScore}
               </div>
-              <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-medium inline-flex items-center gap-1">
+              <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold inline-flex items-center gap-1">
                 +3.5% vs last week
               </span>
             </div>
-            <div className="w-12 h-12 rounded-lg bg-primary/10 text-primary flex items-center justify-center shrink-0">
+            <div className="w-12 h-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
               <Smile className={cn("w-6 h-6", scoreColorClass)} />
             </div>
           </CardContent>
         </Card>
 
         {/* Stat 2: Risk Level */}
-        <Card className="rounded-lg border border-border bg-card p-5 shadow-xs card-hover">
+        <Card className="rounded-2xl border border-border bg-card p-5 shadow-xs card-hover">
           <CardContent className="p-0 flex items-center justify-between">
             <div className="space-y-1.5">
-              <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider block">
+              <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block">
                 Risk Level
               </span>
               <div className="pt-0.5">
-                <RiskBadge level={normalizedRisk} />
+                <span
+                  className={cn(
+                    "inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wider border",
+                    normalizedRisk === "HIGH"
+                      ? "badge-elevated"
+                      : normalizedRisk === "MODERATE"
+                      ? "badge-moderate"
+                      : "badge-stable"
+                  )}
+                >
+                  <span
+                    className={cn(
+                      "w-1.5 h-1.5 rounded-full shrink-0",
+                      normalizedRisk === "HIGH"
+                        ? "bg-rose-500"
+                        : normalizedRisk === "MODERATE"
+                        ? "bg-amber-500"
+                        : "bg-emerald-500"
+                    )}
+                  />
+                  <span>{normalizedRisk}</span>
+                </span>
               </div>
               <button
                 onClick={() => setIsExplainOpen(true)}
@@ -276,17 +289,17 @@ export const StudentDashboard: React.FC = () => {
                 View SHAP Factors →
               </button>
             </div>
-            <div className="w-12 h-12 rounded-lg bg-secondary text-muted-foreground flex items-center justify-center shrink-0">
+            <div className="w-12 h-12 rounded-xl bg-secondary text-muted-foreground flex items-center justify-center shrink-0">
               <Activity className="w-6 h-6 text-primary" />
             </div>
           </CardContent>
         </Card>
 
         {/* Stat 3: Last Check-In */}
-        <Card className="rounded-lg border border-border bg-card p-5 shadow-xs card-hover">
+        <Card className="rounded-2xl border border-border bg-card p-5 shadow-xs card-hover">
           <CardContent className="p-0 flex items-center justify-between">
             <div className="space-y-1">
-              <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider block">
+              <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block">
                 Last Check-in
               </span>
               <div className="text-2xl font-bold text-foreground">
@@ -296,17 +309,17 @@ export const StudentDashboard: React.FC = () => {
                 Completed via web portal
               </span>
             </div>
-            <div className="w-12 h-12 rounded-lg bg-primary/10 text-primary flex items-center justify-center shrink-0">
+            <div className="w-12 h-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
               <Clock className="w-6 h-6" />
             </div>
           </CardContent>
         </Card>
 
         {/* Stat 4: Streak Days */}
-        <Card className="rounded-lg border border-border bg-card p-5 shadow-xs card-hover">
+        <Card className="rounded-2xl border border-border bg-card p-5 shadow-xs card-hover">
           <CardContent className="p-0 flex items-center justify-between">
             <div className="space-y-1">
-              <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider block">
+              <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block">
                 Streak
               </span>
               <div className="text-3xl font-extrabold text-foreground flex items-center gap-1.5">
@@ -317,94 +330,62 @@ export const StudentDashboard: React.FC = () => {
                 Daily mindfulness habit
               </span>
             </div>
-            <div className="w-12 h-12 rounded-lg bg-amber-500/10 text-amber-500 flex items-center justify-center shrink-0">
+            <div className="w-12 h-12 rounded-xl bg-amber-500/10 text-amber-500 flex items-center justify-center shrink-0">
               <Flame className="w-6 h-6 fill-amber-500" />
             </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* 3. QUICK ACTIONS ROW: 4 large clickable cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Action 1: Start Check-in (primary) */}
-        <button
-          onClick={() => navigate("/student/daily-check-in")}
-          className="w-full text-left p-4 rounded-xl border border-primary/30 bg-primary/5 hover:bg-primary/10 hover:border-primary transition-all duration-200 shadow-xs group card-hover"
+      {/* 3. QUICK ACTIONS ROW: 4 interactive cards */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* Action 1: Start Check-in */}
+        <div
+          onClick={() => navigate("/student/check-in")}
+          className="card-hover bg-card border border-border rounded-2xl p-4 flex flex-col items-center gap-2.5 cursor-pointer text-center transition-all"
         >
-          <div className="flex items-center gap-3.5">
-            <div className="w-12 h-12 rounded-xl bg-primary text-primary-foreground flex items-center justify-center shrink-0 shadow-sm shadow-primary/25 group-hover:scale-105 transition-transform">
-              <Sparkles className="w-6 h-6" />
-            </div>
-            <div className="min-w-0">
-              <h3 className="text-sm font-semibold text-foreground group-hover:text-primary transition-colors">
-                Start Check-in
-              </h3>
-              <p className="text-xs text-muted-foreground truncate mt-0.5">
-                Daily reflection & mood pulse
-              </p>
-            </div>
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-primary/10 text-primary">
+            <Sparkles className="w-5 h-5" />
           </div>
-        </button>
+          <span className="text-xs font-semibold text-foreground">Start Check-in</span>
+          <span className="text-[10px] text-muted-foreground">Log today's mood</span>
+        </div>
 
-        {/* Action 2: Talk to AI (indigo) */}
-        <button
-          onClick={() => navigate("/student/chatbot")}
-          className="w-full text-left p-4 rounded-xl border border-indigo-500/30 bg-indigo-500/5 hover:bg-indigo-500/10 hover:border-indigo-500 transition-all duration-200 shadow-xs group card-hover"
+        {/* Action 2: Talk to AI */}
+        <div
+          onClick={() => navigate("/student/chat")}
+          className="card-hover bg-card border border-border rounded-2xl p-4 flex flex-col items-center gap-2.5 cursor-pointer text-center transition-all"
         >
-          <div className="flex items-center gap-3.5">
-            <div className="w-12 h-12 rounded-xl bg-indigo-600 text-white flex items-center justify-center shrink-0 shadow-sm group-hover:scale-105 transition-transform">
-              <MessageSquare className="w-6 h-6" />
-            </div>
-            <div className="min-w-0">
-              <h3 className="text-sm font-semibold text-foreground group-hover:text-indigo-600 transition-colors">
-                Talk to AI
-              </h3>
-              <p className="text-xs text-muted-foreground truncate mt-0.5">
-                24/7 empathetic companion
-              </p>
-            </div>
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-purple-500/10 text-purple-500">
+            <MessageSquare className="w-5 h-5" />
           </div>
-        </button>
+          <span className="text-xs font-semibold text-foreground">Talk to AI</span>
+          <span className="text-[10px] text-muted-foreground">Emotional reflection & coping</span>
+        </div>
 
-        {/* Action 3: Book Counselor (blue) */}
-        <button
+        {/* Action 3: Book Counselor */}
+        <div
           onClick={() => setIsBookingOpen(true)}
-          className="w-full text-left p-4 rounded-xl border border-blue-500/30 bg-blue-500/5 hover:bg-blue-500/10 hover:border-blue-500 transition-all duration-200 shadow-xs group card-hover"
+          className="card-hover bg-card border border-border rounded-2xl p-4 flex flex-col items-center gap-2.5 cursor-pointer text-center transition-all"
         >
-          <div className="flex items-center gap-3.5">
-            <div className="w-12 h-12 rounded-xl bg-blue-600 text-white flex items-center justify-center shrink-0 shadow-sm group-hover:scale-105 transition-transform">
-              <Calendar className="w-6 h-6" />
-            </div>
-            <div className="min-w-0">
-              <h3 className="text-sm font-semibold text-foreground group-hover:text-blue-600 transition-colors">
-                Book Counselor
-              </h3>
-              <p className="text-xs text-muted-foreground truncate mt-0.5">
-                Confidential campus 1-on-1
-              </p>
-            </div>
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-emerald-500/10 text-emerald-500">
+            <Calendar className="w-5 h-5" />
           </div>
-        </button>
+          <span className="text-xs font-semibold text-foreground">Book Counselor</span>
+          <span className="text-[10px] text-muted-foreground">Schedule session</span>
+        </div>
 
-        {/* Action 4: Crisis Support (rose) */}
-        <button
+        {/* Action 4: Crisis Support */}
+        <div
           onClick={() => setIsSOSOpen(true)}
-          className="w-full text-left p-4 rounded-xl border border-rose-500/30 bg-rose-500/5 hover:bg-rose-500/10 hover:border-rose-500 transition-all duration-200 shadow-xs group card-hover"
+          className="card-hover bg-card border border-border rounded-2xl p-4 flex flex-col items-center gap-2.5 cursor-pointer text-center transition-all"
         >
-          <div className="flex items-center gap-3.5">
-            <div className="w-12 h-12 rounded-xl bg-rose-600 text-white flex items-center justify-center shrink-0 shadow-sm shadow-rose-600/20 group-hover:scale-105 transition-transform">
-              <ShieldAlert className="w-6 h-6" />
-            </div>
-            <div className="min-w-0">
-              <h3 className="text-sm font-semibold text-foreground group-hover:text-rose-600 transition-colors">
-                Crisis Support
-              </h3>
-              <p className="text-xs text-muted-foreground truncate mt-0.5">
-                Immediate emergency triage
-              </p>
-            </div>
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-rose-500/10 text-rose-500">
+            <ShieldAlert className="w-5 h-5" />
           </div>
-        </button>
+          <span className="text-xs font-semibold text-foreground">Crisis Support</span>
+          <span className="text-[10px] text-muted-foreground">Get help now</span>
+        </div>
       </div>
 
       {/* Micro-Checkin Widget */}
@@ -415,7 +396,7 @@ export const StudentDashboard: React.FC = () => {
       {/* 4. MAIN ANALYTICS ROW: Wellness Trend Area Chart (h-64) & Sleep Quality */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Wellness Trend Area Chart (2 cols) */}
-        <div className="lg:col-span-2 p-6 rounded-lg bg-card border border-border shadow-xs space-y-4">
+        <div className="lg:col-span-2 p-6 rounded-2xl bg-card border border-border shadow-xs card-hover space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
               <h2 className="text-base font-semibold text-foreground">
@@ -455,10 +436,10 @@ export const StudentDashboard: React.FC = () => {
             </div>
           </div>
 
-          {/* Chart area increased to h-64 with primary color opacity gradient */}
+          {/* Chart area h-64 with primary color opacity gradient */}
           <div className="h-64 w-full">
             {isLoadingTrends ? (
-              <Skeleton className="w-full h-full rounded-lg" />
+              <Skeleton className="w-full h-full rounded-xl" />
             ) : (
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
@@ -495,7 +476,7 @@ export const StudentDashboard: React.FC = () => {
         </div>
 
         {/* Sleep Quality Mini-Chart (1 col) */}
-        <div className="p-6 rounded-lg bg-card border border-border shadow-xs flex flex-col justify-between">
+        <div className="p-6 rounded-2xl bg-card border border-border shadow-xs card-hover flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
@@ -549,7 +530,7 @@ export const StudentDashboard: React.FC = () => {
       {/* 5. RECENT MOOD ENTRIES LIST & COPING TOOLS */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Recent Mood Entries List (2 cols) */}
-        <div className="lg:col-span-2 p-6 rounded-lg bg-card border border-border shadow-xs">
+        <div className="lg:col-span-2 p-6 rounded-2xl bg-card border border-border shadow-xs card-hover">
           <div className="flex items-center justify-between mb-4">
             <div>
               <h2 className="text-base font-semibold text-foreground">Recent Mood Logs</h2>
@@ -567,9 +548,9 @@ export const StudentDashboard: React.FC = () => {
 
           {isLoadingMood ? (
             <div className="space-y-3">
-              <Skeleton className="h-12 w-full rounded-lg" />
-              <Skeleton className="h-12 w-full rounded-lg" />
-              <Skeleton className="h-12 w-full rounded-lg" />
+              <Skeleton className="h-12 w-full rounded-xl" />
+              <Skeleton className="h-12 w-full rounded-xl" />
+              <Skeleton className="h-12 w-full rounded-xl" />
             </div>
           ) : moodHistory.length === 0 ? (
             <EmptyState
@@ -577,14 +558,14 @@ export const StudentDashboard: React.FC = () => {
               title="No check-ins logged yet today"
               description="Taking 30 seconds to record your mood pulse helps calibrate personalized campus coping recommendations."
               actionLabel="Start First Check-In"
-              onAction={() => navigate("/student/daily-check-in")}
+              onAction={() => navigate("/student/check-in")}
             />
           ) : (
             <div className="divide-y divide-border">
               {moodHistory.slice(0, 4).map((m, idx) => (
                 <div key={idx} className="py-3 flex items-center justify-between gap-4">
                   <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-lg bg-secondary text-foreground flex items-center justify-center font-bold text-sm">
+                    <div className="w-9 h-9 rounded-xl bg-secondary text-foreground flex items-center justify-center font-bold text-sm">
                       {m.self_reported_score && m.self_reported_score >= 7 ? (
                         <Smile className="w-5 h-5 text-emerald-500" />
                       ) : m.self_reported_score && m.self_reported_score >= 4 ? (
@@ -594,7 +575,7 @@ export const StudentDashboard: React.FC = () => {
                       )}
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-foreground capitalize">
+                      <p className="text-sm font-semibold text-foreground capitalize">
                         {m.primary_emotion ? `${m.primary_emotion} • ${m.input_type || "Check-in"}` : `${m.input_type || "General"} Check-in`}
                       </p>
                       <p className="text-xs text-muted-foreground">
@@ -611,7 +592,7 @@ export const StudentDashboard: React.FC = () => {
                     <span className="text-sm font-semibold text-foreground">
                       {m.self_reported_score || 7} / 10
                     </span>
-                    <span className="block text-[11px] text-emerald-600 dark:text-emerald-400 font-medium">
+                    <span className="block text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold">
                       Recorded
                     </span>
                   </div>
@@ -622,7 +603,7 @@ export const StudentDashboard: React.FC = () => {
         </div>
 
         {/* Guided Coping Tools Panel (1 col) */}
-        <div className="p-6 rounded-lg bg-card border border-border shadow-xs flex flex-col justify-between">
+        <div className="p-6 rounded-2xl bg-card border border-border shadow-xs card-hover flex flex-col justify-between">
           <div>
             <h2 className="text-base font-semibold text-foreground mb-1">Coping Tools</h2>
             <p className="text-xs text-muted-foreground mb-4">Clinically validated grounding and screening protocols</p>
@@ -630,14 +611,14 @@ export const StudentDashboard: React.FC = () => {
             <div className="space-y-3">
               <div
                 onClick={() => setIsBreathOpen(true)}
-                className="p-3 rounded-lg border border-border hover:border-primary/50 cursor-pointer transition-all flex items-center justify-between bg-card"
+                className="p-3 rounded-xl border border-border hover:border-primary/50 cursor-pointer transition-all flex items-center justify-between bg-card card-hover"
               >
                 <div className="flex items-center gap-2.5">
                   <div className="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
                     <Wind className="w-4 h-4" />
                   </div>
                   <div>
-                    <h3 className="text-sm font-medium text-foreground">Box Breathing</h3>
+                    <h3 className="text-sm font-semibold text-foreground">Box Breathing</h3>
                     <p className="text-xs text-muted-foreground">4-4-4-4 nervous system cadence</p>
                   </div>
                 </div>
@@ -649,14 +630,14 @@ export const StudentDashboard: React.FC = () => {
                   setSurveyType("phq-9");
                   setIsSurveyOpen(true);
                 }}
-                className="p-3 rounded-lg border border-border hover:border-primary/50 cursor-pointer transition-all flex items-center justify-between bg-card"
+                className="p-3 rounded-xl border border-border hover:border-primary/50 cursor-pointer transition-all flex items-center justify-between bg-card card-hover"
               >
                 <div className="flex items-center gap-2.5">
                   <div className="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
                     <CheckCircle2 className="w-4 h-4" />
                   </div>
                   <div>
-                    <h3 className="text-sm font-medium text-foreground">PHQ-9 Screener</h3>
+                    <h3 className="text-sm font-semibold text-foreground">PHQ-9 Screener</h3>
                     <p className="text-xs text-muted-foreground">Standardized clinical assessment</p>
                   </div>
                 </div>
@@ -665,14 +646,14 @@ export const StudentDashboard: React.FC = () => {
 
               <div
                 onClick={() => setIsBookingOpen(true)}
-                className="p-3 rounded-lg border border-border hover:border-primary/50 cursor-pointer transition-all flex items-center justify-between bg-card"
+                className="p-3 rounded-xl border border-border hover:border-primary/50 cursor-pointer transition-all flex items-center justify-between bg-card card-hover"
               >
                 <div className="flex items-center gap-2.5">
                   <div className="w-8 h-8 rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center">
                     <Calendar className="w-4 h-4" />
                   </div>
                   <div>
-                    <h3 className="text-sm font-medium text-foreground">Counselor Session</h3>
+                    <h3 className="text-sm font-semibold text-foreground">Counselor Session</h3>
                     <p className="text-xs text-muted-foreground">Confidential campus 1-on-1</p>
                   </div>
                 </div>
@@ -684,7 +665,7 @@ export const StudentDashboard: React.FC = () => {
           <Button
             onClick={() => navigate("/student/resources")}
             variant="outline"
-            className="w-full mt-4 rounded-lg text-xs font-semibold"
+            className="w-full mt-4 rounded-xl text-xs font-semibold"
           >
             Explore Resource Library
           </Button>
@@ -700,16 +681,16 @@ export const StudentDashboard: React.FC = () => {
               Personalized Recommendations for You
             </h2>
           </div>
-          <span className="text-xs text-muted-foreground">Calibrated by AI Coping Engine</span>
+          <span className="text-xs text-muted-foreground font-medium">Calibrated by AI Coping Engine</span>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="p-5 rounded-lg bg-card border border-border shadow-xs flex flex-col justify-between card-hover">
+          <div className="p-5 rounded-2xl bg-card border border-border shadow-xs flex flex-col justify-between card-hover">
             <div>
               <span className="px-2.5 py-0.5 rounded-full bg-primary/10 text-primary text-[10px] font-bold uppercase tracking-wider">
                 Circadian Recovery
               </span>
-              <h3 className="text-sm font-medium text-foreground mt-2">
+              <h3 className="text-sm font-semibold text-foreground mt-2">
                 Digital Sunset Protocol
               </h3>
               <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
@@ -720,18 +701,18 @@ export const StudentDashboard: React.FC = () => {
               size="sm"
               variant="outline"
               onClick={() => setIsBreathOpen(true)}
-              className="mt-4 rounded-lg text-xs font-semibold w-full"
+              className="mt-4 rounded-xl text-xs font-semibold w-full"
             >
               Start Breathing Pacer
             </Button>
           </div>
 
-          <div className="p-5 rounded-lg bg-card border border-border shadow-xs flex flex-col justify-between card-hover">
+          <div className="p-5 rounded-2xl bg-card border border-border shadow-xs flex flex-col justify-between card-hover">
             <div>
               <span className="px-2.5 py-0.5 rounded-full bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 text-[10px] font-bold uppercase tracking-wider">
                 Cognitive Reframing
               </span>
-              <h3 className="text-sm font-medium text-foreground mt-2">
+              <h3 className="text-sm font-semibold text-foreground mt-2">
                 Exam Stress Dialogue
               </h3>
               <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
@@ -740,19 +721,19 @@ export const StudentDashboard: React.FC = () => {
             </div>
             <Button
               size="sm"
-              onClick={() => navigate("/student/chatbot")}
-              className="mt-4 bg-primary text-primary-foreground hover:bg-primary/90 rounded-lg text-xs font-semibold w-full"
+              onClick={() => navigate("/student/chat")}
+              className="mt-4 bg-primary text-primary-foreground hover:bg-primary/90 rounded-xl text-xs font-semibold w-full"
             >
-              Open AI Chatbot
+              Open AI Companion
             </Button>
           </div>
 
-          <div className="p-5 rounded-lg bg-card border border-border shadow-xs flex flex-col justify-between card-hover">
+          <div className="p-5 rounded-2xl bg-card border border-border shadow-xs flex flex-col justify-between card-hover">
             <div>
               <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[10px] font-bold uppercase tracking-wider">
                 Campus Care
               </span>
-              <h3 className="text-sm font-medium text-foreground mt-2">
+              <h3 className="text-sm font-semibold text-foreground mt-2">
                 Check-in with Counselor
               </h3>
               <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
@@ -763,7 +744,7 @@ export const StudentDashboard: React.FC = () => {
               size="sm"
               variant="outline"
               onClick={() => setIsBookingOpen(true)}
-              className="mt-4 rounded-lg text-xs font-semibold w-full"
+              className="mt-4 rounded-xl text-xs font-semibold w-full"
             >
               Schedule Session
             </Button>
@@ -789,7 +770,7 @@ export const StudentDashboard: React.FC = () => {
       {/* Explainable AI Factors Modal */}
       {isExplainOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm animate-fade-in-up">
-          <div className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-lg bg-card border border-border shadow-2xl p-6 space-y-5">
+          <div className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl bg-card border border-border shadow-2xl p-6 space-y-5">
             <ShapExplanationCard predictionId={latestAssessment?.assessment_id} />
             <ExplainableAIFactors
               studentId={user?.id}
@@ -805,7 +786,7 @@ export const StudentDashboard: React.FC = () => {
                 variant="outline"
                 size="sm"
                 onClick={() => setIsExplainOpen(false)}
-                className="rounded-lg text-xs font-semibold"
+                className="rounded-xl text-xs font-semibold"
               >
                 Close Details
               </Button>
