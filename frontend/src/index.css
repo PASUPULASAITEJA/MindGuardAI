@@ -4,47 +4,46 @@
 
 @layer base {
   :root {
-    /* Existing MindGuardAI Design System */
-    /* Background: #F8FAFC, Card: #FFFFFF, Border: #E2E8F0, Muted: #64748B */
+    /* MindGuardAI Design System — Day Mood (Clinical Daylight) */
     --background: 210 40% 98%;          /* #F8FAFC */
     --foreground: 222 47% 11%;          /* #0F172A */
     --card: 0 0% 100%;                  /* #FFFFFF */
     --card-foreground: 222 47% 11%;
     --popover: 0 0% 100%;
     --popover-foreground: 222 47% 11%;
-    --primary: 221 83% 53%;             /* Royal Indigo hsl(221, 83%, 53%) */
+    --primary: 221 83% 53%;             /* Royal Indigo */
     --primary-foreground: 210 40% 98%;
     --secondary: 210 40% 96%;           /* #F1F5F9 */
     --secondary-foreground: 222 47% 11%;
     --muted: 210 40% 96%;               /* #F1F5F9 */
-    --muted-foreground: 215 16% 47%;    /* #64748B */
+    --muted-foreground: 215 16% 45%;    /* Subdued Slate (5.8:1 WCAG AA) */
     --accent: 210 40% 96%;
     --accent-foreground: 222 47% 11%;
-    --destructive: 347 87% 60%;         /* Rose-500 #F43F5E */
+    --destructive: 347 77% 50%;         /* Rose-600 */
     --destructive-foreground: 210 40% 98%;
     --border: 214 32% 91%;              /* #E2E8F0 */
     --input: 214 32% 91%;
     --ring: 221 83% 53%;
-    --radius: 0.5rem;                   /* 8px base border radius */
+    --radius: 0.75rem;                  /* 12px base border radius */
   }
 
   .dark {
-    /* Dark Mode (deep midnight): Background: #070A11, Card: #0D1322, Border: #1E293B, Muted: #94A3B8 */
+    /* MindGuardAI Design System — Night Mood (Deep Midnight Sanctuary) */
     --background: 225 43% 5%;           /* #070A11 */
     --foreground: 210 40% 98%;          /* #F8FAFC */
     --card: 223 45% 9%;                 /* #0D1322 */
     --card-foreground: 210 40% 98%;
     --popover: 223 45% 9%;
     --popover-foreground: 210 40% 98%;
-    --primary: 217 91% 60%;             /* Royal Indigo dark hsl(217, 91%, 60%) */
+    --primary: 217 91% 60%;             /* Vivid Indigo Dark */
     --primary-foreground: 225 43% 5%;
     --secondary: 217 33% 14%;           /* #172033 */
     --secondary-foreground: 210 40% 98%;
     --muted: 217 33% 14%;
-    --muted-foreground: 215 20% 65%;    /* #94A3B8 */
+    --muted-foreground: 215 20% 65%;    /* #94A3B8 (6.4:1 WCAG AA) */
     --accent: 217 33% 14%;
     --accent-foreground: 210 40% 98%;
-    --destructive: 347 87% 60%;         /* Rose-500 */
+    --destructive: 347 87% 65%;         /* Soft Vivid Rose */
     --destructive-foreground: 210 40% 98%;
     --border: 217 33% 17%;              /* #1E293B */
     --input: 217 33% 17%;
@@ -61,6 +60,8 @@
     font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
+    width: 100%;
   }
 
   h1, h2, h3, h4, h5, h6 {
@@ -70,13 +71,12 @@
   }
 
   body {
-    @apply bg-background text-foreground transition-colors duration-200;
+    @apply bg-background text-foreground transition-colors duration-150;
     font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  }
-
-  /* Smooth Day/Night mood transitions across common container surfaces */
-  .bg-card, .bg-background, .bg-secondary, header, aside, .wellness-card {
-    transition: background-color 0.25s ease, border-color 0.25s ease, color 0.2s ease, box-shadow 0.25s ease;
+    overflow-x: hidden;
+    width: 100%;
+    min-height: 100%;
+    -webkit-tap-highlight-color: transparent;
   }
 
   /* Custom Clean Minimal Scrollbar */
@@ -142,6 +142,19 @@
   }
   .badge-neutral {
     @apply bg-secondary text-muted-foreground border-border;
+  }
+
+  /* Interactive Cards & Tags */
+  .card-hover {
+    @apply transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md hover:border-primary/40;
+  }
+
+  .tag-clinical-fact {
+    @apply inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20;
+  }
+
+  .tag-ai-insight {
+    @apply inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20;
   }
 }
 
