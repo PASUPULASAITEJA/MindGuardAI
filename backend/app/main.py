@@ -228,11 +228,17 @@ app.include_router(interventions_router, prefix="/api", tags=["Interventions"])
 app.include_router(academic_router, prefix="/api/v1", tags=["Academic Calendar"])
 app.include_router(academic_router, prefix="/api", tags=["Academic Calendar"])
 
+@app.get("/", tags=["Health"])
 @app.get("/health", tags=["Health"])
 @app.get("/api/health", tags=["Health"])
 @app.get("/api/v1/health", tags=["Health"])
 async def health_check():
-    return {"status": "healthy", "service": "MindGuardAI API", "version": "1.0.0"}
+    return {
+        "status": "healthy",
+        "service": "MindGuardAI API",
+        "version": "1.0.1",
+        "cloud": "AWS Lambda Serverless"
+    }
 
 # AWS Lambda Serverless Handler
 try:
