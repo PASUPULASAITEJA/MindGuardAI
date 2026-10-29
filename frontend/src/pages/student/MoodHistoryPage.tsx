@@ -137,7 +137,7 @@ export const MoodHistoryPage: React.FC = () => {
             ) : "—"}
           </p>
           <span className="text-[10px] font-bold text-muted-foreground">
-            {baseline?.usual_stress ? `Usual: ${baseline.usual_stress}/10` : "Check-in Trajectory"}
+            {baseline?.usual_stress ? `Usual: ${baseline.usual_stress}/10` : "No stress data yet"}
           </span>
         </motion.div>
 
@@ -152,7 +152,7 @@ export const MoodHistoryPage: React.FC = () => {
             ) : "—"}
           </p>
           <span className="text-[10px] font-bold text-muted-foreground">
-            {baseline?.usual_sleep_hours ? `Usual: ${baseline.usual_sleep_hours}h` : "Logged Sleep"}
+            {baseline?.usual_sleep_hours ? `Usual: ${baseline.usual_sleep_hours}h` : "No sleep logged yet"}
           </span>
         </motion.div>
 
