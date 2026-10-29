@@ -5,6 +5,8 @@ export interface MobileDetectResult {
   isTablet: boolean;
   isDesktop: boolean;
   isTouch: boolean;
+  isPortrait: boolean;
+  isLandscape: boolean;
   orientation: "portrait" | "landscape";
   width: number;
   height: number;
@@ -33,14 +35,16 @@ export function useMobileDetect(): MobileDetectResult {
     const isTouch = "ontouchstart" in window || navigator.maxTouchPoints > 0;
     const isMobile = width < 640;
     const isTablet = width >= 640 && width < 1024;
-    const isDesktop = width >= 1024;
-    const orientation = height >= width ? "portrait" : "landscape";
+    const isPortrait = height >= width;
+    const isLandscape = !isPortrait;
 
     return {
       isMobile,
       isTablet,
       isDesktop,
       isTouch,
+      isPortrait,
+      isLandscape,
       orientation,
       width,
       height,
