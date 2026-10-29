@@ -234,5 +234,13 @@ app.include_router(academic_router, prefix="/api", tags=["Academic Calendar"])
 async def health_check():
     return {"status": "healthy", "service": "MindGuardAI API", "version": "1.0.0"}
 
+# AWS Lambda Serverless Handler
+try:
+    from mangum import Mangum
+    handler = Mangum(app, lifespan="off")
+except ImportError:
+    handler = None
+
+
 
 
