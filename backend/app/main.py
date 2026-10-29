@@ -37,19 +37,13 @@ from app.ml.inference import ml_service
 logging.basicConfig(level=logging.INFO, format="%(levelname)s: [%(asctime)s] %(message)s")
 logger = logging.getLogger("mindguard-api")
 
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    # Perform startup routines
-    logger.info("Starting up: preloading machine learning models...")
-    ml_service.load_models()
-    
+async def init_db_schema():
     try:
         from app.db.session import async_engine, Base
         from sqlalchemy import text
         import app.models
         async with async_engine.begin() as conn:
             await conn.run_sync(Base.metadata.create_all)
-            # Ensure severity column exists in alerts table for SQLite
             try:
                 await conn.execute(text("ALTER TABLE alerts ADD COLUMN severity VARCHAR(50) DEFAULT 'HIGH'"))
             except Exception:
@@ -65,7 +59,13 @@ async def lifespan(app: FastAPI):
         logger.info("Database schema initialized and verified.")
     except Exception as e:
         logger.error(f"Database initialization error: {e}")
-        
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Perform startup routines
+    logger.info("Starting up: preloading machine learning models...")
+    ml_service.load_models()
+    await init_db_schema()
     yield
     # Perform shutdown cleanups if any
     logger.info("Shutting down api application...")
@@ -86,7 +86,15 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-app.add_middleware(AuditLoggingMiddleware)
+_db_initialized = False
+
+@app.middleware("http")
+async def ensure_db_initialized_middleware(request: Request, call_next):
+    global _db_initialized
+    if not _db_initialized:
+        _db_initialized = True
+        await init_db_schema()
+    return await call_next(request)
 
 # 2. Configure Request ID and Timing Middleware
 @app.middleware("http")
