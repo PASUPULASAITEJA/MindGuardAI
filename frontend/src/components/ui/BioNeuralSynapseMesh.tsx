@@ -17,6 +17,7 @@ interface ModalityStyle {
   lightGlow: string;
 }
 
+// Multimodal synaptic styling configurations
 const MODALITY_CONFIG: Record<ModalityType, ModalityStyle> = {
   biometric: {
     label: "Biometric Vitals",
