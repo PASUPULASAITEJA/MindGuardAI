@@ -23,6 +23,7 @@ desktop_agent/.mindguard_agent_auth.json
 *.xls
 *.docx
 *.doc
+*.zip
 
 # Python Caches & Virtual Environments
 __pycache__/
