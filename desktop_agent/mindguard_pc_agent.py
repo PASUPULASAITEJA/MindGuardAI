@@ -20,8 +20,9 @@ import getpass
 import datetime
 import threading
 import webbrowser
+import re
 from pathlib import Path
-from typing import Dict, Optional, Tuple, Any
+from typing import Dict, Optional, Tuple, Any, List
 
 import requests
 import psutil
@@ -237,6 +238,53 @@ def get_active_window_details() -> Tuple[str, str, str, bool]:
 
     return proc_name, window_title, "GENERAL", False
 
+APP_TAXONOMY = {
+    "code.exe": ("Visual Studio Code", "Studying", "code"),
+    "antigravity ide.exe": ("Antigravity IDE", "Studying", "code"),
+    "antigravity.exe": ("Antigravity IDE", "Studying", "code"),
+    "pycharm64.exe": ("PyCharm IDE", "Studying", "code"),
+    "devenv.exe": ("Visual Studio", "Studying", "code"),
+    "powershell.exe": ("PowerShell / Terminal", "Studying", "code"),
+    "cmd.exe": ("Command Prompt", "Studying", "code"),
+    "windowsterminal.exe": ("Windows Terminal", "Studying", "code"),
+    "chrome.exe": ("Google Chrome", "Studying", "globe"),
+    "msedge.exe": ("Microsoft Edge", "Studying", "globe"),
+    "firefox.exe": ("Mozilla Firefox", "Studying", "globe"),
+    "brave.exe": ("Brave Browser", "Studying", "globe"),
+    "winword.exe": ("Microsoft Word", "Studying", "book"),
+    "powerpnt.exe": ("Microsoft PowerPoint", "Studying", "book"),
+    "excel.exe": ("Microsoft Excel", "Studying", "book"),
+    "notion.exe": ("Notion Workspace", "Studying", "book"),
+    "discord.exe": ("Discord", "Normal", "message"),
+    "whatsapp.exe": ("WhatsApp", "Normal", "message"),
+    "telegram.exe": ("Telegram", "Normal", "message"),
+    "slack.exe": ("Slack", "Normal", "message"),
+    "spotify.exe": ("Spotify", "Playing", "music"),
+    "steam.exe": ("Steam", "Playing", "gamepad"),
+    "vlc.exe": ("VLC Media Player", "Playing", "music"),
+}
+
+def extract_search_query_from_title(title: str) -> Optional[str]:
+    """Extracts authentic search query keywords from active browser window titles."""
+    if not title:
+        return None
+    patterns = [
+        r"^(.+?)\s+-\s+google\s+search",
+        r"^(.+?)\s+-\s+bing",
+        r"^(.+?)\s+-\s+duckduckgo",
+        r"^(.+?)\s+-\s+youtube",
+        r"^(.+?)\s+-\s+chatgpt",
+        r"^(.+?)\s+\|\s+coursera",
+    ]
+    for pat in patterns:
+        m = re.search(pat, title.strip(), re.IGNORECASE)
+        if m:
+            clean = m.group(1).strip()
+            clean = re.sub(r"\s+-\s+.*$", "", clean).strip()
+            if len(clean) >= 2 and not clean.lower().startswith("http"):
+                return clean
+    return None
+
 def reconstruct_system_uptime_and_late_night() -> Tuple[int, int]:
     """
     Retrospectively inspects Windows Boot Time, System Uptime, and Windows Event Logs
@@ -303,6 +351,8 @@ def load_daily_state() -> dict:
         "entertainment_seconds": 0,
         "adult_seconds": 0,
         "continuous_active_seconds": 0,
+        "app_durations": {},
+        "search_queries": {},
     }
 
     if STATE_CACHE_FILE.exists():
@@ -311,6 +361,10 @@ def load_daily_state() -> dict:
                 loaded = json.load(f)
                 if loaded.get("date") == today_str:
                     data = loaded
+                    if "app_durations" not in data:
+                        data["app_durations"] = {}
+                    if "search_queries" not in data:
+                        data["search_queries"] = {}
         except Exception:
             pass
 
@@ -750,6 +804,8 @@ def start_agent():
     social_seconds = daily_state.get("social_seconds", 0)
     entertainment_seconds = daily_state.get("entertainment_seconds", 0)
     adult_seconds = daily_state.get("adult_seconds", 0)
+    app_durations: Dict[str, int] = daily_state.get("app_durations", {})
+    search_queries: Dict[str, int] = daily_state.get("search_queries", {})
 
     # 1. Authoritative hardware PC running time and late-night usage from Windows
     sys_metrics = get_system_power_and_uptime_history_today()
@@ -865,6 +921,13 @@ def start_agent():
                 if is_crisis:
                     has_crisis_event = True
 
+                # Real app duration and search query tracking
+                if proc_name and proc_name not in ["idle", "desktop"]:
+                    app_durations[proc_name] = app_durations.get(proc_name, 0) + SAMPLE_INTERVAL_SECONDS
+                    sq = extract_search_query_from_title(title)
+                    if sq:
+                        search_queries[sq] = search_queries.get(sq, 0) + 1
+
                 if category == "ACADEMIC":
                     academic_seconds += SAMPLE_INTERVAL_SECONDS
                 elif category == "SOCIAL":
@@ -881,6 +944,38 @@ def start_agent():
             if elapsed_since_sync >= SYNC_INTERVAL_SECONDS:
                 last_sync_time = time.time()
                 today_str = datetime.date.today().isoformat()
+
+                # Build authentic top apps leaderboard from real tracked process seconds
+                top_apps = []
+                sorted_apps = sorted(app_durations.items(), key=lambda x: x[1], reverse=True)[:8]
+                total_app_secs = sum(app_durations.values()) or 1
+                for proc, secs in sorted_apps:
+                    mins = max(1, int(secs / 60))
+                    if proc in APP_TAXONOMY:
+                        name, cat, icon = APP_TAXONOMY[proc]
+                    else:
+                        name = proc.replace(".exe", "").title()
+                        cat = category if category in ["Studying", "Playing", "Normal", "Adult"] else "Studying"
+                        icon = "laptop"
+                    top_apps.append({
+                        "name": name,
+                        "proc": proc,
+                        "minutes": mins,
+                        "category": cat,
+                        "percentage": min(100, round((secs / total_app_secs) * 100)),
+                        "icon": icon
+                    })
+
+                # Build authentic search queries from real observed browser titles
+                top_searches = []
+                sorted_searches = sorted(search_queries.items(), key=lambda x: x[1], reverse=True)[:8]
+                for query, count in sorted_searches:
+                    top_searches.append({
+                        "query": query,
+                        "count": count,
+                        "category": "Academic" if any(k in query.lower() for k in ACADEMIC_KEYWORDS) else "General",
+                        "flagged": any(k in query.lower() for k in CRISIS_KEYWORDS)
+                    })
 
                 # Ensure category seconds strictly sum up to <= total_screen_seconds
                 cat_sum = academic_seconds + social_seconds + entertainment_seconds + adult_seconds
@@ -901,6 +996,8 @@ def start_agent():
                     "entertainment_seconds": entertainment_seconds,
                     "adult_seconds": adult_seconds,
                     "continuous_active_seconds": continuous_active_seconds,
+                    "app_durations": app_durations,
+                    "search_queries": search_queries,
                     "last_sync": datetime.datetime.now().isoformat()
                 })
 
@@ -925,7 +1022,9 @@ def start_agent():
                         "adult_usage_minutes": max(1, int(math.ceil(adult_seconds / 60.0))) if adult_seconds >= 10 else 0,
                         "continuous_screen_minutes": int(continuous_active_seconds / 60),
                         "baseline_deviation_score": 0.0,
-                        "is_crisis_search_flag": has_crisis_event
+                        "is_crisis_search_flag": has_crisis_event,
+                        "top_apps": top_apps,
+                        "search_topics": top_searches,
                     }
                     # Integrate Mathematical Sleep-Wake Cycle Metrics using real power event timestamps
                     sleep_cycle_metrics = infer_circadian_sleep_metrics(
