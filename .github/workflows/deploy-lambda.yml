@@ -12,6 +12,7 @@ env:
   AWS_REGION: us-east-1
   ECR_REPOSITORY: mindguard-backend
   LAMBDA_FUNCTION_NAME: mindguard-api
+  LAMBDA_ROLE_ARN: arn:aws:iam::008402584969:role/mindguard-lambda-role
 
 jobs:
   build-and-deploy:
@@ -43,9 +44,48 @@ jobs:
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
 
-      - name: 5. Update AWS Lambda Function Code
+      - name: 5. Create or Update AWS Lambda Function Automatically
         run: |
-          aws lambda update-function-code \
-            --function-name ${{ env.LAMBDA_FUNCTION_NAME }} \
-            --image-uri ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ github.sha }} \
-            --region ${{ env.AWS_REGION }}
+          IMAGE_URI="${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ github.sha }}"
+          
+          # Check if the Lambda function already exists
+          if aws lambda get-function --function-name ${{ env.LAMBDA_FUNCTION_NAME }} --region ${{ env.AWS_REGION }} >/dev/null 2>&1; then
+            echo "Updating existing Lambda function..."
+            aws lambda update-function-code \
+              --function-name ${{ env.LAMBDA_FUNCTION_NAME }} \
+              --image-uri $IMAGE_URI \
+              --region ${{ env.AWS_REGION }}
+          else
+            echo "Creating new Lambda function from container image..."
+            aws lambda create-function \
+              --function-name ${{ env.LAMBDA_FUNCTION_NAME }} \
+              --package-type Image \
+              --code ImageUri=$IMAGE_URI \
+              --role ${{ env.LAMBDA_ROLE_ARN }} \
+              --timeout 30 \
+              --memory-size 1024 \
+              --environment "Variables={ENVIRONMENT=production,CORS_ORIGINS=[\"https://main.d1s655v046pfka.amplifyapp.com\"]}" \
+              --region ${{ env.AWS_REGION }}
+
+            echo "Enabling public Function URL with CORS..."
+            aws lambda create-function-url-config \
+              --function-name ${{ env.LAMBDA_FUNCTION_NAME }} \
+              --auth-type NONE \
+              --cors "AllowOrigins=[\"https://main.d1s655v046pfka.amplifyapp.com\"],AllowMethods=[\"*\"],AllowHeaders=[\"*\"]" \
+              --region ${{ env.AWS_REGION }}
+
+            aws lambda add-permission \
+              --function-name ${{ env.LAMBDA_FUNCTION_NAME }} \
+              --action lambda:InvokeFunctionUrl \
+              --statement-id FunctionURLAllowPublicAccess \
+              --principal "*" \
+              --function-url-auth-type NONE \
+              --region ${{ env.AWS_REGION }}
+          fi
+
+      - name: 6. Output Live Function URL
+        run: |
+          URL=$(aws lambda get-function-url-config --function-name ${{ env.LAMBDA_FUNCTION_NAME }} --region ${{ env.AWS_REGION }} --query "FunctionUrl" --output text)
+          echo "===================================================="
+          echo "Your Live AWS Lambda Backend URL is: $URL"
+          echo "===================================================="
