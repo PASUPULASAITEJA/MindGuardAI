@@ -42,6 +42,9 @@ import {
   Smile,
   Meh,
   Frown,
+  Monitor,
+  Gamepad2,
+  BookOpen,
 } from "lucide-react";
 
 // Modals
@@ -359,8 +362,8 @@ export const StudentDashboard: React.FC = () => {
           <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-purple-500/10 text-purple-500">
             <MessageSquare className="w-5 h-5" />
           </div>
-          <span className="text-xs font-semibold text-foreground">Talk to AI</span>
-          <span className="text-[10px] text-muted-foreground">Emotional reflection & coping</span>
+          <span className="text-xs font-semibold text-foreground">AI Companion</span>
+          <span className="text-[10px] text-muted-foreground">Guided coping & chat</span>
         </div>
 
         {/* Action 3: Book Counselor */}
@@ -391,6 +394,35 @@ export const StudentDashboard: React.FC = () => {
       {/* Micro-Checkin Widget */}
       <div>
         <MoodMicroCheckin />
+      </div>
+
+      {/* Screen Time & Digital Wellbeing Quick Glance */}
+      <div className="p-4 rounded-2xl bg-gradient-to-r from-blue-500/10 via-indigo-500/10 to-purple-500/10 border border-blue-500/20 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+        <div className="flex items-center gap-3.5">
+          <div className="w-11 h-11 rounded-xl bg-blue-500/15 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0">
+            <Monitor className="w-5 h-5" />
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <h3 className="text-sm font-bold text-foreground">Screen Time & Digital Phenotyping</h3>
+              <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-blue-500/15 text-blue-600 dark:text-blue-400 border border-blue-500/20">
+                {totalMins > 0 ? `${Math.floor(totalMins / 60)}h ${totalMins % 60}m Active` : "Active Tracking"}
+              </span>
+            </div>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              Breakdown: Studying ({academicMins}m) • Playing ({log?.entertainment_usage_minutes || 0}m) • Late Night ({lateNightMins}m)
+            </p>
+          </div>
+        </div>
+
+        <Button
+          size="sm"
+          onClick={() => navigate("/student/screentime")}
+          className="rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold shrink-0 shadow-xs"
+        >
+          View Full Graphics & Apps
+          <ChevronRight className="w-4 h-4 ml-1" />
+        </Button>
       </div>
 
       {/* 4. MAIN ANALYTICS ROW: Wellness Trend Area Chart (h-64) & Sleep Quality */}
@@ -724,7 +756,7 @@ export const StudentDashboard: React.FC = () => {
               onClick={() => navigate("/student/chat")}
               className="mt-4 bg-primary text-primary-foreground hover:bg-primary/90 rounded-xl text-xs font-semibold w-full"
             >
-              Open AI Companion
+              Open AI Chatbot
             </Button>
           </div>
 
