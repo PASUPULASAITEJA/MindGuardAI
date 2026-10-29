@@ -618,21 +618,31 @@ export const BioNeuralSynapseMesh: React.FC<BioNeuralSynapseMeshProps> = ({
 
     render();
 
-    return () => {
-      cancelAnimationFrame(animId);
-      window.removeEventListener("resize", handleResize);
-      window.removeEventListener("orientationchange", handleResize);
-      window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("mousemove", onMouseMove);
-      window.removeEventListener("mouseleave", onMouseLeave);
-      window.removeEventListener("click", onClick);
-      window.removeEventListener("touchstart", onTouchStart);
-      window.removeEventListener("touchmove", onTouchMove);
-      window.removeEventListener("touchend", onTouchEnd);
-      window.removeEventListener("touchcancel", onTouchEnd);
-      if (resizeTimer) clearTimeout(resizeTimer);
-    };
-  }, [nodeCount, interactive]);
+      const handleVisibilityChange = () => {
+        if (!document.hidden && !prefersReducedMotion) {
+          cancelAnimationFrame(animId);
+          animId = requestAnimationFrame(render);
+        }
+      };
+
+      document.addEventListener("visibilitychange", handleVisibilityChange);
+
+      return () => {
+        cancelAnimationFrame(animId);
+        document.removeEventListener("visibilitychange", handleVisibilityChange);
+        window.removeEventListener("resize", handleResize);
+        window.removeEventListener("orientationchange", handleResize);
+        window.removeEventListener("scroll", onScroll);
+        window.removeEventListener("mousemove", onMouseMove);
+        window.removeEventListener("mouseleave", onMouseLeave);
+        window.removeEventListener("click", onClick);
+        window.removeEventListener("touchstart", onTouchStart);
+        window.removeEventListener("touchmove", onTouchMove);
+        window.removeEventListener("touchend", onTouchEnd);
+        window.removeEventListener("touchcancel", onTouchEnd);
+        if (resizeTimer) clearTimeout(resizeTimer);
+      };
+    }, [nodeCount, interactive]);
 
   return (
     <canvas

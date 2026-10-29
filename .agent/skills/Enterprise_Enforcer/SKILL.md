@@ -98,3 +98,12 @@ class UserCreateDTO(BaseModel):
 - **Do Not Use Placeholders**: Write fully functional, complete logic. Avoid comments like `// TODO: Implement later` or `pass # Logic goes here`.
 - **Modular and Dry**: Keep functions small (under 30 lines is preferred). Extract complex nested loops or conditions into descriptive helper functions.
 - **Document Decisions**: Use clean, informative inline comments to explain "why" a design choice was made, rather than just "what" the code does. Add descriptive docstrings / JSDoc blocks to all public APIs.
+
+---
+
+## 5. Mobile Responsiveness & Adaptive Standards
+
+- **Proportional Viewports**: Canvas elements, SVG visualizations, and interactive HUDs must auto-scale across viewport widths (320px to 4K) without horizontal overflow.
+- **Touch & Gesture Target Sizing**: Interactive touch targets must meet WCAG 2.2 Level AA sizing (minimum 44x44px).
+- **Graceful Hardware Degradation**: Support reduced motion preferences (`prefers-reduced-motion`) and low-power hardware modes by pausing non-essential animation loops during hidden document states.
+

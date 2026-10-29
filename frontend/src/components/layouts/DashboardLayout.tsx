@@ -5,6 +5,7 @@ import TopNav from "@/components/layouts/TopNav";
 import { motion, AnimatePresence } from "motion/react";
 import { AmbientParticles } from "@/components/3d/AmbientParticles";
 import { useAuth } from "@/contexts/AuthContext";
+import { useMobileDetect } from "@/hooks/useMobileDetect";
 import {
   LayoutDashboard,
   ClipboardCheck,
@@ -29,6 +30,14 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ title, subtitl
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const location = useLocation();
   const { user } = useAuth();
+  const { isDesktop } = useMobileDetect();
+
+  // Close mobile drawer on route navigation or desktop switch
+  React.useEffect(() => {
+    if (isMobileMenuOpen) {
+      setIsMobileMenuOpen(false);
+    }
+  }, [location.pathname, isDesktop]);
 
   // Mobile Bottom Tab Bar items by role
   const getMobileTabs = () => {
