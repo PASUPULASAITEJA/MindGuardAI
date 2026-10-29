@@ -1,8 +1,0 @@
-Configuration,Feature_Count,Accuracy,Balanced_Accuracy,Macro_F1,High_Risk_Recall,High_Risk_Precision
-1. NLP Features Only,7,59.95,57.16,0.4787,76.57,27.41
-2. Psychometrics Only,19,99.28,98.78,0.9901,98.74,99.24
-3. Digital Biomarkers Only,6,61.31,57.06,0.4992,66.75,26.26
-4. NLP + Psychometrics,20,99.26,98.69,0.9899,98.49,99.49
-5. NLP + Digital Biomarkers,10,63.24,62.11,0.5342,76.57,30.55
-6. Psychometrics + Biomarkers,23,99.24,98.64,0.9886,98.49,98.74
-7. Full Multimodal Fusion,23,99.24,98.64,0.9886,98.49,98.74
