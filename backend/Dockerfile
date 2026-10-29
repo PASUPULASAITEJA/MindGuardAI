@@ -34,7 +34,8 @@ RUN groupadd -g 1001 appgroup && \
 # Copy installed python libraries from builder
 COPY --from=builder /root/.local /home/appuser/.local
 ENV PATH=/home/appuser/.local/bin:$PATH
-ENV PYTHONPATH=/app
+ENV PYTHONPATH=/app:/home/appuser/.local/lib/python3.11/site-packages
+ENV PYTHONUSERBASE=/home/appuser/.local
 ENV AWS_DEFAULT_REGION=us-east-1
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
