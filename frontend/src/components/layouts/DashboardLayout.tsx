@@ -15,6 +15,7 @@ import {
   AlertCircle,
   BarChart3,
   ShieldCheck,
+  Monitor,
 } from "lucide-react";
 import { cn } from "@/utils/cn";
 
@@ -34,10 +35,10 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ title, subtitl
     if (user?.role === "STUDENT") {
       return [
         { label: "Dashboard", to: "/student/dashboard", icon: LayoutDashboard },
+        { label: "Screen Time", to: "/student/screentime", icon: Monitor },
         { label: "Check-in", to: "/student/check-in", icon: ClipboardCheck },
         { label: "AI Chat", to: "/student/chat", icon: MessageSquare },
         { label: "Wellbeing", to: "/student/history", icon: Activity },
-        { label: "Tools", to: "/student/resources", icon: BookOpen },
       ];
     }
     if (user?.role === "COUNSELOR") {
