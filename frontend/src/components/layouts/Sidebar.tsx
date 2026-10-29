@@ -16,6 +16,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Brain,
+  Monitor,
 } from "lucide-react";
 import { useAuth, UserRole } from "@/contexts/AuthContext";
 import { cn } from "@/utils/cn";
@@ -38,6 +39,7 @@ const getRoleNavSections = (role: UserRole): NavSection[] => {
         title: "OVERVIEW",
         items: [
           { label: "Dashboard", to: "/student/dashboard", icon: LayoutDashboard },
+          { label: "Screen Time & Apps", to: "/student/screentime", icon: Monitor },
           { label: "My Wellbeing", to: "/student/history", icon: Activity },
           { label: "Daily Check-in", to: "/student/check-in", icon: ClipboardCheck },
         ],
