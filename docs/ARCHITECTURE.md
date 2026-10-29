@@ -302,4 +302,5 @@ MindGuard's web presentation layer utilizes hardware-accelerated rendering and a
 * **BioNeural Synapse Canvas**: Multi-layered canvas rendering biometric, cognitive, affective, and circadian nodes with action potential photon propagation. Automatically scales node density (48 nodes on mobile vs 130 on desktop) and distance thresholds to optimize battery and memory.
 * **Proportional Coordinate Rescaling**: On viewport orientation change, node coordinates scale proportionally (`x * newW / prevW`) without resetting particle history.
 * **Touch & Haptic Subsystem**: Integrated touch gesture attraction and Web Vibration API haptic pulses for SOS triggers, breathing cycles, and check-ins.
-* **Adaptive Drawer & Tab Architecture**: Dynamic toggle between desktop persistent sidebar and mobile slide-out navigation with bottom action bar.
+* **Adaptive Drawer & Tab Architecture**: Dynamic toggle between desktop persistent sidebar and mobile slide-out navigation with bottom action bar.
+* **Clinical Screening & Immediate Triage**: Direct mapping between standardized PHQ-9 severity scores and contextual multi-region crisis hotlines.
