@@ -24,6 +24,8 @@ export function useMobileDetect(): MobileDetectResult {
         isTablet: false,
         isDesktop: true,
         isTouch: false,
+        isPortrait: false,
+        isLandscape: true,
         orientation: "landscape",
         width: 1280,
         height: 800,
@@ -35,8 +37,10 @@ export function useMobileDetect(): MobileDetectResult {
     const isTouch = "ontouchstart" in window || navigator.maxTouchPoints > 0;
     const isMobile = width < 640;
     const isTablet = width >= 640 && width < 1024;
+    const isDesktop = width >= 1024;
     const isPortrait = height >= width;
     const isLandscape = !isPortrait;
+    const orientation: "portrait" | "landscape" = isPortrait ? "portrait" : "landscape";
 
     return {
       isMobile,
