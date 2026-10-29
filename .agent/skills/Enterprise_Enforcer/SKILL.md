@@ -106,4 +106,5 @@ class UserCreateDTO(BaseModel):
 - **Proportional Viewports**: Canvas elements, SVG visualizations, and interactive HUDs must auto-scale across viewport widths (320px to 4K) without horizontal overflow.
 - **Touch & Gesture Target Sizing**: Interactive touch targets must meet WCAG 2.2 Level AA sizing (minimum 44x44px).
 - **Graceful Hardware Degradation**: Support reduced motion preferences (`prefers-reduced-motion`) and low-power hardware modes by pausing non-essential animation loops during hidden document states.
+- **Tactile Haptic Integration**: Integrate calibrated tactile vibration pulses for critical user states, crisis triggers, and guided somatic breathing cycles.
 
