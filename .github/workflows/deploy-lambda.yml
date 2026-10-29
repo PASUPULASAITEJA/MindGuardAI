@@ -54,6 +54,11 @@ jobs:
               --function-name ${{ env.LAMBDA_FUNCTION_NAME }} \
               --image-uri $IMAGE_URI \
               --region ${{ env.AWS_REGION }}
+            
+            echo "Waiting for Lambda function update to complete..."
+            aws lambda wait function-updated \
+              --function-name ${{ env.LAMBDA_FUNCTION_NAME }} \
+              --region ${{ env.AWS_REGION }}
           else
             echo "Creating new Lambda function from container image..."
             aws lambda create-function \
