@@ -27,7 +27,9 @@ fi
 
 # If running inside AWS Lambda, invoke the AWS Lambda Runtime Interface Client
 if [ -n "$AWS_LAMBDA_FUNCTION_NAME" ]; then
-    echo "==> Detected AWS Lambda Environment ($AWS_LAMBDA_FUNCTION_NAME). Invoking Runtime..."
+    echo "==> Detected AWS Lambda Environment ($AWS_LAMBDA_FUNCTION_NAME). Pre-initializing database..."
+    python -c "import asyncio; from app.main import init_db_schema; asyncio.run(init_db_schema())" || true
+    echo "==> Invoking AWS Lambda Runtime..."
     exec python -m awslambdaric app.main.handler
 fi
 
