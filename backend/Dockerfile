@@ -27,6 +27,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && ./aws/install \
     && rm -rf awscliv2.zip aws /var/lib/apt/lists/*
 
+# AWS Lambda Web Adapter enables running standard FastAPI uvicorn on AWS Lambda
+COPY --from=public.ecr.aws/awsguru/aws-lambda-adapter:0.8.4 /lambda-adapter /opt/extensions/lambda-adapter
+ENV PORT=8000
+
 # Create dedicated non-root application user
 RUN groupadd -g 1001 appgroup && \
     useradd -u 1001 -g appgroup -m -s /bin/bash appuser
