@@ -289,6 +289,8 @@ export const WellnessTrendDashboard: React.FC<WellnessTrendDashboardProps> = ({
                       strokeWidth={2.5}
                       fillOpacity={1}
                       fill="url(#wellnessGradient)"
+                      dot={{ r: 4, stroke: "#06b6d4", strokeWidth: 2, fill: theme === "dark" ? "#0f172a" : "#ffffff" }}
+                      activeDot={{ r: 6, stroke: "#06b6d4", strokeWidth: 2, fill: "#06b6d4" }}
                     />
                     <Line
                       type="monotone"
@@ -296,7 +298,7 @@ export const WellnessTrendDashboard: React.FC<WellnessTrendDashboardProps> = ({
                       stroke="#f59e0b"
                       strokeWidth={2}
                       strokeDasharray="4 4"
-                      dot={false}
+                      dot={{ r: 3, stroke: "#f59e0b", strokeWidth: 1.5, fill: theme === "dark" ? "#0f172a" : "#ffffff" }}
                     />
                   </AreaChart>
                 </ResponsiveContainer>
