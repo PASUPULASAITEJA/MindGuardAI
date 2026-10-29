@@ -3,7 +3,7 @@ import logging
 import subprocess
 import re
 from datetime import datetime, timezone, timedelta, time as time_type
-from typing import Dict, Any, Optional, List
+from typing import Dict, Any, Optional, List, Tuple
 from uuid import UUID, uuid4
 
 from sqlalchemy import select, desc
@@ -255,6 +255,43 @@ def get_machine_screen_metrics_today() -> Dict[str, Any]:
         "first_morning_wake_dt": sys_metrics.get("first_morning_wake_dt"),
     }
 
+def extract_or_generate_app_and_search_telemetry(
+    active_window_raw: Optional[str],
+    acad_mins: int,
+    ent_mins: int,
+    soc_mins: int,
+    adult_mins: int,
+    total_mins: int,
+    is_crisis: bool = False
+) -> Tuple[List[Dict[str, Any]], List[Dict[str, Any]]]:
+    """
+    Extracts authentic active process durations and online search intent from telemetry.
+    Returns strictly authentic data captured from the desktop agent or web tracker.
+    Zero dummy or synthetic fallback data.
+    """
+    top_apps: List[Dict[str, Any]] = []
+    search_topics: List[Dict[str, Any]] = []
+
+    if active_window_raw:
+        try:
+            parsed = json.loads(active_window_raw)
+            if isinstance(parsed, dict):
+                top_apps = parsed.get("top_apps", []) or []
+                search_topics = parsed.get("search_topics", []) or []
+            elif isinstance(parsed, list):
+                top_apps = parsed
+        except Exception:
+            pass
+
+    # Ensure percentages are computed accurately for real tracked apps
+    if top_apps:
+        effective_total = max(1, sum(app.get("minutes", 0) for app in top_apps))
+        for app in top_apps:
+            if "percentage" not in app:
+                app["percentage"] = min(100, round((app.get("minutes", 0) / effective_total) * 100))
+
+    return top_apps, search_topics
+
 class BehavioralService:
     """
     Service responsible for:
@@ -443,9 +480,25 @@ class BehavioralService:
             existing_log.baseline_deviation_score = late_night_deviation_z
             existing_log.risk_level = behavioral_risk_level
             existing_log.synced_at = datetime.now(timezone.utc)
+            if getattr(payload, "top_apps", None) or getattr(payload, "search_topics", None):
+                meta = {}
+                if payload.top_apps:
+                    meta["top_apps"] = payload.top_apps
+                if payload.search_topics:
+                    meta["search_topics"] = payload.search_topics
+                existing_log.active_window_categories = json.dumps(meta)
             db_log = existing_log
         else:
             initial_screen_time = max(sanitized_screen_time, machine_metrics.get("total_screen_time_minutes", 0))
+            meta_json = None
+            if getattr(payload, "top_apps", None) or getattr(payload, "search_topics", None):
+                meta = {}
+                if payload.top_apps:
+                    meta["top_apps"] = payload.top_apps
+                if payload.search_topics:
+                    meta["search_topics"] = payload.search_topics
+                meta_json = json.dumps(meta)
+
             db_log = BehavioralLog(
                 id=uuid4(),
                 student_id=student.id,
@@ -458,6 +511,7 @@ class BehavioralService:
                 adult_usage_minutes=min(max(payload.adult_usage_minutes, machine_metrics.get("adult_usage_minutes", 0)), initial_screen_time),
                 continuous_screen_minutes=min(payload.continuous_screen_minutes, sanitized_screen_time),
                 is_crisis_detected=payload.is_crisis_search_flag,
+                active_window_categories=meta_json,
                 baseline_deviation_score=late_night_deviation_z,
                 risk_level=behavioral_risk_level,
                 synced_at=datetime.now(timezone.utc)
@@ -570,7 +624,9 @@ class BehavioralService:
                 },
                 "circadian_sleep_analysis": None,
                 "latest_log": None,
-                "weekly_history": []
+                "weekly_history": [],
+                "top_apps": [],
+                "search_topics": []
             }
 
         # Deduplicate to pick the latest record per date
@@ -681,6 +737,17 @@ class BehavioralService:
                 "wearable_synced": False
             }
 
+        # Extract or generate top apps and search intent analytics
+        top_apps, search_topics = extract_or_generate_app_and_search_telemetry(
+            active_window_raw=latest.active_window_categories,
+            acad_mins=acad_mins,
+            ent_mins=ent_mins,
+            soc_mins=soc_mins,
+            adult_mins=adult_mins,
+            total_mins=total_mins,
+            is_crisis=bool(getattr(latest, "is_crisis_detected", False))
+        )
+
         return {
             "is_agent_connected": is_connected,
             "is_currently_active": is_live,
@@ -693,9 +760,12 @@ class BehavioralService:
                 "purpose_advice": purpose_advice,
             },
             "circadian_sleep_analysis": circadian_analysis,
+            "top_apps": top_apps,
+            "search_topics": search_topics,
             "latest_log": {
                 "date": latest.date,
                 "total_screen_time_minutes": latest.total_screen_time_minutes or 0,
+                "daytime_usage_minutes": max(0, (latest.total_screen_time_minutes or 0) - (latest.late_night_usage_minutes or 0)),
                 "late_night_usage_minutes": latest.late_night_usage_minutes or 0,
                 "academic_usage_minutes": latest.academic_usage_minutes or 0,
                 "social_usage_minutes": latest.social_usage_minutes or 0,
@@ -705,12 +775,15 @@ class BehavioralService:
                 "is_crisis_detected": bool(getattr(latest, "is_crisis_detected", False)),
                 "baseline_deviation_score": latest.baseline_deviation_score or 0.0,
                 "risk_level": latest.risk_level or "LOW",
-                "synced_at": latest.synced_at.isoformat()
+                "synced_at": latest.synced_at.isoformat(),
+                "top_apps": top_apps,
+                "search_topics": search_topics
             },
             "weekly_history": [
                 {
                     "date": log.date,
                     "total_screen_time_minutes": log.total_screen_time_minutes or 0,
+                    "daytime_usage_minutes": max(0, (log.total_screen_time_minutes or 0) - (log.late_night_usage_minutes or 0)),
                     "academic_usage_minutes": getattr(log, "academic_usage_minutes", 0) or 0,
                     "social_usage_minutes": getattr(log, "social_usage_minutes", 0) or 0,
                     "entertainment_usage_minutes": getattr(log, "entertainment_usage_minutes", 0) or 0,
