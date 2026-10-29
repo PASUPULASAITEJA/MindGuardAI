@@ -16,6 +16,7 @@ import DailyCheckInPage from "./pages/student/DailyCheckInPage";
 import MoodHistoryPage from "./pages/student/MoodHistoryPage";
 import SelfCareResourcesPage from "./pages/student/SelfCareResourcesPage";
 import PrivacyConsentPage from "./pages/student/PrivacyConsentPage";
+import ScreenTimePage from "./pages/student/ScreenTimePage";
 import CounselorDashboard from "./pages/counselor/CounselorDashboard";
 import { StudentCaseFile } from "./pages/counselor/StudentCaseFile";
 import AdminDashboard from "./pages/admin/AdminDashboard";
@@ -86,10 +87,6 @@ function App() {
                 </ProtectedRoute>
               }
             />
-            {/* Convenient Aliases */}
-            <Route path="/student/daily-check-in" element={<Navigate to="/student/check-in" replace />} />
-            <Route path="/student/chatbot" element={<Navigate to="/student/chat" replace />} />
-
             <Route
               path="/student/history"
               element={
@@ -125,6 +122,19 @@ function App() {
                     subtitle="Manage data collection preferences, AI explainability rights, and counselor escalation controls."
                   >
                     <PrivacyConsentPage />
+                  </DashboardLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/student/screentime"
+              element={
+                <ProtectedRoute allowedRoles={["STUDENT"]}>
+                  <DashboardLayout
+                    title="Screen Time & Digital Phenotyping"
+                    subtitle="Analyze active computer time, late-night circadian fatigue, top applications, and search intent."
+                  >
+                    <ScreenTimePage />
                   </DashboardLayout>
                 </ProtectedRoute>
               }
