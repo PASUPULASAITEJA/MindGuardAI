@@ -31,17 +31,8 @@ class UserService:
 
         normalized_email = user_in.email.lower().strip()
 
-        # 1. Validate that the email is authorized under approved institutional domains
-        whitelisted_role = get_authorized_role(normalized_email, requested_role=user_in.role)
-        if not whitelisted_role:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail={
-                    "error_code": "NOT_ON_ROSTER",
-                    "message": "Only authorized institutional emails are permitted to register on this platform.",
-                    "details": {"email": user_in.email}
-                }
-            )
+        # 1. Determine user role (defaults to requested role or STUDENT)
+        assigned_role = user_in.role or UserRole.STUDENT
 
         # 2. Validate that the email does not already exist
         existing_user = await user_repository.get_by_email(db, normalized_email)
@@ -55,12 +46,12 @@ class UserService:
                 }
             )
 
-        # 3. Hash password and create database object with official roster role
+        # 3. Hash password and create database object
         hashed_password = get_password_hash(user_in.password)
         
         db_obj_data = {
             "email": normalized_email,
-            "role": whitelisted_role,  # Enforce officially assigned roster role
+            "role": assigned_role,
             "password_hash": hashed_password,
             "full_name": (user_in.full_name or normalized_email.split("@")[0]).strip(),
             "is_active": True
