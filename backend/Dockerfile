@@ -11,7 +11,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 COPY requirements.txt .
 RUN pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir --user -r requirements.txt
+    pip install --no-cache-dir --prefix=/install -r requirements.txt
 
 # Stage 2: Final lightweight runtime container
 FROM python:3.11-slim AS runner
@@ -27,15 +27,15 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && ./aws/install \
     && rm -rf awscliv2.zip aws /var/lib/apt/lists/*
 
+# Copy installed python libraries from builder to system /usr/local
+COPY --from=builder /install /usr/local
+
 # Create dedicated non-root application user
 RUN groupadd -g 1001 appgroup && \
     useradd -u 1001 -g appgroup -m -s /bin/bash appuser
 
-# Copy installed python libraries from builder
-COPY --from=builder /root/.local /home/appuser/.local
-ENV PATH=/home/appuser/.local/bin:$PATH
-ENV PYTHONPATH=/app:/home/appuser/.local/lib/python3.11/site-packages
-ENV PYTHONUSERBASE=/home/appuser/.local
+ENV PATH=/usr/local/bin:$PATH
+ENV PYTHONPATH=/app
 ENV AWS_DEFAULT_REGION=us-east-1
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
