@@ -241,22 +241,53 @@ api.interceptors.response.use(
           recovery_tip: string;
           wearable_synced: boolean;
         };
+        top_apps?: Array<{
+          name: string;
+          proc: string;
+          minutes: number;
+          category: string;
+          percentage?: number;
+          icon?: string;
+        }>;
+        search_topics?: Array<{
+          query: string;
+          count: number;
+          category: string;
+          flagged?: boolean;
+        }>;
         latest_log: {
           date: string;
           total_screen_time_minutes: number;
+          daytime_usage_minutes?: number;
           late_night_usage_minutes: number;
           academic_usage_minutes: number;
           social_usage_minutes: number;
           entertainment_usage_minutes: number;
           adult_usage_minutes?: number;
           continuous_screen_minutes?: number;
+          is_crisis_detected?: boolean;
           baseline_deviation_score: number;
           risk_level: string;
           synced_at: string;
+          top_apps?: Array<{
+            name: string;
+            proc: string;
+            minutes: number;
+            category: string;
+            percentage?: number;
+            icon?: string;
+          }>;
+          search_topics?: Array<{
+            query: string;
+            count: number;
+            category: string;
+            flagged?: boolean;
+          }>;
         } | null;
         weekly_history: Array<{
           date: string;
           total_screen_time_minutes: number;
+          daytime_usage_minutes?: number;
           academic_usage_minutes?: number;
           social_usage_minutes?: number;
           entertainment_usage_minutes?: number;
