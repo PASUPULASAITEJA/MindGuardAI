@@ -17,15 +17,15 @@ import {
   FileCheck2,
   Smile,
   ChevronDown,
+  Menu,
+  X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useScrollReveal } from "@/hooks/useScrollReveal";
 import { useCountUp } from "@/hooks/useCountUp";
-import { ParticleBackground } from "@/components/ui/ParticleBackground";
-import { BreathingBlob } from "@/components/ui/BreathingBlob";
 import { GlowOrb } from "@/components/ui/GlowOrb";
-import { BrainAnimation } from "@/components/ui/BrainAnimation";
+import { BioNeuralSynapseMesh } from "@/components/ui/BioNeuralSynapseMesh";
 
 interface FAQItem {
   question: string;
@@ -64,6 +64,7 @@ export const LandingPage: React.FC = () => {
   const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
   const [openFaq, setOpenFaq] = useState<number | null>(null);
+  const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
 
   const scrollToSection = (id: string) => {
     const el = document.getElementById(id);
@@ -86,6 +87,11 @@ export const LandingPage: React.FC = () => {
 
   return (
     <div className="relative min-h-screen bg-background text-foreground font-sans antialiased selection:bg-primary/20 selection:text-primary transition-colors duration-200">
+      {/* ── PERSISTENT FULL-PAGE NEURAL SYNAPSE BACKGROUND (TOP TO BOTTOM) ── */}
+      <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+        <BioNeuralSynapseMesh className="w-full h-full" />
+      </div>
+
       {/* ── TOP NAVBAR ── */}
       <header className="sticky top-0 z-50 w-full backdrop-blur-md bg-background/85 border-b border-border transition-colors">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
@@ -136,7 +142,7 @@ export const LandingPage: React.FC = () => {
             </button>
           </nav>
 
-          <div className="flex items-center gap-2.5">
+          <div className="flex items-center gap-2 sm:gap-2.5">
             <button
               onClick={toggleTheme}
               className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
@@ -146,7 +152,7 @@ export const LandingPage: React.FC = () => {
               {theme === "dark" ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
             </button>
 
-            <Link to="/login">
+            <Link to="/login" className="hidden sm:inline-block">
               <Button
                 variant="ghost"
                 size="sm"
@@ -156,58 +162,128 @@ export const LandingPage: React.FC = () => {
               </Button>
             </Link>
 
-            <Link to="/login">
+            <Link to="/login" className="hidden sm:inline-block">
               <Button size="sm" className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-lg text-xs sm:text-sm font-semibold shadow-xs">
                 Student Portal
                 <ArrowRight className="w-3.5 h-3.5 ml-1.5" />
               </Button>
             </Link>
+
+            {/* Mobile Hamburger Button */}
+            <button
+              onClick={() => setIsMobileNavOpen(!isMobileNavOpen)}
+              className="p-2 md:hidden rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
+              aria-label="Toggle mobile menu"
+            >
+              {isMobileNavOpen ? <X className="w-5 h-5 text-primary" /> : <Menu className="w-5 h-5" />}
+            </button>
           </div>
         </div>
+
+        {/* Mobile Navigation Drawer */}
+        {isMobileNavOpen && (
+          <div className="md:hidden border-t border-border bg-background/95 backdrop-blur-xl px-4 py-4 space-y-3 shadow-xl animate-in slide-in-from-top-2 duration-200">
+            <div className="flex flex-col space-y-1.5 text-sm font-medium">
+              <button
+                onClick={() => {
+                  scrollToSection("how-it-works");
+                  setIsMobileNavOpen(false);
+                }}
+                className="text-left px-3 py-2 rounded-lg hover:bg-secondary text-foreground transition-colors"
+              >
+                How It Works
+              </button>
+              <button
+                onClick={() => {
+                  scrollToSection("features");
+                  setIsMobileNavOpen(false);
+                }}
+                className="text-left px-3 py-2 rounded-lg hover:bg-secondary text-foreground transition-colors"
+              >
+                Capabilities
+              </button>
+              <button
+                onClick={() => {
+                  scrollToSection("privacy");
+                  setIsMobileNavOpen(false);
+                }}
+                className="text-left px-3 py-2 rounded-lg hover:bg-secondary text-foreground transition-colors"
+              >
+                Privacy
+              </button>
+              <button
+                onClick={() => {
+                  scrollToSection("faq");
+                  setIsMobileNavOpen(false);
+                }}
+                className="text-left px-3 py-2 rounded-lg hover:bg-secondary text-foreground transition-colors"
+              >
+                FAQ
+              </button>
+              <button
+                onClick={() => {
+                  scrollToSection("helplines");
+                  setIsMobileNavOpen(false);
+                }}
+                className="text-left px-3 py-2 rounded-lg hover:bg-secondary text-rose-500 font-semibold transition-colors"
+              >
+                Crisis Lines (14416)
+              </button>
+            </div>
+            <div className="pt-2 border-t border-border/60 flex flex-col gap-2">
+              <Link to="/login" onClick={() => setIsMobileNavOpen(false)}>
+                <Button className="w-full bg-primary text-primary-foreground font-semibold rounded-lg text-sm shadow-xs">
+                  Student Portal
+                  <ArrowRight className="w-3.5 h-3.5 ml-1.5" />
+                </Button>
+              </Link>
+            </div>
+          </div>
+        )}
       </header>
 
       {/* ── HERO SECTION ── */}
-      <section className="hero-gradient relative min-h-screen flex items-center border-b border-border overflow-hidden">
-        {/* Particle network fills entire hero */}
-        <ParticleBackground className="opacity-50" />
-
+      <section className="hero-gradient relative min-h-screen flex items-center border-b border-border overflow-hidden py-12 sm:py-20 lg:py-0">
         {/* Glow orbs — decorative depth */}
         <GlowOrb
           size={500}
           variant="primary"
-          className="top-[-100px] right-[-100px] opacity-50"
+          className="top-[-100px] right-[-100px] opacity-40 pointer-events-none"
         />
         <GlowOrb
           size={300}
           variant="purple"
-          className="bottom-[-50px] left-[-50px] opacity-30"
+          className="bottom-[-50px] left-[-50px] opacity-25 pointer-events-none"
         />
 
         {/* Content — relative z-10 so it sits above canvas */}
-        <div className="relative z-10 max-w-6xl mx-auto px-6 w-full grid lg:grid-cols-2 gap-12 items-center py-24">
+        <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 w-full grid lg:grid-cols-2 gap-8 lg:gap-12 items-center py-12 sm:py-16 lg:py-24">
           {/* Left: text */}
           <div>
-            <div className="fade-up inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-xs font-semibold text-primary mb-6">
-              <span role="img" aria-label="brain">🧠</span>
-              <span>AI-Powered Student Mental Wellness Platform</span>
+            <div className="fade-up inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-xs font-semibold text-primary mb-4 sm:mb-6 max-w-full">
+              <span className="relative flex h-2 w-2 shrink-0">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
+              </span>
+              <span className="truncate">Autonomous Neural Synapse Architecture</span>
             </div>
 
-            <h1 className="fade-up-1 text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-foreground leading-[1.12]">
+            <h1 className="fade-up-1 text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-foreground leading-[1.15]">
               Detect Burnout
               <span className="gradient-text block">Before It Becomes</span>
               a Crisis.
             </h1>
 
-            <p className="fade-up-2 text-base sm:text-lg text-muted-foreground max-w-lg mt-6 leading-relaxed">
+            <p className="fade-up-2 text-sm sm:text-base lg:text-lg text-muted-foreground max-w-lg mt-4 sm:mt-6 leading-relaxed">
               MindGuardAI continuously monitors student wellbeing signals — emotion analysis,
               sleep patterns, and clinical screeners — to surface early warnings weeks before students reach breaking point.
             </p>
 
-            <div className="fade-up-3 flex flex-wrap gap-3 mt-8">
-              <Link to="/login">
+            <div className="fade-up-3 flex flex-col sm:flex-row gap-3 mt-6 sm:mt-8">
+              <Link to="/login" className="w-full sm:w-auto">
                 <Button
                   size="lg"
-                  className="bg-primary text-primary-foreground hover:bg-primary/90 font-semibold px-7 rounded-xl shadow-md shadow-primary/20"
+                  className="w-full sm:w-auto bg-primary text-primary-foreground hover:bg-primary/90 font-semibold px-7 rounded-xl shadow-md shadow-primary/20"
                 >
                   Enter Student Portal
                   <ArrowRight className="w-4 h-4 ml-2" />
@@ -217,63 +293,97 @@ export const LandingPage: React.FC = () => {
                 variant="outline"
                 size="lg"
                 onClick={() => scrollToSection("how-it-works")}
-                className="font-semibold text-muted-foreground hover:text-foreground px-6 rounded-xl border-border"
+                className="w-full sm:w-auto font-semibold text-muted-foreground hover:text-foreground px-6 rounded-xl border-border"
               >
                 Explore Capabilities ↓
               </Button>
             </div>
 
             {/* Trust badges */}
-            <div className="fade-up-4 flex flex-wrap items-center gap-6 mt-10 pt-6 border-t border-border/80 text-xs text-muted-foreground">
+            <div className="fade-up-4 flex flex-wrap items-center gap-4 sm:gap-6 mt-8 sm:mt-10 pt-6 border-t border-border/80 text-xs text-muted-foreground">
               <div className="flex items-center gap-1.5">
-                <FileCheck2 className="w-4 h-4 text-primary" />
+                <FileCheck2 className="w-4 h-4 text-primary shrink-0" />
                 <span>PHQ-9 & GAD-7 Validated</span>
               </div>
               <div className="flex items-center gap-1.5">
-                <BarChart3 className="w-4 h-4 text-primary" />
+                <BarChart3 className="w-4 h-4 text-primary shrink-0" />
                 <span>SHAP Explainable AI</span>
               </div>
               <div className="flex items-center gap-1.5">
-                <Lock className="w-4 h-4 text-emerald-500" />
+                <Lock className="w-4 h-4 text-emerald-500 shrink-0" />
                 <span>Zero-Keystroke Privacy</span>
               </div>
             </div>
           </div>
 
-          {/* RIGHT COLUMN — 3D Brain */}
-          <div className="hidden lg:flex items-center justify-center relative fade-up-2">
-            {/* Soft glow ring behind brain */}
-            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-              <div className="w-72 h-72 rounded-full bg-primary/5 dark:bg-primary/10 blur-3xl animate-pulse" />
-            </div>
+          {/* RIGHT COLUMN — Responsive Glassmorphic Telemetry HUD on Phone and Desktop */}
+          <div className="flex flex-col justify-center relative fade-up-2 mt-4 lg:mt-0">
+            <div className="relative rounded-2xl bg-card/50 backdrop-blur-md border border-border/80 shadow-2xl p-4 sm:p-6 space-y-4 sm:space-y-5 overflow-hidden">
+              {/* Header */}
+              <div className="flex items-center justify-between pb-3 sm:pb-4 border-b border-border/60">
+                <div className="flex items-center gap-2 sm:gap-2.5">
+                  <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary shrink-0">
+                    <Activity className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <h3 className="text-xs sm:text-sm font-semibold text-foreground">Live Telemetry Synchrony</h3>
+                    <p className="text-[10px] sm:text-[11px] text-muted-foreground">Autonomous Neural Signal Mesh</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-500 text-[10px] sm:text-xs font-semibold shrink-0">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                  <span>Synchronized</span>
+                </div>
+              </div>
 
-            {/* The brain animation */}
-            <BrainAnimation className="relative z-10" />
+              {/* Multimodal Telemetry Grid */}
+              <div className="grid grid-cols-2 gap-2 sm:gap-3">
+                <div className="p-2.5 sm:p-3.5 rounded-xl bg-background/60 border border-border/60 space-y-1">
+                  <span className="text-[9px] sm:text-[10px] uppercase font-bold text-muted-foreground tracking-wider block truncate">
+                    Cognitive Sentiment
+                  </span>
+                  <p className="text-base sm:text-xl font-extrabold text-foreground">Positive (88%)</p>
+                  <p className="text-[10px] sm:text-[11px] text-primary flex items-center gap-1">
+                    <span>NLP DistilBERT 6-Class</span>
+                  </p>
+                </div>
 
-            {/* Small floating stat cards around the brain */}
+                <div className="p-2.5 sm:p-3.5 rounded-xl bg-background/60 border border-border/60 space-y-1">
+                  <span className="text-[9px] sm:text-[10px] uppercase font-bold text-muted-foreground tracking-wider block truncate">
+                    Circadian Rhythm
+                  </span>
+                  <p className="text-base sm:text-xl font-extrabold text-blue-500">7.4h Regular</p>
+                  <p className="text-[10px] sm:text-[11px] text-muted-foreground">Fragmentation 0.12</p>
+                </div>
 
-            {/* Top-left card */}
-            <div className="absolute top-8 -left-4 bg-card border border-border rounded-xl shadow-lg px-3 py-2 text-xs font-medium fade-up-3 card-hover z-20">
-              <p className="text-muted-foreground">Wellness Score</p>
-              <p className="text-2xl font-extrabold text-primary">78</p>
-            </div>
+                <div className="p-2.5 sm:p-3.5 rounded-xl bg-background/60 border border-border/60 space-y-1">
+                  <span className="text-[9px] sm:text-[10px] uppercase font-bold text-muted-foreground tracking-wider block truncate">
+                    Screen Time
+                  </span>
+                  <p className="text-base sm:text-xl font-extrabold text-emerald-500">Balanced</p>
+                  <p className="text-[10px] sm:text-[11px] text-muted-foreground">Zero-keystroke</p>
+                </div>
 
-            {/* Top-right card */}
-            <div className="absolute top-12 -right-4 bg-card border border-border rounded-xl shadow-lg px-3 py-2 text-xs font-medium fade-up-3 card-hover z-20">
-              <p className="text-muted-foreground">Risk Level</p>
-              <p className="text-sm font-bold text-emerald-500">● Low</p>
-            </div>
+                <div className="p-2.5 sm:p-3.5 rounded-xl bg-background/60 border border-border/60 space-y-1">
+                  <span className="text-[9px] sm:text-[10px] uppercase font-bold text-muted-foreground tracking-wider block truncate">
+                    Risk Tier
+                  </span>
+                  <p className="text-base sm:text-xl font-extrabold text-emerald-500">Low (0.14)</p>
+                  <p className="text-[10px] sm:text-[11px] text-muted-foreground">PHQ-9 Validated</p>
+                </div>
+              </div>
 
-            {/* Bottom-left card */}
-            <div className="absolute bottom-12 -left-6 bg-card border border-border rounded-xl shadow-lg px-3 py-2 text-xs font-medium fade-up-4 card-hover z-20">
-              <p className="text-muted-foreground">Mood Today</p>
-              <p className="text-sm font-bold text-foreground">😊 Good</p>
-            </div>
-
-            {/* Bottom-right card */}
-            <div className="absolute bottom-8 -right-6 bg-card border border-border rounded-xl shadow-lg px-3 py-2 text-xs font-medium fade-up-4 card-hover z-20">
-              <p className="text-muted-foreground">Sleep</p>
-              <p className="text-sm font-bold text-blue-500">7.2h ↑</p>
+              {/* Status footer with action potentials notice */}
+              <div className="flex items-center justify-between pt-2.5 sm:pt-3 border-t border-border/60 text-[11px] sm:text-xs text-muted-foreground">
+                <span className="flex items-center gap-1.5">
+                  <span className="relative flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-cyan-500"></span>
+                  </span>
+                  Active Synaptic Axon Links
+                </span>
+                <span className="font-mono text-[11px] text-foreground font-semibold">120+ Nodes</span>
+              </div>
             </div>
           </div>
         </div>
@@ -283,7 +393,7 @@ export const LandingPage: React.FC = () => {
       <section
         id="how-it-works"
         ref={howRef as React.RefObject<HTMLElement>}
-        className="py-24 px-4 sm:px-6 max-w-7xl mx-auto"
+        className="relative z-10 py-24 px-4 sm:px-6 max-w-7xl mx-auto"
       >
         <div className="text-center max-w-2xl mx-auto mb-16 space-y-3">
           <span className="reveal text-xs font-bold uppercase tracking-wider text-primary block">
@@ -368,7 +478,7 @@ export const LandingPage: React.FC = () => {
       <section
         id="features"
         ref={featRef as React.RefObject<HTMLElement>}
-        className="py-24 px-4 sm:px-6 bg-secondary/30 border-y border-border"
+        className="relative z-10 py-24 px-4 sm:px-6 bg-secondary/35 backdrop-blur-xs border-y border-border"
       >
         <div className="max-w-7xl mx-auto space-y-14">
           <div className="text-center max-w-2xl mx-auto space-y-3">
@@ -463,7 +573,7 @@ export const LandingPage: React.FC = () => {
       {/* ── STATS SECTION ── */}
       <section
         ref={s1.ref as React.RefObject<HTMLElement>}
-        className="stats-gradient py-20 relative overflow-hidden"
+        className="stats-gradient relative z-10 py-20 overflow-hidden"
       >
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center max-w-4xl mx-auto px-6 relative z-10">
           <div>
@@ -505,7 +615,7 @@ export const LandingPage: React.FC = () => {
       <section
         id="privacy"
         ref={privRef as React.RefObject<HTMLElement>}
-        className="py-24 px-4 sm:px-6 bg-secondary/30"
+        className="relative z-10 py-24 px-4 sm:px-6 bg-secondary/35 backdrop-blur-xs"
       >
         <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
           {/* Left Column */}
@@ -574,7 +684,7 @@ export const LandingPage: React.FC = () => {
       <section
         id="faq"
         ref={faqRef as React.RefObject<HTMLElement>}
-        className="py-24 px-4 sm:px-6 max-w-4xl mx-auto space-y-10"
+        className="relative z-10 py-24 px-4 sm:px-6 max-w-4xl mx-auto space-y-10"
       >
         <div className="text-center space-y-3">
           <span className="reveal text-xs font-bold uppercase tracking-wider text-primary block">
@@ -620,7 +730,7 @@ export const LandingPage: React.FC = () => {
       </section>
 
       {/* ── CRISIS HELPLINES ── */}
-      <section id="helplines" className="py-16 px-4 sm:px-6 max-w-5xl mx-auto">
+      <section id="helplines" className="relative z-10 py-16 px-4 sm:px-6 max-w-5xl mx-auto">
         <div className="p-6 sm:p-8 rounded-2xl bg-rose-500/5 border border-rose-500/20 text-center space-y-4">
           <div className="w-12 h-12 mx-auto rounded-full bg-rose-500/10 flex items-center justify-center text-rose-500">
             <PhoneCall className="w-6 h-6 pulse-soft" />
@@ -652,7 +762,7 @@ export const LandingPage: React.FC = () => {
       </section>
 
       {/* ── FOOTER ── */}
-      <footer className="border-t border-border bg-card py-12 px-4 sm:px-6">
+      <footer className="relative z-10 border-t border-border bg-card/85 backdrop-blur-md py-12 px-4 sm:px-6">
         <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Logo + tagline */}
           <div className="space-y-3">
