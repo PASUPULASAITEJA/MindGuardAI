@@ -57,6 +57,9 @@ class Settings(BaseSettings):
     @classmethod
     def validate_database_url(cls, v: str) -> str:
         # Standardize standard DB connection URLs to their async SQLAlchemy equivalent
+        import os
+        if ("@db:" in v or "@localhost:" in v) and os.environ.get("AWS_LAMBDA_FUNCTION_NAME"):
+            return "sqlite+aiosqlite:////tmp/mindguard.db"
         if v.startswith("postgresql://"):
             return v.replace("postgresql://", "postgresql+asyncpg://", 1)
         elif v.startswith("sqlite://") and not v.startswith("sqlite+aiosqlite://"):
