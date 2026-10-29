@@ -3,13 +3,6 @@
   <h1>MindGuardAI</h1>
   <p><strong>Predictive, privacy-first mental health intelligence platform for higher education</strong></p>
 
-  [![FastAPI](https://img.shields.io/badge/FastAPI-0.104+-009688.svg?style=flat-square&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
-  [![React](https://img.shields.io/badge/React-18.2-61DAFB.svg?style=flat-square&logo=react&logoColor=black)](https://react.dev)
-  [![TypeScript](https://img.shields.io/badge/TypeScript-5.2-3178C6.svg?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org)
-  [![Docker](https://img.shields.io/badge/Docker-Ready-2496ED.svg?style=flat-square&logo=docker&logoColor=white)](docker-compose.yml)
-  [![License](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)](LICENSE)
-</div>
-
 ---
 
 ## What is MindGuardAI?
@@ -20,14 +13,14 @@ University students frequently face burnout, chronic sleep disruption, and anxie
 
 ## Key Features
 
-| Icon | Feature | Description |
-| :---: | :--- | :--- |
-| 🛡️ | **Early Risk Stratification** | Multi-tier behavioral inference flagging emerging distress before academic crises. |
-| 🤖 | **Empathetic AI Companion** | 24/7 conversational support with automatic clinical escalation for high-distress cues. |
-| 📊 | **Explainable AI Insights** | SHAP-driven factor attribution revealing actionable wellness drivers to students and counselors. |
-| 🔒 | **Zero-Knowledge Privacy** | Explicit granular consent controls, differential privacy, and $k$-anonymity campus aggregation. |
-| 📋 | **Clinical Assessments** | Automated standardized PHQ-9, GAD-7, and ISI screening with longitudinal history tracking. |
-| 🚨 | **Crisis SOS Protocol** | Instant emergency lifeline routing with real-time counselor escalation dashboards. |
+| Icon | Feature                             | Description                                                                                       |
+| :--: | :---------------------------------- | :------------------------------------------------------------------------------------------------ |
+| 🛡️ | **Early Risk Stratification** | Multi-tier behavioral inference flagging emerging distress before academic crises.                |
+|  🤖  | **Empathetic AI Companion**   | 24/7 conversational support with automatic clinical escalation for high-distress cues.            |
+|  📊  | **Explainable AI Insights**   | SHAP-driven factor attribution revealing actionable wellness drivers to students and counselors.  |
+|  🔒  | **Zero-Knowledge Privacy**    | Explicit granular consent controls, differential privacy, and $k$-anonymity campus aggregation. |
+|  📋  | **Clinical Assessments**      | Automated standardized PHQ-9, GAD-7, and ISI screening with longitudinal history tracking.        |
+|  🚨  | **Crisis SOS Protocol**       | Instant emergency lifeline routing with real-time counselor escalation dashboards.                |
 
 ---
 
@@ -63,14 +56,17 @@ University students frequently face burnout, chronic sleep disruption, and anxie
 ## Quick Start
 
 ### Option A: Docker (Recommended)
+
 ```bash
 git clone https://github.com/PASUPULASAITEJA/MindGuardAI.git
 cd MindGuardAI
 docker compose up --build
 ```
+
 Access the application at `http://localhost:5173` (Frontend) and `http://localhost:8000/docs` (API Docs).
 
 ### Option B: Manual Setup
+
 ```bash
 # 1. Backend Setup
 cd backend
@@ -89,11 +85,11 @@ npm run dev
 
 ## ML Model Performance
 
-| Model | Task | Accuracy / F1 | Inference Latency | Notes |
-| :--- | :--- | :---: | :---: | :--- |
-| **DistilBERT v1** | Conversational Intent & Risk | **89.4% F1** | ~42ms (CPU) | Fine-tuned on distress dialogues; optimized for fast CPU inference. |
-| **Random Forest v2**| Academic & Sleep Risk Triaging | **91.2% Acc** | <5ms | Combines academic pressure indices, sleep deficit, and check-in history. |
-| **SHAP Explainer** | Clinical Factor Attribution | N/A | ~85ms | Generates individualized barrier/protective factor breakdowns. |
+| Model                      | Task                           |    Accuracy / F1    | Inference Latency | Notes                                                                    |
+| :------------------------- | :----------------------------- | :-----------------: | :---------------: | :----------------------------------------------------------------------- |
+| **DistilBERT v1**    | Conversational Intent & Risk   | **89.4% F1** |    ~42ms (CPU)    | Fine-tuned on distress dialogues; optimized for fast CPU inference.      |
+| **Random Forest v2** | Academic & Sleep Risk Triaging | **91.2% Acc** |       <5ms       | Combines academic pressure indices, sleep deficit, and check-in history. |
+| **SHAP Explainer**   | Clinical Factor Attribution    |         N/A         |       ~85ms       | Generates individualized barrier/protective factor breakdowns.           |
 
 > *Note: Production deployment uses confidence thresholding with fallback rules to guarantee emergency safety protocols.*
 
@@ -117,12 +113,12 @@ npm run build
 
 Explore in-depth architectural specifications and operational guides in [`docs/`](docs/):
 
-- [Architecture & Data Flow](docs/ARCHITECTURE.md)
+- [Architecture &amp; Data Flow](docs/ARCHITECTURE.md)
 - [API Specification](docs/API.md)
 - [Machine Learning Pipeline](docs/ML.md)
-- [Database Schema & ERD](docs/DATABASE.md)
-- [Security & Threat Model](docs/SECURITY.md)
-- [Privacy & Consent Engine](docs/PRIVACY_AND_CONSENT.md)
+- [Database Schema &amp; ERD](docs/DATABASE.md)
+- [Security &amp; Threat Model](docs/SECURITY.md)
+- [Privacy &amp; Consent Engine](docs/PRIVACY_AND_CONSENT.md)
 - [Emergency Escalation Protocol](docs/EMERGENCY_ESCALATION.md)
 - [Docker Deployment Guide](docs/DOCKER.md)
 - [Product Requirements (PRD)](docs/PRD.md)
