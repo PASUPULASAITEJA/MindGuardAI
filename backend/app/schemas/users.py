@@ -12,14 +12,6 @@ class UserCreate(UserBase):
     full_name: Optional[str] = Field(None, max_length=255, description="Full display name or username")
     password: str = Field(..., min_length=8, description="Cleartext password (min 8 characters)")
 
-    @model_validator(mode="after")
-    def validate_institutional_email(self):
-        from app.core.whitelist import is_valid_institutional_domain
-        email_str = str(self.email).lower().strip()
-        if not is_valid_institutional_domain(email_str):
-            raise ValueError("Registration is restricted to authorized institutional email domains.")
-        return self
-
 class UserUpdate(BaseModel):
     email: Optional[EmailStr] = None
     role: Optional[UserRole] = None
