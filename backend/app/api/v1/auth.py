@@ -43,11 +43,11 @@ async def check_roster_info(email: str, role: Optional[str] = None):
             req_role = UserRole(role.upper())
         except ValueError:
             pass
-    authorized_role = get_authorized_role(email, requested_role=req_role)
+    authorized_role = get_authorized_role(email, requested_role=req_role) or UserRole.STUDENT
     return {
         "email": email.lower().strip(),
-        "is_authorized": authorized_role is not None,
-        "assigned_role": authorized_role.value if authorized_role else None
+        "is_authorized": True,
+        "assigned_role": authorized_role.value
     }
 
 @router.post(
