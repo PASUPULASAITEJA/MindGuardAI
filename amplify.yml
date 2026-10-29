@@ -1,3 +1,4 @@
+# MindGuardAI AWS Amplify Deployment Configuration
 version: 1
 applications:
   - appRoot: frontend
