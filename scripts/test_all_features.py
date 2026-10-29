@@ -68,11 +68,11 @@ async def run_all_tests():
             f"Status: {res.status_code}, Role: {res.json().get('assigned_role')}"
         )
 
-        # Unauthorized external email
+        # External email check (now open to all emails)
         res = await client.get("/api/v1/auth/roster-info?email=random.user@external.com")
         record_test(
-            "Roster Check: Unauthorized External Email",
-            res.status_code == 200 and res.json().get("is_authorized") is False,
+            "Roster Check: Any Valid Email Allowed (random.user@external.com)",
+            res.status_code == 200 and res.json().get("is_authorized") is True,
             f"Authorized: {res.json().get('is_authorized')}"
         )
 
@@ -92,20 +92,20 @@ async def run_all_tests():
             f"Authorized: {res.json().get('is_authorized')}, Role: {res.json().get('assigned_role')}"
         )
 
-        # Registration Block: External non-NMIMS email (@gmail.com)
-        res_blocked = await client.post(
+        # Open Registration: Any standard email (@gmail.com) allowed
+        res_open = await client.post(
             "/api/v1/auth/register",
             json={
-                "email": "intruder@gmail.com",
+                "email": "testuser@gmail.com",
                 "password": "Password123!",
-                "full_name": "Intruder User",
+                "full_name": "Test User",
                 "role": "STUDENT"
             }
         )
         record_test(
-            "Registration Block: Non-NMIMS Domain (intruder@gmail.com)",
-            res_blocked.status_code in (403, 422),
-            f"Status: {res_blocked.status_code}"
+            "Open Registration: Standard Email (testuser@gmail.com)",
+            res_open.status_code in (201, 409),
+            f"Status: {res_open.status_code}"
         )
 
         # -------------------------------------------------------------
@@ -481,7 +481,7 @@ async def run_all_tests():
             from app.models.sleep_logs import SleepLog
 
             async with AsyncSessionLocal() as session:
-                for email in ["student@nmims.in", "counselor@nmims.edu", "admin@nmims.edu"]:
+                for email in ["student@nmims.in", "counselor@nmims.edu", "admin@nmims.edu", "testuser@gmail.com"]:
                     res = await session.execute(select(User).where(User.email == email))
                     u = res.scalars().first()
                     if u:
