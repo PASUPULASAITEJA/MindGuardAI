@@ -23,7 +23,7 @@ import api from "@/services/api";
 const registerSchema = z
   .object({
     full_name: z.string().min(2, "Please enter your full name."),
-    email: z.string().email("Please enter a valid university email address."),
+    email: z.string().email("Please enter a valid email address."),
     role: z.enum(["STUDENT", "COUNSELOR", "ADMIN"], {
       errorMap: () => ({ message: "Please select an account type." }),
     }),
@@ -37,7 +37,7 @@ const registerSchema = z
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         path: ["email"],
-        message: "Please enter a valid institutional or university email address.",
+        message: "Please enter a valid email address.",
       });
     }
     if (data.password !== data.confirm_password) {
@@ -263,28 +263,22 @@ export const Register: React.FC = () => {
               )}
             </div>
 
-            {/* University Email field */}
+            {/* Email field */}
             <div className="space-y-1.5">
               <label
                 htmlFor="email"
                 className="text-xs font-semibold text-foreground block"
               >
-                University Email
+                Email Address
               </label>
               <Input
                 id="email"
                 type="email"
                 autoComplete="email"
-                placeholder="you@university.edu"
+                placeholder="you@example.com"
                 className="rounded-xl h-10 text-sm focus:ring-2 focus:ring-primary/30"
                 {...register("email")}
               />
-              {rosterStatus.checked && rosterStatus.isAuthorized && (
-                <div className="flex items-center gap-1.5 text-[11px] text-emerald-600 dark:text-emerald-400 font-medium pt-0.5">
-                  <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
-                  <span>Verified Campus Roster ({rosterStatus.assignedRole})</span>
-                </div>
-              )}
               {errors.email && (
                 <p className="text-xs text-destructive font-medium">
                   {errors.email.message}
