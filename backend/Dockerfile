@@ -27,12 +27,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && ./aws/install \
     && rm -rf awscliv2.zip aws /var/lib/apt/lists/*
 
-# Download AWS Lambda Web Adapter directly to bypass ECR Public rate limits
-RUN mkdir -p /opt/extensions \
-    && curl -Lo /opt/extensions/lambda-adapter https://github.com/awslabs/aws-lambda-web-adapter/releases/latest/download/lambda-adapter-x86_64 \
-    && chmod +x /opt/extensions/lambda-adapter
-ENV PORT=8000
-
 # Create dedicated non-root application user
 RUN groupadd -g 1001 appgroup && \
     useradd -u 1001 -g appgroup -m -s /bin/bash appuser
