@@ -7,8 +7,6 @@ Welcome to the MindGuardAI development team. This document outlines branch conve
 ## 1. Branch Strategy & Environments
 - **`main`**: Production-ready, verified codebase. Releases to AWS infrastructure originate from here.
 - **`anoushka-dev`**: Active feature development and staging branch for core wellness modules, frontend enhancements, and clinical validation.
-- **`feature/<name>`**: Feature-specific branches branched off `anoushka-dev` or `main`.
-
 ---
 
 ## 2. Clinical Engineering Principles
