@@ -170,11 +170,11 @@ export const NotificationBell: React.FC = () => {
       case "risk_alert":
         return <ShieldAlert className="w-4 h-4 text-rose-500" />;
       case "session_reminder":
-        return <Calendar className="w-4 h-4 text-purple-400" />;
+        return <Calendar className="w-4 h-4 text-purple-600 dark:text-purple-400" />;
       case "counselor_message":
-        return <MessageSquare className="w-4 h-4 text-emerald-400" />;
+        return <MessageSquare className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />;
       default:
-        return <Info className="w-4 h-4 text-blue-400" />;
+        return <Info className="w-4 h-4 text-blue-600 dark:text-blue-400" />;
     }
   };
 
@@ -204,12 +204,12 @@ export const NotificationBell: React.FC = () => {
         type="button"
         id="notification-bell-button"
         onClick={() => setIsOpen(!isOpen)}
-        className="relative p-2 rounded-xl text-slate-400 hover:text-slate-100 hover:bg-slate-800/80 transition-all duration-200 border border-transparent hover:border-slate-700/60 focus:outline-none focus:ring-2 focus:ring-purple-500/40"
+        className="relative p-2 rounded-xl text-muted-foreground hover:text-foreground hover:bg-secondary transition-all duration-200 border border-transparent hover:border-border focus:outline-none focus:ring-2 focus:ring-primary/40"
         title="Notifications"
       >
         <Bell className="w-5 h-5" />
         {unreadCount > 0 && (
-          <span className="absolute -top-0.5 -right-0.5 flex items-center justify-center min-w-[1.25rem] h-5 px-1 text-[11px] font-bold text-white bg-rose-500 rounded-full ring-2 ring-slate-900 shadow-lg shadow-rose-500/30 animate-pulse">
+          <span className="absolute -top-0.5 -right-0.5 flex items-center justify-center min-w-[1.25rem] h-5 px-1 text-[11px] font-bold text-white bg-rose-500 rounded-full ring-2 ring-card shadow-lg shadow-rose-500/30 animate-pulse">
             {unreadCount > 99 ? "99+" : unreadCount}
           </span>
         )}
@@ -217,13 +217,13 @@ export const NotificationBell: React.FC = () => {
 
       {/* Popover Dropdown */}
       {isOpen && (
-        <div className="absolute right-0 mt-3 w-80 sm:w-96 bg-slate-900/95 backdrop-blur-xl border border-slate-800 rounded-2xl shadow-2xl shadow-black/60 z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
+        <div className="absolute right-0 mt-3 w-80 sm:w-96 bg-card text-card-foreground backdrop-blur-xl border border-border rounded-2xl shadow-2xl shadow-black/10 dark:shadow-black/60 z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
           {/* Header */}
-          <div className="px-4 py-3.5 border-b border-slate-800/80 flex items-center justify-between bg-slate-950/40">
+          <div className="px-4 py-3.5 border-b border-border flex items-center justify-between bg-secondary/50">
             <div className="flex items-center space-x-2">
-              <h3 className="text-sm font-semibold text-white tracking-wide">Notifications</h3>
+              <h3 className="text-sm font-semibold text-foreground tracking-wide">Notifications</h3>
               {unreadCount > 0 && (
-                <span className="px-2 py-0.5 text-xs font-semibold rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30">
+                <span className="px-2 py-0.5 text-xs font-semibold rounded-full bg-primary/10 text-primary border border-primary/20">
                   {unreadCount} new
                 </span>
               )}
@@ -231,21 +231,21 @@ export const NotificationBell: React.FC = () => {
             <div className="flex items-center space-x-2">
               {/* WebSocket Live status badge */}
               <div
-                className="flex items-center space-x-1.5 px-2 py-0.5 rounded-full text-[10px] font-medium bg-slate-800/80 border border-slate-700/50"
+                className="flex items-center space-x-1.5 px-2 py-0.5 rounded-full text-[10px] font-medium bg-secondary border border-border"
                 title={isConnected ? "Real-time stream active" : "Reconnecting to notification stream..."}
               >
                 <span
                   className={`w-2 h-2 rounded-full ${
-                    isConnected ? "bg-emerald-400 shadow-sm shadow-emerald-400/50 animate-pulse" : "bg-amber-400"
+                    isConnected ? "bg-emerald-500 shadow-sm shadow-emerald-500/50 animate-pulse" : "bg-amber-500"
                   }`}
                 />
-                <span className="text-slate-400">{isConnected ? "Live" : "Syncing"}</span>
+                <span className="text-muted-foreground">{isConnected ? "Live" : "Syncing"}</span>
               </div>
               {unreadCount > 0 && (
                 <button
                   type="button"
                   onClick={handleMarkAllRead}
-                  className="flex items-center space-x-1 text-xs text-purple-400 hover:text-purple-300 transition-colors p-1 rounded hover:bg-purple-950/30"
+                  className="flex items-center space-x-1 text-xs text-primary hover:text-primary/80 transition-colors p-1 rounded hover:bg-primary/10"
                   title="Mark all as read"
                 >
                   <CheckCheck className="w-3.5 h-3.5" />
@@ -256,14 +256,14 @@ export const NotificationBell: React.FC = () => {
           </div>
 
           {/* Filter Tabs */}
-          <div className="px-4 pt-2.5 pb-1 flex items-center space-x-2 border-b border-slate-800/40 bg-slate-900/60">
+          <div className="px-4 pt-2.5 pb-1 flex items-center space-x-2 border-b border-border bg-card">
             <button
               type="button"
               onClick={() => setFilter("all")}
               className={`text-xs font-medium pb-1.5 border-b-2 transition-all ${
                 filter === "all"
-                  ? "text-purple-400 border-purple-500"
-                  : "text-slate-400 border-transparent hover:text-slate-200"
+                  ? "text-primary border-primary"
+                  : "text-muted-foreground border-transparent hover:text-foreground"
               }`}
             >
               All ({notifications.length})
@@ -273,8 +273,8 @@ export const NotificationBell: React.FC = () => {
               onClick={() => setFilter("unread")}
               className={`text-xs font-medium pb-1.5 border-b-2 transition-all ${
                 filter === "unread"
-                  ? "text-purple-400 border-purple-500"
-                  : "text-slate-400 border-transparent hover:text-slate-200"
+                  ? "text-primary border-primary"
+                  : "text-muted-foreground border-transparent hover:text-foreground"
               }`}
             >
               Unread ({unreadCount})
@@ -282,14 +282,14 @@ export const NotificationBell: React.FC = () => {
           </div>
 
           {/* Notification List */}
-          <div className="max-h-96 overflow-y-auto divide-y divide-slate-800/40 custom-scrollbar">
+          <div className="max-h-96 overflow-y-auto divide-y divide-border custom-scrollbar">
             {filteredNotifications.length === 0 ? (
               <div className="py-10 px-4 text-center">
-                <div className="w-10 h-10 mx-auto mb-2 rounded-full bg-slate-800/80 flex items-center justify-center text-slate-500">
+                <div className="w-10 h-10 mx-auto mb-2 rounded-full bg-secondary flex items-center justify-center text-muted-foreground">
                   <Bell className="w-5 h-5 opacity-60" />
                 </div>
-                <p className="text-xs font-medium text-slate-300">All caught up!</p>
-                <p className="text-[11px] text-slate-500 mt-0.5">
+                <p className="text-xs font-medium text-foreground">All caught up!</p>
+                <p className="text-[11px] text-muted-foreground mt-0.5">
                   {filter === "unread" ? "No unread notifications." : "No notifications right now."}
                 </p>
               </div>
@@ -303,17 +303,17 @@ export const NotificationBell: React.FC = () => {
                     className={`p-3.5 transition-colors cursor-pointer group flex items-start space-x-3 ${
                       !n.is_read
                         ? isRisk
-                          ? "bg-rose-950/20 hover:bg-rose-950/30 border-l-2 border-rose-500"
-                          : "bg-purple-950/15 hover:bg-purple-950/25 border-l-2 border-purple-500"
-                        : "hover:bg-slate-800/40 opacity-85 hover:opacity-100"
+                          ? "bg-rose-500/10 hover:bg-rose-500/15 border-l-2 border-rose-500"
+                          : "bg-primary/5 hover:bg-primary/10 border-l-2 border-primary"
+                        : "hover:bg-secondary/60 opacity-90 hover:opacity-100"
                     }`}
                   >
                     {/* Icon container */}
                     <div
                       className={`p-2 rounded-xl flex-shrink-0 mt-0.5 ${
                         isRisk
-                          ? "bg-rose-500/15 text-rose-400 border border-rose-500/20"
-                          : "bg-slate-800 text-slate-300 border border-slate-700/40"
+                          ? "bg-rose-500/15 text-rose-600 dark:text-rose-400 border border-rose-500/30"
+                          : "bg-secondary text-foreground border border-border"
                       }`}
                     >
                       {getNotificationIcon(n.type)}
@@ -324,27 +324,27 @@ export const NotificationBell: React.FC = () => {
                       <div className="flex items-center justify-between">
                         <h4
                           className={`text-xs font-semibold truncate ${
-                            !n.is_read ? "text-slate-100" : "text-slate-300"
+                            !n.is_read ? "text-foreground" : "text-muted-foreground font-medium"
                           }`}
                         >
                           {n.title}
                         </h4>
-                        <span className="text-[10px] text-slate-500 ml-2 whitespace-nowrap">
+                        <span className="text-[10px] text-muted-foreground ml-2 whitespace-nowrap">
                           {formatRelativeTime(n.created_at)}
                         </span>
                       </div>
-                      <p className="text-xs text-slate-400 mt-1 line-clamp-2 leading-relaxed">
+                      <p className="text-xs text-muted-foreground mt-1 line-clamp-2 leading-relaxed">
                         {n.message}
                       </p>
                       <div className="flex items-center space-x-2 mt-2">
                         {n.channel && n.channel !== "in_app" && (
-                          <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-slate-800 text-slate-400 border border-slate-700/40">
+                          <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-secondary text-muted-foreground border border-border">
                             {n.channel === "both" ? "App + Email" : "Email"}
                           </span>
                         )}
                         {!n.is_read && (
-                          <span className="inline-flex items-center text-[10px] text-purple-400 font-medium">
-                            <span className="w-1.5 h-1.5 rounded-full bg-purple-400 mr-1.5" />
+                          <span className="inline-flex items-center text-[10px] text-primary font-medium">
+                            <span className="w-1.5 h-1.5 rounded-full bg-primary mr-1.5" />
                             New
                           </span>
                         )}
