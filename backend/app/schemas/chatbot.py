@@ -91,6 +91,8 @@ class BehavioralFeaturesPayload(BaseModel):
     circadian_regularity_score: Optional[float] = Field(default=None, ge=0.0, le=100.0, description="0-100 Circadian Regularity Index")
     pre_bedtime_screen_minutes: Optional[int] = Field(default=None, ge=0, description="Active entertainment screen time in the 2h before sleep")
     wearable_synced: Optional[bool] = Field(default=False, description="Whether data originated or was augmented from wearable device")
+    top_apps: Optional[List[Dict[str, Any]]] = Field(default=None, description="Ranked list of top active applications with minutes and category")
+    search_topics: Optional[List[Dict[str, Any]]] = Field(default=None, description="Extracted search queries and topics with category and frequency")
 
 class WearableSleepSyncPayload(BaseModel):
     sleep_duration_hours: float = Field(..., ge=1.0, le=18.0, description="Total sleep duration in hours")
