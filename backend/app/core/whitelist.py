@@ -124,12 +124,12 @@ def _load_excel_roster() -> Dict[str, UserRole]:
 AUTHORIZED_DOMAINS = ("@nmims.in", "@nmims.edu.in", "@nmims.edu")
 
 def is_valid_institutional_domain(email: str) -> bool:
-    """Checks if the email belongs to an authorized NMIMS domain."""
+    """Checks if the email is valid. Open to all domains."""
     normalized = email.lower().strip()
-    return any(normalized.endswith(domain) for domain in AUTHORIZED_DOMAINS)
+    return "@" in normalized and "." in normalized
 
 def get_authorized_roster() -> Dict[str, UserRole]:
-    """Returns the combined roster from base list and live Excel file."""
+    """Returns the combined roster from base list and live Excel file if available."""
     combined = dict(BASE_AUTHORIZED_ROSTER)
     excel_data = _load_excel_roster()
     combined.update(excel_data)
@@ -137,32 +137,27 @@ def get_authorized_roster() -> Dict[str, UserRole]:
 
 def get_authorized_role(email: str, requested_role: Optional[UserRole] = None) -> Optional[UserRole]:
     """
-    Returns the designated UserRole if the email is authorized under NMIMS domains, else None.
-    1. If explicitly in base roster or Excel roster, returns that designated role.
-    2. If not explicitly listed, but matches @nmims.in or @nmims.edu.in -> UserRole.STUDENT.
-    3. If matches @nmims.edu -> UserRole.COUNSELOR, UserRole.ADMIN, or UserRole.STUDENT based on requested_role.
-    4. If not matching any authorized NMIMS domain -> None (Unauthorized).
+    Returns the designated UserRole for any email:
+    1. If requested_role is specified, honor requested_role.
+    2. If email is in base or Excel roster, use that assigned role.
+    3. Defaults to UserRole.STUDENT.
     """
-    normalized_email = email.lower().strip()
-    if not is_valid_institutional_domain(normalized_email):
-        return None
+    if requested_role in [UserRole.COUNSELOR, UserRole.ADMIN, UserRole.STUDENT]:
+        return requested_role
 
+    normalized_email = email.lower().strip()
     roster = get_authorized_roster()
     explicit_role = roster.get(normalized_email)
     if explicit_role:
         return explicit_role
 
-    if normalized_email.endswith("@nmims.in") or normalized_email.endswith("@nmims.edu.in"):
-        return UserRole.STUDENT
-    elif normalized_email.endswith("@nmims.edu"):
-        if requested_role in [UserRole.COUNSELOR, UserRole.ADMIN, UserRole.STUDENT]:
-            return requested_role
+    if normalized_email.endswith("@nmims.edu"):
         return UserRole.COUNSELOR
 
-    return None
+    return UserRole.STUDENT
 
 def is_email_whitelisted(email: str) -> bool:
     """
-    Returns True if the email is authorized under NMIMS institutional domains or roster.
+    Returns True for any valid email format.
     """
-    return get_authorized_role(email) is not None
+    return "@" in email and "." in email
