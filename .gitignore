@@ -101,3 +101,4 @@ Thumbs.db
 *.sln
 *.sw?
 *.swp
+.mindguard_agent_*.json
