@@ -183,21 +183,21 @@ export const PersonalizedRecommendations: React.FC = () => {
             return (
               <div 
                 key={rec.id}
-                className={`p-4 rounded-xl border flex flex-col justify-between transition-all duration-200 ${
+                className={`p-4.5 rounded-2xl border flex flex-col justify-between transition-all duration-200 min-h-[230px] ${
                   isCompleted 
-                    ? "bg-muted/20 border-border/50 opacity-85" 
-                    : "bg-card border-border/70 hover:border-primary/40 shadow-2xs"
+                    ? "bg-muted/30 border-border/60 opacity-80" 
+                    : "bg-card border-border/80 hover:border-primary/50 shadow-xs hover:shadow-md"
                 }`}
               >
-                <div className="space-y-2.5">
+                <div className="space-y-3">
                   {/* Category Pill */}
                   <div className="flex items-center justify-between">
-                    <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[10px] font-extrabold uppercase tracking-wider border ${meta.color}`}>
+                    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider border ${meta.color}`}>
                       {meta.icon}
                       {meta.label}
                     </span>
                     {isCompleted && (
-                      <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-500 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
+                      <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
                         <CheckCircle2 className="h-3 w-3" />
                         Completed
                       </span>
@@ -206,25 +206,25 @@ export const PersonalizedRecommendations: React.FC = () => {
 
                   {/* Title & Description */}
                   <div>
-                    <h4 className={`text-sm font-bold text-foreground ${isCompleted ? "line-through text-muted-foreground" : ""}`}>
+                    <h4 className={`text-sm font-bold text-foreground leading-snug ${isCompleted ? "line-through text-muted-foreground" : ""}`}>
                       {rec.title}
                     </h4>
-                    <p className="text-xs text-muted-foreground mt-1 leading-relaxed line-clamp-3">
+                    <p className="text-xs text-muted-foreground mt-1.5 leading-relaxed line-clamp-3">
                       {rec.description}
                     </p>
                   </div>
 
                   {/* Clinical Reason */}
                   {rec.reason && (
-                    <div className="p-2 rounded-lg bg-muted/40 border border-border/50 text-[11px] text-muted-foreground/90 italic flex items-start gap-1.5">
-                      <Compass className="h-3 w-3 mt-0.5 text-primary shrink-0" />
-                      <span>{rec.reason}</span>
+                    <div className="p-2.5 rounded-xl bg-muted/40 border border-border/60 text-[11px] text-muted-foreground italic flex items-start gap-2">
+                      <Compass className="h-3.5 w-3.5 mt-0.5 text-primary shrink-0" />
+                      <span className="leading-tight">{rec.reason}</span>
                     </div>
                   )}
                 </div>
 
                 {/* Actions Row */}
-                <div className="pt-4 mt-3 border-t border-border/40 flex items-center justify-between gap-2">
+                <div className="pt-3.5 mt-3 border-t border-border/50 flex items-center justify-between gap-2.5">
                   <Button
                     size="sm"
                     variant={isCompleted ? "outline" : "default"}
@@ -235,45 +235,47 @@ export const PersonalizedRecommendations: React.FC = () => {
                         navigate(rec.action_url);
                       }
                     }}
-                    className="h-8 text-xs font-bold gap-1.5 flex-1"
+                    className="h-8.5 text-xs font-bold gap-1.5 flex-1 rounded-xl shadow-xs"
                   >
-                    <span>Launch</span>
+                    <span>Launch Protocol</span>
                     <ArrowRight className="h-3.5 w-3.5" />
                   </Button>
 
-                  <div className="flex items-center gap-1">
+                  <div className="flex items-center gap-1.5">
                     <Button
                       size="sm"
-                      variant="ghost"
+                      variant="outline"
                       disabled={isActing}
                       onClick={() => feedbackMutation.mutate({ 
                         recId: rec.id, 
                         feedback: isHelpful ? undefined : "HELPFUL" 
                       })}
-                      className={`h-8 px-2 text-xs gap-1 rounded-lg ${
+                      className={`h-8.5 w-8.5 p-0 rounded-xl border transition-all ${
                         isHelpful 
-                          ? "text-primary bg-primary/10 border border-primary/20" 
-                          : "text-muted-foreground hover:text-foreground"
+                          ? "text-primary bg-primary/10 border-primary/30" 
+                          : "border-border/70 text-muted-foreground hover:text-foreground hover:bg-muted/60"
                       }`}
-                      title={isHelpful ? "Marked as helpful" : "Helpful recommendation"}
+                      title={isHelpful ? "Marked as helpful" : "Helpful protocol"}
+                      aria-label="Helpful protocol"
                     >
                       <ThumbsUp className="h-3.5 w-3.5" />
                     </Button>
 
                     <Button
                       size="sm"
-                      variant="ghost"
+                      variant="outline"
                       disabled={isActing}
                       onClick={() => feedbackMutation.mutate({ 
                         recId: rec.id, 
                         status: isCompleted ? "ACTIVE" : "COMPLETED" 
                       })}
-                      className={`h-8 px-2 text-xs gap-1 rounded-lg ${
+                      className={`h-8.5 w-8.5 p-0 rounded-xl border transition-all ${
                         isCompleted 
-                          ? "text-emerald-500 bg-emerald-500/10 border border-emerald-500/20" 
-                          : "text-muted-foreground hover:text-foreground"
+                          ? "text-emerald-500 bg-emerald-500/10 border-emerald-500/30" 
+                          : "border-border/70 text-muted-foreground hover:text-foreground hover:bg-muted/60"
                       }`}
-                      title={isCompleted ? "Mark active" : "Mark completed"}
+                      title={isCompleted ? "Mark active" : "Mark protocol completed"}
+                      aria-label="Mark completed"
                     >
                       <CheckCircle2 className="h-3.5 w-3.5" />
                     </Button>
