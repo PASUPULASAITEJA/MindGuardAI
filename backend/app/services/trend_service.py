@@ -393,8 +393,16 @@ class TrendAnalysisService:
             volatility = 0.0
             direction = "STABLE"
 
-        emotion_counter = Counter(all_emotions)
-        dominant_emotion = emotion_counter.most_common(1)[0][0] if all_emotions else "neutral"
+        if all_emotions:
+            emotion_counter = Counter(all_emotions)
+            # Break ties by recency: the emotion appearing latest in the chronological stream
+            dominant_emotion = max(
+                emotion_counter.keys(),
+                key=lambda e: (emotion_counter[e], max(i for i, x in enumerate(all_emotions) if x == e))
+            )
+        else:
+            emotion_counter = Counter()
+            dominant_emotion = "neutral"
         emotion_dist = dict(emotion_counter)
 
         summary = WellnessTrendSummary(
