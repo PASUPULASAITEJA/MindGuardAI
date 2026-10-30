@@ -25,6 +25,26 @@ export const NotificationBell: React.FC = () => {
   const popoverRef = useRef<HTMLDivElement>(null);
   const wsRef = useRef<WebSocket | null>(null);
   const reconnectTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const pingIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const cleanupWebSocket = useCallback(() => {
+    if (pingIntervalRef.current) {
+      clearInterval(pingIntervalRef.current);
+      pingIntervalRef.current = null;
+    }
+    if (wsRef.current) {
+      wsRef.current.onopen = null;
+      wsRef.current.onmessage = null;
+      wsRef.current.onerror = null;
+      wsRef.current.onclose = null;
+      try {
+        if (wsRef.current.readyState === WebSocket.OPEN || wsRef.current.readyState === WebSocket.CONNECTING) {
+          wsRef.current.close();
+        }
+      } catch (e) {}
+      wsRef.current = null;
+    }
+  }, []);
 
   // Fetch initial notifications
   const fetchNotifications = useCallback(async () => {
@@ -45,9 +65,12 @@ export const NotificationBell: React.FC = () => {
     const token = getAccessToken();
     if (!token) return;
 
-    if (wsRef.current) {
-      wsRef.current.close();
+    // If already connected or connecting, skip
+    if (wsRef.current && (wsRef.current.readyState === WebSocket.OPEN || wsRef.current.readyState === WebSocket.CONNECTING)) {
+      return;
     }
+
+    cleanupWebSocket();
 
     // Determine WebSocket host URL
     const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
@@ -60,14 +83,17 @@ export const NotificationBell: React.FC = () => {
 
       ws.onopen = () => {
         setIsConnected(true);
-        // Start ping heartbeat
-        const pingInterval = setInterval(() => {
+        try {
+          ws.send("ping");
+        } catch (e) {}
+        // Ping heartbeat every 20 seconds
+        pingIntervalRef.current = setInterval(() => {
           if (ws.readyState === WebSocket.OPEN) {
-            ws.send("ping");
-          } else {
-            clearInterval(pingInterval);
+            try {
+              ws.send("ping");
+            } catch (e) {}
           }
-        }, 30000);
+        }, 20000);
       };
 
       ws.onmessage = (event) => {
@@ -96,33 +122,38 @@ export const NotificationBell: React.FC = () => {
 
       ws.onclose = () => {
         setIsConnected(false);
-        // Attempt reconnect after 5 seconds
+        if (pingIntervalRef.current) {
+          clearInterval(pingIntervalRef.current);
+          pingIntervalRef.current = null;
+        }
+        // Attempt reconnect after 8 seconds
+        if (reconnectTimeoutRef.current) {
+          clearTimeout(reconnectTimeoutRef.current);
+        }
         reconnectTimeoutRef.current = setTimeout(() => {
           connectWebSocket();
-        }, 5000);
+        }, 8000);
       };
 
       ws.onerror = () => {
-        ws.close();
+        // Handled via onclose
       };
     } catch (err) {
       console.warn("WebSocket init error:", err);
     }
-  }, []);
+  }, [cleanupWebSocket]);
 
   useEffect(() => {
     fetchNotifications();
     connectWebSocket();
 
     return () => {
-      if (wsRef.current) {
-        wsRef.current.close();
-      }
+      cleanupWebSocket();
       if (reconnectTimeoutRef.current) {
         clearTimeout(reconnectTimeoutRef.current);
       }
     };
-  }, [fetchNotifications, connectWebSocket]);
+  }, [fetchNotifications, connectWebSocket, cleanupWebSocket]);
 
   // Click outside to close popover
   useEffect(() => {
