@@ -184,7 +184,7 @@ export const StudentDashboard: React.FC = () => {
   const studentFirstName = user?.full_name ? user.full_name.split(" ")[0] : "Student";
 
   return (
-    <div className="space-y-5 p-4 md:p-6 pb-16 font-sans text-foreground">
+    <div className="w-full space-y-6 pb-12 font-sans text-foreground">
       {/* 1. WELCOME HEADER */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
