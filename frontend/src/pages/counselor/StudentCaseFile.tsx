@@ -622,7 +622,7 @@ export const StudentCaseFile: React.FC = () => {
 
       {/* Add Note Modal */}
       {isNoteModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm animate-in fade-in duration-150">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm animate-in fade-in duration-150">
           <div className="relative w-full max-w-lg rounded-xl bg-card border border-border p-6 shadow-lg space-y-4">
             <h3 className="text-sm font-semibold text-foreground">Add Clinical Case Note</h3>
             <form onSubmit={handleAddNote} className="space-y-4">
@@ -660,7 +660,7 @@ export const StudentCaseFile: React.FC = () => {
 
       {/* Assign Intervention Modal */}
       {isInterventionModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm animate-in fade-in duration-150">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm animate-in fade-in duration-150">
           <div className="relative w-full max-w-lg rounded-xl bg-card border border-border p-6 shadow-lg space-y-4">
             <div className="flex items-center justify-between border-b border-border pb-3">
               <h3 className="text-sm font-semibold text-foreground">Assign Supportive Intervention</h3>

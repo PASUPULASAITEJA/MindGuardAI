@@ -66,7 +66,7 @@ export const BoxBreathingModal: React.FC<BoxBreathingModalProps> = ({ isOpen, on
           initial="initial"
           animate="animate"
           exit="exit"
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-md"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm"
         >
           <motion.div
             variants={modalPanelVariants}
