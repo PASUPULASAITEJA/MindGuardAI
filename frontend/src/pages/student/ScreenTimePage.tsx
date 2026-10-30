@@ -281,7 +281,7 @@ export const ScreenTimePage: React.FC = () => {
       variants={pageVariants}
       initial="initial"
       animate="animate"
-      className="max-w-6xl mx-auto space-y-8 pb-12 font-sans"
+      className="w-full space-y-6 pb-12 font-sans"
     >
       {/* Top Navigation & Status Banner */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
