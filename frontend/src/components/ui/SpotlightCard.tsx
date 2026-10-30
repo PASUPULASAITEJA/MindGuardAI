@@ -41,7 +41,7 @@ export const SpotlightCard: React.FC<SpotlightCardProps> = ({
           background: `radial-gradient(400px circle at ${position.x}px ${position.y}px, ${spotlightColor}, transparent 75%)`,
         }}
       />
-      <div className="relative z-10">{children}</div>
+      <div className="relative z-10 flex flex-col justify-between h-full w-full">{children}</div>
     </div>
   );
 };
