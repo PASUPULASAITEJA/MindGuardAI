@@ -6,10 +6,10 @@ from app.core.config import settings
 # Determine if SQLAlchemy should echo SQL queries (useful for development debugging)
 is_dev = settings.ENVIRONMENT == "development"
 
-# Configure the asynchronous database engine
+# Configure the asynchronous database engine (echo=False keeps terminal output clean)
 async_engine = create_async_engine(
     settings.DATABASE_URL,
-    echo=is_dev,
+    echo=False,
     pool_pre_ping=True,  # Checks connection liveness before executing queries
 )
 
