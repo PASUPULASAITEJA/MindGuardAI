@@ -1,3 +1,4 @@
+import logging
 from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, Response, Cookie, status
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -8,6 +9,7 @@ from app.schemas.users import UserCreate, UserRegisterResponse
 from app.services.auth import auth_service
 from app.services.user import user_service
 
+logger = logging.getLogger("mindguard.auth")
 router = APIRouter()
 
 def _set_refresh_cookie(response: Response, refresh_token: str) -> None:
@@ -22,7 +24,7 @@ def _set_refresh_cookie(response: Response, refresh_token: str) -> None:
         value=refresh_token,
         httponly=True,
         secure=not is_dev,
-        samesite="lax" if is_dev else "none",
+        samesite="lax" if is_dev else "strict",
         max_age=7 * 24 * 3600  # 7 days in seconds
     )
 
@@ -184,9 +186,40 @@ async def forgot_password(
 
     from app.core.security import create_password_reset_token
     token = create_password_reset_token(email_clean)
+
+    # Dispatch password reset email notification
+    from app.services.email_service import email_service
+    try:
+        await email_service.send_email_notification(
+            db,
+            event_type="PASSWORD_RESET",
+            recipient_email=email_clean,
+            recipient_user_id=user.id,
+            subject="MindGuardAI - Password Reset Authorization",
+            body_text=(
+                f"Hello {user.full_name},\n\n"
+                f"A password reset request was initiated for your MindGuardAI account.\n"
+                f"Your authorization reset token is:\n{token}\n\n"
+                f"If you did not initiate this request, you can safely ignore this notification."
+            ),
+            html_body=(
+                f"<div style='font-family: sans-serif; padding: 24px; color: #0F172A;'>"
+                f"<h2 style='color: #2563EB;'>MindGuardAI Security</h2>"
+                f"<p>Hello <strong>{user.full_name}</strong>,</p>"
+                f"<p>A password reset request was authorized for your account.</p>"
+                f"<p style='padding: 12px; background: #F1F5F9; border-radius: 8px; font-family: monospace; font-size: 13px; word-break: break-all;'>"
+                f"Authorization Token: <strong>{token}</strong>"
+                f"</p>"
+                f"<p style='font-size: 12px; color: #64748B;'>If you did not request this, please notify your campus wellness administrator.</p>"
+                f"</div>"
+            )
+        )
+    except Exception as e:
+        logger.warning(f"Could not dispatch reset email to {email_clean}: {e}")
+
     return {
         "status": "success",
-        "message": "Password reset instructions generated.",
+        "message": "Password reset instructions generated and dispatched.",
         "reset_token": token
     }
 
