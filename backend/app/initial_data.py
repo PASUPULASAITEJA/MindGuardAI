@@ -38,30 +38,6 @@ DEFAULT_USERS = [
     },
     # Standard NMIMS institutional accounts
     {
-        "email": "student@nmims.in",
-        "password": "password123",
-        "role": UserRole.STUDENT,
-        "full_name": "NMIMS Student",
-    },
-    {
-        "email": "counselor@nmims.edu",
-        "password": "password123",
-        "role": UserRole.COUNSELOR,
-        "full_name": "NMIMS Counselor",
-    },
-    {
-        "email": "admin@nmims.edu",
-        "password": "password123",
-        "role": UserRole.ADMIN,
-        "full_name": "NMIMS Admin",
-    },
-    {
-        "email": "makkena.lahari06@nmims.in",
-        "password": "password123",
-        "role": UserRole.STUDENT,
-        "full_name": "Makkena Lahari",
-    },
-    {
         "email": "naresh.vurukonda@nmims.edu",
         "password": "password123",
         "role": UserRole.COUNSELOR,
