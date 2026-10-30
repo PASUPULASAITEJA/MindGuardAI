@@ -37,13 +37,19 @@ from app.ml.inference import ml_service
 logging.basicConfig(level=logging.INFO, format="%(levelname)s: [%(asctime)s] %(message)s")
 logger = logging.getLogger("mindguard-api")
 
-async def init_db_schema():
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Perform startup routines
+    logger.info("Starting up: preloading machine learning models...")
+    ml_service.load_models()
+    
     try:
         from app.db.session import async_engine, Base
         from sqlalchemy import text
         import app.models
         async with async_engine.begin() as conn:
             await conn.run_sync(Base.metadata.create_all)
+            # Ensure severity column exists in alerts table for SQLite
             try:
                 await conn.execute(text("ALTER TABLE alerts ADD COLUMN severity VARCHAR(50) DEFAULT 'HIGH'"))
             except Exception:
@@ -57,23 +63,9 @@ async def init_db_schema():
             except Exception:
                 pass
         logger.info("Database schema initialized and verified.")
-
-        # Seed initial/demo accounts for UI demo buttons and user login
-        try:
-            from app.initial_data import init_db
-            await init_db()
-            logger.info("Initial demo user accounts seeded successfully.")
-        except Exception as seed_err:
-            logger.warning(f"Initial data seed notice: {seed_err}")
     except Exception as e:
         logger.error(f"Database initialization error: {e}")
-
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    # Perform startup routines
-    logger.info("Starting up: preloading machine learning models...")
-    ml_service.load_models()
-    await init_db_schema()
+        
     yield
     # Perform shutdown cleanups if any
     logger.info("Shutting down api application...")
@@ -94,15 +86,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-_db_initialized = False
-
-@app.middleware("http")
-async def ensure_db_initialized_middleware(request: Request, call_next):
-    global _db_initialized
-    if not _db_initialized:
-        _db_initialized = True
-        await init_db_schema()
-    return await call_next(request)
+app.add_middleware(AuditLoggingMiddleware)
 
 # 2. Configure Request ID and Timing Middleware
 @app.middleware("http")
@@ -244,25 +228,11 @@ app.include_router(interventions_router, prefix="/api", tags=["Interventions"])
 app.include_router(academic_router, prefix="/api/v1", tags=["Academic Calendar"])
 app.include_router(academic_router, prefix="/api", tags=["Academic Calendar"])
 
-@app.get("/", tags=["Health"])
 @app.get("/health", tags=["Health"])
 @app.get("/api/health", tags=["Health"])
 @app.get("/api/v1/health", tags=["Health"])
 async def health_check():
-    return {
-        "status": "healthy",
-        "service": "MindGuardAI API",
-        "version": "1.0.1",
-        "cloud": "AWS Lambda Serverless"
-    }
-
-# AWS Lambda Serverless Handler
-try:
-    from mangum import Mangum
-    handler = Mangum(app, lifespan="off")
-except ImportError:
-    handler = None
-
+    return {"status": "healthy", "service": "MindGuardAI API", "version": "1.0.0"}
 
 
 

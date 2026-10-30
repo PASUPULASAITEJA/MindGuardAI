@@ -25,11 +25,5 @@ if [ "$RUN_MIGRATIONS" = "true" ]; then
     alembic upgrade head
 fi
 
-# If running inside AWS Lambda, invoke the AWS Lambda Runtime Interface Client
-if [ -n "$AWS_LAMBDA_FUNCTION_NAME" ]; then
-    echo "==> Detected AWS Lambda Environment ($AWS_LAMBDA_FUNCTION_NAME). Invoking Runtime..."
-    exec python -m awslambdaric app.main.handler
-fi
-
 echo "==> Starting application process: $@"
 exec "$@"
