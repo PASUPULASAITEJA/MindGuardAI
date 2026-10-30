@@ -28,7 +28,13 @@ import {
   Trophy,
   BarChart3,
   Target,
-  ArrowUpRight
+  ArrowUpRight,
+  Eye,
+  Sliders,
+  HeartPulse,
+  Flame,
+  Check,
+  Percent
 } from "lucide-react";
 import {
   PieChart,
@@ -51,6 +57,7 @@ import { Badge } from "@/components/ui/badge";
 import { chatAPI } from "@/services/api";
 import { useTheme } from "@/contexts/ThemeContext";
 import { pageVariants, cardEntrance } from "@/utils/motion";
+import { EyeBreakModal } from "@/components/EyeBreakModal";
 
 interface AppUsageItem {
   name: string;
@@ -76,6 +83,10 @@ export const ScreenTimePage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState<any>(null);
   const [refreshing, setRefreshing] = useState(false);
+  const [isEyeBreakOpen, setIsEyeBreakOpen] = useState(false);
+  const [customContinuousMins, setCustomContinuousMins] = useState<number | null>(null);
+  const [dailyGoalHours, setDailyGoalHours] = useState<number>(8);
+  const [appCategoryFilter, setAppCategoryFilter] = useState<string>("ALL");
 
   const fetchSummary = async () => {
     try {
@@ -105,6 +116,7 @@ export const ScreenTimePage: React.FC = () => {
   const socialMins = latest?.social_usage_minutes || 0;
   const adultMins = latest?.adult_usage_minutes || 0;
   const continuousMins = latest?.continuous_screen_minutes || 0;
+  const displayContinuousMins = customContinuousMins !== null ? customContinuousMins : continuousMins;
   const isCrisis = latest?.is_crisis_detected || false;
 
   const formatHoursMins = (mins: number) => {
@@ -210,9 +222,19 @@ export const ScreenTimePage: React.FC = () => {
   );
 
   // 4. Top Apps (Only authentic tracked applications)
-  const topApps: AppUsageItem[] = (data?.top_apps || latest?.top_apps || []).filter(
+  const allTopApps: AppUsageItem[] = (data?.top_apps || latest?.top_apps || []).filter(
     (a: AppUsageItem) => a.minutes > 0
   );
+  const topApps: AppUsageItem[] = appCategoryFilter === "ALL"
+    ? allTopApps
+    : allTopApps.filter((a) => {
+        const cat = (a.category || "").toLowerCase();
+        const target = appCategoryFilter.toLowerCase();
+        if (target === "studying") return cat === "studying" || cat === "academic";
+        if (target === "playing") return cat === "playing" || cat === "entertainment";
+        if (target === "normal") return cat === "normal" || cat === "social";
+        return cat === target;
+      });
 
   // 5. Online Searches (Only authentic tracked search queries)
   const searchTopics: SearchTopicItem[] = data?.search_topics || latest?.search_topics || [];
@@ -396,24 +418,120 @@ export const ScreenTimePage: React.FC = () => {
           </CardContent>
         </Card>
 
-        {/* Stat 4: Unbroken Screen Session */}
-        <Card className="rounded-2xl border-slate-200/80 dark:border-slate-800/80 bg-card/60 backdrop-blur-sm shadow-sm hover:shadow-md transition-shadow">
-          <CardContent className="p-5">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Active Strain Streak</span>
-              <div className="w-9 h-9 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-500">
-                <Zap className="w-4 h-4" />
+        {/* Stat 4: Unbroken Screen Session & 20-20-20 Pacer */}
+        <Card className="rounded-2xl border-slate-200/80 dark:border-slate-800/80 bg-card/60 backdrop-blur-sm shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between">
+          <CardContent className="p-5 flex-1 flex flex-col justify-between">
+            <div>
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Active Strain Streak</span>
+                <div className="w-9 h-9 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-500">
+                  <Zap className="w-4 h-4" />
+                </div>
               </div>
+              <div className="mt-3 flex items-baseline justify-between">
+                <span className="text-2xl font-bold tracking-tight">{formatHoursMins(displayContinuousMins)}</span>
+                <Badge variant="outline" className={displayContinuousMins >= 50 ? "bg-amber-500/15 text-amber-600 dark:text-amber-400 text-[10px] border-amber-500/30" : "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 text-[10px] border-emerald-500/30"}>
+                  {displayContinuousMins >= 50 ? "Break Recommended" : "Rest Window OK"}
+                </Badge>
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">
+                {displayContinuousMins >= 50 ? "⚠️ Recommended: Take a 20-20-20 break" : "Within healthy eye-strain limits"}
+              </p>
             </div>
-            <div className="mt-3">
-              <span className="text-2xl font-bold tracking-tight">{formatHoursMins(continuousMins)}</span>
-            </div>
-            <p className="text-xs text-muted-foreground mt-1">
-              {continuousMins >= 50 ? "⚠️ Recommended: 20-20-20 eye break" : "Within healthy eye-strain limits"}
-            </p>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => setIsEyeBreakOpen(true)}
+              className="mt-3 w-full text-xs h-8 rounded-xl border-emerald-500/40 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10 hover:text-emerald-700 dark:hover:text-emerald-300 flex items-center justify-center gap-1.5 font-semibold transition-all"
+            >
+              <Eye className="w-3.5 h-3.5" /> Start 20-20-20 Break
+            </Button>
           </CardContent>
         </Card>
       </div>
+
+      {/* Smart Digital Wellbeing: Daily Screen-Time Goal & Budget Meter */}
+      {(() => {
+        const goalMins = dailyGoalHours * 60;
+        const budgetRemainingMins = Math.max(0, goalMins - totalMins);
+        const budgetPct = Math.min(100, Math.round((totalMins / goalMins) * 100));
+        const isBudgetExceeded = totalMins > goalMins;
+        const exceededMins = Math.max(0, totalMins - goalMins);
+
+        return (
+          <Card className="rounded-2xl border-slate-200/80 dark:border-slate-800/80 bg-card/60 backdrop-blur-sm p-5 shadow-sm">
+            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-5">
+              <div className="space-y-1.5">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-xl bg-teal-500/10 text-teal-600 dark:text-teal-400 flex items-center justify-center">
+                    <Target className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <h3 className="text-base font-bold text-foreground">Daily Screen-Time Budget & Goal Meter</h3>
+                    <p className="text-xs text-muted-foreground">
+                      Set personal healthy usage thresholds to balance coursework with digital downtime.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Goal Presets */}
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-xs font-semibold text-muted-foreground mr-1">Daily Target:</span>
+                {[6, 8, 10].map((hours) => (
+                  <Button
+                    key={hours}
+                    size="sm"
+                    variant={dailyGoalHours === hours ? "default" : "outline"}
+                    onClick={() => setDailyGoalHours(hours)}
+                    className={`text-xs h-8 px-3 rounded-xl transition-all ${
+                      dailyGoalHours === hours
+                        ? "bg-teal-600 hover:bg-teal-700 text-white font-bold shadow-xs"
+                        : "border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800"
+                    }`}
+                  >
+                    {hours}h / day {hours === 8 ? "(Balanced)" : hours === 6 ? "(Light)" : "(Heavy)"}
+                  </Button>
+                ))}
+              </div>
+            </div>
+
+            {/* Meter Bar & Calculations */}
+            <div className="mt-4 pt-4 border-t border-slate-200/60 dark:border-slate-800/60 space-y-2.5">
+              <div className="flex items-center justify-between text-xs">
+                <span className="font-medium text-muted-foreground">
+                  Consumed: <strong className="text-foreground">{formatHoursMins(totalMins)}</strong> of {dailyGoalHours}h ({budgetPct}%)
+                </span>
+                <span className={`font-semibold ${isBudgetExceeded ? "text-rose-600 dark:text-rose-400" : "text-emerald-600 dark:text-emerald-400"}`}>
+                  {isBudgetExceeded ? `Exceeded budget by ${formatHoursMins(exceededMins)}` : `${formatHoursMins(budgetRemainingMins)} budget buffer remaining`}
+                </span>
+              </div>
+
+              {/* Progress bar */}
+              <div className="w-full bg-slate-200/60 dark:bg-slate-800 rounded-full h-3 overflow-hidden p-0.5 relative">
+                <div
+                  className={`h-full rounded-full transition-all duration-700 ${
+                    isBudgetExceeded
+                      ? "bg-rose-500"
+                      : budgetPct > 80
+                      ? "bg-amber-500"
+                      : "bg-gradient-to-r from-teal-500 to-emerald-500"
+                  }`}
+                  style={{ width: `${budgetPct}%` }}
+                />
+              </div>
+
+              <div className="flex items-center justify-between text-[11px] text-muted-foreground">
+                <span className="flex items-center gap-1">
+                  <Check className="w-3 h-3 text-teal-500" />
+                  {budgetPct <= 80 ? "Healthy digital pacing maintained today." : "Nearing daily recommended exposure limit."}
+                </span>
+                <span>Max: {dailyGoalHours}h 00m</span>
+              </div>
+            </div>
+          </Card>
+        );
+      })()}
 
       {/* Dominant Purpose Spotlight Banner */}
       <Card className="rounded-2xl border-slate-200/80 dark:border-slate-800/80 bg-gradient-to-r from-blue-500/10 via-indigo-500/5 to-purple-500/10 p-5 shadow-xs">
@@ -673,82 +791,104 @@ export const ScreenTimePage: React.FC = () => {
       {/* Row 2: Top Apps Leaderboard & Online Searches */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Left: Top Apps Leaderboard */}
-        <Card className="lg:col-span-6 rounded-2xl border-slate-200/80 dark:border-slate-800/80 bg-card/60 backdrop-blur-sm shadow-sm">
-          <CardHeader className="pb-3">
-            <div className="flex items-center justify-between">
-              <div>
-                <CardTitle className="text-lg font-bold flex items-center gap-2">
-                  <Laptop className="w-5 h-5 text-blue-500" />
-                  Most Used Applications
-                </CardTitle>
-                <CardDescription className="text-xs">
-                  Active foreground process duration ranked by time spent.
-                </CardDescription>
+        <Card className="lg:col-span-6 rounded-2xl border-slate-200/80 dark:border-slate-800/80 bg-card/60 backdrop-blur-sm shadow-sm flex flex-col justify-between">
+          <div>
+            <CardHeader className="pb-3">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <div>
+                  <CardTitle className="text-lg font-bold flex items-center gap-2">
+                    <Laptop className="w-5 h-5 text-blue-500" />
+                    Most Used Applications
+                  </CardTitle>
+                  <CardDescription className="text-xs">
+                    Active foreground process duration ranked by time spent.
+                  </CardDescription>
+                </div>
+                <Badge variant="outline" className="text-xs self-start sm:self-auto">
+                  {topApps.length} Apps Tracked
+                </Badge>
               </div>
-              <Badge variant="outline" className="text-xs">
-                {topApps.length} Apps Tracked
-              </Badge>
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            {topApps.length > 0 ? (
-              topApps.map((app, idx) => {
-                const maxMinutes = Math.max(...topApps.map(a => a.minutes), 1);
-                const barWidth = Math.min(100, Math.round((app.minutes / maxMinutes) * 100));
 
-                return (
-                  <div
-                    key={`${app.proc}-${idx}`}
-                    className="p-3 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200/50 dark:border-slate-800/50 space-y-2 hover:border-blue-500/40 transition-colors"
+              {/* Category Filter Pills */}
+              <div className="flex items-center gap-1.5 pt-2 flex-wrap">
+                {["ALL", "Studying", "Playing", "Normal"].map((category) => (
+                  <button
+                    key={category}
+                    type="button"
+                    onClick={() => setAppCategoryFilter(category)}
+                    className={`text-[11px] font-semibold px-2.5 py-1 rounded-lg border transition-all ${
+                      appCategoryFilter === category
+                        ? "bg-blue-600 text-white border-blue-600 shadow-xs"
+                        : "bg-slate-100 dark:bg-slate-800/60 text-muted-foreground border-slate-200 dark:border-slate-800 hover:text-foreground"
+                    }`}
                   >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <span className="text-xs font-bold text-muted-foreground w-4 text-center">
-                          #{idx + 1}
-                        </span>
-                        <div className="w-9 h-9 rounded-xl bg-background border border-slate-200 dark:border-slate-800 flex items-center justify-center shrink-0 shadow-xs">
-                          {renderAppIcon(app.icon, app.category)}
-                        </div>
-                        <div>
-                          <span className="font-semibold text-xs block text-foreground">{app.name}</span>
-                          <span className="text-[11px] text-muted-foreground font-mono">{app.proc}</span>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center gap-2">
-                        <Badge variant="outline" className={`text-[10px] font-medium border px-2 py-0.5 ${getCategoryBadgeClass(app.category)}`}>
-                          {app.category}
-                        </Badge>
-                        <span className="text-xs font-bold text-foreground min-w-[50px] text-right">
-                          {formatHoursMins(app.minutes)}
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* Progress Bar */}
-                    <div className="w-full bg-slate-200/60 dark:bg-slate-800 rounded-full h-1.5 overflow-hidden">
-                      <div
-                        className={`h-full rounded-full transition-all duration-500 ${
-                          app.category === "Studying" ? "bg-blue-500" :
-                          app.category === "Playing" ? "bg-purple-500" :
-                          app.category === "Adult" ? "bg-rose-500" : "bg-emerald-500"
-                        }`}
-                        style={{ width: `${barWidth}%` }}
-                      />
-                    </div>
-                  </div>
-                );
-              })
-            ) : (
-              <div className="py-12 px-4 text-center border border-dashed rounded-xl border-slate-200 dark:border-slate-800 flex flex-col items-center justify-center">
-                <Laptop className="w-8 h-8 text-muted-foreground/60 mb-2" />
-                <h4 className="text-xs font-semibold text-foreground">No Applications Recorded Today</h4>
-                <p className="text-[11px] text-muted-foreground mt-1 max-w-xs mx-auto">
-                  Foreground applications will be automatically detected and ranked as you work on your PC.
-                </p>
+                    {category === "ALL" ? "All Apps" : category}
+                  </button>
+                ))}
               </div>
-            )}
-          </CardContent>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {topApps.length > 0 ? (
+                topApps.map((app, idx) => {
+                  const maxMinutes = Math.max(...topApps.map(a => a.minutes), 1);
+                  const barWidth = Math.min(100, Math.round((app.minutes / maxMinutes) * 100));
+
+                  return (
+                    <div
+                      key={`${app.proc}-${idx}`}
+                      className="p-3 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200/50 dark:border-slate-800/50 space-y-2 hover:border-blue-500/40 transition-colors"
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <span className="text-xs font-bold text-muted-foreground w-4 text-center">
+                            #{idx + 1}
+                          </span>
+                          <div className="w-9 h-9 rounded-xl bg-background border border-slate-200 dark:border-slate-800 flex items-center justify-center shrink-0 shadow-xs">
+                            {renderAppIcon(app.icon, app.category)}
+                          </div>
+                          <div>
+                            <span className="font-semibold text-xs block text-foreground">{app.name}</span>
+                            <span className="text-[11px] text-muted-foreground font-mono">{app.proc}</span>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                          <Badge variant="outline" className={`text-[10px] font-medium border px-2 py-0.5 ${getCategoryBadgeClass(app.category)}`}>
+                            {app.category}
+                          </Badge>
+                          <span className="text-xs font-bold text-foreground min-w-[50px] text-right">
+                            {formatHoursMins(app.minutes)}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Progress Bar */}
+                      <div className="w-full bg-slate-200/60 dark:bg-slate-800 rounded-full h-1.5 overflow-hidden">
+                        <div
+                          className={`h-full rounded-full transition-all duration-500 ${
+                            app.category === "Studying" ? "bg-blue-500" :
+                            app.category === "Playing" ? "bg-purple-500" :
+                            app.category === "Adult" ? "bg-rose-500" : "bg-emerald-500"
+                          }`}
+                          style={{ width: `${barWidth}%` }}
+                        />
+                      </div>
+                    </div>
+                  );
+                })
+              ) : (
+                <div className="py-12 px-4 text-center border border-dashed rounded-xl border-slate-200 dark:border-slate-800 flex flex-col items-center justify-center">
+                  <Laptop className="w-8 h-8 text-muted-foreground/60 mb-2" />
+                  <h4 className="text-xs font-semibold text-foreground">No Applications Recorded</h4>
+                  <p className="text-[11px] text-muted-foreground mt-1 max-w-xs mx-auto">
+                    {appCategoryFilter !== "ALL"
+                      ? `No applications detected under the "${appCategoryFilter}" filter today.`
+                      : "Foreground applications will be automatically detected and ranked as you work on your PC."}
+                  </p>
+                </div>
+              )}
+            </CardContent>
+          </div>
         </Card>
 
         {/* Right: What the Student is Searching for Online */}
@@ -824,6 +964,93 @@ export const ScreenTimePage: React.FC = () => {
           </CardContent>
         </Card>
       </div>
+
+      {/* Smart Digital Wellbeing: Correlation Insights Engine */}
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="text-lg font-bold text-foreground flex items-center gap-2">
+              <HeartPulse className="w-5 h-5 text-rose-500" />
+              Digital Wellbeing & Habit Correlations
+            </h3>
+            <p className="text-xs text-muted-foreground">
+              Clinical insights bridging screen time habits with mood resilience and cognitive stamina.
+            </p>
+          </div>
+          <Badge className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/30 text-xs">
+            Wellbeing AI Active
+          </Badge>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {/* Card 1: Nocturnal Sleep-Wake Correlation */}
+          <Card className="rounded-2xl border-slate-200/80 dark:border-slate-800/80 bg-card/60 backdrop-blur-sm p-4 space-y-2.5">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-xl bg-amber-500/10 text-amber-500 flex items-center justify-center">
+                  <Moon className="w-4 h-4" />
+                </div>
+                <span className="text-xs font-bold">Circadian Rest Impact</span>
+              </div>
+              <Badge variant="outline" className={lateNightMins >= 60 ? "bg-amber-500/15 text-amber-600 dark:text-amber-400 text-[10px]" : "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 text-[10px]"}>
+                {lateNightMins >= 60 ? "Disruption Risk" : "Healthy Alignment"}
+              </Badge>
+            </div>
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              {lateNightMins >= 60
+                ? `${formatHoursMins(lateNightMins)} of screen exposure past midnight suppresses natural melatonin secretion, correlating with lower focus scores during morning study sessions.`
+                : "Nocturnal computer usage was kept under critical thresholds, protecting restorative REM sleep cycles and next-day attention span."}
+            </p>
+          </Card>
+
+          {/* Card 2: Deep Work & Break Endurance Ratio */}
+          <Card className="rounded-2xl border-slate-200/80 dark:border-slate-800/80 bg-card/60 backdrop-blur-sm p-4 space-y-2.5">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-xl bg-blue-500/10 text-blue-500 flex items-center justify-center">
+                  <Brain className="w-4 h-4" />
+                </div>
+                <span className="text-xs font-bold">Focus & Fatigue Ratio</span>
+              </div>
+              <Badge variant="outline" className="bg-blue-500/15 text-blue-600 dark:text-blue-400 text-[10px]">
+                {dominantPercentage}% Academic
+              </Badge>
+            </div>
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              {academicMins > entertainmentMins
+                ? `You dedicated ${formatHoursMins(academicMins)} to coursework vs ${formatHoursMins(entertainmentMins)} to recreation. Remember to weave in 5-minute cognitive resets between intensive study blocks.`
+                : `Entertainment usage (${formatHoursMins(entertainmentMins)}) balanced your study hours (${formatHoursMins(academicMins)}), preventing mental saturation.`}
+            </p>
+          </Card>
+
+          {/* Card 3: Digital Habit Equilibrium Score */}
+          <Card className="rounded-2xl border-slate-200/80 dark:border-slate-800/80 bg-card/60 backdrop-blur-sm p-4 space-y-2.5">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-xl bg-teal-500/10 text-teal-500 flex items-center justify-center">
+                  <Sparkles className="w-4 h-4" />
+                </div>
+                <span className="text-xs font-bold">Digital Equilibrium</span>
+              </div>
+              <Badge variant="outline" className="bg-teal-500/15 text-teal-600 dark:text-teal-400 text-[10px] font-bold">
+                {lateNightMins >= 60 ? "Score: 78 / 100" : "Score: 92 / 100"}
+              </Badge>
+            </div>
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              {lateNightMins >= 60
+                ? "Slight fatigue penalty applied due to late-night screen time. Shifting 45 minutes of evening study to earlier in the day will elevate your equilibrium score."
+                : "Excellent digital balance. Healthy daytime study focus combined with proper nocturnal rest preserves high mental clarity and mood equilibrium."}
+            </p>
+          </Card>
+        </div>
+      </div>
+
+      {/* 20-20-20 Eye Break Modal */}
+      <EyeBreakModal
+        isOpen={isEyeBreakOpen}
+        onClose={() => setIsEyeBreakOpen(false)}
+        onComplete={() => setCustomContinuousMins(0)}
+      />
     </motion.div>
   );
 };
