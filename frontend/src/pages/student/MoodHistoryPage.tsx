@@ -50,7 +50,7 @@ export const MoodHistoryPage: React.FC = () => {
       variants={pageVariants}
       initial="initial"
       animate="animate"
-      className="max-w-5xl mx-auto space-y-6 pb-12"
+      className="w-full space-y-6 pb-12 font-sans"
     >
       {/* Header */}
       <div className="flex items-center justify-between">
