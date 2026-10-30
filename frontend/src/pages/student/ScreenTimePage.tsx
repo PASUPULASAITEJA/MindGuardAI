@@ -58,6 +58,9 @@ import { chatAPI } from "@/services/api";
 import { useTheme } from "@/contexts/ThemeContext";
 import { pageVariants, cardEntrance } from "@/utils/motion";
 import { EyeBreakModal } from "@/components/EyeBreakModal";
+import { SpotlightCard } from "@/components/ui/SpotlightCard";
+import { DotGridBackground } from "@/components/ui/DotGridBackground";
+import { ShinyText } from "@/components/ui/ShinyText";
 
 interface AppUsageItem {
   name: string;
@@ -281,8 +284,10 @@ export const ScreenTimePage: React.FC = () => {
       variants={pageVariants}
       initial="initial"
       animate="animate"
-      className="w-full space-y-6 pb-12 font-sans"
+      className="relative w-full space-y-6 pb-12 font-sans text-foreground"
     >
+      <DotGridBackground />
+
       {/* Top Navigation & Status Banner */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div className="flex items-center gap-3">
@@ -328,7 +333,7 @@ export const ScreenTimePage: React.FC = () => {
       <div>
         <h1 className="text-3xl font-bold tracking-tight text-foreground flex items-center gap-3">
           <Monitor className="w-8 h-8 text-blue-500" />
-          Screen Time & Digital Phenotyping
+          <ShinyText text="Screen Time & Digital Phenotyping" />
         </h1>
         <p className="text-muted-foreground mt-1 text-sm md:text-base">
           Real-time activity classification, late-night circadian tracking, application usage, and search intent analysis.
@@ -353,11 +358,11 @@ export const ScreenTimePage: React.FC = () => {
         </motion.div>
       )}
 
-      {/* 4 Stat Metric Cards */}
+      {/* 4 Stat Metric Cards (React Bits SpotlightCards) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Stat 1: Total Screen Time */}
-        <Card className="rounded-2xl border-slate-200/80 dark:border-slate-800/80 bg-card/60 backdrop-blur-sm shadow-sm hover:shadow-md transition-shadow">
-          <CardContent className="p-5">
+        <SpotlightCard className="p-5" spotlightColor="rgba(59, 130, 246, 0.15)">
+          <div>
             <div className="flex items-center justify-between">
               <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Total Active Today</span>
               <div className="w-9 h-9 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-500">
@@ -370,12 +375,12 @@ export const ScreenTimePage: React.FC = () => {
             <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
               <Sun className="w-3.5 h-3.5 text-amber-500" /> {formatHoursMins(daytimeMins)} daytime active
             </p>
-          </CardContent>
-        </Card>
+          </div>
+        </SpotlightCard>
 
         {/* Stat 2: Late Night Disruption */}
-        <Card className="rounded-2xl border-slate-200/80 dark:border-slate-800/80 bg-card/60 backdrop-blur-sm shadow-sm hover:shadow-md transition-shadow">
-          <CardContent className="p-5">
+        <SpotlightCard className="p-5" spotlightColor={lateNightMins >= 60 ? "rgba(245, 158, 11, 0.18)" : "rgba(16, 185, 129, 0.15)"}>
+          <div>
             <div className="flex items-center justify-between">
               <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Late Night (12am–5am)</span>
               <div className="w-9 h-9 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-500">
@@ -393,12 +398,12 @@ export const ScreenTimePage: React.FC = () => {
             <p className="text-xs text-muted-foreground mt-1">
               Circadian window between 00:00 & 05:00
             </p>
-          </CardContent>
-        </Card>
+          </div>
+        </SpotlightCard>
 
         {/* Stat 3: Study Focus Ratio */}
-        <Card className="rounded-2xl border-slate-200/80 dark:border-slate-800/80 bg-card/60 backdrop-blur-sm shadow-sm hover:shadow-md transition-shadow">
-          <CardContent className="p-5">
+        <SpotlightCard className="p-5" spotlightColor="rgba(99, 102, 241, 0.15)">
+          <div>
             <div className="flex items-center justify-between">
               <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Studying vs. Rest</span>
               <div className="w-9 h-9 rounded-xl bg-indigo-500/10 flex items-center justify-center text-indigo-500">
@@ -414,12 +419,12 @@ export const ScreenTimePage: React.FC = () => {
             <p className="text-xs text-muted-foreground mt-1">
               {formatHoursMins(academicMins)} on coursework & tools
             </p>
-          </CardContent>
-        </Card>
+          </div>
+        </SpotlightCard>
 
         {/* Stat 4: Unbroken Screen Session & 20-20-20 Pacer */}
-        <Card className="rounded-2xl border-slate-200/80 dark:border-slate-800/80 bg-card/60 backdrop-blur-sm shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between">
-          <CardContent className="p-5 flex-1 flex flex-col justify-between">
+        <SpotlightCard className="p-5" spotlightColor={displayContinuousMins >= 50 ? "rgba(245, 158, 11, 0.18)" : "rgba(16, 185, 129, 0.15)"}>
+          <div className="flex flex-col justify-between h-full">
             <div>
               <div className="flex items-center justify-between">
                 <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Active Strain Streak</span>
@@ -445,8 +450,8 @@ export const ScreenTimePage: React.FC = () => {
             >
               <Eye className="w-3.5 h-3.5" /> Start 20-20-20 Break
             </Button>
-          </CardContent>
-        </Card>
+          </div>
+        </SpotlightCard>
       </div>
 
       {/* Dominant Purpose Spotlight Banner */}
