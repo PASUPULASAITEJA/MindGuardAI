@@ -25,13 +25,16 @@ export const SpotlightCard: React.FC<SpotlightCardProps> = ({
   const handleMouseEnter = () => setOpacity(1);
   const handleMouseLeave = () => setOpacity(0);
 
+  const hasExplicitPadding = /\bp[xytb]?-/.test(className);
+  const defaultPadding = hasExplicitPadding ? "" : "p-5";
+
   return (
     <div
       ref={divRef}
       onMouseMove={handleMouseMove}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
-      className={`relative overflow-hidden rounded-2xl border border-border/80 bg-card/90 backdrop-blur-sm transition-all duration-300 hover:shadow-md hover:border-border ${className}`}
+      className={`relative overflow-hidden rounded-2xl border border-border/80 bg-card/90 backdrop-blur-sm transition-all duration-300 hover:shadow-md hover:border-border ${defaultPadding} ${className}`}
       {...props}
     >
       <div

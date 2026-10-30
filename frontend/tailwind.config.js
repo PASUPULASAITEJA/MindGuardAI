@@ -25,6 +25,9 @@ export default {
           'sans-serif',
         ],
       },
+      spacing: {
+        '4.5': '1.125rem',
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",

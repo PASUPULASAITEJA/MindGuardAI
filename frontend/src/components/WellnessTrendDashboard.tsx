@@ -259,98 +259,142 @@ export const WellnessTrendDashboard: React.FC<WellnessTrendDashboardProps> = ({
             );
 
             const summaryCardsElement = (
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 {/* Avg Score */}
-                <SpotlightCard spotlightColor="rgba(14, 165, 233, 0.14)" className="p-4.5 flex flex-col justify-between">
-                  <div className="flex items-center justify-between text-xs text-slate-600 dark:text-slate-400 font-bold">
-                    <span>Average Wellness</span>
-                    <div className="p-1.5 rounded-lg bg-primary/10 text-primary">
-                      <Activity className="w-3.5 h-3.5" />
+                <SpotlightCard 
+                  spotlightColor="rgba(14, 165, 233, 0.16)" 
+                  className="p-5 sm:p-6 flex flex-col justify-between min-h-[160px] bg-card/95 hover:border-sky-500/30 transition-all shadow-xs"
+                >
+                  <div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                        Average Wellness
+                      </span>
+                      <div className="p-2 rounded-xl bg-sky-500/10 text-sky-500 ring-1 ring-sky-500/20">
+                        <Activity className="w-4 h-4" />
+                      </div>
+                    </div>
+                    <div className="mt-3 flex items-baseline gap-2">
+                      <span className="text-3xl sm:text-4xl font-black text-foreground font-mono tracking-tight">
+                        {summary.average_wellness_score}
+                      </span>
+                      <span className="text-xs font-bold text-muted-foreground">/ 100</span>
                     </div>
                   </div>
-                  <div className="mt-2.5 flex items-baseline space-x-2">
-                    <span className="text-2xl font-black text-foreground font-mono">{summary.average_wellness_score}</span>
-                    <span className="text-xs font-semibold text-muted-foreground">/ 100</span>
-                  </div>
-                  <div className="mt-2 flex items-center space-x-1.5">
-                    <span className="text-[11px] text-muted-foreground font-medium">
-                      Peak: <strong className="text-foreground">{summary.highest_score}</strong> | Low:{" "}
-                      <strong className="text-foreground">{summary.lowest_score}</strong>
-                    </span>
+                  <div className="mt-4 pt-3 border-t border-border/50 flex items-center justify-between text-xs text-muted-foreground font-medium">
+                    <span>Peak: <strong className="font-semibold text-foreground">{summary.highest_score}</strong></span>
+                    <span className="text-border">|</span>
+                    <span>Low: <strong className="font-semibold text-foreground">{summary.lowest_score}</strong></span>
                   </div>
                 </SpotlightCard>
 
                 {/* Trajectory & Delta */}
                 <SpotlightCard 
-                  spotlightColor={summary.direction === "DECLINING" ? "rgba(244, 63, 94, 0.14)" : "rgba(16, 185, 129, 0.14)"} 
-                  className="p-4.5 flex flex-col justify-between"
+                  spotlightColor={summary.direction === "DECLINING" ? "rgba(244, 63, 94, 0.16)" : "rgba(16, 185, 129, 0.16)"} 
+                  className={`p-5 sm:p-6 flex flex-col justify-between min-h-[160px] bg-card/95 transition-all shadow-xs ${
+                    summary.direction === "DECLINING" ? "hover:border-rose-500/30" : "hover:border-emerald-500/30"
+                  }`}
                 >
-                  <div className="flex items-center justify-between text-xs text-slate-600 dark:text-slate-400 font-bold">
-                    <span>Period Trajectory</span>
-                    <div className={`p-1.5 rounded-lg ${getDirectionBg(summary.direction)}`}>
-                      {getDirectionIcon(summary.direction)}
+                  <div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                        Period Trajectory
+                      </span>
+                      <div className={`p-2 rounded-xl ring-1 ${
+                        summary.direction === "DECLINING" 
+                          ? "bg-rose-500/10 text-rose-500 ring-rose-500/20" 
+                          : summary.direction === "IMPROVING" 
+                          ? "bg-emerald-500/10 text-emerald-500 ring-emerald-500/20"
+                          : "bg-muted text-muted-foreground ring-border/50"
+                      }`}>
+                        {getDirectionIcon(summary.direction)}
+                      </div>
+                    </div>
+                    <div className="mt-3 flex items-center gap-2.5 flex-wrap">
+                      <span className={`text-3xl sm:text-4xl font-black font-mono tracking-tight ${
+                        summary.direction === "DECLINING"
+                          ? "text-rose-600 dark:text-rose-400"
+                          : summary.direction === "IMPROVING"
+                          ? "text-emerald-600 dark:text-emerald-400"
+                          : "text-foreground"
+                      }`}>
+                        {summary.wellness_delta >= 0 ? `+${summary.wellness_delta}` : summary.wellness_delta}
+                      </span>
+                      <span
+                        className={`text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full border ${getDirectionBadge(
+                          summary.direction
+                        )}`}
+                      >
+                        {summary.direction}
+                      </span>
                     </div>
                   </div>
-                  <div className="mt-2.5 flex items-baseline space-x-2">
-                    <span className={`text-2xl font-black font-mono ${
-                      summary.direction === "DECLINING"
-                        ? "text-rose-600 dark:text-rose-400"
-                        : summary.direction === "IMPROVING"
-                        ? "text-emerald-600 dark:text-emerald-400"
-                        : "text-foreground"
-                    }`}>
-                      {summary.wellness_delta >= 0 ? `+${summary.wellness_delta}` : summary.wellness_delta}
-                    </span>
-                    <span
-                      className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${getDirectionBadge(
-                        summary.direction
-                      )}`}
-                    >
-                      {summary.direction}
-                    </span>
+                  <div className="mt-4 pt-3 border-t border-border/50">
+                    <p className="text-xs text-muted-foreground font-medium truncate">
+                      Net delta across chosen timeframe
+                    </p>
                   </div>
-                  <p className="mt-2 text-[11px] text-muted-foreground font-medium">Net delta across chosen timeframe</p>
                 </SpotlightCard>
 
                 {/* Dominant Emotion */}
-                <SpotlightCard spotlightColor="rgba(245, 158, 11, 0.14)" className="p-4.5 flex flex-col justify-between">
-                  <div className="flex items-center justify-between text-xs text-slate-600 dark:text-slate-400 font-bold">
-                    <span>Dominant Affect</span>
-                    <div className="p-1.5 rounded-lg bg-amber-500/10 text-amber-500">
-                      <Sparkles className="w-3.5 h-3.5" />
+                <SpotlightCard 
+                  spotlightColor="rgba(245, 158, 11, 0.16)" 
+                  className="p-5 sm:p-6 flex flex-col justify-between min-h-[160px] bg-card/95 hover:border-amber-500/30 transition-all shadow-xs"
+                >
+                  <div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                        Dominant Affect
+                      </span>
+                      <div className="p-2 rounded-xl bg-amber-500/10 text-amber-500 ring-1 ring-amber-500/20">
+                        <Sparkles className="w-4 h-4" />
+                      </div>
+                    </div>
+                    <div className="mt-3 flex items-baseline">
+                      <span className="text-3xl sm:text-4xl font-black capitalize text-foreground tracking-tight">
+                        {summary.dominant_emotion}
+                      </span>
                     </div>
                   </div>
-                  <div className="mt-2.5 flex items-baseline space-x-2">
-                    <span className="text-2xl font-black capitalize text-foreground">
-                      {summary.dominant_emotion}
-                    </span>
+                  <div className="mt-4 pt-3 border-t border-border/50">
+                    <p className="text-xs text-muted-foreground font-medium truncate">
+                      {Object.keys(summary.emotion_distribution).length} emotional markers mapped
+                    </p>
                   </div>
-                  <p className="mt-2 text-[11px] text-muted-foreground font-medium">
-                    {Object.keys(summary.emotion_distribution).length} emotional markers mapped
-                  </p>
                 </SpotlightCard>
 
                 {/* Stability / Volatility */}
-                <SpotlightCard spotlightColor="rgba(239, 68, 68, 0.12)" className="p-4.5 flex flex-col justify-between">
-                  <div className="flex items-center justify-between text-xs text-slate-600 dark:text-slate-400 font-bold">
-                    <span>Score Volatility</span>
-                    <div className="p-1.5 rounded-lg bg-rose-500/10 text-rose-500">
-                      <Flame className="w-3.5 h-3.5" />
+                <SpotlightCard 
+                  spotlightColor="rgba(239, 68, 68, 0.14)" 
+                  className="p-5 sm:p-6 flex flex-col justify-between min-h-[160px] bg-card/95 hover:border-rose-500/30 transition-all shadow-xs"
+                >
+                  <div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                        Score Volatility
+                      </span>
+                      <div className="p-2 rounded-xl bg-rose-500/10 text-rose-500 ring-1 ring-rose-500/20">
+                        <Flame className="w-4 h-4" />
+                      </div>
+                    </div>
+                    <div className="mt-3 flex items-baseline gap-2 flex-wrap">
+                      <span className="text-3xl sm:text-4xl font-black text-foreground font-mono tracking-tight">
+                        ±{summary.volatility_score}
+                      </span>
+                      <span className="text-xs font-semibold text-muted-foreground">
+                        {summary.volatility_score < 8
+                          ? "(High Stability)"
+                          : summary.volatility_score < 15
+                          ? "(Moderate Shift)"
+                          : "(High Flux)"}
+                      </span>
                     </div>
                   </div>
-                  <div className="mt-2.5 flex items-baseline space-x-2">
-                    <span className="text-2xl font-black text-foreground font-mono">±{summary.volatility_score}</span>
-                    <span className="text-xs font-semibold text-muted-foreground">
-                      {summary.volatility_score < 8
-                        ? "(High Stability)"
-                        : summary.volatility_score < 15
-                        ? "(Moderate Shift)"
-                        : "(High Flux)"}
-                    </span>
+                  <div className="mt-4 pt-3 border-t border-border/50">
+                    <p className="text-xs text-muted-foreground font-medium truncate">
+                      {points.length} total check-in events
+                    </p>
                   </div>
-                  <p className="mt-2 text-[11px] text-muted-foreground font-medium">
-                    {points.length} total check-in events
-                  </p>
                 </SpotlightCard>
               </div>
             );
