@@ -51,6 +51,9 @@ import { cn } from "@/utils/cn";
 import { motion } from "motion/react";
 import { pageVariants, staggerContainer, cardEntrance } from "@/utils/motion";
 import { AnimatedCounter } from "@/components/ui/animated-counter";
+import { SpotlightCard } from "@/components/ui/SpotlightCard";
+import { DotGridBackground } from "@/components/ui/DotGridBackground";
+import { ShinyText } from "@/components/ui/ShinyText";
 
 export const AdminDashboard: React.FC = () => {
   const location = useLocation();
@@ -140,8 +143,9 @@ export const AdminDashboard: React.FC = () => {
       variants={pageVariants}
       initial="initial"
       animate="animate"
-      className="space-y-6 pb-12"
+      className="relative w-full space-y-6 pb-12 font-sans text-foreground"
     >
+      <DotGridBackground />
       {/* Toast Banner */}
       {statusMessage && (
         <div className={cn(
@@ -284,7 +288,7 @@ export const AdminDashboard: React.FC = () => {
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border pb-4">
             <div>
               <h1 className="text-xl md:text-2xl font-bold tracking-tight text-foreground">
-                University Wellbeing Overview
+                <ShinyText text="University Wellbeing Overview" />
               </h1>
               <p className="text-xs text-muted-foreground mt-0.5">
                 Aggregated campus mental wellness indices, cohort participation, and longitudinal academic context.
@@ -314,36 +318,44 @@ export const AdminDashboard: React.FC = () => {
             animate="animate"
             className="grid grid-cols-2 lg:grid-cols-4 gap-3"
           >
-            <motion.div variants={cardEntrance} whileHover={{ y: -3 }} className="p-4 rounded-xl border border-border bg-card shadow-xs">
-              <span className="text-[11px] text-muted-foreground uppercase font-medium block">Campus Wellness Index</span>
-              <span className="text-2xl font-bold text-foreground font-sans mt-1 block">
-                {isReportLoading ? "--" : (report?.average_wellness_score ? <AnimatedCounter value={report.average_wellness_score} decimals={1} /> : "--")}
-              </span>
-              <span className="text-[11px] text-muted-foreground mt-0.5 block">Aggregated campus metric</span>
+            <motion.div variants={cardEntrance}>
+              <SpotlightCard className="p-4" spotlightColor="rgba(59, 130, 246, 0.15)">
+                <span className="text-[11px] text-muted-foreground uppercase font-medium block">Campus Wellness Index</span>
+                <span className="text-2xl font-bold text-foreground font-sans mt-1 block">
+                  {isReportLoading ? "--" : (report?.average_wellness_score ? <AnimatedCounter value={report.average_wellness_score} decimals={1} /> : "--")}
+                </span>
+                <span className="text-[11px] text-muted-foreground mt-0.5 block">Aggregated campus metric</span>
+              </SpotlightCard>
             </motion.div>
 
-            <motion.div variants={cardEntrance} whileHover={{ y: -3 }} className="p-4 rounded-xl border border-border bg-card shadow-xs">
-              <span className="text-[11px] text-muted-foreground uppercase font-medium block">Total Students</span>
-              <span className="text-2xl font-bold text-foreground font-sans mt-1 block">
-                <AnimatedCounter value={report?.total_students_monitored ?? 0} />
-              </span>
-              <span className="text-[11px] text-muted-foreground mt-0.5 block">Active registered cohort</span>
+            <motion.div variants={cardEntrance}>
+              <SpotlightCard className="p-4" spotlightColor="rgba(99, 102, 241, 0.15)">
+                <span className="text-[11px] text-muted-foreground uppercase font-medium block">Total Students</span>
+                <span className="text-2xl font-bold text-foreground font-sans mt-1 block">
+                  <AnimatedCounter value={report?.total_students_monitored ?? 0} />
+                </span>
+                <span className="text-[11px] text-muted-foreground mt-0.5 block">Active registered cohort</span>
+              </SpotlightCard>
             </motion.div>
 
-            <motion.div variants={cardEntrance} whileHover={{ y: -3 }} className="p-4 rounded-xl border border-border bg-card shadow-xs">
-              <span className="text-[11px] text-muted-foreground uppercase font-medium block">Active Triage Flags</span>
-              <span className="text-2xl font-bold text-rose-600 dark:text-rose-400 font-sans mt-1 block">
-                <AnimatedCounter value={pendingAlertCount} />
-              </span>
-              <span className="text-[11px] text-muted-foreground mt-0.5 block">Under counsellor triage</span>
+            <motion.div variants={cardEntrance}>
+              <SpotlightCard className="p-4" spotlightColor="rgba(244, 63, 94, 0.15)">
+                <span className="text-[11px] text-muted-foreground uppercase font-medium block">Active Triage Flags</span>
+                <span className="text-2xl font-bold text-rose-600 dark:text-rose-400 font-sans mt-1 block">
+                  <AnimatedCounter value={pendingAlertCount} />
+                </span>
+                <span className="text-[11px] text-muted-foreground mt-0.5 block">Under counsellor triage</span>
+              </SpotlightCard>
             </motion.div>
 
-            <motion.div variants={cardEntrance} whileHover={{ y: -3 }} className="p-4 rounded-xl border border-border bg-card shadow-xs">
-              <span className="text-[11px] text-muted-foreground uppercase font-medium block">Departments Monitored</span>
-              <span className="text-2xl font-bold text-foreground font-sans mt-1 block">
-                <AnimatedCounter value={departmentsList.length} />
-              </span>
-              <span className="text-[11px] text-muted-foreground mt-0.5 block">Active cohort departments</span>
+            <motion.div variants={cardEntrance}>
+              <SpotlightCard className="p-4" spotlightColor="rgba(16, 185, 129, 0.15)">
+                <span className="text-[11px] text-muted-foreground uppercase font-medium block">Departments Monitored</span>
+                <span className="text-2xl font-bold text-foreground font-sans mt-1 block">
+                  <AnimatedCounter value={departmentsList.length} />
+                </span>
+                <span className="text-[11px] text-muted-foreground mt-0.5 block">Active cohort departments</span>
+              </SpotlightCard>
             </motion.div>
           </motion.div>
 
