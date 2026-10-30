@@ -83,6 +83,12 @@ export const WellnessTrendDashboard: React.FC<WellnessTrendDashboardProps> = ({
     return "bg-muted text-muted-foreground border-border/60";
   };
 
+  const getDirectionBg = (dir: string) => {
+    if (dir === "IMPROVING") return "bg-emerald-500/10 text-emerald-500";
+    if (dir === "DECLINING") return "bg-rose-500/10 text-rose-500";
+    return "bg-muted text-muted-foreground";
+  };
+
   return (
     <div className="space-y-6">
       {/* Header & Controls */}
@@ -135,7 +141,7 @@ export const WellnessTrendDashboard: React.FC<WellnessTrendDashboardProps> = ({
           {/* Summary Metric Cards */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             {/* Avg Score */}
-            <div className="bg-card p-4.5 rounded-2xl shadow-xs border border-slate-200 dark:border-slate-800 flex flex-col justify-between hover:border-primary/40 transition-all">
+            <div className="bg-card p-4.5 rounded-2xl shadow-xs border border-border/80 flex flex-col justify-between hover:shadow-md hover:border-border transition-all">
               <div className="flex items-center justify-between text-xs text-slate-600 dark:text-slate-400 font-bold">
                 <span>Average Wellness</span>
                 <div className="p-1.5 rounded-lg bg-primary/10 text-primary">
@@ -155,15 +161,21 @@ export const WellnessTrendDashboard: React.FC<WellnessTrendDashboardProps> = ({
             </div>
 
             {/* Trajectory & Delta */}
-            <div className="bg-card p-4.5 rounded-2xl shadow-xs border border-slate-200 dark:border-slate-800 flex flex-col justify-between hover:border-emerald-500/40 transition-all">
+            <div className="bg-card p-4.5 rounded-2xl shadow-xs border border-border/80 flex flex-col justify-between hover:shadow-md hover:border-border transition-all">
               <div className="flex items-center justify-between text-xs text-slate-600 dark:text-slate-400 font-bold">
                 <span>Period Trajectory</span>
-                <div className="p-1.5 rounded-lg bg-emerald-500/10">
+                <div className={`p-1.5 rounded-lg ${getDirectionBg(summary.direction)}`}>
                   {getDirectionIcon(summary.direction)}
                 </div>
               </div>
               <div className="mt-2.5 flex items-baseline space-x-2">
-                <span className="text-2xl font-black text-foreground">
+                <span className={`text-2xl font-black ${
+                  summary.direction === "DECLINING"
+                    ? "text-rose-600 dark:text-rose-400"
+                    : summary.direction === "IMPROVING"
+                    ? "text-emerald-600 dark:text-emerald-400"
+                    : "text-foreground"
+                }`}>
                   {summary.wellness_delta >= 0 ? `+${summary.wellness_delta}` : summary.wellness_delta}
                 </span>
                 <span
@@ -178,7 +190,7 @@ export const WellnessTrendDashboard: React.FC<WellnessTrendDashboardProps> = ({
             </div>
 
             {/* Dominant Emotion */}
-            <div className="bg-card p-4.5 rounded-2xl shadow-xs border border-border/80 dark:border-border/60 flex flex-col justify-between hover:border-primary/40 transition-all">
+            <div className="bg-card p-4.5 rounded-2xl shadow-xs border border-border/80 flex flex-col justify-between hover:shadow-md hover:border-border transition-all">
               <div className="flex items-center justify-between text-xs text-slate-600 dark:text-slate-400 font-bold">
                 <span>Dominant Affect</span>
                 <div className="p-1.5 rounded-lg bg-amber-500/10 text-amber-500">
@@ -196,7 +208,7 @@ export const WellnessTrendDashboard: React.FC<WellnessTrendDashboardProps> = ({
             </div>
 
             {/* Stability / Volatility */}
-            <div className="bg-card p-4.5 rounded-2xl shadow-xs border border-border/80 dark:border-border/60 flex flex-col justify-between hover:border-primary/40 transition-all">
+            <div className="bg-card p-4.5 rounded-2xl shadow-xs border border-border/80 flex flex-col justify-between hover:shadow-md hover:border-border transition-all">
               <div className="flex items-center justify-between text-xs text-slate-600 dark:text-slate-400 font-bold">
                 <span>Score Volatility</span>
                 <div className="p-1.5 rounded-lg bg-rose-500/10 text-rose-500">
