@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { createPortal } from "react-dom";
 import { PhoneCall, AlertTriangle, ShieldCheck, HeartHandshake, X, Loader2, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/toast";
@@ -74,7 +75,9 @@ export const EmergencySOSModal: React.FC<EmergencySOSModalProps> = ({ isOpen, on
     }
   };
 
-  return (
+  if (!isOpen) return null;
+
+  return createPortal(
     <AnimatePresence>
       {isOpen && (
         <motion.div 
@@ -82,14 +85,14 @@ export const EmergencySOSModal: React.FC<EmergencySOSModalProps> = ({ isOpen, on
           initial="initial"
           animate="animate"
           exit="exit"
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md"
+          className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md overflow-y-auto"
         >
           <motion.div 
             variants={modalPanelVariants}
             initial="initial"
             animate="animate"
             exit="exit"
-            className="relative w-full max-w-lg rounded-2xl border-2 border-rose-500/50 bg-card p-6 shadow-2xl space-y-5 text-foreground"
+            className="relative w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-2xl border-2 border-rose-500/50 bg-card p-6 shadow-2xl space-y-5 text-foreground my-auto"
           >
             {/* Header */}
         <div className="flex items-start justify-between border-b border-border pb-4">
@@ -217,6 +220,7 @@ export const EmergencySOSModal: React.FC<EmergencySOSModalProps> = ({ isOpen, on
           </motion.div>
         </motion.div>
       )}
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.body
   );
 };
