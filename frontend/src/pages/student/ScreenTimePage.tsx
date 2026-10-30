@@ -85,7 +85,6 @@ export const ScreenTimePage: React.FC = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [isEyeBreakOpen, setIsEyeBreakOpen] = useState(false);
   const [customContinuousMins, setCustomContinuousMins] = useState<number | null>(null);
-  const [dailyGoalHours, setDailyGoalHours] = useState<number>(8);
   const [appCategoryFilter, setAppCategoryFilter] = useState<string>("ALL");
 
   const fetchSummary = async () => {
@@ -449,89 +448,6 @@ export const ScreenTimePage: React.FC = () => {
           </CardContent>
         </Card>
       </div>
-
-      {/* Smart Digital Wellbeing: Daily Screen-Time Goal & Budget Meter */}
-      {(() => {
-        const goalMins = dailyGoalHours * 60;
-        const budgetRemainingMins = Math.max(0, goalMins - totalMins);
-        const budgetPct = Math.min(100, Math.round((totalMins / goalMins) * 100));
-        const isBudgetExceeded = totalMins > goalMins;
-        const exceededMins = Math.max(0, totalMins - goalMins);
-
-        return (
-          <Card className="rounded-2xl border-slate-200/80 dark:border-slate-800/80 bg-card/60 backdrop-blur-sm p-5 shadow-sm">
-            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-5">
-              <div className="space-y-1.5">
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-xl bg-teal-500/10 text-teal-600 dark:text-teal-400 flex items-center justify-center">
-                    <Target className="w-4 h-4" />
-                  </div>
-                  <div>
-                    <h3 className="text-base font-bold text-foreground">Daily Screen-Time Budget & Goal Meter</h3>
-                    <p className="text-xs text-muted-foreground">
-                      Set personal healthy usage thresholds to balance coursework with digital downtime.
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Goal Presets */}
-              <div className="flex items-center gap-2 flex-wrap">
-                <span className="text-xs font-semibold text-muted-foreground mr-1">Daily Target:</span>
-                {[6, 8, 10].map((hours) => (
-                  <Button
-                    key={hours}
-                    size="sm"
-                    variant={dailyGoalHours === hours ? "default" : "outline"}
-                    onClick={() => setDailyGoalHours(hours)}
-                    className={`text-xs h-8 px-3 rounded-xl transition-all ${
-                      dailyGoalHours === hours
-                        ? "bg-teal-600 hover:bg-teal-700 text-white font-bold shadow-xs"
-                        : "border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800"
-                    }`}
-                  >
-                    {hours}h / day {hours === 8 ? "(Balanced)" : hours === 6 ? "(Light)" : "(Heavy)"}
-                  </Button>
-                ))}
-              </div>
-            </div>
-
-            {/* Meter Bar & Calculations */}
-            <div className="mt-4 pt-4 border-t border-slate-200/60 dark:border-slate-800/60 space-y-2.5">
-              <div className="flex items-center justify-between text-xs">
-                <span className="font-medium text-muted-foreground">
-                  Consumed: <strong className="text-foreground">{formatHoursMins(totalMins)}</strong> of {dailyGoalHours}h ({budgetPct}%)
-                </span>
-                <span className={`font-semibold ${isBudgetExceeded ? "text-rose-600 dark:text-rose-400" : "text-emerald-600 dark:text-emerald-400"}`}>
-                  {isBudgetExceeded ? `Exceeded budget by ${formatHoursMins(exceededMins)}` : `${formatHoursMins(budgetRemainingMins)} budget buffer remaining`}
-                </span>
-              </div>
-
-              {/* Progress bar */}
-              <div className="w-full bg-slate-200/60 dark:bg-slate-800 rounded-full h-3 overflow-hidden p-0.5 relative">
-                <div
-                  className={`h-full rounded-full transition-all duration-700 ${
-                    isBudgetExceeded
-                      ? "bg-rose-500"
-                      : budgetPct > 80
-                      ? "bg-amber-500"
-                      : "bg-gradient-to-r from-teal-500 to-emerald-500"
-                  }`}
-                  style={{ width: `${budgetPct}%` }}
-                />
-              </div>
-
-              <div className="flex items-center justify-between text-[11px] text-muted-foreground">
-                <span className="flex items-center gap-1">
-                  <Check className="w-3 h-3 text-teal-500" />
-                  {budgetPct <= 80 ? "Healthy digital pacing maintained today." : "Nearing daily recommended exposure limit."}
-                </span>
-                <span>Max: {dailyGoalHours}h 00m</span>
-              </div>
-            </div>
-          </Card>
-        );
-      })()}
 
       {/* Dominant Purpose Spotlight Banner */}
       <Card className="rounded-2xl border-slate-200/80 dark:border-slate-800/80 bg-gradient-to-r from-blue-500/10 via-indigo-500/5 to-purple-500/10 p-5 shadow-xs">
