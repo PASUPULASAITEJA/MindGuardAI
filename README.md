@@ -1,135 +1,206 @@
 <div align="center">
-  <img src="frontend/public/logo.png" alt="MindGuardAI Logo" width="88" />
-  <h1>MindGuardAI</h1>
-  <p><strong>Predictive, privacy-first mental health intelligence platform for higher education</strong></p>
+  <img src="frontend/public/logo.png" alt="MindGuardAI Logo" width="180" style="border-radius: 20px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);" />
+  
+  # MindGuardAI
+  ### *Your Mind. Our Mission.*
+
+  **Predictive, Privacy-First Mental Wellness & Digital Phenotyping Platform for Higher Education**
+
+  <p align="center">
+    <a href="#key-features"><img src="https://img.shields.io/badge/Platform-Higher_Education_Mental_Health-0284c7?style=for-the-badge&logo=react" alt="Platform" /></a>
+    <a href="#tech-stack"><img src="https://img.shields.io/badge/Backend-FastAPI_%7C_Python_3.12-059669?style=for-the-badge&logo=fastapi" alt="FastAPI" /></a>
+    <a href="#tech-stack"><img src="https://img.shields.io/badge/Frontend-React_18_%7C_TypeScript_%7C_Vite-6366f1?style=for-the-badge&logo=vite" alt="React" /></a>
+    <a href="#ml-architecture"><img src="https://img.shields.io/badge/AI_Engine-DistilBERT_%2B_Random_Forest-f59e0b?style=for-the-badge&logo=huggingface" alt="AI Engine" /></a>
+    <a href="#license"><img src="https://img.shields.io/badge/License-MIT-blue?style=for-the-badge" alt="License" /></a>
+  </p>
+</div>
 
 ---
 
-## What is MindGuardAI?
+## 🌟 Executive Overview
 
-University students frequently face burnout, chronic sleep disruption, and anxiety long before clinical crises occur, yet campus counseling centers remain overwhelmed and reactive. MindGuardAI bridges this critical gap by providing students with proactive, non-invasive wellness monitoring and an AI coping companion. For university counselors and administrators, it aggregates anonymized risk signals to enable early, compassionate intervention without compromising individual privacy.
+University students face elevated risks of academic burnout, severe sleep disruption, and anxiety long before clinical crises occur, yet institutional counseling centers often remain reactive and overwhelmed. 
 
----
+**MindGuardAI** bridges this gap by combining **passive digital phenotyping**, **standardized clinical psychometrics**, and **explainable machine learning** into an empathetic student wellness ecosystem:
 
-## Key Features
-
-| Icon | Feature                             | Description                                                                                       |
-| :--: | :---------------------------------- | :------------------------------------------------------------------------------------------------ |
-| 🛡️ | **Early Risk Stratification** | Multi-tier behavioral inference flagging emerging distress before academic crises.                |
-|  🤖  | **Empathetic AI Companion**   | 24/7 conversational support with automatic clinical escalation for high-distress cues.            |
-|  📊  | **Explainable AI Insights**   | SHAP-driven factor attribution revealing actionable wellness drivers to students and counselors.  |
-|  🔒  | **Zero-Knowledge Privacy**    | Explicit granular consent controls, differential privacy, and $k$-anonymity campus aggregation. |
-|  📋  | **Clinical Assessments**      | Automated standardized PHQ-9, GAD-7, and ISI screening with longitudinal history tracking.        |
-|  🚨  | **Crisis SOS Protocol**       | Instant emergency lifeline routing with real-time counselor escalation dashboards.                |
+- **For Students:** A confidential, safe space featuring 24/7 empathetic conversational support, daily screen time purpose analysis, breath pacing, and personalized CBT micro-interventions.
+- **For Campus Counselors:** Proactive, non-stigmatizing triage matrix providing early risk warnings, consent-governed longitudinal trends, and secure 1-on-1 consultation scheduling.
+- **For Campus Administrators:** Aggregated, anonymized campus-wide cohort analytics to address academic pressure points and semester wellness dips.
 
 ---
 
-## Architecture
+## 🚀 Key Modules & Capabilities
+
+### 🖥️ 1. Screen Time & Digital Phenotyping
+- **7-Day Daily Screen Time Graphics:** Interactive longitudinal charts measuring active computer hours, daily averages, and baseline comparisons.
+- **Purpose Classification:** Distinguishes device usage across **Studying (Coursework & Coding)**, **Playing (Gaming & Media)**, **Social Browsing**, and **Sensitive Content**.
+- **Nocturnal Circadian Tracking:** Pinpoints late-night device exposure (12:00 AM – 5:00 AM) to evaluate melatonin disruption and sleep debt risks.
+- **Active Eye-Strain Warnings:** Continuous session alerts encouraging the 20-20-20 rule.
+
+### 🧠 2. Multimodal Clinical Triage & AI Companion
+- **Bilingual Empathetic Assistant:** Delivers non-judgmental CBT micro-exercises with natural code-mixed English and Hinglish support.
+- **DistilBERT Emotion Inference:** Fine-tuned NLP classifying real-time affective vectors: *Joy*, *Sadness*, *Anxiety*, *Anger*, *Fear*, and *Neutral*.
+- **Emergency Safety Diamond:** Deterministic Red-Tier crisis override that immediately activates national hotlines (**Tele-MANAS `14416`**, **KIRAN `1800-599-0019`**) and alerts campus counselors.
+- **Standardized Screenings:** Automated digital **PHQ-9** (depression), **GAD-7** (anxiety), and **ISI** (insomnia) clinical surveys.
+
+### 📈 3. Longitudinal Trajectory & Baselines
+- **Historical Personal Baselines:** Computes individualized rolling averages and Z-score deviations across Mood, Stress, and Sleep metrics.
+- **Longitudinal Mental Wellness Curve:** Composite multi-factor wellness curves with clinical risk boundary overlays.
+- **Volatility & Affect Dynamics:** Tracks score volatility (High Stability vs. High Flux) and identifies dominant emotional drivers.
+
+### 📬 4. Authenticated Notifications & Email Verification
+- **Real-Time Push Alerts:** Low-latency WebSocket channel delivering immediate status changes and appointment reminders.
+- **Delivery Verification:** Authenticated SMTP dispatch with cryptographic password reset links and security audit logging.
+- **Granular Preference Management:** Customizable toggles for crisis alerts, weekly digests, and in-app toasts.
+
+### 🔒 5. Zero-Knowledge Privacy & Granular Consent
+- **Student-Governed Consent:** Students explicitly control counselor data-sharing with instantaneous revocation rights.
+- **PII Scrubbing Gateway:** Built-in regex filters mask emails, phone numbers, and student IDs before inference.
+- **Audit Logging:** Tamper-evident immutable access records satisfying strict campus compliance standards.
+
+---
+
+## 🏛️ System Architecture
 
 ```text
-[ Desktop Telemetry / Mobile Check-ins ] ---> [ Zero-Knowledge Consent Gateway ]
-                                                               |
-                                            +------------------+------------------+
-                                            |                                     |
-                                            v                                     v
-                                  [ ML Risk & SHAP Engine ]           [ FastAPI Core Services ]
-                                  (DistilBERT + Random Forest)        (Auth, Triage, WebSockets)
-                                            |                                     |
-                                            +------------------+------------------+
-                                                               |
-                                            v                                     v
-                                 [ Student Wellness App ]            [ Clinical Counselor Portal ]
-                                 (React 18 + Three.js UI)            (Triage Matrix & Case Notes)
+       +-------------------------------------------------------------------------+
+       |                         STUDENT & COUNSELOR CLIENTS                     |
+       |               React 18  •  TypeScript  •  Vite  •  Tailwind CSS          |
+       +--------------------+-------------------------------+--------------------+
+                            |                               |
+                   REST API |                               | WebSockets (Real-time Alerts)
+                            v                               v
+       +-------------------------------------------------------------------------+
+       |                           FASTAPI BACKEND GATEWAY                       |
+       |  • JWT Auth & Refresh Cookies             • Consent Verification Engine  |
+       |  • PII Masking Pipeline                   • Audit Logging Middleware    |
+       +--------------------+-------------------------------+--------------------+
+                            |                               |
+            Inference Hooks |                               | SQLAlchemy Async Engine
+                            v                               v
+       +----------------------------+             +------------------------------+
+       |     MACHINE LEARNING CORE  |             |      PERSISTENCE LAYER       |
+       | • DistilBERT (Emotion NLP) |             | • PostgreSQL / SQLite Async   |
+       | • Random Forest (Risk)     |             | • Behavioral Telemetry Logs   |
+       | • Intent Classifier        |             | • Notifications & Audit Trail|
+       | • Deterministic Red Safety |             | • Standardized Surveys       |
+       +----------------------------+             +------------------------------+
 ```
 
 ---
 
-## Tech Stack
+## 🛠️ Technology Stack
 
-- **Backend**: Python 3.12, FastAPI, SQLAlchemy, Alembic, SQLite / PostgreSQL, Pydantic v2
-- **ML & Data**: PyTorch, DistilBERT, Hugging Face Transformers, scikit-learn, SHAP, NumPy, pandas
-- **Frontend**: React 18, TypeScript, Vite, Tailwind CSS, Three.js, Framer Motion, Lucide Icons
-- **Infrastructure**: Docker, Docker Compose, Windows Service (Desktop Telemetry Agent)
+| Layer | Technologies |
+| :--- | :--- |
+| **Frontend** | React 18, TypeScript, Vite, Tailwind CSS, Lucide React, Recharts, Motion, Canvas-Confetti |
+| **Backend** | Python 3.12, FastAPI, Pydantic v2, SQLAlchemy 2.0 (AsyncIO), Uvicorn, Python-Jose, Passlib |
+| **Machine Learning** | PyTorch, Hugging Face Transformers (DistilBERT), Scikit-Learn, Joblib, NumPy, Pandas |
+| **Database & Cache** | PostgreSQL (Production) / SQLite Async (Development), In-Memory Telemetry Caching |
+| **Communications** | WebSockets (RFC 6455), SMTP / TLS Authenticated Email Notifications |
+| **DevOps & Containers**| Docker, Docker Compose, Multi-stage Linux builds |
 
 ---
 
-## Quick Start
+## ⚡ Quick Start Guide
 
-### Option A: Docker (Recommended)
+### Option 1: Docker (Fastest & Recommended)
+
+Ensure Docker and Docker Compose are installed, then execute:
 
 ```bash
+# 1. Clone repository
 git clone https://github.com/PASUPULASAITEJA/MindGuardAI.git
 cd MindGuardAI
+
+# 2. Start all services in isolated containers
 docker compose up --build
 ```
 
-Access the application at `http://localhost:5173` (Frontend) and `http://localhost:8000/docs` (API Docs).
+- **Frontend Client:** [http://localhost:5173](http://localhost:5173)
+- **FastAPI Interactive API Docs:** [http://localhost:8000/docs](http://localhost:8000/docs)
 
-### Option B: Manual Setup
+---
 
+### Option 2: Local Manual Setup
+
+#### Step 1: Backend Setup
 ```bash
-# 1. Backend Setup
 cd backend
-python -m venv .venv && source .venv/bin/activate  # On Windows: .venv\Scripts\activate
-pip install -r requirements.txt
-python -m app.initial_data
-uvicorn app.main:app --reload --port 8000
 
-# 2. Frontend Setup (in a second terminal)
-cd ../frontend
+# Create and activate Python virtual environment
+python -m venv .venv
+# Windows:
+.venv\Scripts\activate
+# macOS/Linux:
+source .venv/bin/activate
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Initialize database schema & seed demonstration users
+python -m app.initial_data
+
+# Launch FastAPI development server
+uvicorn app.main:app --reload --port 8000
+```
+
+#### Step 2: Frontend Setup
+In a new terminal window:
+```bash
+cd frontend
+
+# Install Node dependencies
 npm install
+
+# Start Vite live-reload dev server
 npm run dev
 ```
 
 ---
 
-## ML Model Performance
+## 👥 Default Test Accounts
 
-| Model                      | Task                           |    Accuracy / F1    | Inference Latency | Notes                                                                    |
-| :------------------------- | :----------------------------- | :-----------------: | :---------------: | :----------------------------------------------------------------------- |
-| **DistilBERT v1**    | Conversational Intent & Risk   | **89.4% F1** |    ~42ms (CPU)    | Fine-tuned on distress dialogues; optimized for fast CPU inference.      |
-| **Random Forest v2** | Academic & Sleep Risk Triaging | **91.2% Acc** |       <5ms       | Combines academic pressure indices, sleep deficit, and check-in history. |
-| **SHAP Explainer**   | Clinical Factor Attribution    |         N/A         |       ~85ms       | Generates individualized barrier/protective factor breakdowns.           |
+Seed data creates pre-configured accounts with populated histories for demonstration:
 
-> *Note: Production deployment uses confidence thresholding with fallback rules to guarantee emergency safety protocols.*
+| Role | Email | Password | Primary Features |
+| :--- | :--- | :--- | :--- |
+| **Student** | `student@campus.edu` | `SecurePass123!` | Wellness Dashboard, Screen Time, AI Companion, Toolkit, Surveys |
+| **Counselor** | `counselor@campus.edu` | `SecurePass123!` | Clinical Triage Matrix, Student Case Files, Session Bookings |
+| **Administrator** | `admin@campus.edu` | `SecurePass123!` | Cohort Analytics, Campus Trends, User Management |
 
 ---
 
-## Running Tests
+## 🧪 Testing & Code Quality
+
+MindGuardAI includes an automated test suite across backend API contracts and frontend bundles:
 
 ```bash
-# Backend unit & integration test suite (51 tests)
+# Run backend pytest suite with coverage
 cd backend
-pytest tests/ -v
+pytest -v
 
-# Frontend type checking and production build
+# Run frontend TypeScript type checking and production build
 cd ../frontend
 npm run build
 ```
 
 ---
 
-## Documentation
+## 🔒 Security & Compliance
 
-Explore in-depth architectural specifications and operational guides in [`docs/`](docs/):
-
-- [Architecture &amp; Data Flow](docs/ARCHITECTURE.md)
-- [API Specification](docs/API.md)
-- [Machine Learning Pipeline](docs/ML.md)
-- [Database Schema &amp; ERD](docs/DATABASE.md)
-- [Security &amp; Threat Model](docs/SECURITY.md)
-- [Privacy &amp; Consent Engine](docs/PRIVACY_AND_CONSENT.md)
-- [Emergency Escalation Protocol](docs/EMERGENCY_ESCALATION.md)
-- [Docker Deployment Guide](docs/DOCKER.md)
-- [Product Requirements (PRD)](docs/PRD.md)
-- [Project Roadmap](docs/ROADMAP.md)
+- **Authentication:** Dual-token JWT architecture with rotating short-lived access tokens and HttpOnly, Secure, SameSite refresh cookies.
+- **PII Protection:** Automatic redaction of student registration numbers, phone numbers, and emails before ML analysis.
+- **Emergency Safeguard:** Unwavering deterministic safety priority: suicidal ideation or acute harm indicators immediately bypass conversational loops to provide emergency helplines.
+- **Compliance Alignment:** Designed following FERPA privacy mandates and HIPAA health data handling best practices.
 
 ---
 
-## License
+## 📄 License
 
-Distributed under the [MIT License](LICENSE).
+Distributed under the **MIT License**. See [`LICENSE`](LICENSE) for complete details.
 
 <div align="center">
-  <sub>Built with care for student mental health • MindGuardAI Engineering</sub>
+  <br />
+  <sub>Built with compassion for university student mental wellness • <strong>MindGuardAI Engineering</strong></sub>
 </div>
