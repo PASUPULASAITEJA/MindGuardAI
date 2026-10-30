@@ -10,12 +10,12 @@ interface ShinyTextProps {
 export const ShinyText: React.FC<ShinyTextProps> = ({
   text,
   disabled = false,
-  speed = 4,
+  speed = 6,
   className = "",
 }) => {
   return (
     <span
-      className={`inline-block bg-clip-text text-transparent bg-gradient-to-r from-foreground via-primary to-foreground bg-[length:200%_auto] ${
+      className={`inline-block bg-gradient-to-r from-foreground via-indigo-600 dark:via-indigo-400 to-foreground bg-clip-text text-transparent bg-[length:200%_auto] transition-colors ${
         disabled ? "" : "animate-shine"
       } ${className}`}
       style={{
