@@ -22,6 +22,9 @@ import { PersonalizedRecommendations } from "../../components/PersonalizedRecomm
 import { motion } from "motion/react";
 import { pageVariants, staggerContainer, cardEntrance } from "@/utils/motion";
 import { BreathingSphere } from "@/components/3d/BreathingSphere";
+import { ShinyText } from "@/components/ui/ShinyText";
+import { SpotlightCard } from "@/components/ui/SpotlightCard";
+import { DotGridBackground } from "@/components/ui/DotGridBackground";
 
 export const SelfCareResourcesPage: React.FC = () => {
   const navigate = useNavigate();
@@ -63,35 +66,30 @@ export const SelfCareResourcesPage: React.FC = () => {
     setGroundingChecks((prev) => ({ ...prev, [idx]: !prev[idx] }));
   };
 
+  const groundingCount = Object.values(groundingChecks).filter(Boolean).length;
+
   return (
     <motion.div 
       variants={pageVariants}
       initial="initial"
       animate="animate"
-      className="max-w-4xl mx-auto space-y-8 pb-12"
+      className="relative max-w-4xl mx-auto space-y-8 pb-12"
     >
-      {/* Header */}
+      <DotGridBackground />
+
+      {/* Top Protocol Badge */}
       <div className="flex items-center justify-between">
-        <Button 
-          variant="ghost" 
-          size="sm" 
-          onClick={() => navigate("/student/dashboard")}
-          className="gap-2 text-muted-foreground hover:text-foreground -ml-2"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          <span>Back to Hub</span>
-        </Button>
-        <span className="text-xs text-muted-foreground font-medium flex items-center gap-1.5">
-          <Heart className="h-3.5 w-3.5 text-rose-500" />
-          Clinical Calming & Self-Care Tools
+        <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary border border-primary/20 text-xs font-bold tracking-wide">
+          <Heart className="h-3.5 w-3.5 text-rose-500 fill-rose-500/20" />
+          Clinical Calming & Self-Care Protocols
         </span>
       </div>
 
       <div className="space-y-2">
         <h1 className="text-2xl md:text-3xl font-black text-foreground tracking-tight">
-          Mental Recovery & Calming Toolkit
+          <ShinyText text="Mental Recovery & Calming Toolkit" />
         </h1>
-        <p className="text-sm text-muted-foreground max-w-2xl">
+        <p className="text-sm text-muted-foreground max-w-2xl leading-relaxed">
           Clinically backed relaxation protocols to ground your autonomic nervous system, reduce cognitive fatigue, and restore mental focus.
         </p>
       </div>
@@ -108,49 +106,56 @@ export const SelfCareResourcesPage: React.FC = () => {
       >
         {/* 1. Breathing Sphere Interactive Widget */}
         <motion.div variants={cardEntrance} whileHover={{ y: -3 }}>
-          <Card className="border-border/60 shadow-sm overflow-hidden flex flex-col justify-between h-full">
-            <CardHeader className="pb-2">
-              <div className="flex items-center gap-2">
+          <SpotlightCard spotlightColor="rgba(99, 102, 241, 0.15)" className="p-5 flex flex-col justify-between h-full">
+            <div className="pb-3 border-b border-border/40 mb-3">
+              <div className="flex items-center gap-2.5">
                 <div className="h-8 w-8 rounded-xl bg-indigo-500/10 text-indigo-500 flex items-center justify-center">
                   <Wind className="h-4 w-4" />
                 </div>
                 <div>
-                  <CardTitle className="text-base font-bold text-foreground">
+                  <h3 className="text-base font-bold text-foreground">
                     MindBridge Breath Pacer
-                  </CardTitle>
-                  <CardDescription className="text-xs text-muted-foreground">
+                  </h3>
+                  <p className="text-xs text-muted-foreground">
                     Vagus nerve calming protocols to ease acute anxiety & restore focus
-                  </CardDescription>
+                  </p>
                 </div>
               </div>
-            </CardHeader>
+            </div>
 
-            <CardContent className="flex flex-col items-center justify-center py-4">
+            <div className="flex flex-col items-center justify-center py-2">
               <BreathingSphere showPresets={true} showControls={true} />
-            </CardContent>
-          </Card>
+            </div>
+          </SpotlightCard>
         </motion.div>
 
         {/* 2. 5-4-3-2-1 Sensory Grounding Tool */}
         <motion.div variants={cardEntrance} whileHover={{ y: -3 }}>
-          <Card className="border-border/60 shadow-sm overflow-hidden flex flex-col justify-between h-full">
-            <CardHeader className="pb-3">
-              <div className="flex items-center gap-2">
+          <SpotlightCard spotlightColor="rgba(16, 185, 129, 0.15)" className="p-5 flex flex-col justify-between h-full">
+            <div className="pb-3 border-b border-border/40 mb-3 flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
                 <div className="h-8 w-8 rounded-xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center">
                   <Eye className="h-4 w-4" />
                 </div>
                 <div>
-                  <CardTitle className="text-base font-bold text-foreground">
+                  <h3 className="text-base font-bold text-foreground">
                     5-4-3-2-1 Sensory Grounding
-                  </CardTitle>
-                  <CardDescription className="text-xs text-muted-foreground">
+                  </h3>
+                  <p className="text-xs text-muted-foreground">
                     Reconnect with your physical senses when thoughts are racing
-                  </CardDescription>
+                  </p>
                 </div>
               </div>
-            </CardHeader>
+              <span className={`text-[11px] font-black px-2.5 py-0.5 rounded-full border transition-all ${
+                groundingCount === 5 
+                  ? "bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border-emerald-500/40" 
+                  : "bg-muted text-muted-foreground border-border/60"
+              }`}>
+                {groundingCount === 5 ? "All Grounded ✨" : `${groundingCount}/5 Grounded`}
+              </span>
+            </div>
 
-            <CardContent className="space-y-3">
+            <div className="space-y-2.5">
               {[
                 { id: 1, count: "5", title: "Things you can SEE", desc: "Look around you: notice a pen, shadow, or texture." },
                 { id: 2, count: "4", title: "Things you can TOUCH", desc: "Feel the desk, your clothing, or the floor under your feet." },
@@ -166,16 +171,18 @@ export const SelfCareResourcesPage: React.FC = () => {
                     onClick={() => toggleGrounding(step.id)}
                     className={`w-full text-left p-3 rounded-xl border transition-all flex items-start justify-between gap-3 ${
                       checked 
-                        ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-700 dark:text-emerald-300" 
+                        ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-700 dark:text-emerald-300 shadow-xs" 
                         : "bg-background/60 border-border/70 hover:bg-muted/40 text-foreground"
                     }`}
                   >
                     <div className="flex items-start gap-3">
-                      <span className="h-6 w-6 rounded-lg bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-black text-xs flex items-center justify-center shrink-0">
+                      <span className={`h-6 w-6 rounded-lg font-black text-xs flex items-center justify-center shrink-0 transition-colors ${
+                        checked ? "bg-emerald-500 text-white" : "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400"
+                      }`}>
                         {step.count}
                       </span>
                       <div>
-                        <div className={`text-xs font-bold ${checked ? "line-through opacity-70" : ""}`}>
+                        <div className={`text-xs font-bold ${checked ? "line-through opacity-75" : ""}`}>
                           {step.title}
                         </div>
                         <div className="text-[11px] text-muted-foreground mt-0.5">
@@ -183,16 +190,16 @@ export const SelfCareResourcesPage: React.FC = () => {
                         </div>
                       </div>
                     </div>
-                    <div className={`h-5 w-5 rounded-md border flex items-center justify-center shrink-0 mt-0.5 ${
-                      checked ? "bg-emerald-500 border-emerald-500 text-white" : "border-border"
+                    <div className={`h-5 w-5 rounded-md border flex items-center justify-center shrink-0 mt-0.5 transition-all ${
+                      checked ? "bg-emerald-500 border-emerald-500 text-white" : "border-border/80 bg-background/50"
                     }`}>
                       {checked && <CheckCircle2 className="h-3.5 w-3.5" />}
                     </div>
                   </button>
                 );
               })}
-            </CardContent>
-          </Card>
+            </div>
+          </SpotlightCard>
         </motion.div>
       </motion.div>
 
@@ -201,9 +208,11 @@ export const SelfCareResourcesPage: React.FC = () => {
 
       {/* Sleep & Exam Stress Guidance */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Card className="border-border/60 shadow-sm p-5 space-y-3">
+        <SpotlightCard spotlightColor="rgba(139, 92, 246, 0.15)" className="p-5 space-y-3">
           <div className="flex items-center gap-2.5">
-            <Moon className="h-5 w-5 text-violet-500" />
+            <div className="p-1.5 rounded-lg bg-violet-500/10 text-violet-500">
+              <Moon className="h-4 w-4" />
+            </div>
             <h3 className="text-sm font-bold text-foreground">Circadian Sleep Recovery Guidelines</h3>
           </div>
           <ul className="text-xs text-muted-foreground space-y-2 leading-relaxed">
@@ -220,12 +229,14 @@ export const SelfCareResourcesPage: React.FC = () => {
               <span><strong>Consistent Bedtime Window:</strong> Going to sleep within a 30-minute window every day improves memory retention for exams.</span>
             </li>
           </ul>
-        </Card>
+        </SpotlightCard>
 
         {/* Emergency Helplines Card */}
-        <Card className="border-rose-500/30 bg-rose-500/5 shadow-sm p-5 space-y-3">
+        <SpotlightCard spotlightColor="rgba(244, 63, 94, 0.18)" className="border-rose-500/30 bg-rose-500/5 p-5 space-y-3">
           <div className="flex items-center gap-2.5 text-rose-500">
-            <ShieldAlert className="h-5 w-5" />
+            <div className="p-1.5 rounded-lg bg-rose-500/10">
+              <ShieldAlert className="h-4 w-4" />
+            </div>
             <h3 className="text-sm font-bold">24/7 Crisis & Immediate Support</h3>
           </div>
           <p className="text-xs text-muted-foreground leading-relaxed">
@@ -245,7 +256,7 @@ export const SelfCareResourcesPage: React.FC = () => {
               <a href="tel:02242355555" className="font-black text-primary hover:underline">+91 22 4235 5555</a>
             </div>
           </div>
-        </Card>
+        </SpotlightCard>
       </div>
     </motion.div>
   );
