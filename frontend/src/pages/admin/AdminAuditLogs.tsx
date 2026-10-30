@@ -7,6 +7,9 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/com
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/toast";
 import { auditAPI, AuditLogItem } from "@/services/api";
+import { SpotlightCard } from "@/components/ui/SpotlightCard";
+import { DotGridBackground } from "@/components/ui/DotGridBackground";
+import { ShinyText } from "@/components/ui/ShinyText";
 
 export const AdminAuditLogs: React.FC = () => {
   const { toast } = useToast();
@@ -108,79 +111,78 @@ export const AdminAuditLogs: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground pb-12">
-      {/* Top Header */}
-      <div className="border-b border-border/60 bg-card/40 backdrop-blur-md sticky top-0 z-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-          <div>
-            <div className="flex items-center gap-2">
-              <ShieldCheck className="w-5 h-5 text-primary" />
-              <h1 className="text-lg sm:text-xl font-bold text-foreground">
-                Institutional Security & Compliance Audit Log
-              </h1>
-            </div>
-            <p className="text-xs text-muted-foreground mt-0.5">
-              Append-only tamper-evident record of clinical record accesses, authentication, and state modifications.
-            </p>
-          </div>
+    <div className="relative w-full space-y-6 pb-12 font-sans text-foreground">
+      <DotGridBackground />
 
+      {/* Top Header */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-border pb-4">
+        <div>
           <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={fetchLogs}
-              disabled={isLoading}
-              className="rounded-xl border-border/80 text-xs font-semibold gap-1.5 h-8"
-            >
-              <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? "animate-spin" : ""}`} />
-              <span>Refresh Audit Feed</span>
-            </Button>
+            <ShieldCheck className="w-5 h-5 text-primary" />
+            <h1 className="text-lg sm:text-xl font-bold text-foreground">
+              <ShinyText text="Institutional Security & Compliance Audit Log" />
+            </h1>
           </div>
+          <p className="text-xs text-muted-foreground mt-0.5">
+            Append-only tamper-evident record of clinical record accesses, authentication, and state modifications.
+          </p>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={fetchLogs}
+            disabled={isLoading}
+            className="rounded-xl border-border/80 text-xs font-semibold gap-1.5 h-8"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? "animate-spin" : ""}`} />
+            <span>Refresh Audit Feed</span>
+          </Button>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 space-y-5">
-        {/* Compliance Header Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <Card className="border-border/70 bg-card/50 backdrop-blur-sm p-4">
-            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-              Total Audited Events
-            </p>
-            <h3 className="text-2xl sm:text-3xl font-black text-foreground mt-1">
-              {total.toLocaleString()}
-            </h3>
-            <p className="text-[11px] text-muted-foreground mt-1">
-              Immutable audit ledger
-            </p>
-          </Card>
+      {/* Compliance Header Cards (React Bits SpotlightCards) */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <SpotlightCard className="p-4" spotlightColor="rgba(59, 130, 246, 0.15)">
+          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+            Total Audited Events
+          </p>
+          <h3 className="text-2xl sm:text-3xl font-black text-foreground mt-1">
+            {total.toLocaleString()}
+          </h3>
+          <p className="text-[11px] text-muted-foreground mt-1">
+            Immutable audit ledger
+          </p>
+        </SpotlightCard>
 
-          <Card className="border-border/70 bg-card/50 backdrop-blur-sm p-4">
-            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-              Compliance Standard
-            </p>
-            <div className="flex items-center gap-1.5 mt-1.5">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              <span className="text-sm font-bold text-emerald-600 dark:text-emerald-400">
-                FERPA / HIPAA Guarded
-              </span>
-            </div>
-            <p className="text-[11px] text-muted-foreground mt-1">
-              Append-only access ledger
-            </p>
-          </Card>
+        <SpotlightCard className="p-4" spotlightColor="rgba(16, 185, 129, 0.15)">
+          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+            Compliance Standard
+          </p>
+          <div className="flex items-center gap-1.5 mt-1.5">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+            <span className="text-sm font-bold text-emerald-600 dark:text-emerald-400">
+              FERPA / HIPAA Guarded
+            </span>
+          </div>
+          <p className="text-[11px] text-muted-foreground mt-1">
+            Append-only access ledger
+          </p>
+        </SpotlightCard>
 
-          <Card className="border-border/70 bg-card/50 backdrop-blur-sm p-4">
-            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-              Current Page
-            </p>
-            <h3 className="text-2xl sm:text-3xl font-black text-foreground mt-1">
-              {page} <span className="text-xs text-muted-foreground font-normal">/ {totalPages}</span>
-            </h3>
-            <p className="text-[11px] text-muted-foreground mt-1">
-              {pageSize} rows per page
-            </p>
-          </Card>
-        </div>
+        <SpotlightCard className="p-4" spotlightColor="rgba(99, 102, 241, 0.15)">
+          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+            Current Page
+          </p>
+          <h3 className="text-2xl sm:text-3xl font-black text-foreground mt-1">
+            {page} <span className="text-xs text-muted-foreground font-normal">/ {totalPages}</span>
+          </h3>
+          <p className="text-[11px] text-muted-foreground mt-1">
+            {pageSize} rows per page
+          </p>
+        </SpotlightCard>
+      </div>
 
         {/* Filter Toolbar */}
         <Card className="border-border/70 bg-card/40 backdrop-blur-sm p-4">
@@ -452,7 +454,6 @@ export const AdminAuditLogs: React.FC = () => {
             )}
           </CardContent>
         </Card>
-      </div>
 
       {/* Metadata JSON Modal */}
       {selectedMeta && (
