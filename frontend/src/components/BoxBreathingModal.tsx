@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { X, Wind } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "motion/react";
@@ -58,7 +59,9 @@ export const BoxBreathingModal: React.FC<BoxBreathingModalProps> = ({ isOpen, on
   const phaseLabel = PHASE_LABELS[phase];
   const phaseInstruction = PHASE_INSTRUCTIONS[phase];
 
-  return (
+  if (!isOpen) return null;
+
+  return createPortal(
     <AnimatePresence>
       {isOpen && (
         <motion.div
@@ -66,14 +69,14 @@ export const BoxBreathingModal: React.FC<BoxBreathingModalProps> = ({ isOpen, on
           initial="initial"
           animate="animate"
           exit="exit"
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm"
+          className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm overflow-y-auto"
         >
           <motion.div
             variants={modalPanelVariants}
             initial="initial"
             animate="animate"
             exit="exit"
-            className="relative w-full max-w-md rounded-3xl border border-border/80 bg-card p-6 sm:p-8 shadow-2xl text-center space-y-6"
+            className="relative w-full max-w-md max-h-[90vh] overflow-y-auto rounded-3xl border border-border/80 bg-card p-6 sm:p-8 shadow-2xl text-center space-y-6 my-auto"
           >
             <button
               type="button"
@@ -135,7 +138,8 @@ export const BoxBreathingModal: React.FC<BoxBreathingModalProps> = ({ isOpen, on
           </motion.div>
         </motion.div>
       )}
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.body
   );
 };
 
