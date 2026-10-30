@@ -30,6 +30,8 @@ import { cn } from "@/utils/cn";
 import { motion, AnimatePresence } from "motion/react";
 import { pageVariants, staggerContainer, cardEntrance, modalBackdropVariants, modalPanelVariants } from "@/utils/motion";
 import { AnimatedCounter } from "@/components/ui/animated-counter";
+import { SpotlightCard } from "@/components/ui/SpotlightCard";
+import { DotGridBackground } from "@/components/ui/DotGridBackground";
 
 export const CounselorDashboard: React.FC = () => {
   const { toast } = useToast();
@@ -224,8 +226,10 @@ export const CounselorDashboard: React.FC = () => {
       variants={pageVariants}
       initial="initial"
       animate="animate"
-      className="space-y-6 pb-12"
+      className="relative w-full space-y-6 pb-12 font-sans text-foreground"
     >
+      <DotGridBackground />
+
       {/* Critical Alert Banner if Active SOS */}
       {criticalAlertsCount > 0 && (
         <div className="p-4 rounded-xl bg-rose-500/10 border border-rose-500/30 text-foreground flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
@@ -303,54 +307,62 @@ export const CounselorDashboard: React.FC = () => {
           animate="animate"
           className="grid grid-cols-2 lg:grid-cols-4 gap-3"
         >
-          <motion.div variants={cardEntrance} whileHover={{ y: -3 }} className="p-4 rounded-xl border border-border bg-card shadow-xs">
-            <div className="flex items-center justify-between text-muted-foreground">
-              <span className="text-[11px] font-medium uppercase tracking-wider">Cases Requiring Review</span>
-              <AlertCircle className="h-4 w-4 text-rose-500" />
-            </div>
-            <span className="text-2xl font-bold text-foreground font-sans mt-1 block">
-              <AnimatedCounter value={pendingAlerts.length} />
-            </span>
-            <span className="text-[11px] text-muted-foreground mt-0.5 block">Pending triage flags</span>
+          <motion.div variants={cardEntrance}>
+            <SpotlightCard className="p-4" spotlightColor="rgba(244, 63, 94, 0.15)">
+              <div className="flex items-center justify-between text-muted-foreground">
+                <span className="text-[11px] font-medium uppercase tracking-wider">Cases Requiring Review</span>
+                <AlertCircle className="h-4 w-4 text-rose-500" />
+              </div>
+              <span className="text-2xl font-bold text-foreground font-sans mt-1 block">
+                <AnimatedCounter value={pendingAlerts.length} />
+              </span>
+              <span className="text-[11px] text-muted-foreground mt-0.5 block">Pending triage flags</span>
+            </SpotlightCard>
           </motion.div>
 
-          <motion.div variants={cardEntrance} whileHover={{ y: -3 }} className="p-4 rounded-xl border border-border bg-card shadow-xs">
-            <div className="flex items-center justify-between text-muted-foreground">
-              <span className="text-[11px] font-medium uppercase tracking-wider">Active Interventions</span>
-              <Target className="h-4 w-4 text-primary" />
-            </div>
-            <span className="text-2xl font-bold text-foreground font-sans mt-1 block">
-              <AnimatedCounter value={interventionSummary?.total_active ?? reviewedAlerts.length} />
-            </span>
-            <span className="text-[11px] text-muted-foreground mt-0.5 block">
-              {interventionSummary?.follow_ups_due_today ?? 0} follow-ups due today
-            </span>
+          <motion.div variants={cardEntrance}>
+            <SpotlightCard className="p-4" spotlightColor="rgba(59, 130, 246, 0.15)">
+              <div className="flex items-center justify-between text-muted-foreground">
+                <span className="text-[11px] font-medium uppercase tracking-wider">Active Interventions</span>
+                <Target className="h-4 w-4 text-primary" />
+              </div>
+              <span className="text-2xl font-bold text-foreground font-sans mt-1 block">
+                <AnimatedCounter value={interventionSummary?.total_active ?? reviewedAlerts.length} />
+              </span>
+              <span className="text-[11px] text-muted-foreground mt-0.5 block">
+                {interventionSummary?.follow_ups_due_today ?? 0} follow-ups due today
+              </span>
+            </SpotlightCard>
           </motion.div>
 
-          <motion.div variants={cardEntrance} whileHover={{ y: -3 }} className="p-4 rounded-xl border border-border bg-card shadow-xs">
-            <div className="flex items-center justify-between text-muted-foreground">
-              <span className="text-[11px] font-medium uppercase tracking-wider">Consultations Scheduled</span>
-              <Calendar className="h-4 w-4 text-blue-500" />
-            </div>
-            <span className="text-2xl font-bold text-foreground font-sans mt-1 block">
-              <AnimatedCounter value={appointmentsList.filter((a) => a.status === "CONFIRMED" || a.status === "PENDING").length} />
-            </span>
-            <span className="text-[11px] text-muted-foreground mt-0.5 block">Upcoming 1-on-1 sessions</span>
+          <motion.div variants={cardEntrance}>
+            <SpotlightCard className="p-4" spotlightColor="rgba(99, 102, 241, 0.15)">
+              <div className="flex items-center justify-between text-muted-foreground">
+                <span className="text-[11px] font-medium uppercase tracking-wider">Consultations Scheduled</span>
+                <Calendar className="h-4 w-4 text-blue-500" />
+              </div>
+              <span className="text-2xl font-bold text-foreground font-sans mt-1 block">
+                <AnimatedCounter value={appointmentsList.filter((a) => a.status === "CONFIRMED" || a.status === "PENDING").length} />
+              </span>
+              <span className="text-[11px] text-muted-foreground mt-0.5 block">Upcoming 1-on-1 sessions</span>
+            </SpotlightCard>
           </motion.div>
 
-          <motion.div variants={cardEntrance} whileHover={{ y: -3 }} className="p-4 rounded-xl border border-border bg-card shadow-xs">
-            <div className="flex items-center justify-between text-muted-foreground">
-              <span className="text-[11px] font-medium uppercase tracking-wider">Observed Outcomes</span>
-              <CheckCircle2 className="h-4 w-4 text-emerald-500" />
-            </div>
-            <span className="text-2xl font-bold text-foreground font-sans mt-1 block">
-              <AnimatedCounter 
-                value={interventionSummary ? `${interventionSummary.observed_improvement_rate}%` : `${resolvedAlerts.length}`} 
-              />
-            </span>
-            <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold mt-0.5 block">
-              Observed post-intervention improvement
-            </span>
+          <motion.div variants={cardEntrance}>
+            <SpotlightCard className="p-4" spotlightColor="rgba(16, 185, 129, 0.15)">
+              <div className="flex items-center justify-between text-muted-foreground">
+                <span className="text-[11px] font-medium uppercase tracking-wider">Observed Outcomes</span>
+                <CheckCircle2 className="h-4 w-4 text-emerald-500" />
+              </div>
+              <span className="text-2xl font-bold text-foreground font-sans mt-1 block">
+                <AnimatedCounter 
+                  value={interventionSummary ? `${interventionSummary.observed_improvement_rate}%` : `${resolvedAlerts.length}`} 
+                />
+              </span>
+              <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold mt-0.5 block">
+                Observed post-intervention improvement
+              </span>
+            </SpotlightCard>
           </motion.div>
         </motion.div>
       </div>
