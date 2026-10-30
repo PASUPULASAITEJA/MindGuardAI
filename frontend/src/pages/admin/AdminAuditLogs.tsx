@@ -144,43 +144,55 @@ export const AdminAuditLogs: React.FC = () => {
 
       {/* Compliance Header Cards (React Bits SpotlightCards) */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <SpotlightCard className="p-4" spotlightColor="rgba(59, 130, 246, 0.15)">
-          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-            Total Audited Events
-          </p>
-          <h3 className="text-2xl sm:text-3xl font-black text-foreground mt-1">
-            {total.toLocaleString()}
-          </h3>
-          <p className="text-[11px] text-muted-foreground mt-1">
-            Immutable audit ledger
-          </p>
-        </SpotlightCard>
-
-        <SpotlightCard className="p-4" spotlightColor="rgba(16, 185, 129, 0.15)">
-          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-            Compliance Standard
-          </p>
-          <div className="flex items-center gap-1.5 mt-1.5">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-            <span className="text-sm font-bold text-emerald-600 dark:text-emerald-400">
-              FERPA / HIPAA Guarded
-            </span>
+        <SpotlightCard className="p-4 sm:p-5 min-h-[130px] flex flex-col justify-between" spotlightColor="rgba(59, 130, 246, 0.15)">
+          <div>
+            <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
+              Total Audited Events
+            </p>
+            <h3 className="text-2xl sm:text-3xl font-black text-foreground mt-2 tracking-tight">
+              {total.toLocaleString()}
+            </h3>
           </div>
-          <p className="text-[11px] text-muted-foreground mt-1">
-            Append-only access ledger
-          </p>
+          <div className="mt-3 pt-2 border-t border-border/40">
+            <p className="text-[11px] text-muted-foreground font-medium">
+              Immutable audit ledger
+            </p>
+          </div>
         </SpotlightCard>
 
-        <SpotlightCard className="p-4" spotlightColor="rgba(99, 102, 241, 0.15)">
-          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-            Current Page
-          </p>
-          <h3 className="text-2xl sm:text-3xl font-black text-foreground mt-1">
-            {page} <span className="text-xs text-muted-foreground font-normal">/ {totalPages}</span>
-          </h3>
-          <p className="text-[11px] text-muted-foreground mt-1">
-            {pageSize} rows per page
-          </p>
+        <SpotlightCard className="p-4 sm:p-5 min-h-[130px] flex flex-col justify-between" spotlightColor="rgba(16, 185, 129, 0.15)">
+          <div>
+            <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
+              Compliance Standard
+            </p>
+            <div className="flex items-center gap-2 mt-2.5">
+              <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
+              <span className="text-base font-bold text-emerald-600 dark:text-emerald-400">
+                FERPA / HIPAA Guarded
+              </span>
+            </div>
+          </div>
+          <div className="mt-3 pt-2 border-t border-border/40">
+            <p className="text-[11px] text-muted-foreground font-medium">
+              Append-only access ledger
+            </p>
+          </div>
+        </SpotlightCard>
+
+        <SpotlightCard className="p-4 sm:p-5 min-h-[130px] flex flex-col justify-between" spotlightColor="rgba(99, 102, 241, 0.15)">
+          <div>
+            <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
+              Current Page
+            </p>
+            <h3 className="text-2xl sm:text-3xl font-black text-foreground mt-2 tracking-tight">
+              {page} <span className="text-xs text-muted-foreground font-normal">/ {totalPages}</span>
+            </h3>
+          </div>
+          <div className="mt-3 pt-2 border-t border-border/40">
+            <p className="text-[11px] text-muted-foreground font-medium">
+              {pageSize} rows per page
+            </p>
+          </div>
         </SpotlightCard>
       </div>
 

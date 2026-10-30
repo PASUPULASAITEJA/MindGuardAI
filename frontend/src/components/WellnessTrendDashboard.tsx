@@ -281,7 +281,7 @@ export const WellnessTrendDashboard: React.FC<WellnessTrendDashboardProps> = ({
                       <span className="text-xs font-bold text-muted-foreground">/ 100</span>
                     </div>
                   </div>
-                  <div className="mt-4 pt-3 border-t border-border/50 flex items-center justify-between text-xs text-muted-foreground font-medium">
+                  <div className="mt-auto pt-3 border-t border-border/50 flex items-center justify-between text-xs text-muted-foreground font-medium">
                     <span>Peak: <strong className="font-semibold text-foreground">{summary.highest_score}</strong></span>
                     <span className="text-border">|</span>
                     <span>Low: <strong className="font-semibold text-foreground">{summary.lowest_score}</strong></span>
@@ -329,7 +329,7 @@ export const WellnessTrendDashboard: React.FC<WellnessTrendDashboardProps> = ({
                       </span>
                     </div>
                   </div>
-                  <div className="mt-4 pt-3 border-t border-border/50">
+                  <div className="mt-auto pt-3 border-t border-border/50">
                     <p className="text-xs text-muted-foreground font-medium truncate">
                       Net delta across chosen timeframe
                     </p>
@@ -356,7 +356,7 @@ export const WellnessTrendDashboard: React.FC<WellnessTrendDashboardProps> = ({
                       </span>
                     </div>
                   </div>
-                  <div className="mt-4 pt-3 border-t border-border/50">
+                  <div className="mt-auto pt-3 border-t border-border/50">
                     <p className="text-xs text-muted-foreground font-medium truncate">
                       {Object.keys(summary.emotion_distribution).length} emotional markers mapped
                     </p>
@@ -390,7 +390,7 @@ export const WellnessTrendDashboard: React.FC<WellnessTrendDashboardProps> = ({
                       </span>
                     </div>
                   </div>
-                  <div className="mt-4 pt-3 border-t border-border/50">
+                  <div className="mt-auto pt-3 border-t border-border/50">
                     <p className="text-xs text-muted-foreground font-medium truncate">
                       {points.length} total check-in events
                     </p>

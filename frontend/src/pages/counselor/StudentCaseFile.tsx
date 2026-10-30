@@ -327,36 +327,52 @@ export const StudentCaseFile: React.FC = () => {
         <div className="space-y-6">
           {/* 4 Overview Metrics */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-            <SpotlightCard className="p-4" spotlightColor="rgba(59, 130, 246, 0.15)">
-              <span className="text-[11px] text-muted-foreground uppercase font-medium block">Latest Score</span>
-              <span className="text-2xl font-bold text-foreground font-sans mt-1 block">
-                {summary?.latest_wellness_score !== undefined ? `${summary.latest_wellness_score.toFixed(1)}` : "--"} <span className="text-xs text-muted-foreground font-normal">/ 100</span>
-              </span>
-              <span className="text-[11px] text-muted-foreground block mt-0.5">Composite index</span>
+            <SpotlightCard className="p-4 sm:p-5 min-h-[135px] flex flex-col justify-between" spotlightColor="rgba(59, 130, 246, 0.15)">
+              <div>
+                <span className="text-[11px] text-muted-foreground uppercase font-bold tracking-wider block">Latest Score</span>
+                <span className="text-2xl sm:text-3xl font-black text-foreground font-sans mt-2 block tracking-tight">
+                  {summary?.latest_wellness_score !== undefined ? `${summary.latest_wellness_score.toFixed(1)}` : "--"} <span className="text-xs text-muted-foreground font-normal">/ 100</span>
+                </span>
+              </div>
+              <div className="mt-3 pt-2 border-t border-border/40">
+                <span className="text-[11px] text-muted-foreground font-medium block">Composite index</span>
+              </div>
             </SpotlightCard>
 
-            <SpotlightCard className="p-4" spotlightColor="rgba(16, 185, 129, 0.15)">
-              <span className="text-[11px] text-muted-foreground uppercase font-medium block">Assessments Completed</span>
-              <span className="text-2xl font-bold text-foreground font-sans mt-1 block">
-                {summary?.total_assessments ?? 0}
-              </span>
-              <span className="text-[11px] text-muted-foreground block mt-0.5">Submissions on file</span>
+            <SpotlightCard className="p-4 sm:p-5 min-h-[135px] flex flex-col justify-between" spotlightColor="rgba(16, 185, 129, 0.15)">
+              <div>
+                <span className="text-[11px] text-muted-foreground uppercase font-bold tracking-wider block">Assessments Completed</span>
+                <span className="text-2xl sm:text-3xl font-black text-foreground font-sans mt-2 block tracking-tight">
+                  {summary?.total_assessments ?? 0}
+                </span>
+              </div>
+              <div className="mt-3 pt-2 border-t border-border/40">
+                <span className="text-[11px] text-muted-foreground font-medium block">Submissions on file</span>
+              </div>
             </SpotlightCard>
 
-            <SpotlightCard className="p-4" spotlightColor="rgba(244, 63, 94, 0.15)">
-              <span className="text-[11px] text-muted-foreground uppercase font-medium block">Active Triage Flags</span>
-              <span className="text-2xl font-bold text-foreground font-sans mt-1 block">
-                {summary?.active_alerts_count ?? 0}
-              </span>
-              <span className="text-[11px] text-muted-foreground block mt-0.5">Pending flags</span>
+            <SpotlightCard className="p-4 sm:p-5 min-h-[135px] flex flex-col justify-between" spotlightColor="rgba(244, 63, 94, 0.15)">
+              <div>
+                <span className="text-[11px] text-muted-foreground uppercase font-bold tracking-wider block">Active Triage Flags</span>
+                <span className="text-2xl sm:text-3xl font-black text-rose-600 dark:text-rose-400 font-sans mt-2 block tracking-tight">
+                  {summary?.active_alerts_count ?? 0}
+                </span>
+              </div>
+              <div className="mt-3 pt-2 border-t border-border/40">
+                <span className="text-[11px] text-muted-foreground font-medium block">Pending flags</span>
+              </div>
             </SpotlightCard>
 
-            <SpotlightCard className="p-4" spotlightColor="rgba(99, 102, 241, 0.15)">
-              <span className="text-[11px] text-muted-foreground uppercase font-medium block">Active Interventions</span>
-              <span className="text-2xl font-bold text-foreground font-sans mt-1 block">
-                {interventions.filter(i => i.status === "ACTIVE" || i.status === "PENDING").length}
-              </span>
-              <span className="text-[11px] text-muted-foreground block mt-0.5">In-progress protocols</span>
+            <SpotlightCard className="p-4 sm:p-5 min-h-[135px] flex flex-col justify-between" spotlightColor="rgba(99, 102, 241, 0.15)">
+              <div>
+                <span className="text-[11px] text-muted-foreground uppercase font-bold tracking-wider block">Active Interventions</span>
+                <span className="text-2xl sm:text-3xl font-black text-foreground font-sans mt-2 block tracking-tight">
+                  {interventions.filter(i => i.status === "ACTIVE" || i.status === "PENDING").length}
+                </span>
+              </div>
+              <div className="mt-3 pt-2 border-t border-border/40">
+                <span className="text-[11px] text-muted-foreground font-medium block">In-progress protocols</span>
+              </div>
             </SpotlightCard>
           </div>
 
