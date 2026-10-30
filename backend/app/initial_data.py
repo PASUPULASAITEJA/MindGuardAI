@@ -38,6 +38,12 @@ DEFAULT_USERS = [
     },
     # Standard NMIMS institutional accounts
     {
+        "email": "pasupulasai.teja37@nmims.in",
+        "password": "password123",
+        "role": UserRole.STUDENT,
+        "full_name": "Sai Teja Pasupula",
+    },
+    {
         "email": "student@nmims.in",
         "password": "password123",
         "role": UserRole.STUDENT,
