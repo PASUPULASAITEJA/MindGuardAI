@@ -19,6 +19,8 @@ import { cn } from "@/utils/cn";
 import { motion, AnimatePresence } from "motion/react";
 import { pageVariants } from "@/utils/motion";
 import { AnimatedCounter } from "@/components/ui/animated-counter";
+import { DotGridBackground } from "@/components/ui/DotGridBackground";
+import { ShinyText } from "@/components/ui/ShinyText";
 
 const MOOD_OPTIONS = [
   { score: 2, label: "Difficult", symbol: "😔", helper: "Stressed or overwhelmed" },
@@ -72,8 +74,10 @@ export const DailyCheckInPage: React.FC = () => {
       variants={pageVariants}
       initial="initial"
       animate="animate"
-      className="w-full max-w-4xl mx-auto space-y-6 pb-12 font-sans"
+      className="relative w-full max-w-4xl mx-auto space-y-6 pb-12 font-sans text-foreground"
     >
+      <DotGridBackground />
+
       {/* Header */}
       <div className="flex items-center justify-between border-b border-border pb-4">
         <Button 
@@ -156,7 +160,9 @@ export const DailyCheckInPage: React.FC = () => {
             <Card className="p-6 md:p-8">
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div>
-                  <h1 className="text-lg font-bold text-foreground">How are you feeling today?</h1>
+                  <h1 className="text-xl font-bold text-foreground">
+                    <ShinyText text="How are you feeling today?" />
+                  </h1>
                   <p className="text-xs text-muted-foreground mt-0.5">
                     Choose the option that best reflects your current emotional state.
                   </p>
