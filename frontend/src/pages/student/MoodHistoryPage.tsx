@@ -25,6 +25,9 @@ import WellnessTrendDashboard from "@/components/WellnessTrendDashboard";
 import { motion } from "motion/react";
 import { pageVariants, staggerContainer, cardEntrance } from "@/utils/motion";
 import { AnimatedCounter } from "@/components/ui/animated-counter";
+import { SpotlightCard } from "@/components/ui/SpotlightCard";
+import { DotGridBackground } from "@/components/ui/DotGridBackground";
+import { ShinyText } from "@/components/ui/ShinyText";
 
 export const MoodHistoryPage: React.FC = () => {
   const navigate = useNavigate();
@@ -50,8 +53,10 @@ export const MoodHistoryPage: React.FC = () => {
       variants={pageVariants}
       initial="initial"
       animate="animate"
-      className="w-full space-y-6 pb-12 font-sans"
+      className="relative w-full space-y-6 pb-12 font-sans text-foreground"
     >
+      <DotGridBackground />
+
       {/* Header */}
       <div className="flex items-center justify-between">
         <Button 
@@ -88,7 +93,7 @@ export const MoodHistoryPage: React.FC = () => {
 
       <div className="space-y-1">
         <h1 className="text-2xl md:text-3xl font-black text-foreground tracking-tight">
-          My Wellbeing Analytics & Trajectory
+          <ShinyText text="My Wellbeing Analytics & Trajectory" />
         </h1>
         <p className="text-sm text-muted-foreground">
           Longitudinal view of your emotional health, multidimensional baselines, and chronological campus wellness events.
@@ -104,93 +109,103 @@ export const MoodHistoryPage: React.FC = () => {
         )}
       </Alert>
 
-      {/* Multidimensional Breakdown Cards */}
+      {/* Multidimensional Breakdown Cards (React Bits SpotlightCards) */}
       <motion.div 
         variants={staggerContainer}
         initial="initial"
         animate="animate"
         className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5"
       >
-        <motion.div variants={cardEntrance} whileHover={{ y: -3 }} className="p-4 rounded-2xl border border-border/80 bg-card shadow-xs space-y-2 hover:border-border hover:shadow-md transition-all">
-          <div className="flex items-center justify-between text-muted-foreground">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400">Mood Index</span>
-            <div className="p-1.5 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
-              <Smile className="h-3.5 w-3.5" />
+        <motion.div variants={cardEntrance}>
+          <SpotlightCard className="p-4 space-y-2" spotlightColor="rgba(16, 185, 129, 0.15)">
+            <div className="flex items-center justify-between text-muted-foreground">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400">Mood Index</span>
+              <div className="p-1.5 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+                <Smile className="h-3.5 w-3.5" />
+              </div>
             </div>
-          </div>
-          <p className="text-xl font-black text-foreground font-mono">
-            {baseline?.recent_mood_score ? <AnimatedCounter value={baseline.recent_mood_score} decimals={1} /> : (avgScore !== "—" ? <AnimatedCounter value={avgScore} decimals={1} /> : "—")}
-            {avgScore !== "—" && <span className="text-xs font-normal text-muted-foreground">/10</span>}
-          </p>
-          <span className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 block">
-            {baseline?.usual_mood_score ? `Usual: ${baseline.usual_mood_score}/10` : "Self-Reported"}
-          </span>
+            <p className="text-xl font-black text-foreground font-mono">
+              {baseline?.recent_mood_score ? <AnimatedCounter value={baseline.recent_mood_score} decimals={1} /> : (avgScore !== "—" ? <AnimatedCounter value={avgScore} decimals={1} /> : "—")}
+              {avgScore !== "—" && <span className="text-xs font-normal text-muted-foreground">/10</span>}
+            </p>
+            <span className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 block">
+              {baseline?.usual_mood_score ? `Usual: ${baseline.usual_mood_score}/10` : "Self-Reported"}
+            </span>
+          </SpotlightCard>
         </motion.div>
 
-        <motion.div variants={cardEntrance} whileHover={{ y: -3 }} className="p-4 rounded-2xl border border-border/80 bg-card shadow-xs space-y-2 hover:border-border hover:shadow-md transition-all">
-          <div className="flex items-center justify-between text-muted-foreground">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400">Stress Level</span>
-            <div className="p-1.5 rounded-lg bg-indigo-500/10 text-indigo-600 dark:text-indigo-400">
-              <Activity className="h-3.5 w-3.5" />
+        <motion.div variants={cardEntrance}>
+          <SpotlightCard className="p-4 space-y-2" spotlightColor="rgba(99, 102, 241, 0.15)">
+            <div className="flex items-center justify-between text-muted-foreground">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400">Stress Level</span>
+              <div className="p-1.5 rounded-lg bg-indigo-500/10 text-indigo-600 dark:text-indigo-400">
+                <Activity className="h-3.5 w-3.5" />
+              </div>
             </div>
-          </div>
-          <p className="text-xl font-black text-foreground font-mono">
-            {baseline?.recent_stress !== undefined && baseline?.recent_stress !== null ? (
-              <><AnimatedCounter value={baseline.recent_stress} />/10</>
-            ) : "—"}
-          </p>
-          <span className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 block">
-            {baseline?.usual_stress ? `Usual: ${baseline.usual_stress}/10` : "No stress data yet"}
-          </span>
+            <p className="text-xl font-black text-foreground font-mono">
+              {baseline?.recent_stress !== undefined && baseline?.recent_stress !== null ? (
+                <><AnimatedCounter value={baseline.recent_stress} />/10</>
+              ) : "—"}
+            </p>
+            <span className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 block">
+              {baseline?.usual_stress ? `Usual: ${baseline.usual_stress}/10` : "No stress data yet"}
+            </span>
+          </SpotlightCard>
         </motion.div>
 
-        <motion.div variants={cardEntrance} whileHover={{ y: -3 }} className="p-4 rounded-2xl border border-border/80 bg-card shadow-xs space-y-2 hover:border-border hover:shadow-md transition-all">
-          <div className="flex items-center justify-between text-muted-foreground">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400">Sleep Hours</span>
-            <div className="p-1.5 rounded-lg bg-purple-500/10 text-purple-600 dark:text-purple-400">
-              <Moon className="h-3.5 w-3.5" />
+        <motion.div variants={cardEntrance}>
+          <SpotlightCard className="p-4 space-y-2" spotlightColor="rgba(168, 85, 247, 0.15)">
+            <div className="flex items-center justify-between text-muted-foreground">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400">Sleep Hours</span>
+              <div className="p-1.5 rounded-lg bg-purple-500/10 text-purple-600 dark:text-purple-400">
+                <Moon className="h-3.5 w-3.5" />
+              </div>
             </div>
-          </div>
-          <p className="text-xl font-black text-foreground font-mono">
-            {baseline?.recent_sleep_hours !== undefined && baseline?.recent_sleep_hours !== null ? (
-              <><AnimatedCounter value={baseline.recent_sleep_hours} decimals={1} /> hrs</>
-            ) : "—"}
-          </p>
-          <span className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 block">
-            {baseline?.usual_sleep_hours ? `Usual: ${baseline.usual_sleep_hours}h` : "No sleep logged yet"}
-          </span>
+            <p className="text-xl font-black text-foreground font-mono">
+              {baseline?.recent_sleep_hours !== undefined && baseline?.recent_sleep_hours !== null ? (
+                <><AnimatedCounter value={baseline.recent_sleep_hours} decimals={1} /> hrs</>
+              ) : "—"}
+            </p>
+            <span className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 block">
+              {baseline?.usual_sleep_hours ? `Usual: ${baseline.usual_sleep_hours}h` : "No sleep logged yet"}
+            </span>
+          </SpotlightCard>
         </motion.div>
 
-        <motion.div variants={cardEntrance} whileHover={{ y: -3 }} className="p-4 rounded-2xl border border-border/80 bg-card shadow-xs space-y-2 hover:border-border hover:shadow-md transition-all">
-          <div className="flex items-center justify-between text-muted-foreground">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400">Assessments</span>
-            <div className="p-1.5 rounded-lg bg-cyan-500/10 text-cyan-600 dark:text-cyan-400">
-              <ShieldCheck className="h-3.5 w-3.5" />
+        <motion.div variants={cardEntrance}>
+          <SpotlightCard className="p-4 space-y-2" spotlightColor="rgba(6, 182, 212, 0.15)">
+            <div className="flex items-center justify-between text-muted-foreground">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400">Assessments</span>
+              <div className="p-1.5 rounded-lg bg-cyan-500/10 text-cyan-600 dark:text-cyan-400">
+                <ShieldCheck className="h-3.5 w-3.5" />
+              </div>
             </div>
-          </div>
-          <p className="text-xl font-black text-foreground font-mono">
-            {latestAssessment?.mental_wellness_score ? (
-              <><AnimatedCounter value={Number(latestAssessment.mental_wellness_score).toFixed(0)} />/100</>
-            ) : "—"}
-          </p>
-          <span className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 block">
-            {latestAssessment?.risk_level ? `Risk: ${latestAssessment.risk_level}` : "Clinical Psychometric"}
-          </span>
+            <p className="text-xl font-black text-foreground font-mono">
+              {latestAssessment?.mental_wellness_score ? (
+                <><AnimatedCounter value={Number(latestAssessment.mental_wellness_score).toFixed(0)} />/100</>
+              ) : "—"}
+            </p>
+            <span className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 block">
+              {latestAssessment?.risk_level ? `Risk: ${latestAssessment.risk_level}` : "Clinical Psychometric"}
+            </span>
+          </SpotlightCard>
         </motion.div>
 
-        <motion.div variants={cardEntrance} whileHover={{ y: -3 }} className="p-4 rounded-2xl border border-border/80 bg-card shadow-xs space-y-2 hover:border-border hover:shadow-md transition-all">
-          <div className="flex items-center justify-between text-muted-foreground">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400">Confidence</span>
-            <div className="p-1.5 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400">
-              <Zap className="h-3.5 w-3.5" />
+        <motion.div variants={cardEntrance}>
+          <SpotlightCard className="p-4 space-y-2" spotlightColor="rgba(245, 158, 11, 0.15)">
+            <div className="flex items-center justify-between text-muted-foreground">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400">Confidence</span>
+              <div className="p-1.5 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400">
+                <Zap className="h-3.5 w-3.5" />
+              </div>
             </div>
-          </div>
-          <p className="text-xl font-black text-foreground font-mono">
-            {baseline?.baseline_confidence || "ESTABLISHING"}
-          </p>
-          <span className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 block">
-            {baseline?.observations_count ? `${baseline.observations_count} observations` : "Active Calibration"}
-          </span>
+            <p className="text-xl font-black text-foreground font-mono">
+              {baseline?.baseline_confidence || "ESTABLISHING"}
+            </p>
+            <span className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 block">
+              {baseline?.observations_count ? `${baseline.observations_count} observations` : "Active Calibration"}
+            </span>
+          </SpotlightCard>
         </motion.div>
       </motion.div>
       
