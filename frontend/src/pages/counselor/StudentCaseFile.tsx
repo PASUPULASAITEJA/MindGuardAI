@@ -39,6 +39,8 @@ import WellnessTrendDashboard from "@/components/WellnessTrendDashboard";
 import { cn } from "@/utils/cn";
 import { motion } from "motion/react";
 import { pageVariants } from "@/utils/motion";
+import { SpotlightCard } from "@/components/ui/SpotlightCard";
+import { DotGridBackground } from "@/components/ui/DotGridBackground";
 
 export const StudentCaseFile: React.FC = () => {
   const { studentId } = useParams<{ studentId: string }>();
@@ -241,8 +243,9 @@ export const StudentCaseFile: React.FC = () => {
       variants={pageVariants}
       initial="initial"
       animate="animate"
-      className="space-y-6 pb-12"
+      className="relative w-full space-y-6 pb-12 font-sans text-foreground"
     >
+      <DotGridBackground />
       {/* Top Header with Breadcrumb & Student Identity */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border pb-4">
         <div className="space-y-1">
@@ -324,37 +327,37 @@ export const StudentCaseFile: React.FC = () => {
         <div className="space-y-6">
           {/* 4 Overview Metrics */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-            <div className="p-4 rounded-xl border border-border bg-card shadow-xs">
+            <SpotlightCard className="p-4" spotlightColor="rgba(59, 130, 246, 0.15)">
               <span className="text-[11px] text-muted-foreground uppercase font-medium block">Latest Score</span>
               <span className="text-2xl font-bold text-foreground font-sans mt-1 block">
                 {summary?.latest_wellness_score !== undefined ? `${summary.latest_wellness_score.toFixed(1)}` : "--"} <span className="text-xs text-muted-foreground font-normal">/ 100</span>
               </span>
               <span className="text-[11px] text-muted-foreground block mt-0.5">Composite index</span>
-            </div>
+            </SpotlightCard>
 
-            <div className="p-4 rounded-xl border border-border bg-card shadow-xs">
+            <SpotlightCard className="p-4" spotlightColor="rgba(16, 185, 129, 0.15)">
               <span className="text-[11px] text-muted-foreground uppercase font-medium block">Assessments Completed</span>
               <span className="text-2xl font-bold text-foreground font-sans mt-1 block">
                 {summary?.total_assessments ?? 0}
               </span>
               <span className="text-[11px] text-muted-foreground block mt-0.5">Submissions on file</span>
-            </div>
+            </SpotlightCard>
 
-            <div className="p-4 rounded-xl border border-border bg-card shadow-xs">
+            <SpotlightCard className="p-4" spotlightColor="rgba(244, 63, 94, 0.15)">
               <span className="text-[11px] text-muted-foreground uppercase font-medium block">Active Triage Flags</span>
               <span className="text-2xl font-bold text-foreground font-sans mt-1 block">
                 {summary?.active_alerts_count ?? 0}
               </span>
               <span className="text-[11px] text-muted-foreground block mt-0.5">Pending flags</span>
-            </div>
+            </SpotlightCard>
 
-            <div className="p-4 rounded-xl border border-border bg-card shadow-xs">
+            <SpotlightCard className="p-4" spotlightColor="rgba(99, 102, 241, 0.15)">
               <span className="text-[11px] text-muted-foreground uppercase font-medium block">Active Interventions</span>
               <span className="text-2xl font-bold text-foreground font-sans mt-1 block">
                 {interventions.filter(i => i.status === "ACTIVE" || i.status === "PENDING").length}
               </span>
               <span className="text-[11px] text-muted-foreground block mt-0.5">In-progress protocols</span>
-            </div>
+            </SpotlightCard>
           </div>
 
           {/* Student Case Summary Card */}
