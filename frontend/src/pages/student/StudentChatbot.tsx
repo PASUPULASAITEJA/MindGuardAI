@@ -30,6 +30,7 @@ import { chatAPI, ChatMessageItem, ChatResponsePayload, getAccessToken } from "@
 import { cn } from "@/utils/cn";
 import { useToast } from "@/components/ui/toast";
 import { EmergencySOSModal } from "@/components/EmergencySOSModal";
+import { AgentActivityDrawer } from "@/components/chat/AgentActivityDrawer";
 import { motion, AnimatePresence } from "motion/react";
 import { chatBotMessageVariants, chatUserMessageVariants } from "@/utils/motion";
 
@@ -202,6 +203,9 @@ export const StudentChatbot: React.FC = () => {
 
   // Emergency SOS Modal State
   const [isSOSOpen, setIsSOSOpen] = useState(false);
+
+  // Agent Activity & Tool Calls Drawer State (React Bits Pro)
+  const [isActivityDrawerOpen, setIsActivityDrawerOpen] = useState(false);
 
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
@@ -553,6 +557,18 @@ export const StudentChatbot: React.FC = () => {
           </div>
 
           <div className="flex items-center gap-2">
+            {/* React Bits Pro Agent Activity & Tool Calls Trigger */}
+            <button
+              type="button"
+              onClick={() => setIsActivityDrawerOpen(true)}
+              className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-border bg-secondary/60 hover:bg-secondary text-foreground text-xs font-semibold transition-all shadow-xs"
+              title="Inspect AI Agent Activity, Plan & Tool Calls"
+            >
+              <BrainCircuit className="h-3.5 w-3.5 text-primary" />
+              <span>Agent Activity</span>
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+            </button>
+
             <button
               onClick={() => setIsSOSOpen(true)}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-rose-500/10 border border-rose-500/30 text-rose-600 dark:text-rose-400 text-xs font-bold hover:bg-rose-500/20 transition-all shadow-sm"
@@ -1128,6 +1144,18 @@ export const StudentChatbot: React.FC = () => {
 
       {/* REUSABLE EMERGENCY SOS MODAL */}
       <EmergencySOSModal isOpen={isSOSOpen} onClose={() => setIsSOSOpen(false)} />
+
+      {/* REACT BITS PRO AGENT ACTIVITY & TOOL CALLS DRAWER */}
+      <AgentActivityDrawer
+        isOpen={isActivityDrawerOpen}
+        onClose={() => setIsActivityDrawerOpen(false)}
+        lastEmotion={
+          messages.filter((m) => m.sender !== "STUDENT").slice(-1)[0]?.primary_emotion || "neutral"
+        }
+        riskLevel={
+          messages.filter((m) => m.sender !== "STUDENT").slice(-1)[0]?.risk_level || "GREEN"
+        }
+      />
     </div>
   );
 };
