@@ -14,7 +14,6 @@ from app.models.users import UserRole
 # -------------------------------------------------------------------------
 BASE_AUTHORIZED_ROSTER: Dict[str, UserRole] = {
     # 1. Authorized Student Roster
-    "makkena.lahari06@nmims.in": UserRole.STUDENT,
     "siripuramvaishnavi.goud20@nmims.in": UserRole.STUDENT,
     "aashritha.reddy35@nmims.in": UserRole.STUDENT,
     "ratnachand.kancharla04@nmims.in": UserRole.STUDENT,
