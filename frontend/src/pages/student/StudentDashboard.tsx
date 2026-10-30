@@ -13,6 +13,9 @@ import { chatAPI, consentRecordsAPI } from "@/services/api";
 
 // UI Components
 import { Card, CardContent } from "@/components/ui/card";
+import { SpotlightCard } from "@/components/ui/SpotlightCard";
+import { DotGridBackground } from "@/components/ui/DotGridBackground";
+import { ShinyText } from "@/components/ui/ShinyText";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -184,7 +187,9 @@ export const StudentDashboard: React.FC = () => {
   const studentFirstName = user?.full_name ? user.full_name.split(" ")[0] : "Student";
 
   return (
-    <div className="w-full space-y-6 pb-12 font-sans text-foreground">
+    <div className="relative w-full space-y-6 pb-12 font-sans text-foreground">
+      <DotGridBackground />
+
       {/* 1. WELCOME HEADER */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
@@ -193,7 +198,7 @@ export const StudentDashboard: React.FC = () => {
             <span>Campus Wellness Space</span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground">
-            Welcome back, {studentFirstName} 👋
+            Welcome back, <ShinyText text={studentFirstName} className="inline-block" /> 👋
           </h1>
           <p className="text-xs sm:text-sm text-muted-foreground mt-1">
             Here is your daily mental health overview and circadian recovery status.
@@ -233,11 +238,14 @@ export const StudentDashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* 2. TOP STAT ROW: 4 Cards in a grid */}
+      {/* 2. TOP STAT ROW: 4 React Bits SpotlightCards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Stat 1: Wellness Score */}
-        <Card className="rounded-2xl border border-border bg-card p-5 shadow-xs card-hover">
-          <CardContent className="p-0 flex items-center justify-between">
+        <SpotlightCard
+          className="p-5"
+          spotlightColor={wellnessScore >= 65 ? "rgba(16, 185, 129, 0.15)" : wellnessScore >= 35 ? "rgba(245, 158, 11, 0.15)" : "rgba(244, 63, 94, 0.15)"}
+        >
+          <div className="flex items-center justify-between w-full">
             <div className="space-y-1">
               <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block">
                 Wellness Score
@@ -252,12 +260,15 @@ export const StudentDashboard: React.FC = () => {
             <div className="w-12 h-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
               <Smile className={cn("w-6 h-6", scoreColorClass)} />
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </SpotlightCard>
 
         {/* Stat 2: Risk Level */}
-        <Card className="rounded-2xl border border-border bg-card p-5 shadow-xs card-hover">
-          <CardContent className="p-0 flex items-center justify-between">
+        <SpotlightCard
+          className="p-5"
+          spotlightColor={normalizedRisk === "HIGH" ? "rgba(244, 63, 94, 0.15)" : normalizedRisk === "MODERATE" ? "rgba(245, 158, 11, 0.15)" : "rgba(16, 185, 129, 0.15)"}
+        >
+          <div className="flex items-center justify-between w-full">
             <div className="space-y-1.5">
               <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block">
                 Risk Level
@@ -296,12 +307,15 @@ export const StudentDashboard: React.FC = () => {
             <div className="w-12 h-12 rounded-xl bg-secondary text-muted-foreground flex items-center justify-center shrink-0">
               <Activity className="w-6 h-6 text-primary" />
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </SpotlightCard>
 
         {/* Stat 3: Last Check-In */}
-        <Card className="rounded-2xl border border-border bg-card p-5 shadow-xs card-hover">
-          <CardContent className="p-0 flex items-center justify-between">
+        <SpotlightCard
+          className="p-5"
+          spotlightColor="rgba(99, 102, 241, 0.15)"
+        >
+          <div className="flex items-center justify-between w-full">
             <div className="space-y-1">
               <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block">
                 Last Check-in
@@ -316,12 +330,15 @@ export const StudentDashboard: React.FC = () => {
             <div className="w-12 h-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
               <Clock className="w-6 h-6" />
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </SpotlightCard>
 
         {/* Stat 4: Streak Days */}
-        <Card className="rounded-2xl border border-border bg-card p-5 shadow-xs card-hover">
-          <CardContent className="p-0 flex items-center justify-between">
+        <SpotlightCard
+          className="p-5"
+          spotlightColor="rgba(245, 158, 11, 0.15)"
+        >
+          <div className="flex items-center justify-between w-full">
             <div className="space-y-1">
               <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block">
                 Streak
@@ -337,59 +354,63 @@ export const StudentDashboard: React.FC = () => {
             <div className="w-12 h-12 rounded-xl bg-amber-500/10 text-amber-500 flex items-center justify-center shrink-0">
               <Flame className="w-6 h-6 fill-amber-500" />
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </SpotlightCard>
       </div>
 
-      {/* 3. QUICK ACTIONS ROW: 4 interactive cards */}
+      {/* 3. QUICK ACTIONS ROW: 4 React Bits SpotlightCards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Action 1: Start Check-in */}
-        <div
+        <SpotlightCard
           onClick={() => navigate("/student/check-in")}
-          className="card-hover bg-card border border-border rounded-2xl p-4 flex flex-col items-center gap-2.5 cursor-pointer text-center transition-all"
+          className="p-4 flex flex-col items-center gap-2.5 cursor-pointer text-center group"
+          spotlightColor="rgba(59, 130, 246, 0.18)"
         >
-          <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-primary/10 text-primary">
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-primary/10 text-primary group-hover:scale-105 transition-transform">
             <Sparkles className="w-5 h-5" />
           </div>
           <span className="text-xs font-semibold text-foreground">Start Check-in</span>
           <span className="text-[10px] text-muted-foreground">Log today's mood</span>
-        </div>
+        </SpotlightCard>
 
         {/* Action 2: Talk to AI */}
-        <div
+        <SpotlightCard
           onClick={() => navigate("/student/chat")}
-          className="card-hover bg-card border border-border rounded-2xl p-4 flex flex-col items-center gap-2.5 cursor-pointer text-center transition-all"
+          className="p-4 flex flex-col items-center gap-2.5 cursor-pointer text-center group"
+          spotlightColor="rgba(168, 85, 247, 0.18)"
         >
-          <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-purple-500/10 text-purple-500">
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-purple-500/10 text-purple-500 group-hover:scale-105 transition-transform">
             <MessageSquare className="w-5 h-5" />
           </div>
           <span className="text-xs font-semibold text-foreground">AI Companion</span>
           <span className="text-[10px] text-muted-foreground">Guided coping & chat</span>
-        </div>
+        </SpotlightCard>
 
         {/* Action 3: Book Counselor */}
-        <div
+        <SpotlightCard
           onClick={() => setIsBookingOpen(true)}
-          className="card-hover bg-card border border-border rounded-2xl p-4 flex flex-col items-center gap-2.5 cursor-pointer text-center transition-all"
+          className="p-4 flex flex-col items-center gap-2.5 cursor-pointer text-center group"
+          spotlightColor="rgba(16, 185, 129, 0.18)"
         >
-          <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-emerald-500/10 text-emerald-500">
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-emerald-500/10 text-emerald-500 group-hover:scale-105 transition-transform">
             <Calendar className="w-5 h-5" />
           </div>
           <span className="text-xs font-semibold text-foreground">Book Counselor</span>
           <span className="text-[10px] text-muted-foreground">Schedule session</span>
-        </div>
+        </SpotlightCard>
 
         {/* Action 4: Crisis Support */}
-        <div
+        <SpotlightCard
           onClick={() => setIsSOSOpen(true)}
-          className="card-hover bg-card border border-border rounded-2xl p-4 flex flex-col items-center gap-2.5 cursor-pointer text-center transition-all"
+          className="p-4 flex flex-col items-center gap-2.5 cursor-pointer text-center group"
+          spotlightColor="rgba(244, 63, 94, 0.18)"
         >
-          <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-rose-500/10 text-rose-500">
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-rose-500/10 text-rose-500 group-hover:scale-105 transition-transform">
             <ShieldAlert className="w-5 h-5" />
           </div>
           <span className="text-xs font-semibold text-foreground">Crisis Support</span>
           <span className="text-[10px] text-muted-foreground">Get help now</span>
-        </div>
+        </SpotlightCard>
       </div>
 
       {/* Micro-Checkin Widget */}
