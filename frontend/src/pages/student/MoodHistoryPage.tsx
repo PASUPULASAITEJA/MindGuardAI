@@ -28,8 +28,8 @@ import { AnimatedCounter } from "@/components/ui/animated-counter";
 
 export const MoodHistoryPage: React.FC = () => {
   const navigate = useNavigate();
-  const [timeframe, setTimeframe] = useState<"7d" | "30d" | "90d" | "180d">("30d");
-  const { data: history = [], isLoading } = useMoodHistory(timeframe);
+  const [timeframe, setTimeframe] = useState<"7d" | "30d" | "90d">("30d");
+  const { data: history = [], isLoading } = useMoodHistory(timeframe as any);
   const { data: latestAssessment } = useLatestAssessment();
   const { data: trendData } = useWellnessTrends(timeframe);
 
@@ -67,10 +67,9 @@ export const MoodHistoryPage: React.FC = () => {
         {/* Timeframe selector */}
         <div className="flex items-center gap-1.5 p-1 bg-muted/50 rounded-xl border border-border">
           {[
-            { key: "7d", label: "7D" },
-            { key: "30d", label: "30D" },
-            { key: "90d", label: "3M" },
-            { key: "180d", label: "6M" },
+            { key: "7d", label: "7 Days" },
+            { key: "30d", label: "30 Days" },
+            { key: "90d", label: "90 Days" },
           ].map((t) => (
             <button
               key={t.key}
@@ -196,7 +195,12 @@ export const MoodHistoryPage: React.FC = () => {
       </motion.div>
       
       {/* Wellness Trend Visualizer */}
-      <WellnessTrendDashboard />
+      <WellnessTrendDashboard 
+        timeframe={timeframe} 
+        onTimeframeChange={setTimeframe} 
+        hideHeader={true} 
+        showChartFirst={true} 
+      />
 
       {/* Chronological Longitudinal Timeline of Events */}
       <Card className="border-border/80 shadow-xs">
