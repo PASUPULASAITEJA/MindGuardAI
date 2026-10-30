@@ -442,6 +442,19 @@
 }
 .pulse-soft { animation: pulse-soft 2s ease-in-out infinite; }
 
+/* ReactBits Shimmer / Shiny Text */
+@keyframes shine {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+.animate-shine {
+  animation: shine 5s linear infinite;
+}
+
 /* Global prefers-reduced-motion overrides */
 @media (prefers-reduced-motion: reduce) {
   .breathing-blob,
