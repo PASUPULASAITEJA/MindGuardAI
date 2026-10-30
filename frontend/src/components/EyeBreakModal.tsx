@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { X, Eye, CheckCircle2, RotateCcw, Volume2, VolumeX, Sparkles, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -65,10 +66,10 @@ export const EyeBreakModal: React.FC<EyeBreakModalProps> = ({
   const progressPct = ((20 - secondsLeft) / 20) * 100;
   const strokeDashoffset = 283 - (283 * progressPct) / 100;
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm animate-in fade-in duration-200">
+  return createPortal(
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm animate-in fade-in duration-200 overflow-y-auto">
       <div 
-        className="w-full max-w-md bg-card border border-border/80 rounded-3xl p-6 shadow-2xl relative overflow-hidden"
+        className="w-full max-w-md max-h-[90vh] overflow-y-auto bg-card border border-border/80 rounded-3xl p-6 shadow-2xl relative my-auto"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Decorative Top Accent Glow */}
@@ -208,6 +209,7 @@ export const EyeBreakModal: React.FC<EyeBreakModalProps> = ({
           )}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
