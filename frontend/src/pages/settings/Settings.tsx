@@ -12,6 +12,8 @@ import {
 import { profileAPI, consentAPI, ConsentRecord, notificationsAPI } from "@/services/api";
 import { ConsentBanner } from "@/components/ConsentBanner";
 import { ConsentSettingsManager } from "@/components/ConsentSettingsManager";
+import { DotGridBackground } from "@/components/ui/DotGridBackground";
+import { ShinyText } from "@/components/ui/ShinyText";
 
 export const Settings: React.FC = () => {
   const { user } = useAuth();
@@ -263,9 +265,12 @@ export const Settings: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="relative w-full space-y-6 pb-12 font-sans text-foreground">
+      <DotGridBackground />
       <div>
-        <h3 className="text-foreground text-lg md:text-xl font-extrabold">Account Settings</h3>
+        <h3 className="text-foreground text-lg md:text-xl font-extrabold">
+          <ShinyText text="Account Settings" />
+        </h3>
         <p className="text-muted-foreground text-xs md:text-sm mt-1">Manage your preferences, security settings, and styling choices.</p>
       </div>
 
