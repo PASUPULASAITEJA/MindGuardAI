@@ -135,17 +135,19 @@ export const WellnessTrendDashboard: React.FC<WellnessTrendDashboardProps> = ({
           {/* Summary Metric Cards */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             {/* Avg Score */}
-            <div className="wellness-card p-4 rounded-2xl shadow-xs border border-border/70 flex flex-col justify-between">
-              <div className="flex items-center justify-between text-xs text-muted-foreground font-semibold">
+            <div className="bg-card p-4.5 rounded-2xl shadow-xs border border-slate-200 dark:border-slate-800 flex flex-col justify-between hover:border-primary/40 transition-all">
+              <div className="flex items-center justify-between text-xs text-slate-600 dark:text-slate-400 font-bold">
                 <span>Average Wellness</span>
-                <Activity className="w-4 h-4 text-primary" />
+                <div className="p-1.5 rounded-lg bg-primary/10 text-primary">
+                  <Activity className="w-3.5 h-3.5" />
+                </div>
               </div>
-              <div className="mt-2 flex items-baseline space-x-2">
+              <div className="mt-2.5 flex items-baseline space-x-2">
                 <span className="text-2xl font-black text-foreground">{summary.average_wellness_score}</span>
-                <span className="text-xs text-muted-foreground">/ 100</span>
+                <span className="text-xs font-semibold text-muted-foreground">/ 100</span>
               </div>
               <div className="mt-2 flex items-center space-x-1.5">
-                <span className="text-[11px] text-muted-foreground">
+                <span className="text-[11px] text-muted-foreground font-medium">
                   Peak: <strong className="text-foreground">{summary.highest_score}</strong> | Low:{" "}
                   <strong className="text-foreground">{summary.lowest_score}</strong>
                 </span>
@@ -153,12 +155,14 @@ export const WellnessTrendDashboard: React.FC<WellnessTrendDashboardProps> = ({
             </div>
 
             {/* Trajectory & Delta */}
-            <div className="wellness-card p-4 rounded-2xl shadow-xs border border-border/70 flex flex-col justify-between">
-              <div className="flex items-center justify-between text-xs text-muted-foreground font-semibold">
+            <div className="bg-card p-4.5 rounded-2xl shadow-xs border border-slate-200 dark:border-slate-800 flex flex-col justify-between hover:border-emerald-500/40 transition-all">
+              <div className="flex items-center justify-between text-xs text-slate-600 dark:text-slate-400 font-bold">
                 <span>Period Trajectory</span>
-                {getDirectionIcon(summary.direction)}
+                <div className="p-1.5 rounded-lg bg-emerald-500/10">
+                  {getDirectionIcon(summary.direction)}
+                </div>
               </div>
-              <div className="mt-2 flex items-baseline space-x-2">
+              <div className="mt-2.5 flex items-baseline space-x-2">
                 <span className="text-2xl font-black text-foreground">
                   {summary.wellness_delta >= 0 ? `+${summary.wellness_delta}` : summary.wellness_delta}
                 </span>
@@ -170,34 +174,38 @@ export const WellnessTrendDashboard: React.FC<WellnessTrendDashboardProps> = ({
                   {summary.direction}
                 </span>
               </div>
-              <p className="mt-2 text-[11px] text-muted-foreground">Net delta across chosen timeframe</p>
+              <p className="mt-2 text-[11px] text-muted-foreground font-medium">Net delta across chosen timeframe</p>
             </div>
 
             {/* Dominant Emotion */}
-            <div className="wellness-card p-4 rounded-2xl shadow-xs border border-border/70 flex flex-col justify-between">
-              <div className="flex items-center justify-between text-xs text-muted-foreground font-semibold">
+            <div className="bg-card p-4.5 rounded-2xl shadow-xs border border-slate-200 dark:border-slate-800 flex flex-col justify-between hover:border-amber-500/40 transition-all">
+              <div className="flex items-center justify-between text-xs text-slate-600 dark:text-slate-400 font-bold">
                 <span>Dominant Affect</span>
-                <Sparkles className="w-4 h-4 text-amber-500" />
+                <div className="p-1.5 rounded-lg bg-amber-500/10 text-amber-500">
+                  <Sparkles className="w-3.5 h-3.5" />
+                </div>
               </div>
-              <div className="mt-2 flex items-baseline space-x-2">
+              <div className="mt-2.5 flex items-baseline space-x-2">
                 <span className="text-2xl font-black capitalize text-foreground">
                   {summary.dominant_emotion}
                 </span>
               </div>
-              <p className="mt-2 text-[11px] text-muted-foreground">
+              <p className="mt-2 text-[11px] text-muted-foreground font-medium">
                 {Object.keys(summary.emotion_distribution).length} emotional markers mapped
               </p>
             </div>
 
             {/* Stability / Volatility */}
-            <div className="wellness-card p-4 rounded-2xl shadow-xs border border-border/70 flex flex-col justify-between">
-              <div className="flex items-center justify-between text-xs text-muted-foreground font-semibold">
+            <div className="bg-card p-4.5 rounded-2xl shadow-xs border border-slate-200 dark:border-slate-800 flex flex-col justify-between hover:border-rose-500/40 transition-all">
+              <div className="flex items-center justify-between text-xs text-slate-600 dark:text-slate-400 font-bold">
                 <span>Score Volatility</span>
-                <Flame className="w-4 h-4 text-rose-500" />
+                <div className="p-1.5 rounded-lg bg-rose-500/10 text-rose-500">
+                  <Flame className="w-3.5 h-3.5" />
+                </div>
               </div>
-              <div className="mt-2 flex items-baseline space-x-2">
+              <div className="mt-2.5 flex items-baseline space-x-2">
                 <span className="text-2xl font-black text-foreground">±{summary.volatility_score}</span>
-                <span className="text-xs text-muted-foreground">
+                <span className="text-xs font-semibold text-muted-foreground">
                   {summary.volatility_score < 8
                     ? "(High Stability)"
                     : summary.volatility_score < 15
@@ -205,7 +213,9 @@ export const WellnessTrendDashboard: React.FC<WellnessTrendDashboardProps> = ({
                     : "(High Flux)"}
                 </span>
               </div>
-              <p className="mt-2 text-[11px] text-muted-foreground">{summary.total_checkins} total check-in events</p>
+              <p className="mt-2 text-[11px] text-muted-foreground font-medium">
+                {points.length} total check-in events
+              </p>
             </div>
           </div>
 
