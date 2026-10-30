@@ -7,9 +7,9 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { 
-  User as UserIcon, Shield, Bell, Moon, Sun, Lock, CheckCircle, FileDown, ShieldAlert, AlertTriangle, Check, X
+  User as UserIcon, Shield, Bell, Moon, Sun, Lock, CheckCircle, FileDown, ShieldAlert, AlertTriangle, Check, X, Mail, Send
 } from "lucide-react";
-import { profileAPI, consentAPI, ConsentRecord } from "@/services/api";
+import { profileAPI, consentAPI, ConsentRecord, notificationsAPI } from "@/services/api";
 import { ConsentBanner } from "@/components/ConsentBanner";
 import { ConsentSettingsManager } from "@/components/ConsentSettingsManager";
 
@@ -204,6 +204,54 @@ export const Settings: React.FC = () => {
         variant: "success"
       });
     }, 1200);
+  };
+
+  const [isSendingTestEmail, setIsSendingTestEmail] = useState(false);
+  const [isSendingTestNotif, setIsSendingTestNotif] = useState(false);
+
+  const handleTestEmail = async () => {
+    setIsSendingTestEmail(true);
+    try {
+      const res = await notificationsAPI.dispatchTestEmail();
+      toast({
+        title: "Authenticated Email Dispatched",
+        description: res.message || `Test wellness alert sent to ${res.recipient} with delivery verification.`,
+        variant: "success"
+      });
+    } catch (err: any) {
+      toast({
+        title: "Email Dispatch Error",
+        description: err.response?.data?.detail || "Could not dispatch test email. Check SMTP settings.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsSendingTestEmail(false);
+    }
+  };
+
+  const handleTestNotification = async () => {
+    setIsSendingTestNotif(true);
+    try {
+      await notificationsAPI.createTestNotification({
+        title: "Wellness Status Check",
+        message: "Your authenticated realtime notification channel is operating normally.",
+        type: "SYSTEM_ALERT",
+        channel: "WEBSOCKET"
+      });
+      toast({
+        title: "Push Notification Sent",
+        description: "Authenticated WebSocket broadcast delivered to your active session.",
+        variant: "success"
+      });
+    } catch (err: any) {
+      toast({
+        title: "Notification Error",
+        description: err.response?.data?.detail || "Could not trigger push notification.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsSendingTestNotif(false);
+    }
   };
 
   const handleSaveNotifications = () => {
@@ -628,14 +676,21 @@ export const Settings: React.FC = () => {
             </CardContent>
           </Card>
 
-          {/* Notifications Card */}
+          {/* Notifications & Authenticated Delivery Card */}
           <Card className="border-border/70 bg-card/50 backdrop-blur-md">
             <CardHeader>
-              <CardTitle className="text-foreground text-sm md:text-base font-bold flex items-center gap-2">
-                <Bell className="h-4.5 w-4.5 text-primary" />
-                Notification Preferences
+              <CardTitle className="text-foreground text-sm md:text-base font-bold flex items-center justify-between">
+                <span className="flex items-center gap-2">
+                  <Bell className="h-4.5 w-4.5 text-primary" />
+                  Notification & Email Preferences
+                </span>
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                  <Check className="h-3 w-3" /> Authenticated Channel
+                </span>
               </CardTitle>
-              <CardDescription className="text-xs md:text-sm">Select how you want to receive early warning alerts and updates</CardDescription>
+              <CardDescription className="text-xs md:text-sm">
+                Control authenticated clinical alerts delivered to your verified campus inbox (<span className="font-semibold text-foreground">{user?.email || "student@campus.edu"}</span>) and dashboard stream.
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-4">
@@ -665,7 +720,7 @@ export const Settings: React.FC = () => {
                   />
                 </div>
 
-                <div className="flex items-center justify-between pb-1">
+                <div className="flex items-center justify-between border-b border-border/60 pb-3.5">
                   <div>
                     <p className="text-xs md:text-sm font-bold text-foreground">In-App Live Toast Feed</p>
                     <p className="text-xs text-muted-foreground mt-0.5">Show popup banners inside the dashboard for instant status changes.</p>
@@ -676,6 +731,42 @@ export const Settings: React.FC = () => {
                     onChange={(e) => setPushAlerts(e.target.checked)}
                     className="h-4.5 w-4.5 rounded border-border/70 text-primary focus:ring-primary accent-primary"
                   />
+                </div>
+
+                {/* Authentication Diagnostics & Verification Actions */}
+                <div className="p-3.5 rounded-xl bg-muted/40 border border-border/60 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                  <div>
+                    <p className="text-xs font-bold text-foreground flex items-center gap-1.5">
+                      <Mail className="h-3.5 w-3.5 text-primary" /> Delivery Verification
+                    </p>
+                    <p className="text-[11px] text-muted-foreground mt-0.5">
+                      Dispatch authenticated test packets to confirm email delivery and WebSocket push.
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={handleTestEmail}
+                      disabled={isSendingTestEmail}
+                      className="text-xs h-8 px-3 rounded-lg border-border font-semibold flex items-center gap-1.5"
+                    >
+                      <Mail className="h-3.5 w-3.5 text-primary" />
+                      {isSendingTestEmail ? "Sending..." : "Test Email"}
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={handleTestNotification}
+                      disabled={isSendingTestNotif}
+                      className="text-xs h-8 px-3 rounded-lg border-border font-semibold flex items-center gap-1.5"
+                    >
+                      <Bell className="h-3.5 w-3.5 text-amber-500" />
+                      {isSendingTestNotif ? "Broadcasting..." : "Test Push"}
+                    </Button>
+                  </div>
                 </div>
               </div>
 
