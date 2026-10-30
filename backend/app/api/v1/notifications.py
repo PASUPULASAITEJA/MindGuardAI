@@ -163,6 +163,50 @@ async def create_test_notification(
     return notification
 
 
+@router.post(
+    "/test-email",
+    status_code=status.HTTP_200_OK,
+    summary="Dispatch an authenticated test email alert"
+)
+async def dispatch_test_email(
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Dispatches a test security & wellness notification email to verify SMTP delivery and audit logging.
+    """
+    from app.services.email_service import email_service
+    record = await email_service.send_email_notification(
+        db,
+        event_type="TEST_NOTIFICATION",
+        recipient_email=current_user.email,
+        recipient_user_id=current_user.id,
+        subject="MindGuardAI - Verified Email Delivery Test",
+        body_text=(
+            f"Hello {current_user.full_name},\n\n"
+            f"This is a verified test email from your MindGuardAI wellness platform.\n"
+            f"Your mail and notification authentication channels are active and working properly."
+        ),
+        html_body=(
+            f"<div style='font-family: sans-serif; padding: 24px; color: #0F172A;'>"
+            f"<h2 style='color: #059669;'>MindGuardAI Notification Verified</h2>"
+            f"<p>Hello <strong>{current_user.full_name}</strong>,</p>"
+            f"<p>This is a verified test email from your MindGuardAI wellness platform.</p>"
+            f"<p style='padding: 12px; background: #ECFDF5; border: 1px solid #A7F3D0; border-radius: 8px; color: #065F46;'>"
+            f"<strong>Status:</strong> Active & Authenticated"
+            f"</p>"
+            f"</div>"
+        )
+    )
+    return {
+        "status": "success",
+        "delivery_id": str(record.id),
+        "recipient": record.recipient_email,
+        "delivery_status": record.status,
+        "message": "Test notification email processed successfully."
+    }
+
+
 @router.websocket("/ws")
 async def websocket_notifications(
     websocket: WebSocket,
