@@ -112,7 +112,7 @@ export const MoodHistoryPage: React.FC = () => {
         animate="animate"
         className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5"
       >
-        <motion.div variants={cardEntrance} whileHover={{ y: -3 }} className="p-4 rounded-2xl border border-slate-200 dark:border-slate-800 bg-card shadow-xs space-y-2 hover:border-emerald-500/40 transition-all">
+        <motion.div variants={cardEntrance} whileHover={{ y: -3 }} className="p-4 rounded-2xl border border-border/80 bg-card shadow-xs space-y-2 hover:border-border hover:shadow-md transition-all">
           <div className="flex items-center justify-between text-muted-foreground">
             <span className="text-[11px] font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400">Mood Index</span>
             <div className="p-1.5 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
@@ -128,7 +128,7 @@ export const MoodHistoryPage: React.FC = () => {
           </span>
         </motion.div>
 
-        <motion.div variants={cardEntrance} whileHover={{ y: -3 }} className="p-4 rounded-2xl border border-slate-200 dark:border-slate-800 bg-card shadow-xs space-y-2 hover:border-indigo-500/40 transition-all">
+        <motion.div variants={cardEntrance} whileHover={{ y: -3 }} className="p-4 rounded-2xl border border-border/80 bg-card shadow-xs space-y-2 hover:border-border hover:shadow-md transition-all">
           <div className="flex items-center justify-between text-muted-foreground">
             <span className="text-[11px] font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400">Stress Level</span>
             <div className="p-1.5 rounded-lg bg-indigo-500/10 text-indigo-600 dark:text-indigo-400">
@@ -145,7 +145,7 @@ export const MoodHistoryPage: React.FC = () => {
           </span>
         </motion.div>
 
-        <motion.div variants={cardEntrance} whileHover={{ y: -3 }} className="p-4 rounded-2xl border border-slate-200 dark:border-slate-800 bg-card shadow-xs space-y-2 hover:border-purple-500/40 transition-all">
+        <motion.div variants={cardEntrance} whileHover={{ y: -3 }} className="p-4 rounded-2xl border border-border/80 bg-card shadow-xs space-y-2 hover:border-border hover:shadow-md transition-all">
           <div className="flex items-center justify-between text-muted-foreground">
             <span className="text-[11px] font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400">Sleep Hours</span>
             <div className="p-1.5 rounded-lg bg-purple-500/10 text-purple-600 dark:text-purple-400">
@@ -162,7 +162,7 @@ export const MoodHistoryPage: React.FC = () => {
           </span>
         </motion.div>
 
-        <motion.div variants={cardEntrance} whileHover={{ y: -3 }} className="p-4 rounded-2xl border border-slate-200 dark:border-slate-800 bg-card shadow-xs space-y-2 hover:border-cyan-500/40 transition-all">
+        <motion.div variants={cardEntrance} whileHover={{ y: -3 }} className="p-4 rounded-2xl border border-border/80 bg-card shadow-xs space-y-2 hover:border-border hover:shadow-md transition-all">
           <div className="flex items-center justify-between text-muted-foreground">
             <span className="text-[11px] font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400">Assessments</span>
             <div className="p-1.5 rounded-lg bg-cyan-500/10 text-cyan-600 dark:text-cyan-400">
@@ -179,7 +179,7 @@ export const MoodHistoryPage: React.FC = () => {
           </span>
         </motion.div>
 
-        <motion.div variants={cardEntrance} whileHover={{ y: -3 }} className="p-4 rounded-2xl border border-slate-200 dark:border-slate-800 bg-card shadow-xs space-y-2 hover:border-amber-500/40 transition-all">
+        <motion.div variants={cardEntrance} whileHover={{ y: -3 }} className="p-4 rounded-2xl border border-border/80 bg-card shadow-xs space-y-2 hover:border-border hover:shadow-md transition-all">
           <div className="flex items-center justify-between text-muted-foreground">
             <span className="text-[11px] font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400">Confidence</span>
             <div className="p-1.5 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400">
