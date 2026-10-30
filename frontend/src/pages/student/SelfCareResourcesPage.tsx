@@ -73,7 +73,7 @@ export const SelfCareResourcesPage: React.FC = () => {
       variants={pageVariants}
       initial="initial"
       animate="animate"
-      className="relative max-w-4xl mx-auto space-y-8 pb-12"
+      className="relative w-full space-y-6 pb-12 font-sans"
     >
       <DotGridBackground />
 
