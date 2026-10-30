@@ -18,7 +18,7 @@ export const PrivacyConsentPage: React.FC = () => {
   const { user } = useAuth();
 
   return (
-    <div className="space-y-6 pb-12 max-w-5xl mx-auto">
+    <div className="w-full space-y-6 pb-12 font-sans">
       {/* Header Banner */}
       <div className="flex flex-col gap-2 rounded-2xl border border-border/80 bg-gradient-to-r from-card via-card/90 to-primary/5 p-6 shadow-xs">
         <div className="flex items-center gap-3">
