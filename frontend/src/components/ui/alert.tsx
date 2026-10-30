@@ -21,43 +21,51 @@ export const Alert: React.FC<AlertProps> = ({
     switch (variant) {
       case "success":
         return {
-          container: "border-emerald-500/20 bg-emerald-500/10 text-emerald-900 dark:text-emerald-300",
-          icon: <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400 shrink-0" />,
+          container: "border-emerald-500/30 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-950 dark:text-emerald-200",
+          icon: <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />,
+          titleClass: "text-emerald-900 dark:text-emerald-100",
+          bodyClass: "text-emerald-800/90 dark:text-emerald-300/90",
         };
       case "warning":
         return {
-          container: "border-amber-500/20 bg-amber-500/10 text-amber-900 dark:text-amber-300",
-          icon: <AlertTriangle className="h-4 w-4 text-amber-600 dark:text-amber-400 shrink-0" />,
+          container: "border-amber-500/30 bg-amber-50 dark:bg-amber-500/10 text-amber-950 dark:text-amber-200",
+          icon: <AlertTriangle className="h-4 w-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />,
+          titleClass: "text-amber-900 dark:text-amber-100",
+          bodyClass: "text-amber-800/90 dark:text-amber-300/90",
         };
       case "destructive":
         return {
-          container: "border-rose-500/20 bg-rose-500/10 text-rose-900 dark:text-rose-300",
-          icon: <AlertCircle className="h-4 w-4 text-rose-600 dark:text-rose-400 shrink-0" />,
+          container: "border-rose-500/30 bg-rose-50 dark:bg-rose-500/10 text-rose-950 dark:text-rose-200",
+          icon: <AlertCircle className="h-4 w-4 text-rose-600 dark:text-rose-400 shrink-0 mt-0.5" />,
+          titleClass: "text-rose-900 dark:text-rose-100",
+          bodyClass: "text-rose-800/90 dark:text-rose-300/90",
         };
       case "info":
       default:
         return {
-          container: "border-primary/20 bg-primary/10 text-primary-foreground dark:text-primary",
-          icon: <Info className="h-4 w-4 text-primary shrink-0" />,
+          container: "border-sky-500/30 bg-sky-50 dark:bg-sky-500/10 text-sky-950 dark:text-sky-200",
+          icon: <Info className="h-4 w-4 text-sky-600 dark:text-sky-400 shrink-0 mt-0.5" />,
+          titleClass: "text-sky-900 dark:text-sky-100",
+          bodyClass: "text-sky-800/90 dark:text-sky-300/90",
         };
     }
   };
 
-  const { container, icon } = getVariantStyles();
+  const { container, icon, titleClass, bodyClass } = getVariantStyles();
 
   return (
     <div
       role="alert"
       className={cn(
-        "relative flex items-start gap-3 rounded-xl border p-4 text-xs leading-relaxed",
+        "relative flex items-start gap-3 rounded-2xl border p-4 text-xs leading-relaxed shadow-xs",
         container,
         className
       )}
     >
       {icon}
       <div className="flex-1">
-        {title && <h5 className="font-bold tracking-tight mb-0.5">{title}</h5>}
-        <div className="text-muted-foreground/90 font-medium">{children}</div>
+        {title && <h5 className={cn("font-bold tracking-tight mb-1", titleClass)}>{title}</h5>}
+        <div className={cn("font-medium", bodyClass)}>{children}</div>
       </div>
       {onClose && (
         <button
