@@ -3,6 +3,9 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Alert } from "@/components/ui/alert";
 import { ConsentSettingsManager } from "@/components/ConsentSettingsManager";
+import { SpotlightCard } from "@/components/ui/SpotlightCard";
+import { DotGridBackground } from "@/components/ui/DotGridBackground";
+import { ShinyText } from "@/components/ui/ShinyText";
 import { 
   ShieldCheck, 
   Eye, 
@@ -18,7 +21,9 @@ export const PrivacyConsentPage: React.FC = () => {
   const { user } = useAuth();
 
   return (
-    <div className="w-full space-y-6 pb-12 font-sans">
+    <div className="relative w-full space-y-6 pb-12 font-sans text-foreground">
+      <DotGridBackground />
+
       {/* Header Banner */}
       <div className="flex flex-col gap-2 rounded-2xl border border-border/80 bg-gradient-to-r from-card via-card/90 to-primary/5 p-6 shadow-xs">
         <div className="flex items-center gap-3">
@@ -27,7 +32,7 @@ export const PrivacyConsentPage: React.FC = () => {
           </div>
           <div>
             <h1 className="text-xl font-bold tracking-tight text-foreground">
-              Privacy & Consent Governance Center
+              <ShinyText text="Privacy & Consent Governance Center" />
             </h1>
             <p className="text-xs text-muted-foreground">
               Understand how your wellbeing data is protected, encrypted, and managed across MindGuardAI.
@@ -40,9 +45,9 @@ export const PrivacyConsentPage: React.FC = () => {
         Your wellness data is strictly confidential. Personal reflections and text logs are never shared with academic staff or university administrators. Only licensed university counsellors can view critical triage indicators if escalation consent is enabled.
       </Alert>
 
-      {/* Information Disclosure Cards */}
+      {/* Information Disclosure Cards (React Bits SpotlightCards) */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card className="rounded-2xl border-border/80 bg-card p-5 shadow-xs">
+        <SpotlightCard className="p-5" spotlightColor="rgba(59, 130, 246, 0.15)">
           <div className="flex items-center gap-2.5 text-primary mb-3">
             <Eye className="h-4 w-4" />
             <h3 className="text-sm font-bold text-foreground">What We Collect</h3>
@@ -61,9 +66,9 @@ export const PrivacyConsentPage: React.FC = () => {
               <span>Aggregated device active time (no keystroke or browser history)</span>
             </li>
           </ul>
-        </Card>
+        </SpotlightCard>
 
-        <Card className="rounded-2xl border-border/80 bg-card p-5 shadow-xs">
+        <SpotlightCard className="p-5" spotlightColor="rgba(168, 85, 247, 0.15)">
           <div className="flex items-center gap-2.5 text-primary mb-3">
             <Sparkles className="h-4 w-4" />
             <h3 className="text-sm font-bold text-foreground">How AI Is Used</h3>
@@ -82,9 +87,9 @@ export const PrivacyConsentPage: React.FC = () => {
               <span>Non-diagnostic decision support with licensed human counsellor oversight</span>
             </li>
           </ul>
-        </Card>
+        </SpotlightCard>
 
-        <Card className="rounded-2xl border-border/80 bg-card p-5 shadow-xs">
+        <SpotlightCard className="p-5" spotlightColor="rgba(16, 185, 129, 0.15)">
           <div className="flex items-center gap-2.5 text-primary mb-3">
             <Users className="h-4 w-4" />
             <h3 className="text-sm font-bold text-foreground">Who Has Access</h3>
@@ -103,7 +108,7 @@ export const PrivacyConsentPage: React.FC = () => {
               <span><strong>Admins:</strong> Anonymized campus-wide statistics only (k-anonymity)</span>
             </li>
           </ul>
-        </Card>
+        </SpotlightCard>
       </div>
 
       {/* Embedded Granular Consent & Immutable Audit History Component */}
