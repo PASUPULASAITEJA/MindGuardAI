@@ -186,7 +186,7 @@ export const PersonalizedRecommendations: React.FC = () => {
                 className={`p-4.5 rounded-2xl border flex flex-col justify-between transition-all duration-200 min-h-[230px] ${
                   isCompleted 
                     ? "bg-muted/30 border-border/60 opacity-80" 
-                    : "bg-card border-border/80 hover:border-primary/50 shadow-xs hover:shadow-md"
+                    : "bg-card border-border/80 hover:border-border shadow-xs hover:shadow-md hover:-translate-y-0.5"
                 }`}
               >
                 <div className="space-y-3">
