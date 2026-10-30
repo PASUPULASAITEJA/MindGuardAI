@@ -45,9 +45,9 @@ async def run_all_tests():
         print(f"\n{BOLD}1. Testing Institutional Whitelist & Roster Endpoint{RESET}")
         
         # Student in Excel
-        res = await client.get("/api/v1/auth/roster-info?email=makkena.lahari06@nmims.in")
+        res = await client.get("/api/v1/auth/roster-info?email=pasupulasai.teja37@nmims.in")
         record_test(
-            "Roster Check: Student in Excel (makkena.lahari06@nmims.in)",
+            "Roster Check: Student in Excel (pasupulasai.teja37@nmims.in)",
             res.status_code == 200 and res.json().get("is_authorized") is True and res.json().get("assigned_role") == "STUDENT",
             f"Status: {res.status_code}, Response: {res.json()}"
         )
@@ -122,9 +122,9 @@ async def run_all_tests():
 
         async with AsyncSessionLocal() as session:
             test_users = [
-                ("student@nmims.in", UserRole.STUDENT),
-                ("counselor@nmims.edu", UserRole.COUNSELOR),
-                ("admin@nmims.edu", UserRole.ADMIN),
+                ("student1@mindguard.edu", UserRole.STUDENT),
+                ("counselor1@mindguard.edu", UserRole.COUNSELOR),
+                ("admin@mindguard.edu", UserRole.ADMIN),
             ]
             for email, role in test_users:
                 res = await session.execute(select(User).where(User.email == email))
@@ -134,23 +134,23 @@ async def run_all_tests():
                         id=uuid.uuid4(),
                         email=email,
                         role=role,
-                        password_hash=get_password_hash("MindGuard@Role2026!"),
+                        password_hash=get_password_hash("Student@123"),
                         is_active=True
                     )
                     session.add(u)
                 else:
-                    u.password_hash = get_password_hash("MindGuard@Role2026!")
+                    u.password_hash = get_password_hash("Student@123")
                     u.is_active = True
             await session.commit()
 
         # Student Login
         res_student_login = await client.post(
             "/api/v1/auth/login",
-            json={"email": "student@nmims.in", "password": "MindGuard@Role2026!"}
+            json={"email": "student1@mindguard.edu", "password": "Student@123"}
         )
         student_token = res_student_login.json().get("access_token") if res_student_login.status_code == 200 else None
         record_test(
-            "Student Login (student@nmims.in)",
+            "Student Login (student1@mindguard.edu)",
             res_student_login.status_code == 200 and bool(student_token),
             f"Token generated: {bool(student_token)}"
         )
@@ -158,11 +158,11 @@ async def run_all_tests():
         # Counselor Login
         res_counselor_login = await client.post(
             "/api/v1/auth/login",
-            json={"email": "counselor@nmims.edu", "password": "MindGuard@Role2026!"}
+            json={"email": "counselor1@mindguard.edu", "password": "Student@123"}
         )
         counselor_token = res_counselor_login.json().get("access_token") if res_counselor_login.status_code == 200 else None
         record_test(
-            "Counselor Login (counselor@nmims.edu)",
+            "Counselor Login (counselor1@mindguard.edu)",
             res_counselor_login.status_code == 200 and bool(counselor_token),
             f"Token generated: {bool(counselor_token)}"
         )
@@ -170,11 +170,11 @@ async def run_all_tests():
         # Admin Login
         res_admin_login = await client.post(
             "/api/v1/auth/login",
-            json={"email": "admin@nmims.edu", "password": "MindGuard@Role2026!"}
+            json={"email": "admin@mindguard.edu", "password": "Student@123"}
         )
         admin_token = res_admin_login.json().get("access_token") if res_admin_login.status_code == 200 else None
         record_test(
-            "Admin Login (admin@nmims.edu)",
+            "Admin Login (admin@mindguard.edu)",
             res_admin_login.status_code == 200 and bool(admin_token),
             f"Token generated: {bool(admin_token)}"
         )
@@ -182,7 +182,7 @@ async def run_all_tests():
         # Invalid Credentials
         res_invalid = await client.post(
             "/api/v1/auth/login",
-            json={"email": "student@nmims.in", "password": "incorrect_password"}
+            json={"email": "student1@mindguard.edu", "password": "incorrect_password"}
         )
         record_test(
             "Authentication Rejection for Invalid Password",
@@ -231,7 +231,7 @@ async def run_all_tests():
         res_profile = await client.get("/api/v1/students/me", headers=student_headers)
         record_test(
             "Get Student Profile (/api/v1/students/me)",
-            res_profile.status_code == 200 and res_profile.json().get("email") == "student@nmims.in",
+            res_profile.status_code == 200 and res_profile.json().get("email") == "student1@mindguard.edu",
             f"Email: {res_profile.json().get('email')}"
         )
 
@@ -481,7 +481,7 @@ async def run_all_tests():
             from app.models.sleep_logs import SleepLog
 
             async with AsyncSessionLocal() as session:
-                for email in ["student@nmims.in", "counselor@nmims.edu", "admin@nmims.edu", "testuser@gmail.com"]:
+                for email in ["student1@mindguard.edu", "counselor1@mindguard.edu", "admin@mindguard.edu", "testuser@gmail.com"]:
                     res = await session.execute(select(User).where(User.email == email))
                     u = res.scalars().first()
                     if u:
