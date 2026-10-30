@@ -1,7 +1,7 @@
 import axios from "axios";
 
-// Read API base URL from Vite environment or default to live Lambda Function URL in production
-const API_URL = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? "https://xbfsz5f5yphpuoryhqml7m6uie0plzhb.lambda-url.us-east-1.on.aws/api/v1" : "/api/v1");
+// Read API base URL from Vite environment or default to local API gateway path
+const API_URL = import.meta.env.VITE_API_URL || "/api/v1";
 
 export const api = axios.create({
   baseURL: API_URL,
@@ -708,6 +708,10 @@ api.interceptors.response.use(
     },
     createTestNotification: async (payload: { title: string; message: string; type?: string; channel?: string }) => {
       const res = await api.post<NotificationItem>("/notifications/test", payload);
+      return res.data;
+    },
+    dispatchTestEmail: async () => {
+      const res = await api.post<{ status: string; recipient: string; delivery_status: string; message: string }>("/notifications/test-email");
       return res.data;
     }
   };
