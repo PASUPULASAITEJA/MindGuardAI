@@ -23,7 +23,9 @@ import {
   PhoneCall,
   Target,
   TrendingUp,
-  Brain
+  Brain,
+  LayoutList,
+  Columns
 } from "lucide-react";
 import { appointmentsAPI, AppointmentItem, alertsAPI, interventionsAPI, InterventionSummary } from "@/services/api";
 import { cn } from "@/utils/cn";
@@ -32,6 +34,7 @@ import { pageVariants, staggerContainer, cardEntrance, modalBackdropVariants, mo
 import { AnimatedCounter } from "@/components/ui/animated-counter";
 import { SpotlightCard } from "@/components/ui/SpotlightCard";
 import { DotGridBackground } from "@/components/ui/DotGridBackground";
+import { TriageKanbanBoard } from "@/components/counselor/TriageKanbanBoard";
 
 export const CounselorDashboard: React.FC = () => {
   const { toast } = useToast();
@@ -42,6 +45,7 @@ export const CounselorDashboard: React.FC = () => {
   // Filter states
   const [statusFilter, setStatusFilter] = useState<string>("PENDING");
   const [studentSearchQuery, setStudentSearchQuery] = useState("");
+  const [viewMode, setViewMode] = useState<"table" | "kanban">("table");
 
   // 1. Fetching Alerts Queue & Booked Appointments
   const { data: alertsData, isLoading: isAlertsLoading } = useCounselorAlerts(statusFilter);
@@ -382,29 +386,65 @@ export const CounselorDashboard: React.FC = () => {
                 </p>
               </div>
 
-              {/* Status Filter Tabs */}
+              {/* View Switcher and Status Filter Tabs */}
               {!isStudentsPage && (
-                <div className="flex rounded-lg bg-secondary p-0.5 text-xs font-medium border border-border">
-                  {[
-                    { key: "PENDING", label: "Pending" },
-                    { key: "REVIEWED", label: "Under Review" },
-                    { key: "RESOLVED", label: "Resolved" },
-                    { key: "", label: "All" },
-                  ].map((tab) => (
+                <div className="flex flex-wrap items-center gap-2">
+                  {/* Table vs Kanban Toggle */}
+                  <div className="flex rounded-lg bg-secondary/80 p-0.5 text-xs font-medium border border-border">
                     <button
-                      key={tab.key}
                       type="button"
-                      onClick={() => setStatusFilter(tab.key)}
+                      onClick={() => setViewMode("table")}
                       className={cn(
-                        "px-2.5 py-1 rounded-md transition-colors",
-                        statusFilter === tab.key
+                        "inline-flex items-center gap-1 px-2.5 py-1 rounded-md transition-all",
+                        viewMode === "table"
                           ? "bg-card text-foreground font-semibold shadow-xs"
                           : "text-muted-foreground hover:text-foreground"
                       )}
+                      title="Table View"
                     >
-                      {tab.label}
+                      <LayoutList className="w-3.5 h-3.5" />
+                      <span className="hidden sm:inline">Table</span>
                     </button>
-                  ))}
+                    <button
+                      type="button"
+                      onClick={() => setViewMode("kanban")}
+                      className={cn(
+                        "inline-flex items-center gap-1 px-2.5 py-1 rounded-md transition-all",
+                        viewMode === "kanban"
+                          ? "bg-card text-foreground font-semibold shadow-xs"
+                          : "text-muted-foreground hover:text-foreground"
+                      )}
+                      title="Kanban Board View (React Bits Pro)"
+                    >
+                      <Columns className="w-3.5 h-3.5" />
+                      <span className="hidden sm:inline">Kanban</span>
+                    </button>
+                  </div>
+
+                  {viewMode === "table" && (
+                    <div className="flex rounded-lg bg-secondary p-0.5 text-xs font-medium border border-border">
+                      {[
+                        { key: "PENDING", label: "Pending" },
+                        { key: "REVIEWED", label: "Under Review" },
+                        { key: "RESOLVED", label: "Resolved" },
+                        { key: "", label: "All" },
+                      ].map((tab) => (
+                        <button
+                          key={tab.key}
+                          type="button"
+                          onClick={() => setStatusFilter(tab.key)}
+                          className={cn(
+                            "px-2.5 py-1 rounded-md transition-colors",
+                            statusFilter === tab.key
+                              ? "bg-card text-foreground font-semibold shadow-xs"
+                              : "text-muted-foreground hover:text-foreground"
+                          )}
+                        >
+                          {tab.label}
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </div>
               )}
             </div>
@@ -421,7 +461,7 @@ export const CounselorDashboard: React.FC = () => {
               />
             </div>
 
-            {/* Student Cases or Alerts Table */}
+            {/* Student Cases or Alerts Table / Kanban */}
             {isStudentsPage ? (
               <div className="overflow-x-auto">
                 <table className="saas-table">
@@ -468,6 +508,24 @@ export const CounselorDashboard: React.FC = () => {
                   </tbody>
                 </table>
               </div>
+            ) : viewMode === "kanban" ? (
+              <TriageKanbanBoard
+                alerts={
+                  studentSearchQuery.trim()
+                    ? (allAlertsData?.alerts || []).filter(
+                        (a) =>
+                          a.student_id.toLowerCase().includes(studentSearchQuery.toLowerCase()) ||
+                          ((a as any).reason && (a as any).reason.toLowerCase().includes(studentSearchQuery.toLowerCase()))
+                      )
+                    : allAlertsData?.alerts || []
+                }
+                onStatusChange={handleStatusChange}
+                onOpenNote={(alert) => {
+                  setActiveNoteAlert(alert);
+                  setAlertNoteText((alert as any).counselor_notes || "");
+                }}
+                isLoading={isAlertsLoading}
+              />
             ) : isAlertsLoading ? (
               <div className="py-12 text-center text-xs text-muted-foreground flex flex-col items-center gap-2">
                 <Loader2 className="h-5 w-5 animate-spin text-primary" />
