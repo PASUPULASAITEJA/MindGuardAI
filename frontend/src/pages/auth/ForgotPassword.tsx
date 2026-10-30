@@ -113,8 +113,8 @@ export const ForgotPassword: React.FC = () => {
         {/* Brand Header */}
         <div className="flex flex-col items-center mb-7 text-center">
           <div className="h-14 w-14 rounded-2xl bg-gradient-to-tr from-primary to-emerald-500 p-0.5 shadow-xl shadow-primary/15 mb-3.5 flex items-center justify-center">
-            <div className="w-full h-full rounded-[14px] bg-card overflow-hidden flex items-center justify-center">
-              <img src="/favicon.jpg" alt="MindGuardAI Logo" className="h-full w-full object-cover" />
+            <div className="w-full h-full rounded-[14px] bg-card p-1 overflow-hidden flex items-center justify-center">
+              <img src="/logo.png" alt="MindGuardAI Logo" className="h-full w-full object-contain" />
             </div>
           </div>
           <h1 className="text-3xl font-extrabold tracking-tight text-foreground">

@@ -96,8 +96,8 @@ export const LandingPage: React.FC = () => {
       <header className="sticky top-0 z-50 w-full backdrop-blur-md bg-background/85 border-b border-border transition-colors">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2.5 group">
-            <div className="w-9 h-9 rounded-lg bg-primary flex items-center justify-center text-primary-foreground shadow-sm shadow-primary/25 transition-transform group-hover:scale-105">
-              <Brain className="w-5 h-5" />
+            <div className="w-10 h-10 rounded-xl bg-card border border-border/80 p-0.5 flex items-center justify-center shrink-0 shadow-xs overflow-hidden transition-transform group-hover:scale-105">
+              <img src="/logo.png" alt="MindGuardAI Logo" className="w-full h-full object-contain" />
             </div>
             <div className="flex flex-col">
               <span className="font-bold text-base sm:text-lg tracking-tight text-foreground">
@@ -767,8 +767,8 @@ export const LandingPage: React.FC = () => {
           {/* Logo + tagline */}
           <div className="space-y-3">
             <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground">
-                <Brain className="w-4 h-4" />
+              <div className="w-9 h-9 rounded-xl bg-card border border-border/80 p-0.5 flex items-center justify-center shrink-0 overflow-hidden">
+                <img src="/logo.png" alt="MindGuardAI Logo" className="w-full h-full object-contain" />
               </div>
               <span className="font-bold text-base text-foreground">MindGuardAI</span>
             </div>

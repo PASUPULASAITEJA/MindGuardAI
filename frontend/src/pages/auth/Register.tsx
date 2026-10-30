@@ -152,8 +152,8 @@ export const Register: React.FC = () => {
         <div>
           {/* Logo */}
           <Link to="/" className="inline-flex items-center gap-2.5 group">
-            <div className="w-9 h-9 rounded-xl bg-white/15 backdrop-blur-sm border border-white/20 flex items-center justify-center text-white shadow-sm transition-transform group-hover:scale-105">
-              <Brain className="w-5 h-5 text-white" />
+            <div className="w-10 h-10 rounded-xl bg-white p-1 flex items-center justify-center shadow-md transition-transform group-hover:scale-105 overflow-hidden">
+              <img src="/logo.png" alt="MindGuardAI Logo" className="w-full h-full object-contain" />
             </div>
             <div className="flex items-center gap-1 font-extrabold text-xl tracking-tight text-white">
               <span>MindGuard</span>
@@ -218,8 +218,8 @@ export const Register: React.FC = () => {
 
         {/* Mobile logo (lg:hidden) */}
         <Link to="/" className="lg:hidden flex items-center gap-2 mb-8 group">
-          <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center text-primary-foreground shadow-sm shadow-primary/25">
-            <Brain className="w-5 h-5" />
+          <div className="w-10 h-10 rounded-xl bg-card border border-border/80 p-0.5 flex items-center justify-center shadow-xs overflow-hidden">
+            <img src="/logo.png" alt="MindGuardAI Logo" className="w-full h-full object-contain" />
           </div>
           <div className="flex items-center gap-1 font-bold text-lg tracking-tight text-foreground">
             <span>MindGuard</span>

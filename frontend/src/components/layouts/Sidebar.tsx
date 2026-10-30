@@ -160,8 +160,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
           )}
         >
           <div className="flex items-center gap-2.5 overflow-hidden">
-            <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground shrink-0 shadow-xs">
-              <Brain className="w-4 h-4" />
+            <div className="w-9 h-9 rounded-xl bg-card border border-border/80 p-0.5 flex items-center justify-center shrink-0 shadow-xs overflow-hidden">
+              <img src="/logo.png" alt="MindGuardAI Logo" className="w-full h-full object-contain" />
             </div>
             {!isCollapsed && (
               <div className="flex flex-col min-w-0">
