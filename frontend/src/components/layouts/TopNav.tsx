@@ -1,9 +1,10 @@
-import React, { useState } from "react";
-import { Menu, AlertTriangle } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { Menu, AlertTriangle, Search, Command } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import ThemeToggle from "@/components/layouts/ThemeToggle";
 import { EmergencySOSModal } from "@/components/EmergencySOSModal";
 import NotificationBell from "@/components/NotificationBell";
+import { CommandMenu } from "@/components/ui/CommandMenu";
 
 export interface TopNavProps {
   title: string;
@@ -14,6 +15,19 @@ export interface TopNavProps {
 export const TopNav: React.FC<TopNavProps> = ({ title, subtitle, onMenuClick }) => {
   const { user } = useAuth();
   const [isSOSOpen, setIsSOSOpen] = useState(false);
+  const [isCommandOpen, setIsCommandOpen] = useState(false);
+
+  // Global keyboard shortcut: Ctrl+K / Cmd+K
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        setIsCommandOpen((prev) => !prev);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
 
   return (
     <>
@@ -40,6 +54,28 @@ export const TopNav: React.FC<TopNavProps> = ({ title, subtitle, onMenuClick }) 
           </div>
 
           <div className="flex items-center gap-2.5">
+            {/* React Bits Command Menu Trigger */}
+            <button
+              onClick={() => setIsCommandOpen(true)}
+              className="hidden md:inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border bg-secondary/50 hover:bg-secondary text-muted-foreground hover:text-foreground text-xs font-medium transition-all shadow-xs"
+              title="Open Command Menu (Ctrl + K)"
+            >
+              <Search className="w-3.5 h-3.5 text-muted-foreground" />
+              <span className="hidden lg:inline">Search or command...</span>
+              <span className="lg:hidden">Search...</span>
+              <kbd className="inline-flex items-center gap-0.5 rounded border border-border bg-card px-1.5 py-0.5 text-[10px] font-mono font-medium text-muted-foreground">
+                <Command className="w-2.5 h-2.5" /> K
+              </kbd>
+            </button>
+
+            <button
+              onClick={() => setIsCommandOpen(true)}
+              className="p-1.5 rounded-lg border border-border bg-card hover:bg-secondary text-muted-foreground hover:text-foreground md:hidden"
+              aria-label="Search or command menu"
+            >
+              <Search className="h-4 w-4" />
+            </button>
+
             {user?.role === "STUDENT" && (
               <button
                 onClick={() => setIsSOSOpen(true)}
@@ -68,6 +104,11 @@ export const TopNav: React.FC<TopNavProps> = ({ title, subtitle, onMenuClick }) 
       </header>
 
       <EmergencySOSModal isOpen={isSOSOpen} onClose={() => setIsSOSOpen(false)} />
+      <CommandMenu
+        isOpen={isCommandOpen}
+        onClose={() => setIsCommandOpen(false)}
+        onOpenSOS={() => setIsSOSOpen(true)}
+      />
     </>
   );
 };
