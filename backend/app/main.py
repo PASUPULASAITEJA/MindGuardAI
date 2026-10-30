@@ -57,6 +57,14 @@ async def init_db_schema():
             except Exception:
                 pass
         logger.info("Database schema initialized and verified.")
+
+        # Seed initial/demo accounts for UI demo buttons and user login
+        try:
+            from app.initial_data import init_db
+            await init_db()
+            logger.info("Initial demo user accounts seeded successfully.")
+        except Exception as seed_err:
+            logger.warning(f"Initial data seed notice: {seed_err}")
     except Exception as e:
         logger.error(f"Database initialization error: {e}")
 
