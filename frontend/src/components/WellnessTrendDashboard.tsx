@@ -178,7 +178,7 @@ export const WellnessTrendDashboard: React.FC<WellnessTrendDashboardProps> = ({
             </div>
 
             {/* Dominant Emotion */}
-            <div className="bg-card p-4.5 rounded-2xl shadow-xs border border-slate-200 dark:border-slate-800 flex flex-col justify-between hover:border-amber-500/40 transition-all">
+            <div className="bg-card p-4.5 rounded-2xl shadow-xs border border-border/80 dark:border-border/60 flex flex-col justify-between hover:border-primary/40 transition-all">
               <div className="flex items-center justify-between text-xs text-slate-600 dark:text-slate-400 font-bold">
                 <span>Dominant Affect</span>
                 <div className="p-1.5 rounded-lg bg-amber-500/10 text-amber-500">
@@ -196,7 +196,7 @@ export const WellnessTrendDashboard: React.FC<WellnessTrendDashboardProps> = ({
             </div>
 
             {/* Stability / Volatility */}
-            <div className="bg-card p-4.5 rounded-2xl shadow-xs border border-slate-200 dark:border-slate-800 flex flex-col justify-between hover:border-rose-500/40 transition-all">
+            <div className="bg-card p-4.5 rounded-2xl shadow-xs border border-border/80 dark:border-border/60 flex flex-col justify-between hover:border-primary/40 transition-all">
               <div className="flex items-center justify-between text-xs text-slate-600 dark:text-slate-400 font-bold">
                 <span>Score Volatility</span>
                 <div className="p-1.5 rounded-lg bg-rose-500/10 text-rose-500">
@@ -253,7 +253,7 @@ export const WellnessTrendDashboard: React.FC<WellnessTrendDashboardProps> = ({
             ) : (
               <div className="h-72 w-full">
                 <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={points} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                  <AreaChart data={points.length === 1 ? [{ ...points[0], date: "Initial" }, points[0]] : points} margin={{ top: 10, right: 15, left: -10, bottom: 0 }}>
                     <defs>
                       <linearGradient id="wellnessGradient" x1="0" y1="0" x2="0" y2="1">
                         <stop offset="5%" stopColor="#06b6d4" stopOpacity={0.4} />
@@ -271,7 +271,7 @@ export const WellnessTrendDashboard: React.FC<WellnessTrendDashboardProps> = ({
                         return parts.length >= 3 ? `${parts[1]}/${parts[2]}` : d;
                       }}
                     />
-                    <YAxis stroke={theme === "dark" ? "#64748b" : "#94a3b8"} fontSize={11} domain={[0, 100]} tickLine={false} />
+                    <YAxis stroke={theme === "dark" ? "#64748b" : "#94a3b8"} fontSize={11} domain={[0, 100]} tickLine={false} width={35} />
                     <Tooltip
                       contentStyle={{
                         backgroundColor: theme === "dark" ? "#0f172a" : "#ffffff",
