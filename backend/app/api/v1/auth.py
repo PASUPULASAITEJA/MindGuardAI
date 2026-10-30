@@ -22,7 +22,7 @@ def _set_refresh_cookie(response: Response, refresh_token: str) -> None:
         value=refresh_token,
         httponly=True,
         secure=not is_dev,
-        samesite="lax" if is_dev else "strict",
+        samesite="lax" if is_dev else "none",
         max_age=7 * 24 * 3600  # 7 days in seconds
     )
 
