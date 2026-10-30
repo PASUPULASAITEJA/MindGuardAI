@@ -141,6 +141,10 @@ async def run_all_tests():
                 else:
                     u.password_hash = get_password_hash("Student@123")
                     u.is_active = True
+                if email == "student1@mindguard.edu" and u:
+                    from sqlalchemy import delete
+                    from app.models.consent import Consent
+                    await session.execute(delete(Consent).where(Consent.student_id == u.id))
             await session.commit()
 
         # Student Login
