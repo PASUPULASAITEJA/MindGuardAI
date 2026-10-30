@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { useNavigate } from "react-router-dom";
 import { useQueryClient, useQuery } from "@tanstack/react-query";
 import { useLatestAssessment, useWellnessTrends } from "@/hooks/usePredictions";
@@ -183,7 +184,7 @@ export const StudentDashboard: React.FC = () => {
   const studentFirstName = user?.full_name ? user.full_name.split(" ")[0] : "Student";
 
   return (
-    <div className="fade-up space-y-5 p-4 md:p-6 pb-16 font-sans text-foreground">
+    <div className="space-y-5 p-4 md:p-6 pb-16 font-sans text-foreground">
       {/* 1. WELCOME HEADER */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
@@ -800,9 +801,9 @@ export const StudentDashboard: React.FC = () => {
       />
 
       {/* Explainable AI Factors Modal */}
-      {isExplainOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm animate-fade-in-up">
-          <div className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl bg-card border border-border shadow-2xl p-6 space-y-5">
+      {isExplainOpen && createPortal(
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm animate-fade-in-up overflow-y-auto">
+          <div className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl bg-card border border-border shadow-2xl p-6 space-y-5 my-auto">
             <ShapExplanationCard predictionId={latestAssessment?.assessment_id} />
             <ExplainableAIFactors
               studentId={user?.id}
@@ -824,7 +825,8 @@ export const StudentDashboard: React.FC = () => {
               </Button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );
