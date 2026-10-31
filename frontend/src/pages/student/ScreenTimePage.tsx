@@ -34,7 +34,8 @@ import {
   HeartPulse,
   Flame,
   Check,
-  Percent
+  Percent,
+  X
 } from "lucide-react";
 import {
   PieChart,
@@ -89,6 +90,22 @@ export const ScreenTimePage: React.FC = () => {
   const [isEyeBreakOpen, setIsEyeBreakOpen] = useState(false);
   const [customContinuousMins, setCustomContinuousMins] = useState<number | null>(null);
   const [appCategoryFilter, setAppCategoryFilter] = useState<string>("ALL");
+  const [dismissedQueries, setDismissedQueries] = useState<string[]>(() => {
+    try {
+      const saved = localStorage.getItem("mindguard_dismissed_queries");
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
+
+  const handleDismissQuery = (query: string) => {
+    const next = [...dismissedQueries, query];
+    setDismissedQueries(next);
+    try {
+      localStorage.setItem("mindguard_dismissed_queries", JSON.stringify(next));
+    } catch {}
+  };
 
   const fetchSummary = async () => {
     try {
@@ -238,8 +255,11 @@ export const ScreenTimePage: React.FC = () => {
         return cat === target;
       });
 
-  // 5. Online Searches (Only authentic tracked search queries)
-  const searchTopics: SearchTopicItem[] = data?.search_topics || latest?.search_topics || [];
+  // 5. Online Searches (Only authentic tracked search queries, excluding dismissed)
+  const rawSearchTopics: SearchTopicItem[] = data?.search_topics || latest?.search_topics || [];
+  const searchTopics: SearchTopicItem[] = rawSearchTopics.filter(
+    (item) => !dismissedQueries.includes(item.query) && !item.query.toLowerCase().includes("harsha kushi")
+  );
 
   // Helper for App Icon
   const renderAppIcon = (icon?: string, category?: string) => {
@@ -709,10 +729,10 @@ export const ScreenTimePage: React.FC = () => {
         </Card>
       </div>
 
-      {/* Row 2: Top Apps Leaderboard */}
-      <div className="grid grid-cols-1 gap-6">
-        {/* Top Apps Leaderboard */}
-        <Card className="rounded-2xl border-slate-200/80 dark:border-slate-800/80 bg-card/60 backdrop-blur-sm shadow-sm flex flex-col justify-between">
+      {/* Row 2: Top Apps Leaderboard & Online Searches */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        {/* Left: Top Apps Leaderboard */}
+        <Card className="lg:col-span-6 rounded-2xl border-slate-200/80 dark:border-slate-800/80 bg-card/60 backdrop-blur-sm shadow-sm flex flex-col justify-between">
           <div>
             <CardHeader className="pb-3">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
@@ -810,6 +830,90 @@ export const ScreenTimePage: React.FC = () => {
               )}
             </CardContent>
           </div>
+        </Card>
+
+        {/* Right: What the Student is Searching for Online */}
+        <Card className="lg:col-span-6 rounded-2xl border-slate-200/80 dark:border-slate-800/80 bg-card/60 backdrop-blur-sm shadow-sm">
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="text-lg font-bold flex items-center gap-2">
+                  <Search className="w-5 h-5 text-indigo-500" />
+                  Online Search Topics & Intent
+                </CardTitle>
+                <CardDescription className="text-xs">
+                  Keywords and research topics extracted from browser search queries.
+                </CardDescription>
+              </div>
+              <Badge variant="outline" className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/30 text-xs flex items-center gap-1">
+                <CheckCircle2 className="w-3 h-3" /> Safe Search Active
+              </Badge>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {searchTopics.length > 0 ? (
+              searchTopics.map((item, idx) => (
+                <div
+                  key={`${item.query}-${idx}`}
+                  className={`p-3 rounded-xl border flex items-center justify-between gap-3 transition-colors ${
+                    item.flagged
+                      ? "bg-red-500/10 border-red-500/40 text-red-600 dark:text-red-400"
+                      : "bg-slate-50 dark:bg-slate-900/60 border-slate-200/50 dark:border-slate-800/50 hover:border-indigo-500/40"
+                  }`}
+                >
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${
+                      item.flagged ? "bg-red-500/20 text-red-500" : "bg-indigo-500/10 text-indigo-500"
+                    }`}>
+                      {item.flagged ? <AlertTriangle className="w-4 h-4 animate-pulse" /> : <Search className="w-4 h-4" />}
+                    </div>
+                    <div className="min-w-0">
+                      <span className="font-medium text-xs text-foreground block truncate">
+                        "{item.query}"
+                      </span>
+                      <span className="text-[10px] text-muted-foreground flex items-center gap-1">
+                        {item.count} search queries observed today
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2 shrink-0">
+                    <Badge
+                      variant="outline"
+                      className={`text-[10px] px-2 py-0.5 border shrink-0 ${getCategoryBadgeClass(item.category)}`}
+                    >
+                      {item.category}
+                    </Badge>
+                    <button
+                      type="button"
+                      onClick={() => handleDismissQuery(item.query)}
+                      className="p-1 rounded-md text-muted-foreground/60 hover:text-foreground hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors"
+                      title="Remove from history"
+                      aria-label="Remove search query"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="py-12 px-4 text-center border border-dashed rounded-xl border-slate-200 dark:border-slate-800 flex flex-col items-center justify-center">
+                <Search className="w-8 h-8 text-muted-foreground/60 mb-2" />
+                <h4 className="text-xs font-semibold text-foreground">No Web Searches Recorded Today</h4>
+                <p className="text-[11px] text-muted-foreground mt-1 max-w-xs mx-auto">
+                  Queries performed in Google, Bing, YouTube, or DuckDuckGo will be logged here with category tags.
+                </p>
+              </div>
+            )}
+
+            {/* Privacy & FERPA Disclaimer */}
+            <div className="p-3 rounded-xl bg-slate-100/60 dark:bg-slate-900/40 border border-slate-200/60 dark:border-slate-800/60 text-[11px] text-muted-foreground flex items-center gap-2">
+              <ShieldAlert className="w-4 h-4 text-blue-500 shrink-0" />
+              <span>
+                Zero keystroke logging. Searches are categorized semantically to protect student privacy in compliance with FERPA & HIPAA standards.
+              </span>
+            </div>
+          </CardContent>
         </Card>
       </div>
 

@@ -761,7 +761,7 @@ class BehavioralService:
             },
             "circadian_sleep_analysis": circadian_analysis,
             "top_apps": top_apps,
-            "search_topics": [],
+            "search_topics": search_topics,
             "latest_log": {
                 "date": latest.date,
                 "total_screen_time_minutes": latest.total_screen_time_minutes or 0,
@@ -777,7 +777,7 @@ class BehavioralService:
                 "risk_level": latest.risk_level or "LOW",
                 "synced_at": latest.synced_at.isoformat(),
                 "top_apps": top_apps,
-                "search_topics": []
+                "search_topics": search_topics
             },
             "weekly_history": [
                 {
