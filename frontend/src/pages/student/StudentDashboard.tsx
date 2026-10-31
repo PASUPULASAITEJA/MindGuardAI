@@ -20,9 +20,9 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/ui/empty-state";
 import { AnimatedCounter } from "@/components/ui/animated-counter";
-import { GsapStagger } from "@/components/ui/gsap-stagger";
-import { GsapMagnetic } from "@/components/ui/gsap-magnetic";
-import { GsapButton } from "@/components/ui/gsap-button";
+import { GSAPTilt } from "@/components/ui/gsap-tilt";
+import { GSAPMagnetic } from "@/components/ui/gsap-magnetic";
+import { GSAPStagger } from "@/components/ui/gsap-stagger";
 import {
   ResponsiveContainer,
   AreaChart,
@@ -229,7 +229,7 @@ export const StudentDashboard: React.FC = () => {
             />
             {isLive ? "Telemetry Connected" : "Telemetry Standby"}
           </span>
-          <GsapMagnetic strength={0.4}>
+          <GSAPMagnetic strength={0.25}>
             <Button
               variant="outline"
               size="sm"
@@ -240,184 +240,208 @@ export const StudentDashboard: React.FC = () => {
               <RefreshCw className={cn("h-3 w-3 mr-1", isRefetchingBehavioral && "animate-spin text-primary")} />
               Sync
             </Button>
-          </GsapMagnetic>
+          </GSAPMagnetic>
         </div>
       </div>
 
-      {/* 2. TOP STAT ROW: 4 GSAP Staggered SpotlightCards */}
-      <GsapStagger className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4" stagger={0.08}>
+      {/* 2. TOP STAT ROW: 4 GSAP 3D Tilt Cards with Staggered Entrance */}
+      <GSAPStagger className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Stat 1: Wellness Score */}
-        <SpotlightCard
-          className="p-5"
-          spotlightColor={wellnessScore >= 65 ? "rgba(16, 185, 129, 0.15)" : wellnessScore >= 35 ? "rgba(245, 158, 11, 0.15)" : "rgba(244, 63, 94, 0.15)"}
-        >
-          <div className="flex items-center justify-between w-full">
-            <div className="space-y-1">
-              <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block">
-                Wellness Score
-              </span>
-              <div className={cn("text-5xl font-extrabold tracking-tight", scoreColorClass)}>
-                <AnimatedCounter value={wellnessScore} />
-              </div>
-              <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold inline-flex items-center gap-1">
-                +3.5% vs last week
-              </span>
-            </div>
-            <div className="w-12 h-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
-              <Smile className={cn("w-6 h-6", scoreColorClass)} />
-            </div>
-          </div>
-        </SpotlightCard>
-
-        {/* Stat 2: Risk Level */}
-        <SpotlightCard
-          className="p-5"
-          spotlightColor={normalizedRisk === "HIGH" ? "rgba(244, 63, 94, 0.15)" : normalizedRisk === "MODERATE" ? "rgba(245, 158, 11, 0.15)" : "rgba(16, 185, 129, 0.15)"}
-        >
-          <div className="flex items-center justify-between w-full">
-            <div className="space-y-1.5">
-              <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block">
-                Risk Level
-              </span>
-              <div className="pt-0.5">
-                <span
-                  className={cn(
-                    "inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wider border",
-                    normalizedRisk === "HIGH"
-                      ? "badge-elevated"
-                      : normalizedRisk === "MODERATE"
-                      ? "badge-moderate"
-                      : "badge-stable"
-                  )}
-                >
-                  <span
-                    className={cn(
-                      "w-1.5 h-1.5 rounded-full shrink-0",
-                      normalizedRisk === "HIGH"
-                        ? "bg-rose-500"
-                        : normalizedRisk === "MODERATE"
-                        ? "bg-amber-500"
-                        : "bg-emerald-500"
-                    )}
-                  />
-                  <span>{normalizedRisk}</span>
+        <GSAPTilt maxTilt={8} scaleOnHover={1.02} className="h-full">
+          <SpotlightCard
+            className="p-5 h-full"
+            spotlightColor={wellnessScore >= 65 ? "rgba(16, 185, 129, 0.15)" : wellnessScore >= 35 ? "rgba(245, 158, 11, 0.15)" : "rgba(244, 63, 94, 0.15)"}
+          >
+            <div className="flex items-center justify-between w-full">
+              <div className="space-y-1">
+                <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block">
+                  Wellness Score
+                </span>
+                <div className={cn("text-5xl font-extrabold tracking-tight", scoreColorClass)}>
+                  <AnimatedCounter value={wellnessScore} />
+                </div>
+                <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold inline-flex items-center gap-1">
+                  +3.5% vs last week
                 </span>
               </div>
-              <button
-                onClick={() => setIsExplainOpen(true)}
-                className="text-[11px] text-primary font-semibold hover:underline block pt-1"
-              >
-                View SHAP Factors →
-              </button>
+              <div className="w-12 h-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
+                <Smile className={cn("w-6 h-6", scoreColorClass)} />
+              </div>
             </div>
-            <div className="w-12 h-12 rounded-xl bg-secondary text-muted-foreground flex items-center justify-center shrink-0">
-              <Activity className="w-6 h-6 text-primary" />
+          </SpotlightCard>
+        </GSAPTilt>
+
+        {/* Stat 2: Risk Level */}
+        <GSAPTilt maxTilt={8} scaleOnHover={1.02} className="h-full">
+          <SpotlightCard
+            className="p-5 h-full"
+            spotlightColor={normalizedRisk === "HIGH" ? "rgba(244, 63, 94, 0.15)" : normalizedRisk === "MODERATE" ? "rgba(245, 158, 11, 0.15)" : "rgba(16, 185, 129, 0.15)"}
+          >
+            <div className="flex items-center justify-between w-full">
+              <div className="space-y-1.5">
+                <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block">
+                  Risk Level
+                </span>
+                <div className="pt-0.5">
+                  <span
+                    className={cn(
+                      "inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wider border",
+                      normalizedRisk === "HIGH"
+                        ? "badge-elevated"
+                        : normalizedRisk === "MODERATE"
+                        ? "badge-moderate"
+                        : "badge-stable"
+                    )}
+                  >
+                    <span
+                      className={cn(
+                        "w-1.5 h-1.5 rounded-full shrink-0",
+                        normalizedRisk === "HIGH"
+                          ? "bg-rose-500"
+                          : normalizedRisk === "MODERATE"
+                          ? "bg-amber-500"
+                          : "bg-emerald-500"
+                      )}
+                    />
+                    <span>{normalizedRisk}</span>
+                  </span>
+                </div>
+                <button
+                  onClick={() => setIsExplainOpen(true)}
+                  className="text-[11px] text-primary font-semibold hover:underline block pt-1"
+                >
+                  View SHAP Factors →
+                </button>
+              </div>
+              <div className="w-12 h-12 rounded-xl bg-secondary text-muted-foreground flex items-center justify-center shrink-0">
+                <Activity className="w-6 h-6 text-primary" />
+              </div>
             </div>
-          </div>
-        </SpotlightCard>
+          </SpotlightCard>
+        </GSAPTilt>
 
         {/* Stat 3: Last Check-In */}
-        <SpotlightCard
-          className="p-5"
-          spotlightColor="rgba(99, 102, 241, 0.15)"
-        >
-          <div className="flex items-center justify-between w-full">
-            <div className="space-y-1">
-              <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block">
-                Last Check-in
-              </span>
-              <div className="text-2xl font-bold text-foreground">
-                {lastCheckinTime}
+        <GSAPTilt maxTilt={8} scaleOnHover={1.02} className="h-full">
+          <SpotlightCard
+            className="p-5 h-full"
+            spotlightColor="rgba(99, 102, 241, 0.15)"
+          >
+            <div className="flex items-center justify-between w-full">
+              <div className="space-y-1">
+                <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block">
+                  Last Check-in
+                </span>
+                <div className="text-2xl font-bold text-foreground">
+                  {lastCheckinTime}
+                </div>
+                <span className="text-xs text-muted-foreground block">
+                  Completed via web portal
+                </span>
               </div>
-              <span className="text-xs text-muted-foreground block">
-                Completed via web portal
-              </span>
+              <div className="w-12 h-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
+                <Clock className="w-6 h-6" />
+              </div>
             </div>
-            <div className="w-12 h-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
-              <Clock className="w-6 h-6" />
-            </div>
-          </div>
-        </SpotlightCard>
+          </SpotlightCard>
+        </GSAPTilt>
 
         {/* Stat 4: Streak Days */}
-        <SpotlightCard
-          className="p-5"
-          spotlightColor="rgba(245, 158, 11, 0.15)"
-        >
-          <div className="flex items-center justify-between w-full">
-            <div className="space-y-1">
-              <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block">
-                Streak
-              </span>
-              <div className="text-3xl font-extrabold text-foreground flex items-center gap-1.5">
-                <AnimatedCounter value={streakDays} />
-                <span className="text-sm font-semibold text-muted-foreground">Days</span>
+        <GSAPTilt maxTilt={8} scaleOnHover={1.02} className="h-full">
+          <SpotlightCard
+            className="p-5 h-full"
+            spotlightColor="rgba(245, 158, 11, 0.15)"
+          >
+            <div className="flex items-center justify-between w-full">
+              <div className="space-y-1">
+                <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block">
+                  Streak
+                </span>
+                <div className="text-3xl font-extrabold text-foreground flex items-center gap-1.5">
+                  <AnimatedCounter value={streakDays} />
+                  <span className="text-sm font-semibold text-muted-foreground">Days</span>
+                </div>
+                <span className="text-xs text-muted-foreground block">
+                  Daily mindfulness habit
+                </span>
               </div>
-              <span className="text-xs text-muted-foreground block">
-                Daily mindfulness habit
-              </span>
+              <div className="w-12 h-12 rounded-xl bg-amber-500/10 text-amber-500 flex items-center justify-center shrink-0">
+                <Flame className="w-6 h-6 fill-amber-500" />
+              </div>
             </div>
-            <div className="w-12 h-12 rounded-xl bg-amber-500/10 text-amber-500 flex items-center justify-center shrink-0">
-              <Flame className="w-6 h-6 fill-amber-500" />
-            </div>
-          </div>
-        </SpotlightCard>
-      </GsapStagger>
+          </SpotlightCard>
+        </GSAPTilt>
+      </GSAPStagger>
 
-      {/* 3. QUICK ACTIONS ROW: 4 GSAP Staggered SpotlightCards */}
-      <GsapStagger className="grid grid-cols-2 lg:grid-cols-4 gap-4" stagger={0.06}>
+      {/* 3. QUICK ACTIONS ROW: 4 GSAP 3D Tilt Cards with Magnetic Icons */}
+      <GSAPStagger className="grid grid-cols-2 lg:grid-cols-4 gap-4" delay={0.12}>
         {/* Action 1: Start Check-in */}
-        <SpotlightCard
-          onClick={() => navigate("/student/check-in")}
-          className="p-4 flex flex-col items-center gap-2.5 cursor-pointer text-center group"
-          spotlightColor="rgba(59, 130, 246, 0.18)"
-        >
-          <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-primary/10 text-primary group-hover:scale-105 transition-transform">
-            <Sparkles className="w-5 h-5" />
-          </div>
-          <span className="text-xs font-semibold text-foreground">Start Check-in</span>
-          <span className="text-[10px] text-muted-foreground">Log today's mood</span>
-        </SpotlightCard>
+        <GSAPTilt maxTilt={6} scaleOnHover={1.03} className="h-full">
+          <SpotlightCard
+            onClick={() => navigate("/student/check-in")}
+            className="p-4 flex flex-col items-center gap-2.5 cursor-pointer text-center group h-full"
+            spotlightColor="rgba(59, 130, 246, 0.18)"
+          >
+            <GSAPMagnetic strength={0.45}>
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-primary/10 text-primary group-hover:scale-110 transition-transform">
+                <Sparkles className="w-5 h-5" />
+              </div>
+            </GSAPMagnetic>
+            <span className="text-xs font-semibold text-foreground">Start Check-in</span>
+            <span className="text-[10px] text-muted-foreground">Log today's mood</span>
+          </SpotlightCard>
+        </GSAPTilt>
 
         {/* Action 2: Talk to AI */}
-        <SpotlightCard
-          onClick={() => navigate("/student/chat")}
-          className="p-4 flex flex-col items-center gap-2.5 cursor-pointer text-center group"
-          spotlightColor="rgba(168, 85, 247, 0.18)"
-        >
-          <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-purple-500/10 text-purple-500 group-hover:scale-105 transition-transform">
-            <MessageSquare className="w-5 h-5" />
-          </div>
-          <span className="text-xs font-semibold text-foreground">AI Companion</span>
-          <span className="text-[10px] text-muted-foreground">Guided coping & chat</span>
-        </SpotlightCard>
+        <GSAPTilt maxTilt={6} scaleOnHover={1.03} className="h-full">
+          <SpotlightCard
+            onClick={() => navigate("/student/chat")}
+            className="p-4 flex flex-col items-center gap-2.5 cursor-pointer text-center group h-full"
+            spotlightColor="rgba(168, 85, 247, 0.18)"
+          >
+            <GSAPMagnetic strength={0.45}>
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-purple-500/10 text-purple-500 group-hover:scale-110 transition-transform">
+                <MessageSquare className="w-5 h-5" />
+              </div>
+            </GSAPMagnetic>
+            <span className="text-xs font-semibold text-foreground">AI Companion</span>
+            <span className="text-[10px] text-muted-foreground">Guided coping & chat</span>
+          </SpotlightCard>
+        </GSAPTilt>
 
         {/* Action 3: Book Counselor */}
-        <SpotlightCard
-          onClick={() => setIsBookingOpen(true)}
-          className="p-4 flex flex-col items-center gap-2.5 cursor-pointer text-center group"
-          spotlightColor="rgba(16, 185, 129, 0.18)"
-        >
-          <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-emerald-500/10 text-emerald-500 group-hover:scale-105 transition-transform">
-            <Calendar className="w-5 h-5" />
-          </div>
-          <span className="text-xs font-semibold text-foreground">Book Counselor</span>
-          <span className="text-[10px] text-muted-foreground">Schedule session</span>
-        </SpotlightCard>
+        <GSAPTilt maxTilt={6} scaleOnHover={1.03} className="h-full">
+          <SpotlightCard
+            onClick={() => setIsBookingOpen(true)}
+            className="p-4 flex flex-col items-center gap-2.5 cursor-pointer text-center group h-full"
+            spotlightColor="rgba(16, 185, 129, 0.18)"
+          >
+            <GSAPMagnetic strength={0.45}>
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-emerald-500/10 text-emerald-500 group-hover:scale-110 transition-transform">
+                <Calendar className="w-5 h-5" />
+              </div>
+            </GSAPMagnetic>
+            <span className="text-xs font-semibold text-foreground">Book Counselor</span>
+            <span className="text-[10px] text-muted-foreground">Schedule session</span>
+          </SpotlightCard>
+        </GSAPTilt>
 
         {/* Action 4: Crisis Support */}
-        <SpotlightCard
-          onClick={() => setIsSOSOpen(true)}
-          className="p-4 flex flex-col items-center gap-2.5 cursor-pointer text-center group"
-          spotlightColor="rgba(244, 63, 94, 0.18)"
-        >
-          <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-rose-500/10 text-rose-500 group-hover:scale-105 transition-transform">
-            <ShieldAlert className="w-5 h-5" />
-          </div>
-          <span className="text-xs font-semibold text-foreground">Crisis Support</span>
-          <span className="text-[10px] text-muted-foreground">Get help now</span>
-        </SpotlightCard>
-      </GsapStagger>
+        <GSAPTilt maxTilt={6} scaleOnHover={1.03} className="h-full">
+          <SpotlightCard
+            onClick={() => setIsSOSOpen(true)}
+            className="p-4 flex flex-col items-center gap-2.5 cursor-pointer text-center group h-full"
+            spotlightColor="rgba(244, 63, 94, 0.18)"
+          >
+            <GSAPMagnetic strength={0.45}>
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-rose-500/10 text-rose-500 group-hover:scale-110 transition-transform">
+                <ShieldAlert className="w-5 h-5" />
+              </div>
+            </GSAPMagnetic>
+            <span className="text-xs font-semibold text-foreground">Crisis Support</span>
+            <span className="text-[10px] text-muted-foreground">Get help now</span>
+          </SpotlightCard>
+        </GSAPTilt>
+      </GSAPStagger>
 
       {/* Micro-Checkin Widget */}
       <div>
@@ -443,14 +467,16 @@ export const StudentDashboard: React.FC = () => {
           </div>
         </div>
 
-        <Button
-          size="sm"
-          onClick={() => navigate("/student/screentime")}
-          className="rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold shrink-0 shadow-xs"
-        >
-          View Full Graphics & Apps
-          <ChevronRight className="w-4 h-4 ml-1" />
-        </Button>
+        <GSAPMagnetic strength={0.3}>
+          <Button
+            size="sm"
+            onClick={() => navigate("/student/screentime")}
+            className="rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold shrink-0 shadow-xs"
+          >
+            View Full Graphics & Apps
+            <ChevronRight className="w-4 h-4 ml-1" />
+          </Button>
+        </GSAPMagnetic>
       </div>
 
       {/* 4. MAIN ANALYTICS ROW: Wellness Trend Area Chart (h-64) & Sleep Quality */}

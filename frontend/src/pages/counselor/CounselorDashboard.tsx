@@ -36,8 +36,8 @@ import { SpotlightCard } from "@/components/ui/SpotlightCard";
 import { DotGridBackground } from "@/components/ui/DotGridBackground";
 import { EmptyState } from "@/components/ui/empty-state";
 import { TriageKanbanBoard } from "@/components/counselor/TriageKanbanBoard";
-import { GsapStagger } from "@/components/ui/gsap-stagger";
-import { GsapMagnetic } from "@/components/ui/gsap-magnetic";
+import { GSAPTilt } from "@/components/ui/gsap-tilt";
+import { GSAPMagnetic } from "@/components/ui/gsap-magnetic";
 
 export const CounselorDashboard: React.FC = () => {
   const { toast } = useToast();
@@ -308,89 +308,102 @@ export const CounselorDashboard: React.FC = () => {
         )}
 
         {/* 4 Executive KPI Cards */}
-        <GsapStagger className="grid grid-cols-2 lg:grid-cols-4 gap-3" stagger={0.07}>
-          <div>
-            <SpotlightCard className="p-4 sm:p-5 min-h-[140px] flex flex-col justify-between" spotlightColor="rgba(244, 63, 94, 0.15)">
-              <div>
-                <div className="flex items-center justify-between text-muted-foreground">
-                  <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Cases Requiring Review</span>
-                  <div className="p-1.5 rounded-lg bg-rose-500/10 text-rose-500">
-                    <AlertCircle className="h-4 w-4" />
+        <motion.div 
+          variants={staggerContainer}
+          initial="initial"
+          animate="animate"
+          className="grid grid-cols-2 lg:grid-cols-4 gap-3"
+        >
+          <motion.div variants={cardEntrance} className="h-full">
+            <GSAPTilt maxTilt={6} scaleOnHover={1.02} className="h-full">
+              <SpotlightCard className="p-4 sm:p-5 min-h-[140px] h-full flex flex-col justify-between" spotlightColor="rgba(244, 63, 94, 0.15)">
+                <div>
+                  <div className="flex items-center justify-between text-muted-foreground">
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Cases Requiring Review</span>
+                    <div className="p-1.5 rounded-lg bg-rose-500/10 text-rose-500">
+                      <AlertCircle className="h-4 w-4" />
+                    </div>
                   </div>
+                  <span className="text-2xl sm:text-3xl font-black text-foreground font-sans mt-2 block tracking-tight">
+                    <AnimatedCounter value={pendingAlerts.length} />
+                  </span>
                 </div>
-                <span className="text-2xl sm:text-3xl font-black text-foreground font-sans mt-2 block tracking-tight">
-                  <AnimatedCounter value={pendingAlerts.length} />
-                </span>
-              </div>
-              <div className="mt-3 pt-2 border-t border-border/40">
-                <span className="text-[11px] text-muted-foreground font-medium block">Pending triage flags</span>
-              </div>
-            </SpotlightCard>
-          </div>
+                <div className="mt-3 pt-2 border-t border-border/40">
+                  <span className="text-[11px] text-muted-foreground font-medium block">Pending triage flags</span>
+                </div>
+              </SpotlightCard>
+            </GSAPTilt>
+          </motion.div>
 
-          <div>
-            <SpotlightCard className="p-4 sm:p-5 min-h-[140px] flex flex-col justify-between" spotlightColor="rgba(59, 130, 246, 0.15)">
-              <div>
-                <div className="flex items-center justify-between text-muted-foreground">
-                  <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Active Interventions</span>
-                  <div className="p-1.5 rounded-lg bg-primary/10 text-primary">
-                    <Target className="h-4 w-4" />
+          <motion.div variants={cardEntrance} className="h-full">
+            <GSAPTilt maxTilt={6} scaleOnHover={1.02} className="h-full">
+              <SpotlightCard className="p-4 sm:p-5 min-h-[140px] h-full flex flex-col justify-between" spotlightColor="rgba(59, 130, 246, 0.15)">
+                <div>
+                  <div className="flex items-center justify-between text-muted-foreground">
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Active Interventions</span>
+                    <div className="p-1.5 rounded-lg bg-primary/10 text-primary">
+                      <Target className="h-4 w-4" />
+                    </div>
                   </div>
+                  <span className="text-2xl sm:text-3xl font-black text-foreground font-sans mt-2 block tracking-tight">
+                    <AnimatedCounter value={interventionSummary?.total_active ?? reviewedAlerts.length} />
+                  </span>
                 </div>
-                <span className="text-2xl sm:text-3xl font-black text-foreground font-sans mt-2 block tracking-tight">
-                  <AnimatedCounter value={interventionSummary?.total_active ?? reviewedAlerts.length} />
-                </span>
-              </div>
-              <div className="mt-3 pt-2 border-t border-border/40">
-                <span className="text-[11px] text-muted-foreground font-medium block">
-                  {interventionSummary?.follow_ups_due_today ?? 0} follow-ups due today
-                </span>
-              </div>
-            </SpotlightCard>
-          </div>
+                <div className="mt-3 pt-2 border-t border-border/40">
+                  <span className="text-[11px] text-muted-foreground font-medium block">
+                    {interventionSummary?.follow_ups_due_today ?? 0} follow-ups due today
+                  </span>
+                </div>
+              </SpotlightCard>
+            </GSAPTilt>
+          </motion.div>
 
-          <div>
-            <SpotlightCard className="p-4 sm:p-5 min-h-[140px] flex flex-col justify-between" spotlightColor="rgba(99, 102, 241, 0.15)">
-              <div>
-                <div className="flex items-center justify-between text-muted-foreground">
-                  <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Consultations Scheduled</span>
-                  <div className="p-1.5 rounded-lg bg-indigo-500/10 text-indigo-500">
-                    <Calendar className="h-4 w-4" />
+          <motion.div variants={cardEntrance} className="h-full">
+            <GSAPTilt maxTilt={6} scaleOnHover={1.02} className="h-full">
+              <SpotlightCard className="p-4 sm:p-5 min-h-[140px] h-full flex flex-col justify-between" spotlightColor="rgba(99, 102, 241, 0.15)">
+                <div>
+                  <div className="flex items-center justify-between text-muted-foreground">
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Consultations Scheduled</span>
+                    <div className="p-1.5 rounded-lg bg-indigo-500/10 text-indigo-500">
+                      <Calendar className="h-4 w-4" />
+                    </div>
                   </div>
+                  <span className="text-2xl sm:text-3xl font-black text-foreground font-sans mt-2 block tracking-tight">
+                    <AnimatedCounter value={appointmentsList.filter((a) => a.status === "CONFIRMED" || a.status === "PENDING").length} />
+                  </span>
                 </div>
-                <span className="text-2xl sm:text-3xl font-black text-foreground font-sans mt-2 block tracking-tight">
-                  <AnimatedCounter value={appointmentsList.filter((a) => a.status === "CONFIRMED" || a.status === "PENDING").length} />
-                </span>
-              </div>
-              <div className="mt-3 pt-2 border-t border-border/40">
-                <span className="text-[11px] text-muted-foreground font-medium block">Upcoming 1-on-1 sessions</span>
-              </div>
-            </SpotlightCard>
-          </div>
+                <div className="mt-3 pt-2 border-t border-border/40">
+                  <span className="text-[11px] text-muted-foreground font-medium block">Upcoming 1-on-1 sessions</span>
+                </div>
+              </SpotlightCard>
+            </GSAPTilt>
+          </motion.div>
 
-          <div>
-            <SpotlightCard className="p-4 sm:p-5 min-h-[140px] flex flex-col justify-between" spotlightColor="rgba(16, 185, 129, 0.15)">
-              <div>
-                <div className="flex items-center justify-between text-muted-foreground">
-                  <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Observed Outcomes</span>
-                  <div className="p-1.5 rounded-lg bg-emerald-500/10 text-emerald-500">
-                    <CheckCircle2 className="h-4 w-4" />
+          <motion.div variants={cardEntrance} className="h-full">
+            <GSAPTilt maxTilt={6} scaleOnHover={1.02} className="h-full">
+              <SpotlightCard className="p-4 sm:p-5 min-h-[140px] h-full flex flex-col justify-between" spotlightColor="rgba(16, 185, 129, 0.15)">
+                <div>
+                  <div className="flex items-center justify-between text-muted-foreground">
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Observed Outcomes</span>
+                    <div className="p-1.5 rounded-lg bg-emerald-500/10 text-emerald-500">
+                      <CheckCircle2 className="h-4 w-4" />
+                    </div>
                   </div>
+                  <span className="text-2xl sm:text-3xl font-black text-foreground font-sans mt-2 block tracking-tight">
+                    <AnimatedCounter 
+                      value={interventionSummary ? `${interventionSummary.observed_improvement_rate}%` : `${resolvedAlerts.length}`} 
+                    />
+                  </span>
                 </div>
-                <span className="text-2xl sm:text-3xl font-black text-foreground font-sans mt-2 block tracking-tight">
-                  <AnimatedCounter 
-                    value={interventionSummary ? `${interventionSummary.observed_improvement_rate}%` : `${resolvedAlerts.length}`} 
-                  />
-                </span>
-              </div>
-              <div className="mt-3 pt-2 border-t border-border/40">
-                <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold block truncate">
-                  Observed post-intervention improvement
-                </span>
-              </div>
-            </SpotlightCard>
-          </div>
-        </GsapStagger>
+                <div className="mt-3 pt-2 border-t border-border/40">
+                  <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold block truncate">
+                    Observed post-intervention improvement
+                  </span>
+                </div>
+              </SpotlightCard>
+            </GSAPTilt>
+          </motion.div>
+        </motion.div>
       </div>
 
       {/* 2. Main Content Split: Support Queue Table + Sessions/Activity */}

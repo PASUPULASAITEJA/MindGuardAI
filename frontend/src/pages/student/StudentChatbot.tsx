@@ -32,9 +32,10 @@ import { useToast } from "@/components/ui/toast";
 import { EmergencySOSModal } from "@/components/EmergencySOSModal";
 import { AgentActivityDrawer } from "@/components/chat/AgentActivityDrawer";
 import { LottieIllustration } from "@/components/ui/LottieIllustration";
-import { GsapMagnetic } from "@/components/ui/gsap-magnetic";
 import { motion, AnimatePresence } from "motion/react";
 import { chatBotMessageVariants, chatUserMessageVariants } from "@/utils/motion";
+import { GSAPMagnetic } from "@/components/ui/gsap-magnetic";
+import { GSAPTilt } from "@/components/ui/gsap-tilt";
 
 interface QuickPrompt {
   title: string;
@@ -606,28 +607,26 @@ export const StudentChatbot: React.FC = () => {
                 A private, confidential listening space for academic stress, emotional overwhelm, or gentle guided grounding exercises.
               </p>
 
-              {/* Quick Prompts */}
+              {/* Quick Prompts with GSAP 3D Tilt */}
               <div className="mt-6 grid max-w-lg grid-cols-1 gap-2.5 sm:grid-cols-2">
                 {QUICK_PROMPTS.map((item, idx) => (
-                  <motion.button
-                    key={idx}
-                    whileHover={{ scale: 1.02, y: -2 }}
-                    whileTap={{ scale: 0.98 }}
-                    transition={{ duration: 0.15 }}
-                    onClick={() => handleSendMessage(item.prompt)}
-                    className="flex flex-col text-left p-3.5 rounded-2xl border border-border/80 bg-card hover:border-primary/40 hover:bg-primary/5 transition-colors shadow-xs group"
-                  >
-                    <div className="flex items-center justify-between mb-1.5">
-                      <span className="text-xl">{item.icon}</span>
-                      <ChevronRight className="h-3.5 w-3.5 text-muted-foreground group-hover:text-primary group-hover:translate-x-0.5 transition-transform" />
-                    </div>
-                    <span className="text-xs font-bold text-foreground group-hover:text-primary transition-colors">
-                      {item.title}
-                    </span>
-                    <span className="text-[11px] text-muted-foreground mt-0.5 leading-snug">
-                      {item.desc}
-                    </span>
-                  </motion.button>
+                  <GSAPTilt key={idx} maxTilt={6} scaleOnHover={1.02} className="h-full">
+                    <button
+                      onClick={() => handleSendMessage(item.prompt)}
+                      className="w-full h-full flex flex-col text-left p-3.5 rounded-2xl border border-border/80 bg-card hover:border-primary/40 hover:bg-primary/5 transition-colors shadow-xs group"
+                    >
+                      <div className="flex items-center justify-between mb-1.5 w-full">
+                        <span className="text-xl">{item.icon}</span>
+                        <ChevronRight className="h-3.5 w-3.5 text-muted-foreground group-hover:text-primary group-hover:translate-x-0.5 transition-transform" />
+                      </div>
+                      <span className="text-xs font-bold text-foreground group-hover:text-primary transition-colors">
+                        {item.title}
+                      </span>
+                      <span className="text-[11px] text-muted-foreground mt-0.5 leading-snug">
+                        {item.desc}
+                      </span>
+                    </button>
+                  </GSAPTilt>
                 ))}
               </div>
             </div>
@@ -942,50 +941,58 @@ export const StudentChatbot: React.FC = () => {
           </span>
 
           {/* Breathing Toggle */}
-          <button
-            onClick={() => setActiveExercise(activeExercise === "breathing" ? null : "breathing")}
-            className={cn(
-              "flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium border transition-all shrink-0",
-              activeExercise === "breathing"
-                ? "bg-indigo-600 border-indigo-600 text-white shadow-sm"
-                : "border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 hover:border-indigo-400"
-            )}
-          >
-            <Wind className="h-3.5 w-3.5 text-indigo-500" />
-            <span>Breathing Pacer (Dual Mode)</span>
-          </button>
+          <GSAPMagnetic strength={0.35}>
+            <button
+              onClick={() => setActiveExercise(activeExercise === "breathing" ? null : "breathing")}
+              className={cn(
+                "flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium border transition-all shrink-0",
+                activeExercise === "breathing"
+                  ? "bg-indigo-600 border-indigo-600 text-white shadow-sm"
+                  : "border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 hover:border-indigo-400"
+              )}
+            >
+              <Wind className="h-3.5 w-3.5 text-indigo-500" />
+              <span>Breathing Pacer (Dual Mode)</span>
+            </button>
+          </GSAPMagnetic>
 
           {/* 5-4-3-2-1 Sensory Grounding Toggle */}
-          <button
-            onClick={() => setActiveExercise(activeExercise === "grounding" ? null : "grounding")}
-            className={cn(
-              "flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium border transition-all shrink-0",
-              activeExercise === "grounding"
-                ? "bg-teal-600 border-teal-600 text-white shadow-sm"
-                : "border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 hover:border-teal-400"
-            )}
-          >
-            <Compass className="h-3.5 w-3.5 text-teal-500" />
-            <span>5-4-3-2-1 Grounding</span>
-          </button>
+          <GSAPMagnetic strength={0.35}>
+            <button
+              onClick={() => setActiveExercise(activeExercise === "grounding" ? null : "grounding")}
+              className={cn(
+                "flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium border transition-all shrink-0",
+                activeExercise === "grounding"
+                  ? "bg-teal-600 border-teal-600 text-white shadow-sm"
+                  : "border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 hover:border-teal-400"
+              )}
+            >
+              <Compass className="h-3.5 w-3.5 text-teal-500" />
+              <span>5-4-3-2-1 Grounding</span>
+            </button>
+          </GSAPMagnetic>
 
           {/* Cognitive Thought Distortion Reframer Trigger */}
-          <button
-            onClick={() => setIsReframerOpen(true)}
-            className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 hover:border-violet-400 hover:text-violet-600 dark:hover:text-violet-400 shrink-0 transition-all"
-          >
-            <BrainCircuit className="h-3.5 w-3.5 text-violet-500" />
-            <span>Thought Reframer (CBT)</span>
-          </button>
+          <GSAPMagnetic strength={0.35}>
+            <button
+              onClick={() => setIsReframerOpen(true)}
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 hover:border-violet-400 hover:text-violet-600 dark:hover:text-violet-400 shrink-0 transition-all"
+            >
+              <BrainCircuit className="h-3.5 w-3.5 text-violet-500" />
+              <span>Thought Reframer (CBT)</span>
+            </button>
+          </GSAPMagnetic>
 
           {/* Direct Emergency SOS Trigger */}
-          <button
-            onClick={() => setIsSOSOpen(true)}
-            className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold border border-rose-300 bg-rose-50 text-rose-700 hover:bg-rose-100 dark:border-rose-900/60 dark:bg-rose-950/40 dark:text-rose-300 shrink-0 ml-auto transition-all"
-          >
-            <PhoneCall className="h-3.5 w-3.5 text-rose-600 animate-pulse" />
-            <span>Crisis SOS</span>
-          </button>
+          <GSAPMagnetic strength={0.4}>
+            <button
+              onClick={() => setIsSOSOpen(true)}
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold border border-rose-300 bg-rose-50 text-rose-700 hover:bg-rose-100 dark:border-rose-900/60 dark:bg-rose-950/40 dark:text-rose-300 shrink-0 ml-auto transition-all"
+            >
+              <PhoneCall className="h-3.5 w-3.5 text-rose-600 animate-pulse" />
+              <span>Crisis SOS</span>
+            </button>
+          </GSAPMagnetic>
         </div>
 
         {/* Input Box */}
@@ -1000,7 +1007,7 @@ export const StudentChatbot: React.FC = () => {
               className="max-h-28 flex-1 resize-none bg-transparent px-2 py-1 text-xs text-foreground outline-none placeholder:text-muted-foreground"
             />
 
-            <GsapMagnetic strength={0.35}>
+            <GSAPMagnetic strength={0.4}>
               <button
                 onClick={() => handleSendMessage()}
                 disabled={!inputMessage.trim() || isSending}
@@ -1008,7 +1015,7 @@ export const StudentChatbot: React.FC = () => {
               >
                 <Send className="h-4 w-4" />
               </button>
-            </GsapMagnetic>
+            </GSAPMagnetic>
           </div>
 
           <div className="mt-2 flex items-center justify-between px-1 text-[11px] text-muted-foreground">

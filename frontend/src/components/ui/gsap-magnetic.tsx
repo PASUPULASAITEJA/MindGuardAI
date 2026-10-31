@@ -1,72 +1,77 @@
-import React, { useRef, useEffect } from "react";
+import React, { useRef } from "react";
 import gsap from "gsap";
+import { useGSAP } from "@gsap/react";
 
-interface GsapMagneticProps {
+interface GSAPMagneticProps {
   children: React.ReactElement;
-  strength?: number; // Distance factor (default 0.35)
-  active?: boolean;
+  strength?: number; // 0.1 to 1 (how strongly it pulls)
+  radius?: number; // active distance radius in pixels
+  className?: string;
+  disabled?: boolean;
 }
 
-/**
- * GsapMagnetic
- * Signature GSAP UI Interaction: Cursor pulls button/element with elastic magnetic physics.
- * Source reference: https://gsap.com/showcase/?tags=UI+Interactions
- */
-export const GsapMagnetic: React.FC<GsapMagneticProps> = ({
+export const GSAPMagnetic: React.FC<GSAPMagneticProps> = ({
   children,
   strength = 0.35,
-  active = true,
+  className = "",
+  disabled = false,
 }) => {
-  const magneticRef = useRef<HTMLDivElement | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    if (!active) return;
-    const el = magneticRef.current;
-    if (!el) return;
+  useGSAP(
+    () => {
+      if (disabled || !containerRef.current) return;
 
-    // Check prefers-reduced-motion
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      return;
-    }
+      const element = containerRef.current;
 
-    const xTo = gsap.quickTo(el, "x", { duration: 0.6, ease: "power3.out" });
-    const yTo = gsap.quickTo(el, "y", { duration: 0.6, ease: "power3.out" });
+      const handleMouseMove = (e: MouseEvent) => {
+        const bounds = element.getBoundingClientRect();
+        const centerX = bounds.left + bounds.width / 2;
+        const centerY = bounds.top + bounds.height / 2;
 
-    const handleMouseMove = (e: MouseEvent) => {
-      const rect = el.getBoundingClientRect();
-      const centerX = rect.left + rect.width / 2;
-      const centerY = rect.top + rect.height / 2;
-      const deltaX = (e.clientX - centerX) * strength;
-      const deltaY = (e.clientY - centerY) * strength;
+        const distanceX = e.clientX - centerX;
+        const distanceY = e.clientY - centerY;
 
-      xTo(deltaX);
-      yTo(deltaY);
-    };
+        gsap.to(element, {
+          x: distanceX * strength,
+          y: distanceY * strength,
+          rotation: distanceX * 0.05 * strength,
+          duration: 0.3,
+          ease: "power2.out",
+          overwrite: "auto",
+        });
+      };
 
-    const handleMouseLeave = () => {
-      gsap.to(el, {
-        x: 0,
-        y: 0,
-        duration: 0.7,
-        ease: "elastic.out(1.1, 0.4)",
-      });
-    };
+      const handleMouseLeave = () => {
+        gsap.to(element, {
+          x: 0,
+          y: 0,
+          rotation: 0,
+          duration: 0.7,
+          ease: "elastic.out(1.1, 0.4)",
+          overwrite: "auto",
+        });
+      };
 
-    el.addEventListener("mousemove", handleMouseMove);
-    el.addEventListener("mouseleave", handleMouseLeave);
+      element.addEventListener("mousemove", handleMouseMove);
+      element.addEventListener("mouseleave", handleMouseLeave);
 
-    return () => {
-      el.removeEventListener("mousemove", handleMouseMove);
-      el.removeEventListener("mouseleave", handleMouseLeave);
-      gsap.killTweensOf(el);
-    };
-  }, [strength, active]);
+      return () => {
+        element.removeEventListener("mousemove", handleMouseMove);
+        element.removeEventListener("mouseleave", handleMouseLeave);
+      };
+    },
+    { scope: containerRef, dependencies: [strength, disabled] }
+  );
 
   return (
-    <div ref={magneticRef} className="inline-block will-change-transform">
+    <div
+      ref={containerRef}
+      className={`inline-block transition-transform will-change-transform ${className}`}
+    >
       {children}
     </div>
   );
 };
 
-export default GsapMagnetic;
+export default GSAPMagnetic;

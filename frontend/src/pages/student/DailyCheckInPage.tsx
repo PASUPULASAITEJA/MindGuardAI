@@ -22,8 +22,7 @@ import { AnimatedCounter } from "@/components/ui/animated-counter";
 import { DotGridBackground } from "@/components/ui/DotGridBackground";
 import { ShinyText } from "@/components/ui/ShinyText";
 import { LottieIllustration } from "@/components/ui/LottieIllustration";
-import { GsapStagger } from "@/components/ui/gsap-stagger";
-import { GsapButton } from "@/components/ui/gsap-button";
+import { GSAPMagnetic } from "@/components/ui/gsap-magnetic";
 
 const MOOD_OPTIONS = [
   { score: 2, label: "Difficult", symbol: "😔", helper: "Stressed or overwhelmed" },
@@ -170,30 +169,28 @@ export const DailyCheckInPage: React.FC = () => {
                     Choose the option that best reflects your current emotional state.
                   </p>
 
-                  <GsapStagger className="grid grid-cols-5 gap-2 mt-4" stagger={0.05}>
+                  <div className="grid grid-cols-5 gap-2 mt-4">
                     {MOOD_OPTIONS.map((opt) => {
                       const isSelected = selectedMood === opt.score;
                       return (
-                        <motion.button
-                          key={opt.score}
-                          type="button"
-                          whileHover={{ scale: 1.05, y: -2 }}
-                          whileTap={{ scale: 0.95 }}
-                          transition={{ duration: 0.15 }}
-                          onClick={() => setSelectedMood(opt.score)}
-                          className={cn(
-                            "flex flex-col items-center justify-center p-3 rounded-xl border text-xs transition-colors",
-                            isSelected
-                              ? "border-primary bg-primary/5 text-primary font-semibold shadow-xs ring-1 ring-primary"
-                              : "border-border hover:bg-secondary/60 text-muted-foreground hover:text-foreground"
-                          )}
-                        >
-                          <span className="text-2xl mb-1">{opt.symbol}</span>
-                          <span className="text-xs font-medium">{opt.label}</span>
-                        </motion.button>
+                        <GSAPMagnetic key={opt.score} strength={0.4} className="w-full">
+                          <button
+                            type="button"
+                            onClick={() => setSelectedMood(opt.score)}
+                            className={cn(
+                              "w-full flex flex-col items-center justify-center p-3 rounded-xl border text-xs transition-colors",
+                              isSelected
+                                ? "border-primary bg-primary/5 text-primary font-semibold shadow-xs ring-1 ring-primary"
+                                : "border-border hover:bg-secondary/60 text-muted-foreground hover:text-foreground"
+                            )}
+                          >
+                            <span className="text-2xl mb-1">{opt.symbol}</span>
+                            <span className="text-xs font-medium">{opt.label}</span>
+                          </button>
+                        </GSAPMagnetic>
                       );
                     })}
-                  </GsapStagger>
+                  </div>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t border-border">
@@ -252,14 +249,16 @@ export const DailyCheckInPage: React.FC = () => {
                   >
                     Cancel
                   </Button>
-                  <GsapButton
-                    type="submit"
-                    size="sm"
-                    disabled={submitJournal.isPending}
-                    className="text-xs font-semibold px-6 shadow-sm"
-                  >
-                    {submitJournal.isPending ? "Recording..." : "Complete Check-in"}
-                  </GsapButton>
+                  <GSAPMagnetic strength={0.35}>
+                    <Button
+                      type="submit"
+                      size="sm"
+                      disabled={submitJournal.isPending}
+                      className="text-xs font-semibold px-6 shadow-sm shadow-primary/20 hover:shadow-primary/30"
+                    >
+                      {submitJournal.isPending ? "Recording..." : "Complete Check-in"}
+                    </Button>
+                  </GSAPMagnetic>
                 </div>
               </form>
             </Card>
