@@ -30,6 +30,7 @@ export default defineConfig({
             if (id.includes('three') || id.includes('@react-three')) return 'vendor-three';
             if (id.includes('recharts')) return 'vendor-recharts';
             if (id.includes('framer-motion') || id.includes('motion')) return 'vendor-motion';
+            if (id.includes('lottie-web') || id.includes('lottie-react')) return 'vendor-lottie';
             return 'vendor';
           }
         },

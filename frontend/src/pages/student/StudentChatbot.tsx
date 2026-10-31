@@ -31,6 +31,7 @@ import { cn } from "@/utils/cn";
 import { useToast } from "@/components/ui/toast";
 import { EmergencySOSModal } from "@/components/EmergencySOSModal";
 import { AgentActivityDrawer } from "@/components/chat/AgentActivityDrawer";
+import { LottieIllustration } from "@/components/ui/LottieIllustration";
 import { motion, AnimatePresence } from "motion/react";
 import { chatBotMessageVariants, chatUserMessageVariants } from "@/utils/motion";
 
@@ -594,10 +595,8 @@ export const StudentChatbot: React.FC = () => {
         <div className="flex-1 space-y-4 overflow-y-auto p-4 sm:p-6">
           {messages.length === 0 ? (
             <div className="flex h-full flex-col items-center justify-center text-center py-6">
-              <div className="h-24 w-24 relative flex items-center justify-center mb-2">
-                <div className="h-20 w-20 rounded-2xl bg-card border border-border/80 shadow-md flex items-center justify-center p-2">
-                  <img src="/logo.png" alt="MindGuardAI Logo" className="h-full w-full object-contain" />
-                </div>
+              <div className="h-20 w-20 relative flex items-center justify-center mb-2">
+                <LottieIllustration variant="companion" className="w-16 h-16" />
               </div>
               <h4 className="mt-2 text-base font-extrabold text-foreground">
                 MindGuardAI Sanctuary Companion

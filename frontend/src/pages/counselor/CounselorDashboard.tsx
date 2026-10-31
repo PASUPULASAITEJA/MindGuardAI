@@ -34,6 +34,7 @@ import { pageVariants, staggerContainer, cardEntrance, modalBackdropVariants, mo
 import { AnimatedCounter } from "@/components/ui/animated-counter";
 import { SpotlightCard } from "@/components/ui/SpotlightCard";
 import { DotGridBackground } from "@/components/ui/DotGridBackground";
+import { EmptyState } from "@/components/ui/empty-state";
 import { TriageKanbanBoard } from "@/components/counselor/TriageKanbanBoard";
 
 export const CounselorDashboard: React.FC = () => {
@@ -556,11 +557,11 @@ export const CounselorDashboard: React.FC = () => {
                 <span>Loading triage queue...</span>
               </div>
             ) : filteredAlerts.length === 0 ? (
-              <div className="py-12 text-center text-xs text-muted-foreground space-y-1">
-                <CheckCircle2 className="h-6 w-6 text-emerald-500 mx-auto mb-2" />
-                <p className="font-medium text-foreground">No alerts currently pending triage.</p>
-                <p className="text-[11px]">All student check-ins are currently operating within stable parameters.</p>
-              </div>
+              <EmptyState
+                illustration="success"
+                title="No alerts currently pending triage"
+                description="All student check-ins and telemetry signals are currently operating within stable parameters."
+              />
             ) : (
               <div className="overflow-x-auto">
                 <table className="saas-table">

@@ -54,6 +54,7 @@ import { AnimatedCounter } from "@/components/ui/animated-counter";
 import { SpotlightCard } from "@/components/ui/SpotlightCard";
 import { DotGridBackground } from "@/components/ui/DotGridBackground";
 import { ShinyText } from "@/components/ui/ShinyText";
+import { EmptyState } from "@/components/ui/empty-state";
 
 export const AdminDashboard: React.FC = () => {
   const location = useLocation();
@@ -469,11 +470,11 @@ export const AdminDashboard: React.FC = () => {
             {isDeptRiskLoading ? (
               <div className="py-8 text-center text-xs text-muted-foreground">Loading department data...</div>
             ) : departmentsList.length === 0 ? (
-              <div className="py-8 text-center text-xs text-muted-foreground space-y-1">
-                <Building2 className="h-6 w-6 text-muted-foreground/40 mx-auto mb-1" />
-                <p className="font-medium text-foreground">No student assessment data recorded by department yet.</p>
-                <p className="text-[11px]">Department wellness aggregations will appear as students submit validated check-ins.</p>
-              </div>
+              <EmptyState
+                illustration="empty"
+                title="No student assessment data recorded by department yet"
+                description="Department wellness aggregations will appear as students submit validated check-ins."
+              />
             ) : (
               <div className="overflow-x-auto">
                 <table className="saas-table">

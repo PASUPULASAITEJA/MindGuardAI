@@ -21,6 +21,7 @@ import api from "@/services/api";
 import { motion, AnimatePresence } from "motion/react";
 import { modalBackdropVariants, modalPanelVariants } from "@/utils/motion";
 import { AnimatedCounter } from "@/components/ui/animated-counter";
+import { LottieIllustration } from "@/components/ui/LottieIllustration";
 
 export interface SurveyQuestionItem {
   id: number;
@@ -290,8 +291,8 @@ export const ClinicalSurveyModal: React.FC<ClinicalSurveyModalProps> = ({
             >
               <div className="flex items-center justify-between border-b border-border/60 pb-4">
                 <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 rounded-2xl bg-emerald-500/10 flex items-center justify-center text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
-                    <Sparkles className="h-5 w-5" />
+                  <div className="h-10 w-10 rounded-2xl flex items-center justify-center shrink-0">
+                    <LottieIllustration variant="success" className="h-10 w-10" loop={false} />
                   </div>
                   <div>
                     <h3 className="text-base font-black text-foreground">Assessment Summary</h3>

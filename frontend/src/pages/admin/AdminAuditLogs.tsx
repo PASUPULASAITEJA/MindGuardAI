@@ -10,6 +10,7 @@ import { auditAPI, AuditLogItem } from "@/services/api";
 import { SpotlightCard } from "@/components/ui/SpotlightCard";
 import { DotGridBackground } from "@/components/ui/DotGridBackground";
 import { ShinyText } from "@/components/ui/ShinyText";
+import { EmptyState } from "@/components/ui/empty-state";
 
 export const AdminAuditLogs: React.FC = () => {
   const { toast } = useToast();
@@ -353,10 +354,12 @@ export const AdminAuditLogs: React.FC = () => {
                 <p className="text-xs text-muted-foreground">Loading forensic audit trail...</p>
               </div>
             ) : logs.length === 0 ? (
-              <div className="p-12 text-center space-y-2">
-                <FileText className="w-8 h-8 text-muted-foreground/40 mx-auto" />
-                <h4 className="text-sm font-semibold text-foreground">No audit entries matching filter</h4>
-                <p className="text-xs text-muted-foreground">Try clearing your filters or refreshing the table.</p>
+              <div className="p-6">
+                <EmptyState
+                  illustration="empty"
+                  title="No audit entries matching filter"
+                  description="Try clearing your search query, adjusting your role filters, or refreshing the table."
+                />
               </div>
             ) : (
               <div className="overflow-x-auto">

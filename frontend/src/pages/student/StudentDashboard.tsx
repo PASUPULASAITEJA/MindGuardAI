@@ -608,7 +608,7 @@ export const StudentDashboard: React.FC = () => {
             </div>
           ) : moodHistory.length === 0 ? (
             <EmptyState
-              icon={Smile}
+              illustration="empty"
               title="No check-ins logged yet today"
               description="Taking 30 seconds to record your mood pulse helps calibrate personalized campus coping recommendations."
               actionLabel="Start First Check-In"
