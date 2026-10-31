@@ -172,8 +172,8 @@ export const PersonalizedRecommendations: React.FC = () => {
         </div>
       </CardHeader>
 
-      <CardContent className="p-4 sm:p-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <CardContent className="p-3 sm:p-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
           {data.recommendations.map((rec: PersonalizedRecommendationItem) => {
             const meta = getCategoryMeta(rec.category);
             const isActing = actingId === rec.id;
@@ -183,48 +183,48 @@ export const PersonalizedRecommendations: React.FC = () => {
             return (
               <div 
                 key={rec.id}
-                className={`p-5 rounded-2xl border flex flex-col justify-between transition-all duration-200 min-h-[230px] ${
+                className={`p-3.5 rounded-xl border flex flex-col justify-between transition-all duration-200 ${
                   isCompleted 
                     ? "bg-muted/30 border-border/60 opacity-80" 
-                    : "bg-card border-border/80 hover:border-border shadow-xs hover:shadow-md hover:-translate-y-0.5"
+                    : "bg-card border-border/80 hover:border-border shadow-2xs hover:shadow-sm"
                 }`}
               >
-                <div className="space-y-3">
+                <div className="space-y-2">
                   {/* Category Pill */}
                   <div className="flex items-center justify-between">
-                    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider border ${meta.color}`}>
+                    <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[9px] font-black uppercase tracking-wider border ${meta.color}`}>
                       {meta.icon}
                       {meta.label}
                     </span>
                     {isCompleted && (
-                      <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
-                        <CheckCircle2 className="h-3 w-3" />
-                        Completed
+                      <span className="inline-flex items-center gap-1 text-[9px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded-full border border-emerald-500/20">
+                        <CheckCircle2 className="h-2.5 w-2.5" />
+                        Done
                       </span>
                     )}
                   </div>
 
                   {/* Title & Description */}
                   <div>
-                    <h4 className={`text-sm font-bold text-foreground leading-snug ${isCompleted ? "line-through text-muted-foreground" : ""}`}>
+                    <h4 className={`text-xs sm:text-sm font-bold text-foreground leading-snug ${isCompleted ? "line-through text-muted-foreground" : ""}`}>
                       {rec.title}
                     </h4>
-                    <p className="text-xs text-muted-foreground mt-1.5 leading-relaxed line-clamp-3">
+                    <p className="text-[11px] text-muted-foreground mt-1 leading-snug line-clamp-2">
                       {rec.description}
                     </p>
                   </div>
 
                   {/* Clinical Reason */}
                   {rec.reason && (
-                    <div className="p-2.5 rounded-xl bg-muted/40 border border-border/60 text-[11px] text-muted-foreground italic flex items-start gap-2">
-                      <Compass className="h-3.5 w-3.5 mt-0.5 text-primary shrink-0" />
-                      <span className="leading-tight">{rec.reason}</span>
+                    <div className="p-1.5 rounded-lg bg-muted/40 border border-border/60 text-[10px] text-muted-foreground italic flex items-center gap-1.5">
+                      <Compass className="h-3 w-3 text-primary shrink-0" />
+                      <span className="truncate">{rec.reason}</span>
                     </div>
                   )}
                 </div>
 
                 {/* Actions Row */}
-                <div className="pt-3.5 mt-3 border-t border-border/50 flex items-center justify-between gap-2.5">
+                <div className="pt-2.5 mt-2.5 border-t border-border/50 flex items-center justify-between gap-2">
                   <Button
                     size="sm"
                     variant={isCompleted ? "outline" : "default"}
@@ -235,13 +235,13 @@ export const PersonalizedRecommendations: React.FC = () => {
                         navigate(rec.action_url);
                       }
                     }}
-                    className="h-8.5 text-xs font-bold gap-1.5 flex-1 rounded-xl shadow-xs"
+                    className="h-7 text-[11px] font-bold gap-1 flex-1 rounded-lg shadow-2xs"
                   >
                     <span>Launch Protocol</span>
-                    <ArrowRight className="h-3.5 w-3.5" />
+                    <ArrowRight className="h-3 w-3" />
                   </Button>
 
-                  <div className="flex items-center gap-1.5">
+                  <div className="flex items-center gap-1">
                     <Button
                       size="sm"
                       variant="outline"
@@ -250,7 +250,7 @@ export const PersonalizedRecommendations: React.FC = () => {
                         recId: rec.id, 
                         feedback: isHelpful ? undefined : "HELPFUL" 
                       })}
-                      className={`h-8.5 w-8.5 p-0 rounded-xl border transition-all ${
+                      className={`h-7 w-7 p-0 rounded-lg border transition-all ${
                         isHelpful 
                           ? "text-primary bg-primary/10 border-primary/30" 
                           : "border-border/70 text-muted-foreground hover:text-foreground hover:bg-muted/60"

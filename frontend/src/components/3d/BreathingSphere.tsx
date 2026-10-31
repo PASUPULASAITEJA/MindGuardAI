@@ -174,21 +174,21 @@ export const BreathingSphere: React.FC<BreathingSphereProps> = ({
   }, [phase, config]);
 
   // SVG circular progress calculation
-  const radius = 96;
+  const radius = 70;
   const circumference = 2 * Math.PI * radius;
   const progressRatio = Math.max(0, Math.min(1, (currentPhaseTotal - secondsLeft) / currentPhaseTotal));
   const strokeDashoffset = circumference * (1 - progressRatio);
 
   return (
-    <div className={`flex flex-col items-center space-y-6 ${className}`}>
+    <div className={`flex flex-col items-center space-y-3.5 ${className}`}>
       {/* Preset Cadence Switcher */}
       {showPresets && (
-        <div className="flex flex-wrap items-center justify-center gap-2 p-1.5 rounded-2xl bg-muted/60 border border-border/60">
+        <div className="flex flex-wrap items-center justify-center gap-1.5 p-1 rounded-xl bg-muted/60 border border-border/60">
           {Object.entries(PRESET_CADENCES).map(([key, item]) => (
             <button
               key={key}
               onClick={() => handleSelectPreset(key)}
-              className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
+              className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold transition-all ${
                 activePreset === key
                   ? "bg-primary text-primary-foreground shadow-xs"
                   : "text-muted-foreground hover:text-foreground"
@@ -201,7 +201,7 @@ export const BreathingSphere: React.FC<BreathingSphereProps> = ({
       )}
 
       {/* Clean, Normal 2D Breath Pacer Circle */}
-      <div className="relative flex items-center justify-center w-64 h-64 sm:w-72 sm:h-72">
+      <div className="relative flex items-center justify-center w-44 h-44 sm:w-48 sm:h-48">
         {/* Outer subtle guide ring */}
         <div className="absolute inset-0 rounded-full border border-border/40 bg-card/40 backdrop-blur-xs" />
 
@@ -209,35 +209,35 @@ export const BreathingSphere: React.FC<BreathingSphereProps> = ({
         <div
           className={`absolute rounded-full border ${phaseColors.border} ${phaseColors.circleBg} transition-all duration-1000 ease-in-out ${
             phase === "Inhale"
-              ? "w-52 h-52 sm:w-60 sm:h-60 scale-100 shadow-lg shadow-sky-500/10"
+              ? "w-36 h-36 sm:w-40 sm:h-40 scale-100 shadow-lg shadow-sky-500/10"
               : phase === "Hold"
-              ? "w-52 h-52 sm:w-60 sm:h-60 scale-100 shadow-lg shadow-amber-500/10"
+              ? "w-36 h-36 sm:w-40 sm:h-40 scale-100 shadow-lg shadow-amber-500/10"
               : phase === "Exhale"
-              ? "w-40 h-40 sm:w-44 sm:h-44 scale-95 shadow-md shadow-emerald-500/10"
-              : "w-40 h-40 sm:w-44 sm:h-44 scale-95 shadow-xs"
+              ? "w-28 h-28 sm:w-32 sm:h-32 scale-95 shadow-md shadow-emerald-500/10"
+              : "w-28 h-28 sm:w-32 sm:h-32 scale-95 shadow-xs"
           }`}
         />
 
         {/* SVG Circular Progress Track */}
-        <svg className="absolute w-full h-full -rotate-90 pointer-events-none" viewBox="0 0 220 220">
+        <svg className="absolute w-full h-full -rotate-90 pointer-events-none" viewBox="0 0 160 160">
           {/* Base Track */}
           <circle
-            cx="110"
-            cy="110"
+            cx="80"
+            cy="80"
             r={radius}
             fill="none"
             stroke="currentColor"
-            strokeWidth="3.5"
+            strokeWidth="3"
             className="text-border/40"
           />
           {/* Active Phase Stroke */}
           <circle
-            cx="110"
-            cy="110"
+            cx="80"
+            cy="80"
             r={radius}
             fill="none"
             stroke={phaseColors.stroke}
-            strokeWidth="3.5"
+            strokeWidth="3"
             strokeDasharray={circumference}
             strokeDashoffset={strokeDashoffset}
             strokeLinecap="round"
@@ -247,11 +247,11 @@ export const BreathingSphere: React.FC<BreathingSphereProps> = ({
 
         {/* Center Countdown & Phase Typography */}
         <div className="relative z-10 flex flex-col items-center justify-center text-center select-none">
-          <span className="text-4xl sm:text-5xl font-black font-mono tracking-tight text-foreground">
+          <span className="text-3xl sm:text-4xl font-black font-mono tracking-tight text-foreground">
             {secondsLeft}s
           </span>
           <span
-            className={`mt-2 px-3 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider border shadow-2xs ${phaseColors.badge}`}
+            className={`mt-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border shadow-2xs ${phaseColors.badge}`}
           >
             {status === "paused" ? "Paused" : phase}
           </span>
@@ -259,30 +259,30 @@ export const BreathingSphere: React.FC<BreathingSphereProps> = ({
       </div>
 
       {/* Synchronized Verbal Guidance */}
-      <div className="text-center min-h-[40px] px-4 max-w-md">
-        <p className="text-xs sm:text-sm font-medium text-foreground leading-relaxed">
+      <div className="text-center min-h-[28px] px-2 max-w-sm">
+        <p className="text-xs font-medium text-foreground leading-snug">
           {phaseInstruction}
         </p>
       </div>
 
       {/* Controls: Start, Pause, Resume, Reset */}
       {showControls && (
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           {status === "idle" ? (
             <Button
               onClick={handleStart}
-              className="gap-2 rounded-xl bg-primary text-primary-foreground font-semibold px-5 h-10 shadow-xs"
+              className="gap-1.5 rounded-xl bg-primary text-primary-foreground font-semibold px-4 h-8 text-xs shadow-xs"
             >
-              <Play className="h-4 w-4 fill-current" />
+              <Play className="h-3.5 w-3.5 fill-current" />
               <span>Start Exercise</span>
             </Button>
           ) : status === "running" ? (
             <Button
               onClick={handlePause}
               variant="outline"
-              className="gap-2 rounded-xl border-border font-semibold px-5 h-10"
+              className="gap-1.5 rounded-xl border-border font-semibold px-4 h-8 text-xs"
             >
-              <Pause className="h-4 w-4" />
+              <Pause className="h-3.5 w-3.5" />
               <span>Pause</span>
             </Button>
           ) : (

@@ -24,6 +24,7 @@ import {
   RotateCcw,
   ArrowRight,
   Check,
+  Trash2,
 } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { chatAPI, ChatMessageItem, ChatResponsePayload, getAccessToken } from "@/services/api";
@@ -209,6 +210,7 @@ export const StudentChatbot: React.FC = () => {
 
   // Agent Activity & Tool Calls Drawer State (React Bits Pro)
   const [isActivityDrawerOpen, setIsActivityDrawerOpen] = useState(false);
+  const [convToDelete, setConvToDelete] = useState<string | null>(null);
 
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
@@ -305,6 +307,31 @@ export const StudentChatbot: React.FC = () => {
       toast({
         title: "Could not start chat",
         description: "Please check your network connection.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Mutation: Delete Conversation
+  const deleteConvMutation = useMutation({
+    mutationFn: (convId: string) => chatAPI.deleteConversation(convId),
+    onSuccess: (_, deletedId) => {
+      queryClient.invalidateQueries({ queryKey: ["conversations"] });
+      queryClient.removeQueries({ queryKey: ["conversation", deletedId] });
+      if (activeConvId === deletedId) {
+        const remaining = conversations.filter((c: any) => c.id !== deletedId);
+        setActiveConvId(remaining.length > 0 ? remaining[0].id : null);
+      }
+      toast({
+        title: "Chat Deleted",
+        description: "The conversation thread has been permanently removed.",
+        variant: "default",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Could not delete chat",
+        description: "Failed to remove the conversation. Please try again.",
         variant: "destructive",
       });
     },
@@ -504,24 +531,37 @@ export const StudentChatbot: React.FC = () => {
             conversations.map((conv) => {
               const isActive = conv.id === activeConvId;
               return (
-                <button
+                <div
                   key={conv.id}
                   onClick={() => setActiveConvId(conv.id)}
                   className={cn(
-                    "flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left text-xs font-medium transition-all",
+                    "group relative flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left text-xs font-medium transition-all cursor-pointer",
                     isActive
                       ? "bg-primary/10 text-primary border border-primary/20 font-bold"
                       : "text-muted-foreground hover:bg-secondary hover:text-foreground"
                   )}
                 >
-                  <div className="flex items-center gap-2.5 truncate">
+                  <div className="flex items-center gap-2.5 truncate flex-1 min-w-0 pr-1.5">
                     <MessageSquare className="h-4 w-4 shrink-0 text-primary/70" />
                     <span className="truncate">{conv.title}</span>
                   </div>
-                  {conv.current_risk_level === "RED" && (
-                    <span className="h-2 w-2 rounded-full bg-rose-500 animate-pulse" />
-                  )}
-                </button>
+                  <div className="flex items-center gap-1.5 shrink-0">
+                    {conv.current_risk_level === "RED" && (
+                      <span className="h-2 w-2 rounded-full bg-rose-500 animate-pulse" />
+                    )}
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setConvToDelete(conv.id);
+                      }}
+                      title="Delete chat"
+                      className="opacity-0 group-hover:opacity-100 p-1 rounded-md text-muted-foreground hover:text-rose-600 hover:bg-rose-500/10 transition-all"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+                </div>
               );
             })
           )}
@@ -586,10 +626,21 @@ export const StudentChatbot: React.FC = () => {
                 if (activeConvId) refetchMessages();
               }}
               title="Refresh conversation"
-              className="rounded-lg p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-800 dark:hover:text-slate-300"
+              className="rounded-lg p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-800 dark:hover:text-slate-300 transition-colors"
             >
               <RefreshCw className="h-4 w-4" />
             </button>
+            {activeConvId && (
+              <button
+                type="button"
+                onClick={() => setConvToDelete(activeConvId)}
+                title="Delete this conversation"
+                className="rounded-lg p-2 text-rose-500/80 hover:bg-rose-500/10 hover:text-rose-600 transition-colors"
+                aria-label="Delete chat"
+              >
+                <Trash2 className="h-4 w-4" />
+              </button>
+            )}
           </div>
         </div>
 
@@ -1165,6 +1216,43 @@ export const StudentChatbot: React.FC = () => {
           messages.filter((m) => m.sender !== "STUDENT").slice(-1)[0]?.risk_level || "GREEN"
         }
       />
+
+      {/* Delete Chat Confirmation Modal */}
+      {convToDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+          <div className="bg-card border border-border/80 rounded-2xl max-w-sm w-full p-5 shadow-2xl space-y-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-rose-500/15 border border-rose-500/30 flex items-center justify-center text-rose-500 shrink-0">
+                <Trash2 className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="text-sm font-bold text-foreground">Delete Conversation?</h3>
+                <p className="text-xs text-muted-foreground mt-0.5">This will permanently clear this chat history.</p>
+              </div>
+            </div>
+            <div className="flex items-center justify-end gap-2 pt-2">
+              <button
+                type="button"
+                onClick={() => setConvToDelete(null)}
+                className="px-3.5 py-1.5 text-xs font-semibold rounded-lg border border-border hover:bg-secondary text-foreground transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                disabled={deleteConvMutation.isPending}
+                onClick={() => {
+                  deleteConvMutation.mutate(convToDelete);
+                  setConvToDelete(null);
+                }}
+                className="px-3.5 py-1.5 text-xs font-bold rounded-lg bg-rose-600 hover:bg-rose-700 text-white transition-colors disabled:opacity-50"
+              >
+                {deleteConvMutation.isPending ? "Deleting..." : "Delete Chat"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -14,11 +14,14 @@ import { ConsentBanner } from "@/components/ConsentBanner";
 import { ConsentSettingsManager } from "@/components/ConsentSettingsManager";
 import { DotGridBackground } from "@/components/ui/DotGridBackground";
 import { ShinyText } from "@/components/ui/ShinyText";
+import { cn } from "@/utils/cn";
 
 export const Settings: React.FC = () => {
   const { user } = useAuth();
   const { theme, setTheme } = useTheme();
   const { toast } = useToast();
+
+  const [activeTab, setActiveTab] = useState<"profile" | "consent" | "security" | "notifications">("profile");
 
   // Profile fields state
   const [fullName, setFullName] = useState("");
@@ -359,20 +362,77 @@ export const Settings: React.FC = () => {
           </Card>
         </div>
 
-        {/* Right Column: Forms */}
-        <div className="space-y-6 md:col-span-2">
+        {/* Right Column: Tabbed Forms */}
+        <div className="space-y-4 md:col-span-2">
+          {/* Tab Switcher */}
+          <div className="flex items-center gap-1.5 p-1 rounded-xl bg-muted/60 border border-border/60 overflow-x-auto">
+            <button
+              type="button"
+              onClick={() => setActiveTab("profile")}
+              className={cn(
+                "flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap",
+                activeTab === "profile"
+                  ? "bg-card text-foreground shadow-2xs border border-border/80"
+                  : "text-muted-foreground hover:text-foreground hover:bg-muted/40"
+              )}
+            >
+              <UserIcon className="h-3.5 w-3.5 text-primary" />
+              <span>Profile Details</span>
+            </button>
+            {user.role === "STUDENT" && (
+              <button
+                type="button"
+                onClick={() => setActiveTab("consent")}
+                className={cn(
+                  "flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap",
+                  activeTab === "consent"
+                    ? "bg-card text-foreground shadow-2xs border border-border/80"
+                    : "text-muted-foreground hover:text-foreground hover:bg-muted/40"
+                )}
+              >
+                <Shield className="h-3.5 w-3.5 text-emerald-500" />
+                <span>Privacy & Consent</span>
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={() => setActiveTab("security")}
+              className={cn(
+                "flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap",
+                activeTab === "security"
+                  ? "bg-card text-foreground shadow-2xs border border-border/80"
+                  : "text-muted-foreground hover:text-foreground hover:bg-muted/40"
+              )}
+            >
+              <Lock className="h-3.5 w-3.5 text-amber-500" />
+              <span>Security</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab("notifications")}
+              className={cn(
+                "flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap",
+                activeTab === "notifications"
+                  ? "bg-card text-foreground shadow-2xs border border-border/80"
+                  : "text-muted-foreground hover:text-foreground hover:bg-muted/40"
+              )}
+            >
+              <Bell className="h-3.5 w-3.5 text-blue-500" />
+              <span>Notifications</span>
+            </button>
+          </div>
 
-          {/* Student Profile & Counselor Sharing Preferences */}
-          {user.role === "STUDENT" && (
+          {/* TAB 1: Profile & Student Details */}
+          {activeTab === "profile" && user.role === "STUDENT" && (
             <Card className="border-border/70 bg-card/50 backdrop-blur-md">
-              <CardHeader>
+              <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">
                   <div>
                     <CardTitle className="text-foreground text-sm md:text-base font-bold flex items-center gap-2">
-                      <UserIcon className="h-4.5 w-4.5 text-primary" />
+                      <UserIcon className="h-4 w-4 text-primary" />
                       Student Profile & Wellness Sharing
                     </CardTitle>
-                    <CardDescription className="text-xs md:text-sm">
+                    <CardDescription className="text-xs">
                       Configure your contact details and counselor privacy preferences
                     </CardDescription>
                   </div>
@@ -381,90 +441,90 @@ export const Settings: React.FC = () => {
                     onClick={handleExportSummary}
                     variant="outline"
                     size="sm"
-                    className="border-primary/40 text-primary hover:bg-primary/10 text-xs font-semibold flex items-center gap-1.5"
+                    className="border-primary/40 text-primary hover:bg-primary/10 text-xs font-semibold h-8 px-2.5 flex items-center gap-1.5"
                   >
-                    <FileDown className="h-4 w-4" />
-                    Export PDF Summary
+                    <FileDown className="h-3.5 w-3.5" />
+                    Export PDF
                   </Button>
                 </div>
               </CardHeader>
-              <CardContent>
-                <form onSubmit={handleProfileSubmit} className="space-y-4">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div className="space-y-1.5">
-                      <Label htmlFor="full-name">Full Name</Label>
+              <CardContent className="pt-1">
+                <form onSubmit={handleProfileSubmit} className="space-y-3.5">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div className="space-y-1">
+                      <Label htmlFor="full-name" className="text-xs">Full Name</Label>
                       <Input
                         id="full-name"
                         value={fullName}
                         onChange={(e) => setFullName(e.target.value)}
                         placeholder="e.g. Alex Sharma"
-                        className="h-10 text-xs md:text-sm bg-background/50 border-border/70"
+                        className="h-8.5 text-xs bg-background/50 border-border/70"
                       />
                     </div>
-                    <div className="space-y-1.5">
-                      <Label htmlFor="phone-number">Phone Number</Label>
+                    <div className="space-y-1">
+                      <Label htmlFor="phone-number" className="text-xs">Phone Number</Label>
                       <Input
                         id="phone-number"
                         value={phoneNumber}
                         onChange={(e) => setPhoneNumber(e.target.value)}
                         placeholder="+91 98765 43210"
-                        className="h-10 text-xs md:text-sm bg-background/50 border-border/70"
+                        className="h-8.5 text-xs bg-background/50 border-border/70"
                       />
                     </div>
-                    <div className="space-y-1.5">
-                      <Label htmlFor="dept">Academic Department / Major</Label>
+                    <div className="space-y-1">
+                      <Label htmlFor="dept" className="text-xs">Academic Department</Label>
                       <Input
                         id="dept"
                         value={department}
                         onChange={(e) => setDepartment(e.target.value)}
                         placeholder="e.g. Computer Science, 3rd Year"
-                        className="h-10 text-xs md:text-sm bg-background/50 border-border/70"
+                        className="h-8.5 text-xs bg-background/50 border-border/70"
                       />
                     </div>
-                    <div className="space-y-1.5">
-                      <Label htmlFor="emergency-name">Emergency Contact Name</Label>
+                    <div className="space-y-1">
+                      <Label htmlFor="emergency-name" className="text-xs">Emergency Contact Name</Label>
                       <Input
                         id="emergency-name"
                         value={emergencyName}
                         onChange={(e) => setEmergencyName(e.target.value)}
-                        placeholder="Parent / Guardian / Hosteller"
-                        className="h-10 text-xs md:text-sm bg-background/50 border-border/70"
+                        placeholder="Parent / Guardian"
+                        className="h-8.5 text-xs bg-background/50 border-border/70"
                       />
                     </div>
-                    <div className="space-y-1.5 sm:col-span-2">
-                      <Label htmlFor="emergency-phone">Emergency Contact Phone</Label>
+                    <div className="space-y-1 sm:col-span-2">
+                      <Label htmlFor="emergency-phone" className="text-xs">Emergency Contact Phone</Label>
                       <Input
                         id="emergency-phone"
                         value={emergencyPhone}
                         onChange={(e) => setEmergencyPhone(e.target.value)}
                         placeholder="Emergency contact telephone number"
-                        className="h-10 text-xs md:text-sm bg-background/50 border-border/70"
+                        className="h-8.5 text-xs bg-background/50 border-border/70"
                       />
                     </div>
                   </div>
 
                   {/* Privacy & Sharing Checkbox */}
-                  <div className="p-3.5 rounded-xl border border-border/70 bg-accent/20 flex items-start gap-3 mt-2">
+                  <div className="p-3 rounded-xl border border-border/70 bg-accent/20 flex items-start gap-2.5">
                     <input
                       type="checkbox"
                       id="counselor-sharing"
                       checked={counselorConsent}
                       onChange={(e) => setCounselorConsent(e.target.checked)}
-                      className="mt-1 h-4 w-4 rounded border-border text-primary focus:ring-primary accent-primary"
+                      className="mt-0.5 h-3.5 w-3.5 rounded border-border text-primary focus:ring-primary accent-primary"
                     />
-                    <label htmlFor="counselor-sharing" className="text-xs leading-relaxed text-foreground cursor-pointer select-none">
+                    <label htmlFor="counselor-sharing" className="text-[11px] leading-snug text-foreground cursor-pointer select-none">
                       <span className="font-bold block">Share Behavioral Indicators With Campus Counselor</span>
-                      Allow your designated university clinical counselor to review automated screen time and sleep disruption markers if high-stress anomalies are detected.
+                      Allow your designated university counselor to review automated screen time and sleep disruption markers if high-stress anomalies are detected.
                     </label>
                   </div>
 
-                  <div className="flex justify-end pt-2">
+                  <div className="flex justify-end pt-1">
                     <Button
                       type="submit"
                       disabled={isUpdatingProfile}
-                      className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-xs md:text-sm h-10 px-5 rounded-xl transition-all"
+                      className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-xs h-8.5 px-4 rounded-xl transition-all"
                     >
-                      {isUpdatingProfile ? "Saving Profile..." : "Save Profile Details"}
+                      {isUpdatingProfile ? "Saving..." : "Save Profile Details"}
                     </Button>
                   </div>
                 </form>
@@ -472,320 +532,182 @@ export const Settings: React.FC = () => {
             </Card>
           )}
 
-          {/* Feature 1: Granular 4-Surface Consent & Privacy Controls (Student Only) */}
-          {user.role === "STUDENT" && <ConsentSettingsManager />}
+          {/* TAB 2: Privacy & Consent Governance (Student Only) */}
+          {activeTab === "consent" && user.role === "STUDENT" && (
+            <div className="space-y-3">
+              <ConsentSettingsManager />
+            </div>
+          )}
 
-          {/* Clinical Consent & Privacy Enforcement Card (Student Only) */}
-          {user.role === "STUDENT" && (
-            <Card className="border-border/70 bg-card/50 backdrop-blur-md relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none" />
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-foreground text-sm md:text-base font-bold flex items-center gap-2">
-                    <Shield className="h-4.5 w-4.5 text-primary" />
-                    Clinical Consent & Counselor Access
-                  </CardTitle>
-                  {consentData && (
-                    <span className={`px-2.5 py-1 rounded-full text-xs font-semibold uppercase tracking-wider flex items-center gap-1.5 ${
-                      consentData.status === "GRANTED"
-                        ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30"
-                        : consentData.status === "PENDING"
-                        ? "bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30"
-                        : "bg-rose-500/15 text-rose-600 dark:text-rose-400 border border-rose-500/30"
-                    }`}>
-                      <span className={`w-1.5 h-1.5 rounded-full ${
-                        consentData.status === "GRANTED"
-                          ? "bg-emerald-500 animate-pulse"
-                          : consentData.status === "PENDING"
-                          ? "bg-amber-500 animate-bounce"
-                          : "bg-rose-500"
-                      }`} />
-                      {consentData.status === "GRANTED"
-                        ? "Access Granted"
-                        : consentData.status === "PENDING"
-                        ? "Pending (Action Required)"
-                        : "Access Revoked"}
-                    </span>
-                  )}
-                </div>
-                <CardDescription className="text-xs md:text-sm">
-                  Govern your personal wellness data permissions. Enforced by backend privacy-by-design access controls.
+          {/* TAB 3: Change Password & Security */}
+          {activeTab === "security" && (
+            <Card className="border-border/70 bg-card/50 backdrop-blur-md">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-foreground text-sm md:text-base font-bold flex items-center gap-2">
+                  <Lock className="h-4 w-4 text-primary" />
+                  Security Settings
+                </CardTitle>
+                <CardDescription className="text-xs">
+                  Change your account password safely
                 </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="p-4 rounded-xl border border-border/70 bg-accent/15 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                  <div className="space-y-1 pr-4">
-                    <p className="text-xs md:text-sm font-bold text-foreground">
-                      Share Wellness Insights with Counselor
-                    </p>
-                    <p className="text-xs text-muted-foreground leading-relaxed">
-                      Allow certified university counselors to view your wellness assessments, emotional mapping, and longitudinal case timeline. When turned off or pending, counselor access is strictly blocked (HTTP 403).
-                    </p>
-                    {consentData && (
-                      <p className="text-[11px] text-muted-foreground/80 font-mono mt-1">
-                        Last updated: {new Date(consentData.revoked_at || consentData.granted_at || consentData.created_at).toLocaleString()}
-                      </p>
-                    )}
+              <CardContent className="pt-1">
+                <form onSubmit={handlePasswordSubmit} className="space-y-3.5">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div className="space-y-1">
+                      <Label htmlFor="current-password" className="text-xs">Current Password</Label>
+                      <Input
+                        id="current-password"
+                        type="password"
+                        value={currentPassword}
+                        onChange={(e) => setCurrentPassword(e.target.value)}
+                        placeholder="••••••••"
+                        className="h-8.5 text-xs bg-background/50 border-border/70"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <Label htmlFor="new-password" className="text-xs">New Password</Label>
+                      <Input
+                        id="new-password"
+                        type="password"
+                        value={newPassword}
+                        onChange={(e) => setNewPassword(e.target.value)}
+                        placeholder="••••••••"
+                        className="h-8.5 text-xs bg-background/50 border-border/70"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <Label htmlFor="confirm-password" className="text-xs">Confirm Password</Label>
+                      <Input
+                        id="confirm-password"
+                        type="password"
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                        placeholder="••••••••"
+                        className="h-8.5 text-xs bg-background/50 border-border/70"
+                      />
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2.5 shrink-0">
-                    {consentData?.status === "PENDING" ? (
-                      <div className="flex items-center gap-2">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          disabled={isLoadingConsent}
-                          onClick={handleDeclineConsent}
-                          className="h-8 text-xs px-3 border-border hover:bg-rose-500/10 hover:text-rose-600 gap-1"
-                        >
-                          <X className="h-3.5 w-3.5" />
-                          Decline
-                        </Button>
-                        <Button
-                          size="sm"
-                          disabled={isLoadingConsent}
-                          onClick={handleGrantConsent}
-                          className="h-8 text-xs px-3.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold gap-1"
-                        >
-                          <Check className="h-3.5 w-3.5" />
-                          Grant Access
-                        </Button>
-                      </div>
-                    ) : consentData?.status === "GRANTED" ? (
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        disabled={isLoadingConsent}
-                        onClick={() => setShowRevokeModal(true)}
-                        className="h-8 text-xs px-3 border-rose-500/30 text-rose-600 hover:bg-rose-500/10 gap-1.5"
-                      >
-                        <Lock className="h-3.5 w-3.5" />
-                        Revoke Access
-                      </Button>
-                    ) : (
-                      <Button
-                        size="sm"
-                        disabled={isLoadingConsent}
-                        onClick={handleGrantConsent}
-                        className="h-8 text-xs px-3.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold gap-1.5"
-                      >
-                        <Check className="h-3.5 w-3.5" />
-                        Grant Access
-                      </Button>
-                    )}
+                  <div className="flex justify-end pt-1">
+                    <Button
+                      type="submit"
+                      disabled={isUpdatingPassword}
+                      className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-xs h-8.5 px-4 rounded-xl transition-all"
+                    >
+                      {isUpdatingPassword ? "Updating..." : "Update Password"}
+                    </Button>
                   </div>
-                </div>
-
-                <div className="text-xs text-muted-foreground flex items-center gap-2">
-                  <Lock className="w-3.5 h-3.5 text-primary" />
-                  <span>Student confidentiality is legally protected under institutional wellness guidelines.</span>
-                </div>
+                </form>
               </CardContent>
             </Card>
           )}
 
-          {/* Revoke Consent Warning Modal */}
-          {showRevokeModal && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-              <div className="bg-card border border-border/80 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
-                <div className="w-12 h-12 rounded-full bg-rose-500/15 border border-rose-500/30 flex items-center justify-center text-rose-500">
-                  <ShieldAlert className="w-6 h-6" />
+          {/* TAB 4: Notifications & Email Preferences */}
+          {activeTab === "notifications" && (
+            <Card className="border-border/70 bg-card/50 backdrop-blur-md">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-foreground text-sm md:text-base font-bold flex items-center justify-between">
+                  <span className="flex items-center gap-2">
+                    <Bell className="h-4 w-4 text-primary" />
+                    Notification & Email Preferences
+                  </span>
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                    <Check className="h-3 w-3" /> Authenticated
+                  </span>
+                </CardTitle>
+                <CardDescription className="text-xs">
+                  Control clinical alerts delivered to your verified campus inbox (<span className="font-semibold text-foreground">{user?.email || "student@campus.edu"}</span>)
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-3 pt-1">
+                <div className="space-y-2.5">
+                  <div className="flex items-center justify-between border-b border-border/60 pb-2.5">
+                    <div>
+                      <p className="text-xs font-bold text-foreground">Critical Warning Alerts</p>
+                      <p className="text-[11px] text-muted-foreground">Immediate alerts for high-risk assessments.</p>
+                    </div>
+                    <input
+                      type="checkbox"
+                      checked={emailAlerts}
+                      onChange={(e) => setEmailAlerts(e.target.checked)}
+                      className="h-4 w-4 rounded border-border/70 text-primary focus:ring-primary accent-primary"
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-between border-b border-border/60 pb-2.5">
+                    <div>
+                      <p className="text-xs font-bold text-foreground">Weekly Aggregate Digests</p>
+                      <p className="text-[11px] text-muted-foreground">Weekly summary of wellness score trends.</p>
+                    </div>
+                    <input
+                      type="checkbox"
+                      checked={weeklyDigest}
+                      onChange={(e) => setWeeklyDigest(e.target.checked)}
+                      className="h-4 w-4 rounded border-border/70 text-primary focus:ring-primary accent-primary"
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-between border-b border-border/60 pb-2.5">
+                    <div>
+                      <p className="text-xs font-bold text-foreground">In-App Live Toast Feed</p>
+                      <p className="text-[11px] text-muted-foreground">Popup banners inside the dashboard for instant updates.</p>
+                    </div>
+                    <input
+                      type="checkbox"
+                      checked={pushAlerts}
+                      onChange={(e) => setPushAlerts(e.target.checked)}
+                      className="h-4 w-4 rounded border-border/70 text-primary focus:ring-primary accent-primary"
+                    />
+                  </div>
+
+                  {/* Delivery Verification Actions */}
+                  <div className="p-3 rounded-xl bg-muted/40 border border-border/60 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5">
+                    <div>
+                      <p className="text-xs font-bold text-foreground flex items-center gap-1.5">
+                        <Mail className="h-3.5 w-3.5 text-primary" /> Delivery Verification
+                      </p>
+                      <p className="text-[11px] text-muted-foreground">
+                        Dispatch test packets to verify email delivery.
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={handleTestEmail}
+                        disabled={isSendingTestEmail}
+                        className="text-xs h-7.5 px-2.5 rounded-lg border-border font-semibold flex items-center gap-1"
+                      >
+                        <Mail className="h-3 w-3 text-primary" />
+                        {isSendingTestEmail ? "Sending..." : "Test Email"}
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={handleTestNotification}
+                        disabled={isSendingTestNotif}
+                        className="text-xs h-7.5 px-2.5 rounded-lg border-border font-semibold flex items-center gap-1"
+                      >
+                        <Bell className="h-3 w-3 text-amber-500" />
+                        {isSendingTestNotif ? "Broadcasting..." : "Test Push"}
+                      </Button>
+                    </div>
+                  </div>
                 </div>
-                <div className="space-y-1">
-                  <h3 className="text-base font-bold text-foreground">Revoke Counselor Access?</h3>
-                  <p className="text-xs md:text-sm text-muted-foreground leading-relaxed">
-                    Your counselor will not be able to view your trend reports or case timeline.
-                  </p>
-                </div>
-                <div className="p-3 rounded-lg bg-rose-500/10 border border-rose-500/20 text-[11px] text-rose-600 dark:text-rose-300">
-                  ⚠️ Any counselor attempting to open your casefile or view your mood logs will be denied access with HTTP 403 Forbidden until you grant permission again.
-                </div>
-                <div className="flex items-center justify-end gap-2 pt-2">
+
+                <div className="flex justify-end pt-1">
                   <Button
-                    variant="outline"
-                    onClick={() => setShowRevokeModal(false)}
-                    disabled={isLoadingConsent}
-                    className="h-9 text-xs px-4 rounded-lg"
+                    onClick={handleSaveNotifications}
+                    className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-xs h-8.5 px-4 rounded-xl transition-all"
                   >
-                    Cancel
-                  </Button>
-                  <Button
-                    onClick={handleConfirmRevoke}
-                    disabled={isLoadingConsent}
-                    className="h-9 text-xs px-4 rounded-lg bg-rose-600 hover:bg-rose-700 text-white font-medium"
-                  >
-                    {isLoadingConsent ? "Revoking..." : "Revoke Access"}
+                    Save Notification Settings
                   </Button>
                 </div>
-              </div>
-            </div>
+              </CardContent>
+            </Card>
           )}
-
-
-          {/* Change Password Card */}
-          <Card className="border-border/70 bg-card/50 backdrop-blur-md">
-            <CardHeader>
-              <CardTitle className="text-foreground text-sm md:text-base font-bold flex items-center gap-2">
-                <Lock className="h-4.5 w-4.5 text-primary" />
-                Security Settings
-              </CardTitle>
-              <CardDescription className="text-xs md:text-sm">Change your account password safely</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <form onSubmit={handlePasswordSubmit} className="space-y-4">
-
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  <div className="space-y-1.5">
-                    <Label htmlFor="current-password">Current Password</Label>
-                    <Input
-                      id="current-password"
-                      type="password"
-                      value={currentPassword}
-                      onChange={(e) => setCurrentPassword(e.target.value)}
-                      placeholder="••••••••"
-                      className="h-10 text-xs md:text-sm bg-background/50 border-border/70"
-                    />
-                  </div>
-                  <div className="space-y-1.5">
-                    <Label htmlFor="new-password">New Password</Label>
-                    <Input
-                      id="new-password"
-                      type="password"
-                      value={newPassword}
-                      onChange={(e) => setNewPassword(e.target.value)}
-                      placeholder="••••••••"
-                      className="h-10 text-xs md:text-sm bg-background/50 border-border/70"
-                    />
-                  </div>
-                  <div className="space-y-1.5">
-                    <Label htmlFor="confirm-password">Confirm Password</Label>
-                    <Input
-                      id="confirm-password"
-                      type="password"
-                      value={confirmPassword}
-                      onChange={(e) => setConfirmPassword(e.target.value)}
-                      placeholder="••••••••"
-                      className="h-10 text-xs md:text-sm bg-background/50 border-border/70"
-                    />
-                  </div>
-                </div>
-                <div className="flex justify-end">
-                  <Button
-                    type="submit"
-                    disabled={isUpdatingPassword}
-                    className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-xs md:text-sm h-10 px-5 rounded-xl transition-all duration-300"
-                  >
-                    {isUpdatingPassword ? "Updating..." : "Update Password"}
-                  </Button>
-                </div>
-              </form>
-            </CardContent>
-          </Card>
-
-          {/* Notifications & Authenticated Delivery Card */}
-          <Card className="border-border/70 bg-card/50 backdrop-blur-md">
-            <CardHeader>
-              <CardTitle className="text-foreground text-sm md:text-base font-bold flex items-center justify-between">
-                <span className="flex items-center gap-2">
-                  <Bell className="h-4.5 w-4.5 text-primary" />
-                  Notification & Email Preferences
-                </span>
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
-                  <Check className="h-3 w-3" /> Authenticated Channel
-                </span>
-              </CardTitle>
-              <CardDescription className="text-xs md:text-sm">
-                Control authenticated clinical alerts delivered to your verified campus inbox (<span className="font-semibold text-foreground">{user?.email || "student@campus.edu"}</span>) and dashboard stream.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-4">
-                <div className="flex items-center justify-between border-b border-border/60 pb-3.5">
-                  <div>
-                    <p className="text-xs md:text-sm font-bold text-foreground">Critical Warning Alerts</p>
-                    <p className="text-xs text-muted-foreground mt-0.5">Receive immediate notifications for high-risk assessments.</p>
-                  </div>
-                  <input
-                    type="checkbox"
-                    checked={emailAlerts}
-                    onChange={(e) => setEmailAlerts(e.target.checked)}
-                    className="h-4.5 w-4.5 rounded border-border/70 text-primary focus:ring-primary accent-primary"
-                  />
-                </div>
-
-                <div className="flex items-center justify-between border-b border-border/60 pb-3.5">
-                  <div>
-                    <p className="text-xs md:text-sm font-bold text-foreground">Weekly Aggregate Digests</p>
-                    <p className="text-xs text-muted-foreground mt-0.5">Receive a weekly clinical summary of mental wellness score trends.</p>
-                  </div>
-                  <input
-                    type="checkbox"
-                    checked={weeklyDigest}
-                    onChange={(e) => setWeeklyDigest(e.target.checked)}
-                    className="h-4.5 w-4.5 rounded border-border/70 text-primary focus:ring-primary accent-primary"
-                  />
-                </div>
-
-                <div className="flex items-center justify-between border-b border-border/60 pb-3.5">
-                  <div>
-                    <p className="text-xs md:text-sm font-bold text-foreground">In-App Live Toast Feed</p>
-                    <p className="text-xs text-muted-foreground mt-0.5">Show popup banners inside the dashboard for instant status changes.</p>
-                  </div>
-                  <input
-                    type="checkbox"
-                    checked={pushAlerts}
-                    onChange={(e) => setPushAlerts(e.target.checked)}
-                    className="h-4.5 w-4.5 rounded border-border/70 text-primary focus:ring-primary accent-primary"
-                  />
-                </div>
-
-                {/* Authentication Diagnostics & Verification Actions */}
-                <div className="p-3.5 rounded-xl bg-muted/40 border border-border/60 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                  <div>
-                    <p className="text-xs font-bold text-foreground flex items-center gap-1.5">
-                      <Mail className="h-3.5 w-3.5 text-primary" /> Delivery Verification
-                    </p>
-                    <p className="text-[11px] text-muted-foreground mt-0.5">
-                      Dispatch authenticated test packets to confirm email delivery and WebSocket push.
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={handleTestEmail}
-                      disabled={isSendingTestEmail}
-                      className="text-xs h-8 px-3 rounded-lg border-border font-semibold flex items-center gap-1.5"
-                    >
-                      <Mail className="h-3.5 w-3.5 text-primary" />
-                      {isSendingTestEmail ? "Sending..." : "Test Email"}
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={handleTestNotification}
-                      disabled={isSendingTestNotif}
-                      className="text-xs h-8 px-3 rounded-lg border-border font-semibold flex items-center gap-1.5"
-                    >
-                      <Bell className="h-3.5 w-3.5 text-amber-500" />
-                      {isSendingTestNotif ? "Broadcasting..." : "Test Push"}
-                    </Button>
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex justify-end pt-2">
-                <Button
-                  onClick={handleSaveNotifications}
-                  className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-xs md:text-sm h-10 px-5 rounded-xl transition-all duration-300"
-                >
-                  Save Notification Settings
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-
         </div>
 
       </div>

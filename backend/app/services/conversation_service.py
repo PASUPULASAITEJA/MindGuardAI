@@ -157,4 +157,23 @@ class ConversationService:
             conv.updated_at = datetime.now(timezone.utc)
             db.add(conv)
 
+    async def delete_conversation(
+        self,
+        db: AsyncSession,
+        *,
+        conversation_id: UUID,
+        student_id: UUID
+    ) -> bool:
+        stmt = select(Conversation).where(
+            Conversation.id == conversation_id,
+            Conversation.student_id == student_id
+        )
+        result = await db.execute(stmt)
+        conv = result.scalar_one_or_none()
+        if not conv:
+            return False
+        await db.delete(conv)
+        await db.commit()
+        return True
+
 conversation_service = ConversationService()

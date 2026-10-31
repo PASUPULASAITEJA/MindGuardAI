@@ -203,6 +203,12 @@ api.interceptors.response.use(
       );
       return res.data;
     },
+    deleteConversation: async (conversationId: string) => {
+      const res = await api.delete<{ success: boolean; message: string }>(
+        `/chat/conversations/${conversationId}`
+      );
+      return res.data;
+    },
     sendMessage: async (conversationId: string, message: string) => {
       const res = await api.post<ChatResponsePayload>(
         `/chat/conversations/${conversationId}/messages`,

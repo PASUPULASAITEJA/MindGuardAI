@@ -150,6 +150,34 @@ async def get_conversation_details(
         messages=messages
     )
 
+@router.delete("/conversations/{conversation_id}", status_code=status.HTTP_200_OK)
+async def delete_conversation(
+    conversation_id: UUID,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    Deletes a conversation thread and all associated messages for the authenticated student.
+    """
+    if current_user.role != UserRole.STUDENT:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Access restricted to student accounts."
+        )
+
+    deleted = await conversation_service.delete_conversation(
+        db,
+        conversation_id=conversation_id,
+        student_id=current_user.id
+    )
+    if not deleted:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Conversation not found or access denied."
+        )
+
+    return {"success": True, "message": "Conversation deleted successfully."}
+
 @router.post("/conversations/{conversation_id}/messages", response_model=ChatResponsePayload)
 async def send_message(
     conversation_id: UUID,
