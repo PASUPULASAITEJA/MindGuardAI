@@ -211,6 +211,7 @@ app.include_router(appointments_router, prefix="/api/appointments", tags=["Couns
 app.include_router(consent_router, prefix="/api/v1/consent", tags=["Student Consent"])
 app.include_router(consent_records_router, prefix="/api/consent", tags=["Consent Records"])
 app.include_router(consent_records_router, prefix="/api/v1/consent-records", tags=["Consent Records"])
+app.include_router(consent_records_router, prefix="/api/v1/consent", tags=["Consent Records"])
 app.include_router(checkins_router, prefix="/api/v1/checkins", tags=["Mood Check-Ins (EMA)"])
 app.include_router(checkins_router, prefix="/api/checkins", tags=["Mood Check-Ins (EMA)"])
 app.include_router(counselor_checkins_router, prefix="/api/counsellor", tags=["Counselor Student EMA Check-Ins"])
