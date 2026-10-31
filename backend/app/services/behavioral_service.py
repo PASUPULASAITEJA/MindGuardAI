@@ -480,23 +480,15 @@ class BehavioralService:
             existing_log.baseline_deviation_score = late_night_deviation_z
             existing_log.risk_level = behavioral_risk_level
             existing_log.synced_at = datetime.now(timezone.utc)
-            if getattr(payload, "top_apps", None) or getattr(payload, "search_topics", None):
-                meta = {}
-                if payload.top_apps:
-                    meta["top_apps"] = payload.top_apps
-                if payload.search_topics:
-                    meta["search_topics"] = payload.search_topics
+            if getattr(payload, "top_apps", None):
+                meta = {"top_apps": payload.top_apps}
                 existing_log.active_window_categories = json.dumps(meta)
             db_log = existing_log
         else:
             initial_screen_time = max(sanitized_screen_time, machine_metrics.get("total_screen_time_minutes", 0))
             meta_json = None
-            if getattr(payload, "top_apps", None) or getattr(payload, "search_topics", None):
-                meta = {}
-                if payload.top_apps:
-                    meta["top_apps"] = payload.top_apps
-                if payload.search_topics:
-                    meta["search_topics"] = payload.search_topics
+            if getattr(payload, "top_apps", None):
+                meta = {"top_apps": payload.top_apps}
                 meta_json = json.dumps(meta)
 
             db_log = BehavioralLog(
@@ -761,7 +753,7 @@ class BehavioralService:
             },
             "circadian_sleep_analysis": circadian_analysis,
             "top_apps": top_apps,
-            "search_topics": search_topics,
+            "search_topics": [],
             "latest_log": {
                 "date": latest.date,
                 "total_screen_time_minutes": latest.total_screen_time_minutes or 0,
@@ -777,7 +769,7 @@ class BehavioralService:
                 "risk_level": latest.risk_level or "LOW",
                 "synced_at": latest.synced_at.isoformat(),
                 "top_apps": top_apps,
-                "search_topics": search_topics
+                "search_topics": []
             },
             "weekly_history": [
                 {
