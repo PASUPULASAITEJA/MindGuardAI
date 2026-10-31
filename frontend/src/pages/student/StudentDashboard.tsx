@@ -20,6 +20,9 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/ui/empty-state";
 import { AnimatedCounter } from "@/components/ui/animated-counter";
+import { GsapStagger } from "@/components/ui/gsap-stagger";
+import { GsapMagnetic } from "@/components/ui/gsap-magnetic";
+import { GsapButton } from "@/components/ui/gsap-button";
 import {
   ResponsiveContainer,
   AreaChart,
@@ -226,21 +229,23 @@ export const StudentDashboard: React.FC = () => {
             />
             {isLive ? "Telemetry Connected" : "Telemetry Standby"}
           </span>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => refetchBehavioral()}
-            disabled={isRefetchingBehavioral}
-            className="rounded-lg h-8 px-2.5 text-xs font-semibold"
-          >
-            <RefreshCw className={cn("h-3 w-3 mr-1", isRefetchingBehavioral && "animate-spin text-primary")} />
-            Sync
-          </Button>
+          <GsapMagnetic strength={0.4}>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => refetchBehavioral()}
+              disabled={isRefetchingBehavioral}
+              className="rounded-lg h-8 px-2.5 text-xs font-semibold"
+            >
+              <RefreshCw className={cn("h-3 w-3 mr-1", isRefetchingBehavioral && "animate-spin text-primary")} />
+              Sync
+            </Button>
+          </GsapMagnetic>
         </div>
       </div>
 
-      {/* 2. TOP STAT ROW: 4 React Bits SpotlightCards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      {/* 2. TOP STAT ROW: 4 GSAP Staggered SpotlightCards */}
+      <GsapStagger className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4" stagger={0.08}>
         {/* Stat 1: Wellness Score */}
         <SpotlightCard
           className="p-5"
@@ -357,10 +362,10 @@ export const StudentDashboard: React.FC = () => {
             </div>
           </div>
         </SpotlightCard>
-      </div>
+      </GsapStagger>
 
-      {/* 3. QUICK ACTIONS ROW: 4 React Bits SpotlightCards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      {/* 3. QUICK ACTIONS ROW: 4 GSAP Staggered SpotlightCards */}
+      <GsapStagger className="grid grid-cols-2 lg:grid-cols-4 gap-4" stagger={0.06}>
         {/* Action 1: Start Check-in */}
         <SpotlightCard
           onClick={() => navigate("/student/check-in")}
@@ -412,7 +417,7 @@ export const StudentDashboard: React.FC = () => {
           <span className="text-xs font-semibold text-foreground">Crisis Support</span>
           <span className="text-[10px] text-muted-foreground">Get help now</span>
         </SpotlightCard>
-      </div>
+      </GsapStagger>
 
       {/* Micro-Checkin Widget */}
       <div>

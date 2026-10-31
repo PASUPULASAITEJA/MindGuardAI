@@ -32,6 +32,7 @@ import { useToast } from "@/components/ui/toast";
 import { EmergencySOSModal } from "@/components/EmergencySOSModal";
 import { AgentActivityDrawer } from "@/components/chat/AgentActivityDrawer";
 import { LottieIllustration } from "@/components/ui/LottieIllustration";
+import { GsapMagnetic } from "@/components/ui/gsap-magnetic";
 import { motion, AnimatePresence } from "motion/react";
 import { chatBotMessageVariants, chatUserMessageVariants } from "@/utils/motion";
 
@@ -999,13 +1000,15 @@ export const StudentChatbot: React.FC = () => {
               className="max-h-28 flex-1 resize-none bg-transparent px-2 py-1 text-xs text-foreground outline-none placeholder:text-muted-foreground"
             />
 
-            <button
-              onClick={() => handleSendMessage()}
-              disabled={!inputMessage.trim() || isSending}
-              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-md shadow-primary/20 transition-all hover:bg-primary/90 active:scale-95 disabled:opacity-40"
-            >
-              <Send className="h-4 w-4" />
-            </button>
+            <GsapMagnetic strength={0.35}>
+              <button
+                onClick={() => handleSendMessage()}
+                disabled={!inputMessage.trim() || isSending}
+                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-md shadow-primary/20 transition-all hover:bg-primary/90 active:scale-95 disabled:opacity-40"
+              >
+                <Send className="h-4 w-4" />
+              </button>
+            </GsapMagnetic>
           </div>
 
           <div className="mt-2 flex items-center justify-between px-1 text-[11px] text-muted-foreground">

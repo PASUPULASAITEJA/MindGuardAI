@@ -5,6 +5,7 @@ import ThemeToggle from "@/components/layouts/ThemeToggle";
 import { EmergencySOSModal } from "@/components/EmergencySOSModal";
 import NotificationBell from "@/components/NotificationBell";
 import { CommandMenu } from "@/components/ui/CommandMenu";
+import { GsapMagnetic } from "@/components/ui/gsap-magnetic";
 
 export interface TopNavProps {
   title: string;
@@ -54,19 +55,21 @@ export const TopNav: React.FC<TopNavProps> = ({ title, subtitle, onMenuClick }) 
           </div>
 
           <div className="flex items-center gap-2.5">
-            {/* React Bits Command Menu Trigger */}
-            <button
-              onClick={() => setIsCommandOpen(true)}
-              className="hidden md:inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border bg-secondary/50 hover:bg-secondary text-muted-foreground hover:text-foreground text-xs font-medium transition-all shadow-xs"
-              title="Open Command Menu (Ctrl + K)"
-            >
-              <Search className="w-3.5 h-3.5 text-muted-foreground" />
-              <span className="hidden lg:inline">Search or command...</span>
-              <span className="lg:hidden">Search...</span>
-              <kbd className="inline-flex items-center gap-0.5 rounded border border-border bg-card px-1.5 py-0.5 text-[10px] font-mono font-medium text-muted-foreground">
-                <Command className="w-2.5 h-2.5" /> K
-              </kbd>
-            </button>
+            {/* React Bits Command Menu Trigger with GSAP Magnetic Pull */}
+            <GsapMagnetic strength={0.25}>
+              <button
+                onClick={() => setIsCommandOpen(true)}
+                className="hidden md:inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border bg-secondary/50 hover:bg-secondary text-muted-foreground hover:text-foreground text-xs font-medium transition-all shadow-xs"
+                title="Open Command Menu (Ctrl + K)"
+              >
+                <Search className="w-3.5 h-3.5 text-muted-foreground" />
+                <span className="hidden lg:inline">Search or command...</span>
+                <span className="lg:hidden">Search...</span>
+                <kbd className="inline-flex items-center gap-0.5 rounded border border-border bg-card px-1.5 py-0.5 text-[10px] font-mono font-medium text-muted-foreground">
+                  <Command className="w-2.5 h-2.5" /> K
+                </kbd>
+              </button>
+            </GsapMagnetic>
 
             <button
               onClick={() => setIsCommandOpen(true)}
@@ -77,14 +80,16 @@ export const TopNav: React.FC<TopNavProps> = ({ title, subtitle, onMenuClick }) 
             </button>
 
             {user?.role === "STUDENT" && (
-              <button
-                onClick={() => setIsSOSOpen(true)}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-rose-500 text-white text-xs font-bold hover:bg-rose-600 transition-all shadow-sm shadow-rose-500/20 hover:shadow-rose-500/30"
-                title="Immediate 24/7 Crisis Support"
-              >
-                <AlertTriangle className="w-3 h-3 pulse-soft" />
-                <span>Crisis</span>
-              </button>
+              <GsapMagnetic strength={0.35}>
+                <button
+                  onClick={() => setIsSOSOpen(true)}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-rose-500 text-white text-xs font-bold hover:bg-rose-600 transition-all shadow-sm shadow-rose-500/20 hover:shadow-rose-500/30"
+                  title="Immediate 24/7 Crisis Support"
+                >
+                  <AlertTriangle className="w-3 h-3 pulse-soft" />
+                  <span>Crisis</span>
+                </button>
+              </GsapMagnetic>
             )}
 
             {/* User Avatar + First Name before NotificationBell */}

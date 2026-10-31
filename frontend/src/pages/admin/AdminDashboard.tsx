@@ -55,6 +55,8 @@ import { SpotlightCard } from "@/components/ui/SpotlightCard";
 import { DotGridBackground } from "@/components/ui/DotGridBackground";
 import { ShinyText } from "@/components/ui/ShinyText";
 import { EmptyState } from "@/components/ui/empty-state";
+import { GsapStagger } from "@/components/ui/gsap-stagger";
+import { GsapMagnetic } from "@/components/ui/gsap-magnetic";
 
 export const AdminDashboard: React.FC = () => {
   const location = useLocation();
@@ -297,29 +299,28 @@ export const AdminDashboard: React.FC = () => {
             </div>
 
             <div className="flex items-center gap-2">
-              <NavLink to="/admin/audit-logs">
-                <Button variant="outline" size="sm" className="text-xs h-8 font-medium gap-1.5">
-                  <Shield className="h-3.5 w-3.5 text-primary" />
-                  <span>Audit Logs</span>
-                </Button>
-              </NavLink>
-              <NavLink to="/admin/directory">
-                <Button variant="outline" size="sm" className="text-xs h-8 font-medium gap-1.5">
-                  <Users className="h-3.5 w-3.5 text-primary" />
-                  <span>User Directory</span>
-                </Button>
-              </NavLink>
+              <GsapMagnetic strength={0.25}>
+                <NavLink to="/admin/audit-logs">
+                  <Button variant="outline" size="sm" className="text-xs h-8 font-medium gap-1.5 shadow-xs">
+                    <Shield className="h-3.5 w-3.5 text-primary" />
+                    <span>Audit Logs</span>
+                  </Button>
+                </NavLink>
+              </GsapMagnetic>
+              <GsapMagnetic strength={0.25}>
+                <NavLink to="/admin/directory">
+                  <Button variant="outline" size="sm" className="text-xs h-8 font-medium gap-1.5 shadow-xs">
+                    <Users className="h-3.5 w-3.5 text-primary" />
+                    <span>User Directory</span>
+                  </Button>
+                </NavLink>
+              </GsapMagnetic>
             </div>
           </div>
 
           {/* KPI Cards */}
-          <motion.div 
-            variants={staggerContainer}
-            initial="initial"
-            animate="animate"
-            className="grid grid-cols-2 lg:grid-cols-4 gap-3"
-          >
-            <motion.div variants={cardEntrance}>
+          <GsapStagger className="grid grid-cols-2 lg:grid-cols-4 gap-3" stagger={0.07}>
+            <div>
               <SpotlightCard className="p-4 sm:p-5 min-h-[135px] flex flex-col justify-between" spotlightColor="rgba(59, 130, 246, 0.15)">
                 <div>
                   <span className="text-[11px] text-muted-foreground uppercase font-bold tracking-wider block">Campus Wellness Index</span>
@@ -331,9 +332,9 @@ export const AdminDashboard: React.FC = () => {
                   <span className="text-[11px] text-muted-foreground font-medium block">Aggregated campus metric</span>
                 </div>
               </SpotlightCard>
-            </motion.div>
+            </div>
 
-            <motion.div variants={cardEntrance}>
+            <div>
               <SpotlightCard className="p-4 sm:p-5 min-h-[135px] flex flex-col justify-between" spotlightColor="rgba(99, 102, 241, 0.15)">
                 <div>
                   <span className="text-[11px] text-muted-foreground uppercase font-bold tracking-wider block">Total Students</span>
@@ -345,9 +346,9 @@ export const AdminDashboard: React.FC = () => {
                   <span className="text-[11px] text-muted-foreground font-medium block">Active registered cohort</span>
                 </div>
               </SpotlightCard>
-            </motion.div>
+            </div>
 
-            <motion.div variants={cardEntrance}>
+            <div>
               <SpotlightCard className="p-4 sm:p-5 min-h-[135px] flex flex-col justify-between" spotlightColor="rgba(244, 63, 94, 0.15)">
                 <div>
                   <span className="text-[11px] text-muted-foreground uppercase font-bold tracking-wider block">Active Triage Flags</span>
@@ -359,9 +360,9 @@ export const AdminDashboard: React.FC = () => {
                   <span className="text-[11px] text-muted-foreground font-medium block">Under counsellor triage</span>
                 </div>
               </SpotlightCard>
-            </motion.div>
+            </div>
 
-            <motion.div variants={cardEntrance}>
+            <div>
               <SpotlightCard className="p-4 sm:p-5 min-h-[135px] flex flex-col justify-between" spotlightColor="rgba(16, 185, 129, 0.15)">
                 <div>
                   <span className="text-[11px] text-muted-foreground uppercase font-bold tracking-wider block">Departments Monitored</span>
@@ -373,8 +374,8 @@ export const AdminDashboard: React.FC = () => {
                   <span className="text-[11px] text-muted-foreground font-medium block">Active cohort departments</span>
                 </div>
               </SpotlightCard>
-            </motion.div>
-          </motion.div>
+            </div>
+          </GsapStagger>
 
           {/* Academic Calendar & Milestone Impact Section */}
           <Card className="p-5 space-y-4">

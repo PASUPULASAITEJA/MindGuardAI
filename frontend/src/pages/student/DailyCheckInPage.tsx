@@ -22,6 +22,8 @@ import { AnimatedCounter } from "@/components/ui/animated-counter";
 import { DotGridBackground } from "@/components/ui/DotGridBackground";
 import { ShinyText } from "@/components/ui/ShinyText";
 import { LottieIllustration } from "@/components/ui/LottieIllustration";
+import { GsapStagger } from "@/components/ui/gsap-stagger";
+import { GsapButton } from "@/components/ui/gsap-button";
 
 const MOOD_OPTIONS = [
   { score: 2, label: "Difficult", symbol: "😔", helper: "Stressed or overwhelmed" },
@@ -168,7 +170,7 @@ export const DailyCheckInPage: React.FC = () => {
                     Choose the option that best reflects your current emotional state.
                   </p>
 
-                  <div className="grid grid-cols-5 gap-2 mt-4">
+                  <GsapStagger className="grid grid-cols-5 gap-2 mt-4" stagger={0.05}>
                     {MOOD_OPTIONS.map((opt) => {
                       const isSelected = selectedMood === opt.score;
                       return (
@@ -191,7 +193,7 @@ export const DailyCheckInPage: React.FC = () => {
                         </motion.button>
                       );
                     })}
-                  </div>
+                  </GsapStagger>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t border-border">
@@ -250,16 +252,14 @@ export const DailyCheckInPage: React.FC = () => {
                   >
                     Cancel
                   </Button>
-                  <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                    <Button
-                      type="submit"
-                      size="sm"
-                      disabled={submitJournal.isPending}
-                      className="text-xs font-semibold px-6"
-                    >
-                      {submitJournal.isPending ? "Recording..." : "Complete Check-in"}
-                    </Button>
-                  </motion.div>
+                  <GsapButton
+                    type="submit"
+                    size="sm"
+                    disabled={submitJournal.isPending}
+                    className="text-xs font-semibold px-6 shadow-sm"
+                  >
+                    {submitJournal.isPending ? "Recording..." : "Complete Check-in"}
+                  </GsapButton>
                 </div>
               </form>
             </Card>

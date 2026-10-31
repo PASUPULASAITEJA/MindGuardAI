@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import { createPortal } from "react-dom";
 import { PhoneCall, AlertTriangle, ShieldCheck, HeartHandshake, X, Loader2, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { GsapButton } from "@/components/ui/gsap-button";
+import { GsapMagnetic } from "@/components/ui/gsap-magnetic";
 import { useToast } from "@/components/ui/toast";
 import { sosAPI, SOSHelpline } from "@/services/api";
 import { motion, AnimatePresence } from "motion/react";
@@ -152,7 +154,7 @@ export const EmergencySOSModal: React.FC<EmergencySOSModalProps> = ({ isOpen, on
               <span>Counselor alert sent. The campus support team has been notified.</span>
             </div>
           ) : (
-            <Button
+            <GsapButton
               onClick={handleDispatchCounselorAlert}
               disabled={isDispatching}
               className="w-full bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs py-2.5 rounded-xl shadow-lg shadow-rose-600/20 transition-all flex items-center justify-center gap-2"
@@ -168,7 +170,7 @@ export const EmergencySOSModal: React.FC<EmergencySOSModalProps> = ({ isOpen, on
                   <span>Dispatch Emergency Counselor Alert Now</span>
                 </>
               )}
-            </Button>
+            </GsapButton>
           )}
         </div>
 
@@ -194,13 +196,15 @@ export const EmergencySOSModal: React.FC<EmergencySOSModalProps> = ({ isOpen, on
                   <p className="text-[11px] text-muted-foreground truncate mt-0.5">{line.description}</p>
                 </div>
 
-                <a
-                  href={`tel:${line.number.replace(/\s+/g, '')}`}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary hover:bg-primary/90 text-primary-foreground text-xs font-bold shrink-0 transition-all shadow-sm"
-                >
-                  <PhoneCall className="h-3.5 w-3.5" />
-                  <span>{line.number}</span>
-                </a>
+                <GsapMagnetic strength={0.3}>
+                  <a
+                    href={`tel:${line.number.replace(/\s+/g, '')}`}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary hover:bg-primary/90 text-primary-foreground text-xs font-bold shrink-0 transition-all shadow-sm"
+                  >
+                    <PhoneCall className="h-3.5 w-3.5" />
+                    <span>{line.number}</span>
+                  </a>
+                </GsapMagnetic>
               </div>
             ))}
           </div>

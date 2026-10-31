@@ -36,6 +36,8 @@ import { SpotlightCard } from "@/components/ui/SpotlightCard";
 import { DotGridBackground } from "@/components/ui/DotGridBackground";
 import { EmptyState } from "@/components/ui/empty-state";
 import { TriageKanbanBoard } from "@/components/counselor/TriageKanbanBoard";
+import { GsapStagger } from "@/components/ui/gsap-stagger";
+import { GsapMagnetic } from "@/components/ui/gsap-magnetic";
 
 export const CounselorDashboard: React.FC = () => {
   const { toast } = useToast();
@@ -306,13 +308,8 @@ export const CounselorDashboard: React.FC = () => {
         )}
 
         {/* 4 Executive KPI Cards */}
-        <motion.div 
-          variants={staggerContainer}
-          initial="initial"
-          animate="animate"
-          className="grid grid-cols-2 lg:grid-cols-4 gap-3"
-        >
-          <motion.div variants={cardEntrance}>
+        <GsapStagger className="grid grid-cols-2 lg:grid-cols-4 gap-3" stagger={0.07}>
+          <div>
             <SpotlightCard className="p-4 sm:p-5 min-h-[140px] flex flex-col justify-between" spotlightColor="rgba(244, 63, 94, 0.15)">
               <div>
                 <div className="flex items-center justify-between text-muted-foreground">
@@ -329,9 +326,9 @@ export const CounselorDashboard: React.FC = () => {
                 <span className="text-[11px] text-muted-foreground font-medium block">Pending triage flags</span>
               </div>
             </SpotlightCard>
-          </motion.div>
+          </div>
 
-          <motion.div variants={cardEntrance}>
+          <div>
             <SpotlightCard className="p-4 sm:p-5 min-h-[140px] flex flex-col justify-between" spotlightColor="rgba(59, 130, 246, 0.15)">
               <div>
                 <div className="flex items-center justify-between text-muted-foreground">
@@ -350,9 +347,9 @@ export const CounselorDashboard: React.FC = () => {
                 </span>
               </div>
             </SpotlightCard>
-          </motion.div>
+          </div>
 
-          <motion.div variants={cardEntrance}>
+          <div>
             <SpotlightCard className="p-4 sm:p-5 min-h-[140px] flex flex-col justify-between" spotlightColor="rgba(99, 102, 241, 0.15)">
               <div>
                 <div className="flex items-center justify-between text-muted-foreground">
@@ -369,9 +366,9 @@ export const CounselorDashboard: React.FC = () => {
                 <span className="text-[11px] text-muted-foreground font-medium block">Upcoming 1-on-1 sessions</span>
               </div>
             </SpotlightCard>
-          </motion.div>
+          </div>
 
-          <motion.div variants={cardEntrance}>
+          <div>
             <SpotlightCard className="p-4 sm:p-5 min-h-[140px] flex flex-col justify-between" spotlightColor="rgba(16, 185, 129, 0.15)">
               <div>
                 <div className="flex items-center justify-between text-muted-foreground">
@@ -392,8 +389,8 @@ export const CounselorDashboard: React.FC = () => {
                 </span>
               </div>
             </SpotlightCard>
-          </motion.div>
-        </motion.div>
+          </div>
+        </GsapStagger>
       </div>
 
       {/* 2. Main Content Split: Support Queue Table + Sessions/Activity */}
