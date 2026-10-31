@@ -26,6 +26,11 @@ import { useScrollReveal } from "@/hooks/useScrollReveal";
 import { useCountUp } from "@/hooks/useCountUp";
 import { GlowOrb } from "@/components/ui/GlowOrb";
 import { BioNeuralSynapseMesh } from "@/components/ui/BioNeuralSynapseMesh";
+import { ShinyText } from "@/components/ui/ShinyText";
+import { SpotlightCard } from "@/components/ui/SpotlightCard";
+import { LottieIllustration } from "@/components/ui/LottieIllustration";
+import { AnimatedCounter } from "@/components/ui/animated-counter";
+import { motion } from "motion/react";
 
 interface FAQItem {
   question: string;
@@ -260,17 +265,19 @@ export const LandingPage: React.FC = () => {
         <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 w-full grid lg:grid-cols-2 gap-8 lg:gap-12 items-center py-12 sm:py-16 lg:py-24">
           {/* Left: text */}
           <div>
-            <div className="fade-up inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-xs font-semibold text-primary mb-4 sm:mb-6 max-w-full">
+            <div className="fade-up inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-xs font-semibold text-primary mb-4 sm:mb-6 max-w-full shadow-xs">
               <span className="relative flex h-2 w-2 shrink-0">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
               </span>
-              <span className="truncate">Autonomous Neural Synapse Architecture</span>
+              <ShinyText text="Autonomous Neural Synapse Architecture" className="text-xs font-semibold text-primary" />
             </div>
 
-            <h1 className="fade-up-1 text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-foreground leading-[1.15]">
-              Detect Burnout
-              <span className="gradient-text block">Before It Becomes</span>
+            <h1 className="fade-up-1 text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-foreground leading-[1.12]">
+              Detect Burnout{" "}
+              <span className="block text-transparent bg-clip-text bg-gradient-to-r from-primary via-teal-500 to-indigo-500">
+                <ShinyText text="Before It Becomes" speed={4} />
+              </span>
               a Crisis.
             </h1>
 
@@ -318,19 +325,22 @@ export const LandingPage: React.FC = () => {
 
           {/* RIGHT COLUMN — Responsive Glassmorphic Telemetry HUD on Phone and Desktop */}
           <div className="flex flex-col justify-center relative fade-up-2 mt-4 lg:mt-0">
-            <div className="relative rounded-2xl bg-card/50 backdrop-blur-md border border-border/80 shadow-2xl p-4 sm:p-6 space-y-4 sm:space-y-5 overflow-hidden">
+            <div className="relative rounded-2xl bg-card/70 backdrop-blur-md border border-border shadow-2xl p-4 sm:p-6 space-y-4 sm:space-y-5 overflow-hidden">
               {/* Header */}
               <div className="flex items-center justify-between pb-3 sm:pb-4 border-b border-border/60">
-                <div className="flex items-center gap-2 sm:gap-2.5">
-                  <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary shrink-0">
-                    <Activity className="w-4 h-4" />
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 flex items-center justify-center shrink-0">
+                    <LottieIllustration variant="companion" className="w-12 h-12" />
                   </div>
                   <div>
-                    <h3 className="text-xs sm:text-sm font-semibold text-foreground">Live Telemetry Synchrony</h3>
+                    <h3 className="text-xs sm:text-sm font-bold text-foreground flex items-center gap-1.5">
+                      <span>Live Telemetry Synchrony</span>
+                      <span className="inline-block w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                    </h3>
                     <p className="text-[10px] sm:text-[11px] text-muted-foreground">Autonomous Neural Signal Mesh</p>
                   </div>
                 </div>
-                <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-500 text-[10px] sm:text-xs font-semibold shrink-0">
+                <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[10px] sm:text-xs font-semibold shrink-0 border border-emerald-500/20">
                   <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                   <span>Synchronized</span>
                 </div>
@@ -409,68 +419,60 @@ export const LandingPage: React.FC = () => {
 
         <div className="reveal-group grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {/* Step 01 */}
-          <Card className="reveal card-hover relative bg-card border border-border rounded-2xl shadow-xs transition-all">
-            <CardContent className="p-6 space-y-4">
-              <span className="text-2xl font-mono font-extrabold text-muted-foreground/30 block">
-                01
-              </span>
-              <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
-                <Smile className="w-5 h-5" />
-              </div>
-              <h3 className="text-base font-semibold text-foreground">Daily Check-in</h3>
-              <p className="text-xs text-muted-foreground leading-relaxed">
-                Students log 30-second mood pulse, sleep hours, and journal notes. Frictionless reflection cultivates personal self-awareness.
-              </p>
-            </CardContent>
-          </Card>
+          <SpotlightCard className="p-6 space-y-4" spotlightColor="rgba(59, 130, 246, 0.15)">
+            <span className="text-2xl font-mono font-extrabold text-muted-foreground/30 block">
+              01
+            </span>
+            <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
+              <Smile className="w-5 h-5" />
+            </div>
+            <h3 className="text-base font-bold text-foreground">Daily Check-in</h3>
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              Students log 30-second mood pulse, sleep hours, and journal notes. Frictionless reflection cultivates personal self-awareness.
+            </p>
+          </SpotlightCard>
 
           {/* Step 02 */}
-          <Card className="reveal card-hover relative bg-card border border-border rounded-2xl shadow-xs transition-all">
-            <CardContent className="p-6 space-y-4">
-              <span className="text-2xl font-mono font-extrabold text-muted-foreground/30 block">
-                02
-              </span>
-              <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
-                <Brain className="w-5 h-5" />
-              </div>
-              <h3 className="text-base font-semibold text-foreground">AI Emotion Analysis</h3>
-              <p className="text-xs text-muted-foreground leading-relaxed">
-                Fine-tuned DistilBERT models classify affective sentiment across 6 distinct states, detecting subtle linguistic distress cues.
-              </p>
-            </CardContent>
-          </Card>
+          <SpotlightCard className="p-6 space-y-4" spotlightColor="rgba(168, 85, 247, 0.15)">
+            <span className="text-2xl font-mono font-extrabold text-muted-foreground/30 block">
+              02
+            </span>
+            <div className="w-10 h-10 rounded-xl bg-purple-500/10 text-purple-600 dark:text-purple-400 flex items-center justify-center">
+              <Brain className="w-5 h-5" />
+            </div>
+            <h3 className="text-base font-bold text-foreground">AI Emotion Analysis</h3>
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              Fine-tuned DistilBERT models classify affective sentiment across 6 distinct states, detecting subtle linguistic distress cues.
+            </p>
+          </SpotlightCard>
 
           {/* Step 03 */}
-          <Card className="reveal card-hover relative bg-card border border-border rounded-2xl shadow-xs transition-all">
-            <CardContent className="p-6 space-y-4">
-              <span className="text-2xl font-mono font-extrabold text-muted-foreground/30 block">
-                03
-              </span>
-              <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
-                <Activity className="w-5 h-5" />
-              </div>
-              <h3 className="text-base font-semibold text-foreground">Risk Stratification</h3>
-              <p className="text-xs text-muted-foreground leading-relaxed">
-                Machine learning models synthesize mood trajectories, sleep deficits, and academic load into calibrated Low, Moderate, or High tiers.
-              </p>
-            </CardContent>
-          </Card>
+          <SpotlightCard className="p-6 space-y-4" spotlightColor="rgba(245, 158, 11, 0.15)">
+            <span className="text-2xl font-mono font-extrabold text-muted-foreground/30 block">
+              03
+            </span>
+            <div className="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center">
+              <Activity className="w-5 h-5" />
+            </div>
+            <h3 className="text-base font-bold text-foreground">Risk Stratification</h3>
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              Machine learning models synthesize mood trajectories, sleep deficits, and academic load into calibrated Low, Moderate, or High tiers.
+            </p>
+          </SpotlightCard>
 
           {/* Step 04 */}
-          <Card className="reveal card-hover relative bg-card border border-border rounded-2xl shadow-xs transition-all">
-            <CardContent className="p-6 space-y-4">
-              <span className="text-2xl font-mono font-extrabold text-muted-foreground/30 block">
-                04
-              </span>
-              <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
-                <HeartHandshake className="w-5 h-5" />
-              </div>
-              <h3 className="text-base font-semibold text-foreground">Guided Care Pathway</h3>
-              <p className="text-xs text-muted-foreground leading-relaxed">
-                Tailored self-care exercises, CBT tools, and instant counselor triage trigger automatically to arrest distress before crisis.
-              </p>
-            </CardContent>
-          </Card>
+          <SpotlightCard className="p-6 space-y-4" spotlightColor="rgba(16, 185, 129, 0.15)">
+            <span className="text-2xl font-mono font-extrabold text-muted-foreground/30 block">
+              04
+            </span>
+            <div className="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
+              <HeartHandshake className="w-5 h-5" />
+            </div>
+            <h3 className="text-base font-bold text-foreground">Guided Care Pathway</h3>
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              Tailored self-care exercises, CBT tools, and instant counselor triage trigger automatically to arrest distress before crisis.
+            </p>
+          </SpotlightCard>
         </div>
       </section>
 
@@ -493,79 +495,67 @@ export const LandingPage: React.FC = () => {
             </p>
           </div>
 
-          {/* 6 feature cards each with reveal card-hover */}
+          {/* 6 feature cards with SpotlightCard */}
           <div className="reveal-group grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <Card className="reveal card-hover bg-card border border-border rounded-2xl shadow-xs transition-all">
-              <CardContent className="p-6 space-y-3">
-                <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
-                  <span className="text-xl" role="img" aria-label="brain">🧠</span>
-                </div>
-                <h3 className="text-base font-semibold text-foreground">Emotion NLP</h3>
-                <p className="text-xs text-muted-foreground leading-relaxed">
-                  DistilBERT 6-class classifier accurately detects joy, sadness, anxiety, anger, fear, and surprise from journal submissions with high precision.
-                </p>
-              </CardContent>
-            </Card>
+            <SpotlightCard className="p-6 space-y-3" spotlightColor="rgba(59, 130, 246, 0.15)">
+              <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
+                <Brain className="w-5 h-5 text-primary" />
+              </div>
+              <h3 className="text-base font-bold text-foreground">Emotion NLP</h3>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                DistilBERT 6-class classifier accurately detects joy, sadness, anxiety, anger, fear, and surprise from journal submissions with high precision.
+              </p>
+            </SpotlightCard>
 
-            <Card className="reveal card-hover bg-card border border-border rounded-2xl shadow-xs transition-all">
-              <CardContent className="p-6 space-y-3">
-                <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
-                  <span className="text-xl" role="img" aria-label="bar chart">📊</span>
-                </div>
-                <h3 className="text-base font-semibold text-foreground">SHAP Explainability</h3>
-                <p className="text-xs text-muted-foreground leading-relaxed">
-                  Every score explained, not a black box. Students and clinical counselors see the precise biometric and survey factors driving every prediction.
-                </p>
-              </CardContent>
-            </Card>
+            <SpotlightCard className="p-6 space-y-3" spotlightColor="rgba(13, 148, 136, 0.15)">
+              <div className="w-10 h-10 rounded-xl bg-teal-500/10 text-teal-600 dark:text-teal-400 flex items-center justify-center">
+                <BarChart3 className="w-5 h-5 text-teal-600 dark:text-teal-400" />
+              </div>
+              <h3 className="text-base font-bold text-foreground">SHAP Explainability</h3>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                Every score explained, not a black box. Students and clinical counselors see the precise biometric and survey factors driving every prediction.
+              </p>
+            </SpotlightCard>
 
-            <Card className="reveal card-hover bg-card border border-border rounded-2xl shadow-xs transition-all">
-              <CardContent className="p-6 space-y-3">
-                <div className="w-10 h-10 rounded-xl bg-rose-500/10 text-rose-500 flex items-center justify-center">
-                  <span className="text-xl" role="img" aria-label="emergency siren">🚨</span>
-                </div>
-                <h3 className="text-base font-semibold text-foreground">Emergency SOS</h3>
-                <p className="text-xs text-muted-foreground leading-relaxed">
-                  24/7 crisis escalation with Tele-MANAS (14416) & KIRAN helplines. One-click emergency protocols bypass queues to reach immediate human responders.
-                </p>
-              </CardContent>
-            </Card>
+            <SpotlightCard className="p-6 space-y-3" spotlightColor="rgba(244, 63, 94, 0.15)">
+              <div className="w-10 h-10 rounded-xl bg-rose-500/10 text-rose-500 flex items-center justify-center">
+                <PhoneCall className="w-5 h-5 text-rose-500" />
+              </div>
+              <h3 className="text-base font-bold text-foreground">Emergency SOS</h3>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                24/7 crisis escalation with Tele-MANAS (14416) & KIRAN helplines. One-click emergency protocols bypass queues to reach immediate human responders.
+              </p>
+            </SpotlightCard>
 
-            <Card className="reveal card-hover bg-card border border-border rounded-2xl shadow-xs transition-all">
-              <CardContent className="p-6 space-y-3">
-                <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
-                  <span className="text-xl" role="img" aria-label="sleeping face">😴</span>
-                </div>
-                <h3 className="text-base font-semibold text-foreground">Sleep & Circadian</h3>
-                <p className="text-xs text-muted-foreground leading-relaxed">
-                  Kernel-power Windows telemetry and self-reported sleep records analyze sleep debt and late-night fragmentation without capturing keystrokes.
-                </p>
-              </CardContent>
-            </Card>
+            <SpotlightCard className="p-6 space-y-3" spotlightColor="rgba(99, 102, 241, 0.15)">
+              <div className="w-10 h-10 rounded-xl bg-indigo-500/10 text-indigo-500 flex items-center justify-center">
+                <Moon className="w-5 h-5 text-indigo-500" />
+              </div>
+              <h3 className="text-base font-bold text-foreground">Sleep & Circadian</h3>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                Kernel-power Windows telemetry and self-reported sleep records analyze sleep debt and late-night fragmentation without capturing keystrokes.
+              </p>
+            </SpotlightCard>
 
-            <Card className="reveal card-hover bg-card border border-border rounded-2xl shadow-xs transition-all">
-              <CardContent className="p-6 space-y-3">
-                <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
-                  <span className="text-xl" role="img" aria-label="stethoscope">🩺</span>
-                </div>
-                <h3 className="text-base font-semibold text-foreground">Counselor Triage</h3>
-                <p className="text-xs text-muted-foreground leading-relaxed">
-                  Priority queue with 5-tab case workspace enables university psychologists to review psychometric trends, log SOAP notes, and initiate outreach.
-                </p>
-              </CardContent>
-            </Card>
+            <SpotlightCard className="p-6 space-y-3" spotlightColor="rgba(168, 85, 247, 0.15)">
+              <div className="w-10 h-10 rounded-xl bg-purple-500/10 text-purple-600 dark:text-purple-400 flex items-center justify-center">
+                <Activity className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+              </div>
+              <h3 className="text-base font-bold text-foreground">Counselor Triage</h3>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                Priority queue with 5-tab case workspace enables university psychologists to review psychometric trends, log SOAP notes, and initiate outreach.
+              </p>
+            </SpotlightCard>
 
-            <Card className="reveal card-hover bg-card border border-border rounded-2xl shadow-xs transition-all">
-              <CardContent className="p-6 space-y-3">
-                <div className="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
-                  <span className="text-xl" role="img" aria-label="lock">🔒</span>
-                </div>
-                <h3 className="text-base font-semibold text-foreground">k-Anonymity Privacy</h3>
-                <p className="text-xs text-muted-foreground leading-relaxed">
-                  Admins see cohort data only, k ≥ 10. Student records are encrypted and decoupled from university academic standing or administrative viewing.
-                </p>
-              </CardContent>
-            </Card>
+            <SpotlightCard className="p-6 space-y-3" spotlightColor="rgba(16, 185, 129, 0.15)">
+              <div className="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
+                <Lock className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+              </div>
+              <h3 className="text-base font-bold text-foreground">k-Anonymity Privacy</h3>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                Admins see cohort data only, k ≥ 10. Student records are encrypted and decoupled from university academic standing or administrative viewing.
+              </p>
+            </SpotlightCard>
           </div>
         </div>
       </section>
@@ -577,34 +567,34 @@ export const LandingPage: React.FC = () => {
       >
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center max-w-4xl mx-auto px-6 relative z-10">
           <div>
-            <p className="text-5xl font-black text-white">
-              {s1.value}%
+            <p className="text-5xl font-black text-white font-mono">
+              <AnimatedCounter value={s1.value} />%
             </p>
-            <p className="text-xs text-white/60 uppercase tracking-wider font-semibold mt-1">
+            <p className="text-xs text-white/70 uppercase tracking-wider font-bold mt-1">
               Risk Accuracy
             </p>
           </div>
           <div>
-            <p className="text-5xl font-black text-white">
-              {s2.value.toLocaleString()}+
+            <p className="text-5xl font-black text-white font-mono">
+              <AnimatedCounter value={s2.value} />+
             </p>
-            <p className="text-xs text-white/60 uppercase tracking-wider font-semibold mt-1">
+            <p className="text-xs text-white/70 uppercase tracking-wider font-bold mt-1">
               Students Monitored
             </p>
           </div>
           <div>
-            <p className="text-5xl font-black text-white">
-              {s3.value}
+            <p className="text-5xl font-black text-white font-mono">
+              <AnimatedCounter value={s3.value} />
             </p>
-            <p className="text-xs text-white/60 uppercase tracking-wider font-semibold mt-1">
+            <p className="text-xs text-white/70 uppercase tracking-wider font-bold mt-1">
               Emotion Classes
             </p>
           </div>
           <div>
-            <p className="text-5xl font-black text-white">
-              {s4.value}
+            <p className="text-5xl font-black text-white font-mono">
+              <AnimatedCounter value={s4.value} />
             </p>
-            <p className="text-xs text-white/60 uppercase tracking-wider font-semibold mt-1">
+            <p className="text-xs text-white/70 uppercase tracking-wider font-bold mt-1">
               Risk Tiers
             </p>
           </div>

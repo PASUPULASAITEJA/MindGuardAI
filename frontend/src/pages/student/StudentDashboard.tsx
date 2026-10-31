@@ -19,6 +19,7 @@ import { ShinyText } from "@/components/ui/ShinyText";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/ui/empty-state";
+import { AnimatedCounter } from "@/components/ui/animated-counter";
 import {
   ResponsiveContainer,
   AreaChart,
@@ -251,7 +252,7 @@ export const StudentDashboard: React.FC = () => {
                 Wellness Score
               </span>
               <div className={cn("text-5xl font-extrabold tracking-tight", scoreColorClass)}>
-                {wellnessScore}
+                <AnimatedCounter value={wellnessScore} />
               </div>
               <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold inline-flex items-center gap-1">
                 +3.5% vs last week
@@ -344,7 +345,7 @@ export const StudentDashboard: React.FC = () => {
                 Streak
               </span>
               <div className="text-3xl font-extrabold text-foreground flex items-center gap-1.5">
-                <span>{streakDays}</span>
+                <AnimatedCounter value={streakDays} />
                 <span className="text-sm font-semibold text-muted-foreground">Days</span>
               </div>
               <span className="text-xs text-muted-foreground block">
