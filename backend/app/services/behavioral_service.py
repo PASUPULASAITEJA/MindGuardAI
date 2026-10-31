@@ -214,26 +214,11 @@ def get_machine_screen_metrics_today() -> Dict[str, Any]:
     final_late_mins = max(sys_late_mins, agent_late_mins)
     final_late_mins = min(final_total_mins, final_late_mins)
 
-    # Ensure realistic distribution when social or entertainment are 0 or unassigned
-    if final_total_mins > 0:
-        if (agent_soc_mins == 0 and agent_ent_mins == 0) or (agent_acad_mins >= final_total_mins * 0.90 and final_total_mins >= 60):
-            final_acad_mins = int(final_total_mins * 0.62)
-            final_ent_mins = int(final_total_mins * 0.23)
-            final_soc_mins = max(0, final_total_mins - final_acad_mins - final_ent_mins)
-            final_adult_mins = 0
-        else:
-            cat_sum = agent_acad_mins + agent_soc_mins + agent_ent_mins + agent_adult_mins
-            if cat_sum > 0:
-                ratio = final_total_mins / max(1, cat_sum)
-                final_acad_mins = int(agent_acad_mins * ratio)
-                final_soc_mins = int(agent_soc_mins * ratio)
-                final_ent_mins = int(agent_ent_mins * ratio)
-                final_adult_mins = int(agent_adult_mins * ratio)
-            else:
-                final_acad_mins = int(final_total_mins * 0.62)
-                final_ent_mins = int(final_total_mins * 0.23)
-                final_soc_mins = max(0, final_total_mins - final_acad_mins - final_ent_mins)
-                final_adult_mins = 0
+    # Strictly authentic categorized minutes captured by the desktop agent
+    final_acad_mins = agent_acad_mins
+    final_soc_mins = agent_soc_mins
+    final_ent_mins = agent_ent_mins
+    final_adult_mins = agent_adult_mins
 
     try:
         today_midnight = now_dt.replace(hour=0, minute=0, second=0, microsecond=0).timestamp()
@@ -480,15 +465,23 @@ class BehavioralService:
             existing_log.baseline_deviation_score = late_night_deviation_z
             existing_log.risk_level = behavioral_risk_level
             existing_log.synced_at = datetime.now(timezone.utc)
-            if getattr(payload, "top_apps", None):
-                meta = {"top_apps": payload.top_apps}
+            if getattr(payload, "top_apps", None) or getattr(payload, "search_topics", None):
+                meta = {}
+                if payload.top_apps:
+                    meta["top_apps"] = payload.top_apps
+                if payload.search_topics:
+                    meta["search_topics"] = payload.search_topics
                 existing_log.active_window_categories = json.dumps(meta)
             db_log = existing_log
         else:
             initial_screen_time = max(sanitized_screen_time, machine_metrics.get("total_screen_time_minutes", 0))
             meta_json = None
-            if getattr(payload, "top_apps", None):
-                meta = {"top_apps": payload.top_apps}
+            if getattr(payload, "top_apps", None) or getattr(payload, "search_topics", None):
+                meta = {}
+                if payload.top_apps:
+                    meta["top_apps"] = payload.top_apps
+                if payload.search_topics:
+                    meta["search_topics"] = payload.search_topics
                 meta_json = json.dumps(meta)
 
             db_log = BehavioralLog(
@@ -753,7 +746,7 @@ class BehavioralService:
             },
             "circadian_sleep_analysis": circadian_analysis,
             "top_apps": top_apps,
-            "search_topics": [],
+            "search_topics": search_topics,
             "latest_log": {
                 "date": latest.date,
                 "total_screen_time_minutes": latest.total_screen_time_minutes or 0,
@@ -769,7 +762,7 @@ class BehavioralService:
                 "risk_level": latest.risk_level or "LOW",
                 "synced_at": latest.synced_at.isoformat(),
                 "top_apps": top_apps,
-                "search_topics": []
+                "search_topics": search_topics
             },
             "weekly_history": [
                 {

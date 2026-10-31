@@ -137,12 +137,12 @@ export const ScreenTimePage: React.FC = () => {
   // Dominant purpose analysis
   const sortedCategories = [...categoryData].sort((a, b) => b.value - a.value);
   const dominantCategory = sortedCategories[0] || {
-    name: "Studying",
-    value: academicMins || 470,
-    desc: "Academic, Coding & Coursework",
-    color: "#3b82f6"
+    name: "Unclassified",
+    value: 0,
+    desc: "Awaiting desktop agent classification",
+    color: "#64748b"
   };
-  const dominantPercentage = totalMins > 0 ? Math.round((dominantCategory.value / totalMins) * 100) : 65;
+  const dominantPercentage = totalMins > 0 && dominantCategory.value > 0 ? Math.round((dominantCategory.value / totalMins) * 100) : 0;
 
   // 2. Day vs Late Night Data
   const timeOfDayData = [
@@ -195,24 +195,16 @@ export const ScreenTimePage: React.FC = () => {
       };
     }
 
-    // Baseline historical trajectory
-    const baselineMins = totalMins > 0 ? totalMins : 490;
-    const dayMultipliers = [0.84, 0.96, 1.05, 0.91, 1.02, 0.74, 1.0];
-    const simTotal = Math.round(baselineMins * dayMultipliers[i]);
-    const simStudy = Math.round(simTotal * 0.65);
-    const simPlay = Math.round(simTotal * 0.28);
-    const simSoc = Math.max(0, simTotal - simStudy - simPlay);
-    const simLate = Math.round((lateNightMins || 120) * dayMultipliers[i] * 0.75);
-
+    // Untracked days strictly return 0 hours - zero synthetic fallback data
     return {
       day: label,
       date: dateStr,
       isToday: false,
-      studyingHours: Number((simStudy / 60).toFixed(1)),
-      playingHours: Number((simPlay / 60).toFixed(1)),
-      socialHours: Number((simSoc / 60).toFixed(1)),
-      lateNightHours: Number((simLate / 60).toFixed(1)),
-      totalHours: Number((simTotal / 60).toFixed(1)),
+      studyingHours: 0,
+      playingHours: 0,
+      socialHours: 0,
+      lateNightHours: 0,
+      totalHours: 0,
     };
   });
 
