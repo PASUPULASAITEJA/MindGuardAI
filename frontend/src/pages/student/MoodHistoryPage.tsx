@@ -28,6 +28,7 @@ import { AnimatedCounter } from "@/components/ui/animated-counter";
 import { SpotlightCard } from "@/components/ui/SpotlightCard";
 import { DotGridBackground } from "@/components/ui/DotGridBackground";
 import { ShinyText } from "@/components/ui/ShinyText";
+import { EmptyState } from "@/components/ui/empty-state";
 
 export const MoodHistoryPage: React.FC = () => {
   const navigate = useNavigate();
@@ -255,18 +256,14 @@ export const MoodHistoryPage: React.FC = () => {
               Loading your timeline...
             </div>
           ) : history.length === 0 ? (
-            <div className="py-12 text-center space-y-3">
-              <Smile className="h-10 w-10 text-muted-foreground/40 mx-auto" />
-              <p className="text-xs text-muted-foreground">
-                No entries recorded for this timeframe yet.
-              </p>
-              <Button 
-                onClick={() => navigate("/student/check-in")}
-                size="sm"
-                className="bg-primary text-primary-foreground font-bold rounded-xl"
-              >
-                Log Check-In
-              </Button>
+            <div className="py-4">
+              <EmptyState
+                illustration="empty"
+                title="No entries recorded for this timeframe yet"
+                description="Record your daily emotional pulse to track your longitudinal baseline trajectory."
+                actionLabel="Log Check-In"
+                onAction={() => navigate("/student/check-in")}
+              />
             </div>
           ) : (
             history.map((item, idx) => {

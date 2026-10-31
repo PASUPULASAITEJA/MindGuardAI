@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { X, Eye, CheckCircle2, RotateCcw, Volume2, VolumeX, Sparkles, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { LottieIllustration } from "@/components/ui/LottieIllustration";
 
 interface EyeBreakModalProps {
   isOpen: boolean;
@@ -132,8 +133,8 @@ export const EyeBreakModal: React.FC<EyeBreakModalProps> = ({
             </svg>
             <div className="absolute inset-0 flex flex-col items-center justify-center">
               {isCompleted ? (
-                <div className="animate-in zoom-in-75 duration-300 flex flex-col items-center">
-                  <CheckCircle2 className="w-10 h-10 text-emerald-500 mb-1" />
+                <div className="flex flex-col items-center">
+                  <LottieIllustration variant="success" className="w-12 h-12 mb-1" loop={false} />
                   <span className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">Refreshed</span>
                 </div>
               ) : (
