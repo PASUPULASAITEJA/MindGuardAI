@@ -75,11 +75,9 @@ export const DailyCheckInPage: React.FC = () => {
       variants={pageVariants}
       initial="initial"
       animate="animate"
-      className="relative w-full max-w-4xl mx-auto space-y-6 pb-12 font-sans text-foreground"
+      className="relative w-full max-w-xl mx-auto space-y-4 pb-12 font-sans text-foreground"
     >
       <DotGridBackground />
-
-
 
       <AnimatePresence mode="wait">
         {result ? (
@@ -91,47 +89,43 @@ export const DailyCheckInPage: React.FC = () => {
             exit={{ opacity: 0, scale: 0.96 }}
             transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
           >
-            <Card className="p-6 md:p-8 space-y-6 text-center">
-              <div className="h-14 w-14 flex items-center justify-center mx-auto">
-                <LottieIllustration variant="success" className="h-14 w-14" loop={false} />
+            <Card className="p-5 sm:p-6 space-y-5 text-center border-border/80 bg-card/90 backdrop-blur-md shadow-xl rounded-2xl">
+              <div className="h-12 w-12 flex items-center justify-center mx-auto">
+                <LottieIllustration variant="success" className="h-12 w-12" loop={false} />
               </div>
 
-              <div className="space-y-1.5">
-                <h2 className="text-xl font-bold text-foreground">Check-in Successfully Recorded</h2>
-                <p className="text-xs text-muted-foreground max-w-md mx-auto">
-                  Your responses have been processed into your longitudinal wellbeing record.
+              <div className="space-y-1">
+                <h2 className="text-lg font-bold text-foreground">Check-in Successfully Recorded</h2>
+                <p className="text-xs text-muted-foreground max-w-sm mx-auto">
+                  Your emotional pulse has been processed into your longitudinal wellbeing record.
                 </p>
               </div>
 
-              <div className="p-4 rounded-xl border border-border bg-secondary/30 max-w-xs mx-auto">
-                <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block">
+              <div className="p-3.5 rounded-xl border border-primary/20 bg-primary/5 max-w-xs mx-auto">
+                <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider block">
                   Updated Wellbeing Score
                 </span>
-                <span className="text-3xl font-bold text-foreground mt-1 block">
+                <span className="text-2xl sm:text-3xl font-extrabold text-foreground mt-0.5 block font-mono">
                   <AnimatedCounter value={result.mental_wellness_score} /> <span className="text-xs text-muted-foreground font-normal">/ 100</span>
                 </span>
               </div>
 
-              <div className="flex justify-center gap-3 pt-2">
-                <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                  <Button
-                    size="sm"
-                    onClick={() => navigate("/student/dashboard")}
-                    className="text-xs font-semibold px-5"
-                  >
-                    Return to Dashboard
-                  </Button>
-                </motion.div>
-                <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => navigate("/student/history")}
-                    className="text-xs font-semibold px-4"
-                  >
-                    View Full History
-                  </Button>
-                </motion.div>
+              <div className="flex justify-center gap-2.5 pt-1">
+                <Button
+                  size="sm"
+                  onClick={() => navigate("/student/dashboard")}
+                  className="text-xs font-semibold px-4 h-8.5 rounded-lg"
+                >
+                  Return to Dashboard
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => navigate("/student/history")}
+                  className="text-xs font-semibold px-4 h-8.5 rounded-lg"
+                >
+                  View Full History
+                </Button>
               </div>
             </Card>
           </motion.div>
@@ -144,45 +138,58 @@ export const DailyCheckInPage: React.FC = () => {
             exit={{ opacity: 0, y: -12 }}
             transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
           >
-            <Card className="p-6 md:p-8">
-              <form onSubmit={handleSubmit} className="space-y-6">
+            <Card className="p-5 sm:p-6 border-border/80 bg-card/90 backdrop-blur-md shadow-xl rounded-2xl">
+              <form onSubmit={handleSubmit} className="space-y-4.5">
                 <div>
-                  <h1 className="text-xl font-bold text-foreground">
-                    <ShinyText text="How are you feeling today?" />
-                  </h1>
+                  <div className="flex items-center justify-between">
+                    <h1 className="text-base sm:text-lg font-bold text-foreground">
+                      <ShinyText text="How are you feeling today?" />
+                    </h1>
+                    <span className="text-[11px] text-muted-foreground font-medium">Daily Pulse</span>
+                  </div>
                   <p className="text-xs text-muted-foreground mt-0.5">
-                    Choose the option that best reflects your current emotional state.
+                    Select the mood that best reflects your current emotional state.
                   </p>
 
-                  <div className="grid grid-cols-5 gap-2 mt-4">
+                  <div className="grid grid-cols-5 gap-2 mt-3">
                     {MOOD_OPTIONS.map((opt) => {
                       const isSelected = selectedMood === opt.score;
                       return (
-                        <GSAPMagnetic key={opt.score} strength={0.4} className="w-full">
+                        <GSAPMagnetic key={opt.score} strength={0.3} className="w-full">
                           <button
                             type="button"
                             onClick={() => setSelectedMood(opt.score)}
                             className={cn(
-                              "w-full flex flex-col items-center justify-center p-3 rounded-xl border text-xs transition-colors",
+                              "w-full flex flex-col items-center justify-center py-2.5 px-1 rounded-xl border text-xs transition-all duration-200",
                               isSelected
-                                ? "border-primary bg-primary/5 text-primary font-semibold shadow-xs ring-1 ring-primary"
-                                : "border-border hover:bg-secondary/60 text-muted-foreground hover:text-foreground"
+                                ? "border-primary bg-primary/10 text-primary font-bold shadow-sm ring-1.5 ring-primary scale-[1.03]"
+                                : "border-border/80 bg-secondary/30 hover:bg-secondary/70 text-muted-foreground hover:text-foreground"
                             )}
                           >
-                            <span className="text-2xl mb-1">{opt.symbol}</span>
-                            <span className="text-xs font-medium">{opt.label}</span>
+                            <span className="text-2xl mb-1 filter drop-shadow-xs">{opt.symbol}</span>
+                            <span className="text-[11px] font-medium leading-tight">{opt.label}</span>
                           </button>
                         </GSAPMagnetic>
                       );
                     })}
                   </div>
+
+                  {/* Selected helper status */}
+                  <div className="mt-2 text-center">
+                    <span className="text-[11px] text-primary/90 font-medium bg-primary/10 px-2.5 py-0.5 rounded-full inline-block">
+                      {MOOD_OPTIONS.find((m) => m.score === selectedMood)?.helper}
+                    </span>
+                  </div>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t border-border">
-                  <div>
-                    <div className="flex justify-between text-xs text-muted-foreground mb-1">
-                      <span>Energy & Stamina</span>
-                      <span className="font-semibold text-foreground">{energyLevel} / 10</span>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 pt-3 border-t border-border/60">
+                  <div className="p-2.5 rounded-xl border border-border/60 bg-secondary/20">
+                    <div className="flex items-center justify-between text-xs text-muted-foreground mb-1.5">
+                      <span className="flex items-center gap-1.5 font-medium text-foreground">
+                        <BatteryMedium className="w-3.5 h-3.5 text-amber-500" />
+                        Energy Level
+                      </span>
+                      <span className="font-bold text-xs font-mono text-primary">{energyLevel} / 10</span>
                     </div>
                     <input
                       type="range"
@@ -194,10 +201,13 @@ export const DailyCheckInPage: React.FC = () => {
                     />
                   </div>
 
-                  <div>
-                    <div className="flex justify-between text-xs text-muted-foreground mb-1">
-                      <span>Sleep Duration</span>
-                      <span className="font-semibold text-foreground">{sleepHours} hrs</span>
+                  <div className="p-2.5 rounded-xl border border-border/60 bg-secondary/20">
+                    <div className="flex items-center justify-between text-xs text-muted-foreground mb-1.5">
+                      <span className="flex items-center gap-1.5 font-medium text-foreground">
+                        <Moon className="w-3.5 h-3.5 text-indigo-500" />
+                        Sleep Duration
+                      </span>
+                      <span className="font-bold text-xs font-mono text-primary">{sleepHours} hrs</span>
                     </div>
                     <input
                       type="range"
@@ -211,26 +221,27 @@ export const DailyCheckInPage: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="pt-2 border-t border-border">
-                  <label className="text-xs font-semibold text-foreground block mb-1">
-                    Optional Journal Notes (Private & Encrypted)
+                <div className="pt-2 border-t border-border/60">
+                  <label className="text-xs font-semibold text-foreground flex items-center justify-between mb-1.5">
+                    <span>Optional Reflection Notes</span>
+                    <span className="text-[10px] text-muted-foreground font-normal">Encrypted & Private</span>
                   </label>
                   <textarea
-                    rows={3}
+                    rows={2.5 as any}
                     value={journalContent}
                     onChange={(e) => setJournalContent(e.target.value)}
-                    placeholder="Write any thoughts, events, or feelings from today..."
-                    className="w-full p-3 text-xs rounded-lg border border-border bg-background focus:outline-none focus:ring-1 focus:ring-primary leading-relaxed"
+                    placeholder="Jot down any thoughts, triggers, or highlights from today..."
+                    className="w-full p-2.5 text-xs rounded-xl border border-border/80 bg-background/80 focus:outline-none focus:ring-1.5 focus:ring-primary leading-relaxed resize-none"
                   />
                 </div>
 
-                <div className="flex justify-end gap-3 pt-2">
+                <div className="flex items-center justify-end gap-2.5 pt-1">
                   <Button
                     type="button"
                     variant="outline"
                     size="sm"
                     onClick={() => navigate("/student/dashboard")}
-                    className="text-xs font-medium"
+                    className="text-xs font-medium h-8.5 px-3.5 rounded-lg"
                   >
                     Cancel
                   </Button>
@@ -239,7 +250,7 @@ export const DailyCheckInPage: React.FC = () => {
                       type="submit"
                       size="sm"
                       disabled={submitJournal.isPending}
-                      className="text-xs font-semibold px-6 shadow-sm shadow-primary/20 hover:shadow-primary/30"
+                      className="text-xs font-bold h-8.5 px-5 rounded-lg shadow-sm shadow-primary/20 hover:shadow-primary/30"
                     >
                       {submitJournal.isPending ? "Recording..." : "Complete Check-in"}
                     </Button>
