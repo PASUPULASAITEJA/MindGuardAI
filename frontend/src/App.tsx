@@ -9,6 +9,7 @@ import ForgotPassword from "./pages/auth/ForgotPassword";
 import ProtectedRoute from "./components/ProtectedRoute";
 import DashboardLayout from "./components/layouts/DashboardLayout";
 import { ThemeProvider } from "./contexts/ThemeContext";
+import { ErrorBoundary } from "./components/ErrorBoundary";
 
 import StudentDashboard from "./pages/student/StudentDashboard";
 import StudentChatbot from "./pages/student/StudentChatbot";
@@ -36,9 +37,10 @@ const queryClient = new QueryClient({
 
 function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <ThemeProvider>
-        <Router>
+    <ErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <ThemeProvider>
+          <Router>
           <Routes>
             {/* Root & Public auth pages */}
             <Route path="/" element={<LandingPage />} />
@@ -269,6 +271,7 @@ function App() {
         </Router>
       </ThemeProvider>
     </QueryClientProvider>
+  </ErrorBoundary>
   );
 }
 

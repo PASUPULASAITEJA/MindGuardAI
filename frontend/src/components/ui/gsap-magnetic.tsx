@@ -1,6 +1,5 @@
-import React, { useRef } from "react";
+import React, { useRef, useEffect } from "react";
 import gsap from "gsap";
-import { useGSAP } from "@gsap/react";
 
 interface GSAPMagneticProps {
   children: React.ReactElement;
@@ -18,56 +17,53 @@ export const GSAPMagnetic: React.FC<GSAPMagneticProps> = ({
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
 
-  useGSAP(
-    () => {
-      if (disabled || !containerRef.current) return;
+  useEffect(() => {
+    const element = containerRef.current;
+    if (disabled || !element) return;
 
-      const element = containerRef.current;
+    const handleMouseMove = (e: MouseEvent) => {
+      const bounds = element.getBoundingClientRect();
+      const centerX = bounds.left + bounds.width / 2;
+      const centerY = bounds.top + bounds.height / 2;
 
-      const handleMouseMove = (e: MouseEvent) => {
-        const bounds = element.getBoundingClientRect();
-        const centerX = bounds.left + bounds.width / 2;
-        const centerY = bounds.top + bounds.height / 2;
+      const distanceX = e.clientX - centerX;
+      const distanceY = e.clientY - centerY;
 
-        const distanceX = e.clientX - centerX;
-        const distanceY = e.clientY - centerY;
+      gsap.to(element, {
+        x: distanceX * strength,
+        y: distanceY * strength,
+        rotation: distanceX * 0.05 * strength,
+        duration: 0.3,
+        ease: "power2.out",
+        overwrite: "auto",
+      });
+    };
 
-        gsap.to(element, {
-          x: distanceX * strength,
-          y: distanceY * strength,
-          rotation: distanceX * 0.05 * strength,
-          duration: 0.3,
-          ease: "power2.out",
-          overwrite: "auto",
-        });
-      };
+    const handleMouseLeave = () => {
+      gsap.to(element, {
+        x: 0,
+        y: 0,
+        rotation: 0,
+        duration: 0.7,
+        ease: "elastic.out(1.1, 0.4)",
+        overwrite: "auto",
+      });
+    };
 
-      const handleMouseLeave = () => {
-        gsap.to(element, {
-          x: 0,
-          y: 0,
-          rotation: 0,
-          duration: 0.7,
-          ease: "elastic.out(1.1, 0.4)",
-          overwrite: "auto",
-        });
-      };
+    element.addEventListener("mousemove", handleMouseMove);
+    element.addEventListener("mouseleave", handleMouseLeave);
 
-      element.addEventListener("mousemove", handleMouseMove);
-      element.addEventListener("mouseleave", handleMouseLeave);
-
-      return () => {
-        element.removeEventListener("mousemove", handleMouseMove);
-        element.removeEventListener("mouseleave", handleMouseLeave);
-      };
-    },
-    { scope: containerRef, dependencies: [strength, disabled] }
-  );
+    return () => {
+      element.removeEventListener("mousemove", handleMouseMove);
+      element.removeEventListener("mouseleave", handleMouseLeave);
+      gsap.killTweensOf(element);
+    };
+  }, [strength, disabled]);
 
   return (
     <div
       ref={containerRef}
-      className={`inline-block transition-transform will-change-transform ${className}`}
+      className={`inline-block will-change-transform ${className}`}
     >
       {children}
     </div>
