@@ -21,6 +21,7 @@ import { pageVariants } from "@/utils/motion";
 import { AnimatedCounter } from "@/components/ui/animated-counter";
 import { DotGridBackground } from "@/components/ui/DotGridBackground";
 import { ShinyText } from "@/components/ui/ShinyText";
+import { LottieIllustration } from "@/components/ui/LottieIllustration";
 
 const MOOD_OPTIONS = [
   { score: 2, label: "Difficult", symbol: "😔", helper: "Stressed or overwhelmed" },
@@ -105,8 +106,8 @@ export const DailyCheckInPage: React.FC = () => {
             transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
           >
             <Card className="p-6 md:p-8 space-y-6 text-center">
-              <div className="h-12 w-12 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mx-auto">
-                <CheckCircle2 className="h-6 w-6" />
+              <div className="h-14 w-14 flex items-center justify-center mx-auto">
+                <LottieIllustration variant="success" className="h-14 w-14" loop={false} />
               </div>
 
               <div className="space-y-1.5">

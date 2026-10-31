@@ -41,6 +41,7 @@ import { motion } from "motion/react";
 import { pageVariants } from "@/utils/motion";
 import { SpotlightCard } from "@/components/ui/SpotlightCard";
 import { DotGridBackground } from "@/components/ui/DotGridBackground";
+import { EmptyState } from "@/components/ui/empty-state";
 
 export const StudentCaseFile: React.FC = () => {
   const { studentId } = useParams<{ studentId: string }>();
@@ -519,11 +520,13 @@ export const StudentCaseFile: React.FC = () => {
           {isInterventionsLoading ? (
             <div className="py-8 text-center text-xs text-muted-foreground">Loading interventions...</div>
           ) : interventions.length === 0 ? (
-            <Card className="p-8 text-center text-xs text-muted-foreground space-y-2">
-              <Target className="h-6 w-6 text-muted-foreground/40 mx-auto" />
-              <p className="font-semibold text-foreground">No active interventions assigned.</p>
-              <p className="max-w-md mx-auto">Assign a structured self-care module, CBT grounding exercise, or counselling follow-up to monitor student progress.</p>
-            </Card>
+            <EmptyState
+              illustration="empty"
+              title="No active interventions assigned"
+              description="Assign a structured self-care module, CBT grounding exercise, or counselling follow-up to monitor student progress."
+              actionLabel="Assign Intervention"
+              onAction={() => setIsInterventionModalOpen(true)}
+            />
           ) : (
             <div className="space-y-3">
               {interventions.map((item) => (
@@ -620,7 +623,16 @@ export const StudentCaseFile: React.FC = () => {
           </div>
 
           {studentNotes.length === 0 ? (
-            <p className="text-xs text-muted-foreground py-6 text-center">No counsellor notes recorded yet.</p>
+            <EmptyState
+              illustration="empty"
+              title="No counsellor notes recorded yet"
+              description="Add clinical observations, session summaries, or follow-up plans."
+              actionLabel="Add Note"
+              onAction={() => {
+                setActiveAlertForNote(null);
+                setIsNoteModalOpen(true);
+              }}
+            />
           ) : (
             <div className="space-y-3">
               {studentNotes.map((note: any) => (
