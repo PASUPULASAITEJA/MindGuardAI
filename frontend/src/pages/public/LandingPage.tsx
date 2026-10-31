@@ -19,25 +19,13 @@ import {
   ChevronDown,
   Menu,
   X,
-  Sparkles,
-  Zap,
-  TrendingUp,
-  Clock,
-  Compass,
-  MessageSquare,
-  Award,
-  Users,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useScrollReveal } from "@/hooks/useScrollReveal";
 import { useCountUp } from "@/hooks/useCountUp";
-import { ShinyText } from "@/components/ui/ShinyText";
-import { SpotlightCard } from "@/components/ui/SpotlightCard";
-import { LottieIllustration } from "@/components/ui/LottieIllustration";
-import { AnimatedCounter } from "@/components/ui/animated-counter";
-import { AuroraBackground } from "@/components/ui/AuroraBackground";
-import { motion, AnimatePresence } from "motion/react";
+import { GlowOrb } from "@/components/ui/GlowOrb";
+import { BioNeuralSynapseMesh } from "@/components/ui/BioNeuralSynapseMesh";
 
 interface FAQItem {
   question: string;
@@ -99,82 +87,83 @@ export const LandingPage: React.FC = () => {
 
   return (
     <div className="relative min-h-screen bg-background text-foreground font-sans antialiased selection:bg-primary/20 selection:text-primary transition-colors duration-200">
-      {/* ── TOP STICKY NAVBAR ── */}
-      <header className="sticky top-0 z-50 w-full border-b border-border/80 bg-background/85 backdrop-blur-xl transition-all duration-200">
+      {/* ── PERSISTENT FULL-PAGE NEURAL SYNAPSE BACKGROUND (TOP TO BOTTOM) ── */}
+      <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+        <BioNeuralSynapseMesh className="w-full h-full" />
+      </div>
+
+      {/* ── TOP NAVBAR ── */}
+      <header className="sticky top-0 z-50 w-full backdrop-blur-md bg-background/85 border-b border-border transition-colors">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-          {/* Logo */}
           <Link to="/" className="flex items-center gap-2.5 group">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-primary to-indigo-500 flex items-center justify-center text-white shadow-md shadow-primary/20 transition-transform group-hover:scale-105">
-              <Brain className="w-5 h-5" />
+            <div className="w-10 h-10 rounded-xl bg-card border border-border/80 p-0.5 flex items-center justify-center shrink-0 shadow-xs overflow-hidden transition-transform group-hover:scale-105">
+              <img src="/logo.png" alt="MindGuardAI Logo" className="w-full h-full object-contain" />
             </div>
-            <div>
-              <span className="font-extrabold text-lg sm:text-xl tracking-tight text-foreground flex items-center gap-1.5">
-                MindGuard<span className="text-primary font-black">AI</span>
-                <span className="hidden sm:inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-primary/10 text-primary border border-primary/20 uppercase tracking-widest">
-                  Enterprise
-                </span>
+            <div className="flex flex-col">
+              <span className="font-bold text-base sm:text-lg tracking-tight text-foreground">
+                MindGuard<span className="text-primary">AI</span>
+              </span>
+              <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium -mt-1">
+                University Wellness
               </span>
             </div>
           </Link>
 
-          {/* Desktop Nav Links */}
-          <nav className="hidden md:flex items-center gap-7 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+          <nav className="hidden md:flex items-center gap-7 text-sm font-medium text-muted-foreground">
             <button
               onClick={() => scrollToSection("how-it-works")}
-              className="hover:text-primary transition-colors"
+              className="hover:text-foreground transition-colors"
             >
               How It Works
             </button>
             <button
               onClick={() => scrollToSection("features")}
-              className="hover:text-primary transition-colors"
+              className="hover:text-foreground transition-colors"
             >
               Capabilities
             </button>
             <button
               onClick={() => scrollToSection("privacy")}
-              className="hover:text-primary transition-colors"
+              className="hover:text-foreground transition-colors"
             >
-              Privacy & k-Anonymity
+              Privacy
             </button>
             <button
               onClick={() => scrollToSection("faq")}
-              className="hover:text-primary transition-colors"
+              className="hover:text-foreground transition-colors"
             >
               FAQ
             </button>
             <button
               onClick={() => scrollToSection("helplines")}
-              className="hover:text-rose-500 transition-colors flex items-center gap-1"
+              className="hover:text-foreground transition-colors"
             >
-              <PhoneCall className="w-3.5 h-3.5" />
-              <span>SOS (14416)</span>
+              Crisis Lines
             </button>
           </nav>
 
-          {/* Actions */}
           <div className="flex items-center gap-2 sm:gap-2.5">
             <button
               onClick={toggleTheme}
-              className="p-2 rounded-xl text-muted-foreground hover:text-foreground hover:bg-secondary border border-transparent hover:border-border transition-colors"
+              className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
               title="Toggle theme"
               aria-label="Toggle dark/light theme"
             >
-              {theme === "dark" ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-indigo-600" />}
+              {theme === "dark" ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
             </button>
 
             <Link to="/login" className="hidden sm:inline-block">
               <Button
                 variant="ghost"
                 size="sm"
-                className="text-xs sm:text-sm font-semibold rounded-xl hover:text-primary"
+                className="text-xs sm:text-sm font-semibold rounded-lg hover:text-primary"
               >
                 Sign In
               </Button>
             </Link>
 
             <Link to="/login" className="hidden sm:inline-block">
-              <Button size="sm" className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-xl text-xs sm:text-sm font-semibold shadow-sm hover:shadow-primary/25 transition-all">
+              <Button size="sm" className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-lg text-xs sm:text-sm font-semibold shadow-xs">
                 Student Portal
                 <ArrowRight className="w-3.5 h-3.5 ml-1.5" />
               </Button>
@@ -183,7 +172,7 @@ export const LandingPage: React.FC = () => {
             {/* Mobile Hamburger Button */}
             <button
               onClick={() => setIsMobileNavOpen(!isMobileNavOpen)}
-              className="p-2 md:hidden rounded-xl text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
+              className="p-2 md:hidden rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
               aria-label="Toggle mobile menu"
             >
               {isMobileNavOpen ? <X className="w-5 h-5 text-primary" /> : <Menu className="w-5 h-5" />}
@@ -192,683 +181,688 @@ export const LandingPage: React.FC = () => {
         </div>
 
         {/* Mobile Navigation Drawer */}
-        <AnimatePresence>
-          {isMobileNavOpen && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
-              exit={{ opacity: 0, height: 0 }}
-              className="md:hidden border-t border-border bg-background/95 backdrop-blur-xl px-4 py-4 space-y-3 shadow-xl overflow-hidden"
-            >
-              <div className="flex flex-col space-y-1.5 text-sm font-medium">
-                <button
-                  onClick={() => {
-                    scrollToSection("how-it-works");
-                    setIsMobileNavOpen(false);
-                  }}
-                  className="text-left px-3 py-2 rounded-lg hover:bg-secondary text-foreground transition-colors"
-                >
-                  How It Works
-                </button>
-                <button
-                  onClick={() => {
-                    scrollToSection("features");
-                    setIsMobileNavOpen(false);
-                  }}
-                  className="text-left px-3 py-2 rounded-lg hover:bg-secondary text-foreground transition-colors"
-                >
-                  Capabilities
-                </button>
-                <button
-                  onClick={() => {
-                    scrollToSection("privacy");
-                    setIsMobileNavOpen(false);
-                  }}
-                  className="text-left px-3 py-2 rounded-lg hover:bg-secondary text-foreground transition-colors"
-                >
-                  Privacy
-                </button>
-                <button
-                  onClick={() => {
-                    scrollToSection("faq");
-                    setIsMobileNavOpen(false);
-                  }}
-                  className="text-left px-3 py-2 rounded-lg hover:bg-secondary text-foreground transition-colors"
-                >
-                  FAQ
-                </button>
-                <button
-                  onClick={() => {
-                    scrollToSection("helplines");
-                    setIsMobileNavOpen(false);
-                  }}
-                  className="text-left px-3 py-2 rounded-lg hover:bg-secondary text-rose-500 font-semibold transition-colors"
-                >
-                  Crisis Lines (14416)
-                </button>
-              </div>
-              <div className="pt-2 border-t border-border/60 flex flex-col gap-2">
-                <Link to="/login" onClick={() => setIsMobileNavOpen(false)}>
-                  <Button className="w-full bg-primary text-primary-foreground font-semibold rounded-xl text-sm shadow-xs">
-                    Student Portal
-                    <ArrowRight className="w-3.5 h-3.5 ml-1.5" />
-                  </Button>
-                </Link>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+        {isMobileNavOpen && (
+          <div className="md:hidden border-t border-border bg-background/95 backdrop-blur-xl px-4 py-4 space-y-3 shadow-xl animate-in slide-in-from-top-2 duration-200">
+            <div className="flex flex-col space-y-1.5 text-sm font-medium">
+              <button
+                onClick={() => {
+                  scrollToSection("how-it-works");
+                  setIsMobileNavOpen(false);
+                }}
+                className="text-left px-3 py-2 rounded-lg hover:bg-secondary text-foreground transition-colors"
+              >
+                How It Works
+              </button>
+              <button
+                onClick={() => {
+                  scrollToSection("features");
+                  setIsMobileNavOpen(false);
+                }}
+                className="text-left px-3 py-2 rounded-lg hover:bg-secondary text-foreground transition-colors"
+              >
+                Capabilities
+              </button>
+              <button
+                onClick={() => {
+                  scrollToSection("privacy");
+                  setIsMobileNavOpen(false);
+                }}
+                className="text-left px-3 py-2 rounded-lg hover:bg-secondary text-foreground transition-colors"
+              >
+                Privacy
+              </button>
+              <button
+                onClick={() => {
+                  scrollToSection("faq");
+                  setIsMobileNavOpen(false);
+                }}
+                className="text-left px-3 py-2 rounded-lg hover:bg-secondary text-foreground transition-colors"
+              >
+                FAQ
+              </button>
+              <button
+                onClick={() => {
+                  scrollToSection("helplines");
+                  setIsMobileNavOpen(false);
+                }}
+                className="text-left px-3 py-2 rounded-lg hover:bg-secondary text-rose-500 font-semibold transition-colors"
+              >
+                Crisis Lines (14416)
+              </button>
+            </div>
+            <div className="pt-2 border-t border-border/60 flex flex-col gap-2">
+              <Link to="/login" onClick={() => setIsMobileNavOpen(false)}>
+                <Button className="w-full bg-primary text-primary-foreground font-semibold rounded-lg text-sm shadow-xs">
+                  Student Portal
+                  <ArrowRight className="w-3.5 h-3.5 ml-1.5" />
+                </Button>
+              </Link>
+            </div>
+          </div>
+        )}
       </header>
 
-      {/* ── HERO SECTION WITH REACT BITS AURORA BACKGROUND ── */}
-      <AuroraBackground className="min-h-[92vh] border-b border-border px-4 sm:px-6 py-12 lg:py-20 relative">
-        <div className="max-w-7xl mx-auto w-full grid lg:grid-cols-12 gap-10 lg:gap-14 items-center">
-          
-          {/* Left Column: Value Prop & CTAs (7 cols) */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="lg:col-span-7 space-y-6"
-          >
-            {/* Pill Badge */}
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-xs font-semibold text-primary shadow-xs">
+      {/* ── HERO SECTION ── */}
+      <section className="hero-gradient relative min-h-screen flex items-center border-b border-border overflow-hidden py-12 sm:py-20 lg:py-0">
+        {/* Glow orbs — decorative depth */}
+        <GlowOrb
+          size={500}
+          variant="primary"
+          className="top-[-100px] right-[-100px] opacity-40 pointer-events-none"
+        />
+        <GlowOrb
+          size={300}
+          variant="purple"
+          className="bottom-[-50px] left-[-50px] opacity-25 pointer-events-none"
+        />
+
+        {/* Content — relative z-10 so it sits above canvas */}
+        <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 w-full grid lg:grid-cols-2 gap-8 lg:gap-12 items-center py-12 sm:py-16 lg:py-24">
+          {/* Left: text */}
+          <div>
+            <div className="fade-up inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-xs font-semibold text-primary mb-4 sm:mb-6 max-w-full">
               <span className="relative flex h-2 w-2 shrink-0">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
               </span>
-              <ShinyText text="✨ AI-Powered Student Mental Health Platform" className="text-xs font-semibold text-primary" />
+              <span className="truncate">Autonomous Neural Synapse Architecture</span>
             </div>
 
-            {/* Headline */}
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight text-foreground leading-[1.12]">
-              Detect Burnout{" "}
-              <span className="block text-transparent bg-clip-text bg-gradient-to-r from-primary via-indigo-500 to-teal-400">
-                <ShinyText text="Before It Becomes" speed={4} />
-              </span>
-              a Student Crisis.
+            <h1 className="fade-up-1 text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-foreground leading-[1.15]">
+              Detect Burnout
+              <span className="gradient-text block">Before It Becomes</span>
+              a Crisis.
             </h1>
 
-            {/* Subtitle */}
-            <p className="text-base sm:text-lg text-muted-foreground max-w-xl leading-relaxed">
-              MindGuardAI combines multimodal affective analysis, circadian sleep rhythms, and validated clinical screeners (PHQ-9 / GAD-7) to provide anonymous early intervention weeks before breakdown.
+            <p className="fade-up-2 text-sm sm:text-base lg:text-lg text-muted-foreground max-w-lg mt-4 sm:mt-6 leading-relaxed">
+              MindGuardAI continuously monitors student wellbeing signals — emotion analysis,
+              sleep patterns, and clinical screeners — to surface early warnings weeks before students reach breaking point.
             </p>
 
-            {/* CTAs */}
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-2">
+            <div className="fade-up-3 flex flex-col sm:flex-row gap-3 mt-6 sm:mt-8">
               <Link to="/login" className="w-full sm:w-auto">
                 <Button
                   size="lg"
-                  className="w-full sm:w-auto bg-primary text-primary-foreground hover:bg-primary/90 font-bold px-8 py-6 rounded-2xl shadow-xl shadow-primary/25 hover:shadow-primary/40 transition-all text-base"
+                  className="w-full sm:w-auto bg-primary text-primary-foreground hover:bg-primary/90 font-semibold px-7 rounded-xl shadow-md shadow-primary/20"
                 >
-                  Open Student Portal
+                  Enter Student Portal
                   <ArrowRight className="w-4 h-4 ml-2" />
                 </Button>
               </Link>
               <Button
                 variant="outline"
                 size="lg"
-                onClick={() => scrollToSection("features")}
-                className="w-full sm:w-auto font-semibold text-foreground px-6 py-6 rounded-2xl border-border bg-card/60 backdrop-blur hover:bg-card/90"
+                onClick={() => scrollToSection("how-it-works")}
+                className="w-full sm:w-auto font-semibold text-muted-foreground hover:text-foreground px-6 rounded-xl border-border"
               >
                 Explore Capabilities ↓
               </Button>
             </div>
 
-            {/* Trust Badges */}
-            <div className="grid grid-cols-3 gap-3 pt-6 border-t border-border/60 max-w-lg">
-              <div className="flex items-center gap-2 text-xs text-muted-foreground font-medium">
-                <div className="w-7 h-7 rounded-lg bg-primary/10 text-primary flex items-center justify-center shrink-0">
-                  <FileCheck2 className="w-4 h-4" />
-                </div>
-                <span>PHQ-9 Validated</span>
+            {/* Trust badges */}
+            <div className="fade-up-4 flex flex-wrap items-center gap-4 sm:gap-6 mt-8 sm:mt-10 pt-6 border-t border-border/80 text-xs text-muted-foreground">
+              <div className="flex items-center gap-1.5">
+                <FileCheck2 className="w-4 h-4 text-primary shrink-0" />
+                <span>PHQ-9 & GAD-7 Validated</span>
               </div>
-              <div className="flex items-center gap-2 text-xs text-muted-foreground font-medium">
-                <div className="w-7 h-7 rounded-lg bg-teal-500/10 text-teal-600 dark:text-teal-400 flex items-center justify-center shrink-0">
-                  <Lock className="w-4 h-4" />
-                </div>
-                <span>k ≥ 10 Privacy</span>
+              <div className="flex items-center gap-1.5">
+                <BarChart3 className="w-4 h-4 text-primary shrink-0" />
+                <span>SHAP Explainable AI</span>
               </div>
-              <div className="flex items-center gap-2 text-xs text-muted-foreground font-medium">
-                <div className="w-7 h-7 rounded-lg bg-purple-500/10 text-purple-600 dark:text-purple-400 flex items-center justify-center shrink-0">
-                  <BarChart3 className="w-4 h-4" />
-                </div>
-                <span>SHAP Explainable</span>
+              <div className="flex items-center gap-1.5">
+                <Lock className="w-4 h-4 text-emerald-500 shrink-0" />
+                <span>Zero-Keystroke Privacy</span>
               </div>
             </div>
-          </motion.div>
+          </div>
 
-          {/* Right Column: Floating Interactive Glass Telemetry HUD (5 cols) */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.7, delay: 0.2 }}
-            className="lg:col-span-5 relative"
-          >
-            {/* Ambient Background Glow */}
-            <div className="absolute -inset-2 bg-gradient-to-r from-primary/20 via-purple-500/20 to-teal-500/20 rounded-3xl blur-2xl opacity-50 pointer-events-none" />
-
-            <div className="relative rounded-3xl bg-card/85 backdrop-blur-xl border border-border shadow-2xl p-5 sm:p-6 space-y-4">
-              
-              {/* HUD Header */}
-              <div className="flex items-center justify-between pb-3 border-b border-border/60">
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center shrink-0 overflow-hidden border border-primary/20">
-                    <LottieIllustration variant="companion" className="w-12 h-12" />
+          {/* RIGHT COLUMN — Responsive Glassmorphic Telemetry HUD on Phone and Desktop */}
+          <div className="flex flex-col justify-center relative fade-up-2 mt-4 lg:mt-0">
+            <div className="relative rounded-2xl bg-card/50 backdrop-blur-md border border-border/80 shadow-2xl p-4 sm:p-6 space-y-4 sm:space-y-5 overflow-hidden">
+              {/* Header */}
+              <div className="flex items-center justify-between pb-3 sm:pb-4 border-b border-border/60">
+                <div className="flex items-center gap-2 sm:gap-2.5">
+                  <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary shrink-0">
+                    <Activity className="w-4 h-4" />
                   </div>
                   <div>
-                    <h3 className="text-sm font-bold text-foreground flex items-center gap-1.5">
-                      <span>MindGuard Companion</span>
-                      <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                    </h3>
-                    <p className="text-[11px] text-muted-foreground">Autonomous Neural Telemetry</p>
+                    <h3 className="text-xs sm:text-sm font-semibold text-foreground">Live Telemetry Synchrony</h3>
+                    <p className="text-[10px] sm:text-[11px] text-muted-foreground">Autonomous Neural Signal Mesh</p>
                   </div>
                 </div>
-                <div className="px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-xs font-bold">
-                  Active
+                <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-500 text-[10px] sm:text-xs font-semibold shrink-0">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                  <span>Synchronized</span>
                 </div>
               </div>
 
-              {/* Main Wellness Metric Preview */}
-              <div className="p-4 rounded-2xl bg-secondary/50 border border-border flex items-center justify-between">
-                <div>
-                  <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block">
-                    Student Wellness Index
+              {/* Multimodal Telemetry Grid */}
+              <div className="grid grid-cols-2 gap-2 sm:gap-3">
+                <div className="p-2.5 sm:p-3.5 rounded-xl bg-background/60 border border-border/60 space-y-1">
+                  <span className="text-[9px] sm:text-[10px] uppercase font-bold text-muted-foreground tracking-wider block truncate">
+                    Cognitive Sentiment
                   </span>
-                  <div className="text-4xl font-black text-emerald-600 dark:text-emerald-400 mt-1 flex items-baseline gap-2">
-                    <span>88</span>
-                    <span className="text-sm font-semibold text-muted-foreground">/ 100</span>
-                  </div>
-                  <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-medium inline-flex items-center gap-1 mt-1">
-                    <TrendingUp className="w-3.5 h-3.5" /> +4.2% healthy stability
-                  </span>
-                </div>
-                <div className="w-16 h-16 rounded-full border-4 border-emerald-500/20 border-t-emerald-500 flex items-center justify-center font-bold text-xs text-foreground bg-card">
-                  Optimal
-                </div>
-              </div>
-
-              {/* Live Multimodal Signal Indicators */}
-              <div className="grid grid-cols-2 gap-2.5 text-xs">
-                <div className="p-3 rounded-xl bg-background/80 border border-border/60 space-y-1">
-                  <div className="flex items-center justify-between text-muted-foreground text-[10px] font-bold uppercase tracking-wider">
-                    <span>Sentiment</span>
-                    <Smile className="w-3.5 h-3.5 text-primary" />
-                  </div>
-                  <p className="font-bold text-foreground text-sm">Calm & Focused</p>
-                  <p className="text-[10px] text-muted-foreground">DistilBERT 6-Class</p>
-                </div>
-
-                <div className="p-3 rounded-xl bg-background/80 border border-border/60 space-y-1">
-                  <div className="flex items-center justify-between text-muted-foreground text-[10px] font-bold uppercase tracking-wider">
-                    <span>Circadian</span>
-                    <Moon className="w-3.5 h-3.5 text-indigo-500" />
-                  </div>
-                  <p className="font-bold text-foreground text-sm">7.4 hrs Sleep</p>
-                  <p className="text-[10px] text-muted-foreground">Regular Rhythm</p>
-                </div>
-              </div>
-
-              {/* Emergency SOS Quick-Connect Bar */}
-              <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-between text-xs">
-                <div className="flex items-center gap-2">
-                  <PhoneCall className="w-4 h-4 text-rose-500 shrink-0" />
-                  <span className="font-semibold text-rose-600 dark:text-rose-400">
-                    Tele-MANAS Emergency Net
-                  </span>
-                </div>
-                <span className="font-mono font-bold text-rose-600 dark:text-rose-400 px-2 py-0.5 rounded bg-rose-500/10">
-                  14416
-                </span>
-              </div>
-
-            </div>
-          </motion.div>
-
-        </div>
-      </AuroraBackground>
-
-      {/* ── HOW IT WORKS: INTERACTIVE WORKFLOW ── */}
-      <section id="how-it-works" ref={howRef} className="py-20 sm:py-28 border-b border-border bg-card/40">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <div className="text-center max-w-2xl mx-auto mb-16 space-y-3">
-            <span className="text-xs font-bold text-primary tracking-widest uppercase bg-primary/10 px-3 py-1 rounded-full border border-primary/20">
-              Clinical Architecture
-            </span>
-            <h2 className="text-3xl sm:text-4xl font-black text-foreground tracking-tight">
-              How MindGuardAI Operates
-            </h2>
-            <p className="text-sm sm:text-base text-muted-foreground">
-              A 4-stage safety net engineered with university psychologists to identify distress weeks before exam failure or clinical breakdown.
-            </p>
-          </div>
-
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            
-            {/* Step 1 */}
-            <SpotlightCard className="p-6 space-y-4" spotlightColor="rgba(59, 130, 246, 0.15)">
-              <div className="w-12 h-12 rounded-2xl bg-blue-500/10 text-blue-500 flex items-center justify-center font-black text-lg">
-                01
-              </div>
-              <h3 className="text-lg font-bold text-foreground">Passive & Active Pulse</h3>
-              <p className="text-xs text-muted-foreground leading-relaxed">
-                Students complete 60-second micro check-ins via text, audio, or standardized mood scales, while screen-time regularity tracks circadian shift.
-              </p>
-              <div className="text-[11px] font-semibold text-blue-500 flex items-center gap-1 pt-2">
-                <span>Zero Keystroke Logging</span>
-              </div>
-            </SpotlightCard>
-
-            {/* Step 2 */}
-            <SpotlightCard className="p-6 space-y-4" spotlightColor="rgba(168, 85, 247, 0.15)">
-              <div className="w-12 h-12 rounded-2xl bg-purple-500/10 text-purple-600 dark:text-purple-400 flex items-center justify-center font-black text-lg">
-                02
-              </div>
-              <h3 className="text-lg font-bold text-foreground">Multi-Signal AI Fusion</h3>
-              <p className="text-xs text-muted-foreground leading-relaxed">
-                Fine-tuned NLP models evaluate sentiment polarity and emotional markers while longitudinal ML models benchmark baseline mood stability.
-              </p>
-              <div className="text-[11px] font-semibold text-purple-600 dark:text-purple-400 flex items-center gap-1 pt-2">
-                <span>DistilBERT 6-Class Emotion</span>
-              </div>
-            </SpotlightCard>
-
-            {/* Step 3 */}
-            <SpotlightCard className="p-6 space-y-4" spotlightColor="rgba(245, 158, 11, 0.15)">
-              <div className="w-12 h-12 rounded-2xl bg-amber-500/10 text-amber-500 flex items-center justify-center font-black text-lg">
-                03
-              </div>
-              <h3 className="text-lg font-bold text-foreground">Risk Stratification</h3>
-              <p className="text-xs text-muted-foreground leading-relaxed">
-                Cross-references mood drift with academic exam dates and sleep deficit to calibrate risk tiers (Low, Moderate, High) with SHAP factor explainability.
-              </p>
-              <div className="text-[11px] font-semibold text-amber-500 flex items-center gap-1 pt-2">
-                <span>SHAP Feature Attribution</span>
-              </div>
-            </SpotlightCard>
-
-            {/* Step 4 */}
-            <SpotlightCard className="p-6 space-y-4" spotlightColor="rgba(16, 185, 129, 0.15)">
-              <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-black text-lg">
-                04
-              </div>
-              <h3 className="text-lg font-bold text-foreground">Intervention & Care</h3>
-              <p className="text-xs text-muted-foreground leading-relaxed">
-                Mild stress triggers guided 4-7-8 breathing and CBT self-care exercises; elevated distress prioritizes confidential counseling appointments.
-              </p>
-              <div className="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 flex items-center gap-1 pt-2">
-                <span>24/7 Human Safety Net</span>
-              </div>
-            </SpotlightCard>
-
-          </div>
-        </div>
-      </section>
-
-      {/* ── BENTO GRID CAPABILITIES SECTION ── */}
-      <section id="features" ref={featRef} className="py-20 sm:py-28 border-b border-border">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <div className="text-center max-w-2xl mx-auto mb-16 space-y-3">
-            <span className="text-xs font-bold text-primary tracking-widest uppercase bg-primary/10 px-3 py-1 rounded-full border border-primary/20">
-              Modern Bento Architecture
-            </span>
-            <h2 className="text-3xl sm:text-4xl font-black text-foreground tracking-tight">
-              Clinical Science Capabilities
-            </h2>
-            <p className="text-sm sm:text-base text-muted-foreground">
-              Built with evidence-based psychology protocols, explainable AI pipelines, and strict campus privacy isolation.
-            </p>
-          </div>
-
-          {/* Bento Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            
-            {/* Bento Item 1: Large 2-Col Hero Card */}
-            <SpotlightCard
-              className="md:col-span-2 p-8 space-y-5"
-              spotlightColor="rgba(59, 130, 246, 0.2)"
-            >
-              <div className="flex items-center justify-between">
-                <div className="w-12 h-12 rounded-2xl bg-primary/10 text-primary flex items-center justify-center">
-                  <Brain className="w-6 h-6" />
-                </div>
-                <span className="px-3 py-1 rounded-full text-xs font-bold bg-primary/10 text-primary border border-primary/20 uppercase tracking-wider">
-                  DistilBERT NLP
-                </span>
-              </div>
-              <div className="space-y-2">
-                <h3 className="text-2xl font-bold text-foreground">
-                  Multimodal Affective NLP Engine
-                </h3>
-                <p className="text-sm text-muted-foreground leading-relaxed max-w-xl">
-                  Evaluates textual reflections, voice sentiment, and behavioral frequency to identify 6 emotional states (Joy, Sadness, Anger, Fear, Love, Surprise) with longitudinal drift monitoring.
-                </p>
-              </div>
-
-              {/* Mini visual preview */}
-              <div className="pt-4 grid sm:grid-cols-3 gap-3">
-                <div className="p-3 rounded-xl bg-secondary/50 border border-border">
-                  <span className="text-[10px] uppercase font-bold text-muted-foreground block">Polarity Accuracy</span>
-                  <span className="text-lg font-black text-foreground">94.8%</span>
-                </div>
-                <div className="p-3 rounded-xl bg-secondary/50 border border-border">
-                  <span className="text-[10px] uppercase font-bold text-muted-foreground block">Inference Speed</span>
-                  <span className="text-lg font-black text-foreground">&lt; 85ms</span>
-                </div>
-                <div className="p-3 rounded-xl bg-secondary/50 border border-border">
-                  <span className="text-[10px] uppercase font-bold text-muted-foreground block">Telemetry Encryption</span>
-                  <span className="text-lg font-black text-foreground">AES-256</span>
-                </div>
-              </div>
-            </SpotlightCard>
-
-            {/* Bento Item 2: SHAP Explainability */}
-            <SpotlightCard
-              className="p-8 space-y-5"
-              spotlightColor="rgba(168, 85, 247, 0.2)"
-            >
-              <div className="w-12 h-12 rounded-2xl bg-purple-500/10 text-purple-600 dark:text-purple-400 flex items-center justify-center">
-                <BarChart3 className="w-6 h-6" />
-              </div>
-              <div className="space-y-2">
-                <h3 className="text-xl font-bold text-foreground">SHAP Explainable AI</h3>
-                <p className="text-xs text-muted-foreground leading-relaxed">
-                  Zero "black box" decisions. Counselors view exact attribution percentages explaining why a student's risk level changed.
-                </p>
-              </div>
-              <div className="space-y-1.5 pt-2">
-                <div className="flex justify-between text-[11px] font-semibold text-muted-foreground">
-                  <span>Sleep Deficit</span>
-                  <span className="text-foreground">+38%</span>
-                </div>
-                <div className="w-full h-1.5 rounded-full bg-secondary overflow-hidden">
-                  <div className="w-[38%] h-full bg-purple-500 rounded-full" />
-                </div>
-                <div className="flex justify-between text-[11px] font-semibold text-muted-foreground pt-1">
-                  <span>Exam Proximity</span>
-                  <span className="text-foreground">+27%</span>
-                </div>
-                <div className="w-full h-1.5 rounded-full bg-secondary overflow-hidden">
-                  <div className="w-[27%] h-full bg-indigo-500 rounded-full" />
-                </div>
-              </div>
-            </SpotlightCard>
-
-            {/* Bento Item 3: Circadian Telemetry */}
-            <SpotlightCard
-              className="p-8 space-y-5"
-              spotlightColor="rgba(99, 102, 241, 0.2)"
-            >
-              <div className="w-12 h-12 rounded-2xl bg-indigo-500/10 text-indigo-500 flex items-center justify-center">
-                <Moon className="w-6 h-6" />
-              </div>
-              <div className="space-y-2">
-                <h3 className="text-xl font-bold text-foreground">Circadian Sleep Analytics</h3>
-                <p className="text-xs text-muted-foreground leading-relaxed">
-                  Self-reported logs and kernel-power screen regularity analyze sleep debt and late-night fragmentation without recording keystrokes.
-                </p>
-              </div>
-              <div className="p-3 rounded-xl bg-secondary/50 border border-border text-xs flex items-center justify-between">
-                <span className="text-muted-foreground">Ideal Window:</span>
-                <span className="font-bold text-foreground">11:00 PM – 7:00 AM</span>
-              </div>
-            </SpotlightCard>
-
-            {/* Bento Item 4: Counselor Triage */}
-            <SpotlightCard
-              className="p-8 space-y-5"
-              spotlightColor="rgba(245, 158, 11, 0.2)"
-            >
-              <div className="w-12 h-12 rounded-2xl bg-amber-500/10 text-amber-500 flex items-center justify-center">
-                <Users className="w-6 h-6" />
-              </div>
-              <div className="space-y-2">
-                <h3 className="text-xl font-bold text-foreground">Counselor Triage Queue</h3>
-                <p className="text-xs text-muted-foreground leading-relaxed">
-                  Priority workspace equips university psychologists to triage high-risk cases, review psychometric trajectories, and log SOAP notes.
-                </p>
-              </div>
-              <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-xs font-semibold text-amber-600 dark:text-amber-400 flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
-                <span>Real-Time Support Triage</span>
-              </div>
-            </SpotlightCard>
-
-            {/* Bento Item 5: Emergency SOS Safety Net */}
-            <SpotlightCard
-              className="p-8 space-y-5"
-              spotlightColor="rgba(244, 63, 94, 0.2)"
-            >
-              <div className="w-12 h-12 rounded-2xl bg-rose-500/10 text-rose-500 flex items-center justify-center">
-                <PhoneCall className="w-6 h-6" />
-              </div>
-              <div className="space-y-2">
-                <h3 className="text-xl font-bold text-foreground">24/7 Crisis Escalation</h3>
-                <p className="text-xs text-muted-foreground leading-relaxed">
-                  Direct one-click connection to Tele-MANAS (14416) and KIRAN (1800-599-0019) helplines with zero queuing for critical situations.
-                </p>
-              </div>
-              <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-xs font-mono font-bold text-rose-600 dark:text-rose-400 flex justify-between">
-                <span>Tele-MANAS Hotline</span>
-                <span>14416</span>
-              </div>
-            </SpotlightCard>
-
-          </div>
-        </div>
-      </section>
-
-      {/* ── LIVE METRICS COUNTER ── */}
-      <section className="py-16 bg-gradient-to-r from-primary via-indigo-600 to-primary text-white">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-          <div>
-            <p className="text-4xl sm:text-5xl font-black font-mono">
-              <AnimatedCounter value={s1.value} />%
-            </p>
-            <p className="text-xs uppercase tracking-widest font-bold mt-1 text-white/80">
-              Risk Calibration
-            </p>
-          </div>
-          <div>
-            <p className="text-4xl sm:text-5xl font-black font-mono">
-              <AnimatedCounter value={s2.value} />+
-            </p>
-            <p className="text-xs uppercase tracking-widest font-bold mt-1 text-white/80">
-              Active Students
-            </p>
-          </div>
-          <div>
-            <p className="text-4xl sm:text-5xl font-black font-mono">
-              <AnimatedCounter value={s3.value} />
-            </p>
-            <p className="text-xs uppercase tracking-widest font-bold mt-1 text-white/80">
-              Affective Modalities
-            </p>
-          </div>
-          <div>
-            <p className="text-4xl sm:text-5xl font-black font-mono">
-              <AnimatedCounter value={s4.value} />
-            </p>
-            <p className="text-xs uppercase tracking-widest font-bold mt-1 text-white/80">
-              Calibrated Tiers
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* ── PRIVACY & COMPLIANCE SECTION ── */}
-      <section id="privacy" ref={privRef} className="py-20 sm:py-28 border-b border-border bg-card/50">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6">
-          <div className="p-8 sm:p-12 rounded-3xl bg-card border border-border shadow-xl space-y-8">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-6 border-b border-border">
-              <div className="flex items-center gap-4">
-                <div className="w-14 h-14 rounded-2xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
-                  <Lock className="w-7 h-7" />
-                </div>
-                <div>
-                  <h3 className="text-2xl font-bold text-foreground">
-                    Zero-Surveillance Privacy Standard
-                  </h3>
-                  <p className="text-xs sm:text-sm text-muted-foreground">
-                    Enforcing k-Anonymity (k ≥ 10) & Institutional Tenant Isolation
+                  <p className="text-base sm:text-xl font-extrabold text-foreground">Positive (88%)</p>
+                  <p className="text-[10px] sm:text-[11px] text-primary flex items-center gap-1">
+                    <span>NLP DistilBERT 6-Class</span>
                   </p>
                 </div>
-              </div>
-              <div className="px-3.5 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-xs font-bold">
-                GDPR & HIPAA Aligned
-              </div>
-            </div>
 
-            <div className="grid sm:grid-cols-3 gap-6 text-xs text-muted-foreground leading-relaxed">
-              <div className="space-y-2">
-                <h4 className="text-sm font-bold text-foreground flex items-center gap-1.5">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-500" />
-                  <span>Zero Keystroke Snooping</span>
-                </h4>
-                <p>
-                  MindGuardAI never records text keystrokes, active browser tabs, or private communications. Data collection is strictly limited to intentional check-ins.
-                </p>
+                <div className="p-2.5 sm:p-3.5 rounded-xl bg-background/60 border border-border/60 space-y-1">
+                  <span className="text-[9px] sm:text-[10px] uppercase font-bold text-muted-foreground tracking-wider block truncate">
+                    Circadian Rhythm
+                  </span>
+                  <p className="text-base sm:text-xl font-extrabold text-blue-500">7.4h Regular</p>
+                  <p className="text-[10px] sm:text-[11px] text-muted-foreground">Fragmentation 0.12</p>
+                </div>
+
+                <div className="p-2.5 sm:p-3.5 rounded-xl bg-background/60 border border-border/60 space-y-1">
+                  <span className="text-[9px] sm:text-[10px] uppercase font-bold text-muted-foreground tracking-wider block truncate">
+                    Screen Time
+                  </span>
+                  <p className="text-base sm:text-xl font-extrabold text-emerald-500">Balanced</p>
+                  <p className="text-[10px] sm:text-[11px] text-muted-foreground">Zero-keystroke</p>
+                </div>
+
+                <div className="p-2.5 sm:p-3.5 rounded-xl bg-background/60 border border-border/60 space-y-1">
+                  <span className="text-[9px] sm:text-[10px] uppercase font-bold text-muted-foreground tracking-wider block truncate">
+                    Risk Tier
+                  </span>
+                  <p className="text-base sm:text-xl font-extrabold text-emerald-500">Low (0.14)</p>
+                  <p className="text-[10px] sm:text-[11px] text-muted-foreground">PHQ-9 Validated</p>
+                </div>
               </div>
-              <div className="space-y-2">
-                <h4 className="text-sm font-bold text-foreground flex items-center gap-1.5">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-500" />
-                  <span>Administrative Isolation</span>
-                </h4>
-                <p>
-                  University deans and professors cannot inspect individual student psychological profiles. Admins only see aggregated cohort cohorts (k ≥ 10).
-                </p>
-              </div>
-              <div className="space-y-2">
-                <h4 className="text-sm font-bold text-foreground flex items-center gap-1.5">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-500" />
-                  <span>Total Data Sovereignty</span>
-                </h4>
-                <p>
-                  Students can view all logged telemetry, toggle passive tracking modules, or permanently delete their entire wellness profile with one click.
-                </p>
+
+              {/* Status footer with action potentials notice */}
+              <div className="flex items-center justify-between pt-2.5 sm:pt-3 border-t border-border/60 text-[11px] sm:text-xs text-muted-foreground">
+                <span className="flex items-center gap-1.5">
+                  <span className="relative flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-cyan-500"></span>
+                  </span>
+                  Active Synaptic Axon Links
+                </span>
+                <span className="font-mono text-[11px] text-foreground font-semibold">120+ Nodes</span>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* ── FAQ SECTION (ACCORDION) ── */}
-      <section id="faq" ref={faqRef} className="py-20 sm:py-28 border-b border-border">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6">
-          <div className="text-center max-w-2xl mx-auto mb-16 space-y-3">
-            <span className="text-xs font-bold text-primary tracking-widest uppercase bg-primary/10 px-3 py-1 rounded-full border border-primary/20">
-              Knowledge Base
+      {/* ── HOW IT WORKS SECTION ── */}
+      <section
+        id="how-it-works"
+        ref={howRef as React.RefObject<HTMLElement>}
+        className="relative z-10 py-24 px-4 sm:px-6 max-w-7xl mx-auto"
+      >
+        <div className="text-center max-w-2xl mx-auto mb-16 space-y-3">
+          <span className="reveal text-xs font-bold uppercase tracking-wider text-primary block">
+            Proactive Architecture
+          </span>
+          <h2 className="reveal text-3xl sm:text-4xl font-extrabold text-foreground tracking-tight">
+            How MindGuardAI Protects Students
+          </h2>
+          <p className="reveal text-sm text-muted-foreground">
+            A continuous, non-intrusive clinical safety net that bridges daily campus living with proactive mental healthcare.
+          </p>
+        </div>
+
+        <div className="reveal-group grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {/* Step 01 */}
+          <Card className="reveal card-hover relative bg-card border border-border rounded-2xl shadow-xs transition-all">
+            <CardContent className="p-6 space-y-4">
+              <span className="text-2xl font-mono font-extrabold text-muted-foreground/30 block">
+                01
+              </span>
+              <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
+                <Smile className="w-5 h-5" />
+              </div>
+              <h3 className="text-base font-semibold text-foreground">Daily Check-in</h3>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                Students log 30-second mood pulse, sleep hours, and journal notes. Frictionless reflection cultivates personal self-awareness.
+              </p>
+            </CardContent>
+          </Card>
+
+          {/* Step 02 */}
+          <Card className="reveal card-hover relative bg-card border border-border rounded-2xl shadow-xs transition-all">
+            <CardContent className="p-6 space-y-4">
+              <span className="text-2xl font-mono font-extrabold text-muted-foreground/30 block">
+                02
+              </span>
+              <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
+                <Brain className="w-5 h-5" />
+              </div>
+              <h3 className="text-base font-semibold text-foreground">AI Emotion Analysis</h3>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                Fine-tuned DistilBERT models classify affective sentiment across 6 distinct states, detecting subtle linguistic distress cues.
+              </p>
+            </CardContent>
+          </Card>
+
+          {/* Step 03 */}
+          <Card className="reveal card-hover relative bg-card border border-border rounded-2xl shadow-xs transition-all">
+            <CardContent className="p-6 space-y-4">
+              <span className="text-2xl font-mono font-extrabold text-muted-foreground/30 block">
+                03
+              </span>
+              <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
+                <Activity className="w-5 h-5" />
+              </div>
+              <h3 className="text-base font-semibold text-foreground">Risk Stratification</h3>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                Machine learning models synthesize mood trajectories, sleep deficits, and academic load into calibrated Low, Moderate, or High tiers.
+              </p>
+            </CardContent>
+          </Card>
+
+          {/* Step 04 */}
+          <Card className="reveal card-hover relative bg-card border border-border rounded-2xl shadow-xs transition-all">
+            <CardContent className="p-6 space-y-4">
+              <span className="text-2xl font-mono font-extrabold text-muted-foreground/30 block">
+                04
+              </span>
+              <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
+                <HeartHandshake className="w-5 h-5" />
+              </div>
+              <h3 className="text-base font-semibold text-foreground">Guided Care Pathway</h3>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                Tailored self-care exercises, CBT tools, and instant counselor triage trigger automatically to arrest distress before crisis.
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+      </section>
+
+      {/* ── CAPABILITIES SECTION ── */}
+      <section
+        id="features"
+        ref={featRef as React.RefObject<HTMLElement>}
+        className="relative z-10 py-24 px-4 sm:px-6 bg-secondary/35 backdrop-blur-xs border-y border-border"
+      >
+        <div className="max-w-7xl mx-auto space-y-14">
+          <div className="text-center max-w-2xl mx-auto space-y-3">
+            <span className="reveal text-xs font-bold uppercase tracking-wider text-primary block">
+              Core Architecture
             </span>
-            <h2 className="text-3xl sm:text-4xl font-black text-foreground tracking-tight">
-              Frequently Asked Questions
+            <h2 className="reveal text-3xl sm:text-4xl font-extrabold text-foreground tracking-tight">
+              Clinical Science & Explainable Intelligence
             </h2>
-            <p className="text-sm sm:text-base text-muted-foreground">
-              Everything you need to know about MindGuardAI's algorithms, clinical validation, and data safety.
+            <p className="reveal text-sm text-muted-foreground">
+              Every algorithm, data pipeline, and triage policy was engineered in accordance with psychiatric validation standards.
             </p>
           </div>
 
-          <div className="space-y-3">
-            {faqs.map((faq, index) => {
-              const isOpen = openFaq === index;
-              return (
-                <div
-                  key={index}
-                  className="rounded-2xl border border-border bg-card overflow-hidden transition-all duration-200"
-                >
-                  <button
-                    onClick={() => setOpenFaq(isOpen ? null : index)}
-                    className="w-full p-5 text-left flex items-center justify-between gap-4 font-bold text-sm sm:text-base text-foreground hover:bg-secondary/40 transition-colors"
-                  >
-                    <span>{faq.question}</span>
-                    <ChevronDown
-                      className={`w-5 h-5 text-muted-foreground shrink-0 transition-transform duration-200 ${
-                        isOpen ? "transform rotate-180 text-primary" : ""
-                      }`}
-                    />
-                  </button>
-                  <AnimatePresence>
-                    {isOpen && (
-                      <motion.div
-                        initial={{ opacity: 0, height: 0 }}
-                        animate={{ opacity: 1, height: "auto" }}
-                        exit={{ opacity: 0, height: 0 }}
-                        transition={{ duration: 0.2 }}
-                      >
-                        <div className="px-5 pb-5 text-xs sm:text-sm text-muted-foreground leading-relaxed border-t border-border/50 pt-3">
-                          {faq.answer}
-                        </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
+          {/* 6 feature cards each with reveal card-hover */}
+          <div className="reveal-group grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <Card className="reveal card-hover bg-card border border-border rounded-2xl shadow-xs transition-all">
+              <CardContent className="p-6 space-y-3">
+                <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
+                  <span className="text-xl" role="img" aria-label="brain">🧠</span>
                 </div>
-              );
-            })}
+                <h3 className="text-base font-semibold text-foreground">Emotion NLP</h3>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  DistilBERT 6-class classifier accurately detects joy, sadness, anxiety, anger, fear, and surprise from journal submissions with high precision.
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card className="reveal card-hover bg-card border border-border rounded-2xl shadow-xs transition-all">
+              <CardContent className="p-6 space-y-3">
+                <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
+                  <span className="text-xl" role="img" aria-label="bar chart">📊</span>
+                </div>
+                <h3 className="text-base font-semibold text-foreground">SHAP Explainability</h3>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  Every score explained, not a black box. Students and clinical counselors see the precise biometric and survey factors driving every prediction.
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card className="reveal card-hover bg-card border border-border rounded-2xl shadow-xs transition-all">
+              <CardContent className="p-6 space-y-3">
+                <div className="w-10 h-10 rounded-xl bg-rose-500/10 text-rose-500 flex items-center justify-center">
+                  <span className="text-xl" role="img" aria-label="emergency siren">🚨</span>
+                </div>
+                <h3 className="text-base font-semibold text-foreground">Emergency SOS</h3>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  24/7 crisis escalation with Tele-MANAS (14416) & KIRAN helplines. One-click emergency protocols bypass queues to reach immediate human responders.
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card className="reveal card-hover bg-card border border-border rounded-2xl shadow-xs transition-all">
+              <CardContent className="p-6 space-y-3">
+                <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
+                  <span className="text-xl" role="img" aria-label="sleeping face">😴</span>
+                </div>
+                <h3 className="text-base font-semibold text-foreground">Sleep & Circadian</h3>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  Kernel-power Windows telemetry and self-reported sleep records analyze sleep debt and late-night fragmentation without capturing keystrokes.
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card className="reveal card-hover bg-card border border-border rounded-2xl shadow-xs transition-all">
+              <CardContent className="p-6 space-y-3">
+                <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
+                  <span className="text-xl" role="img" aria-label="stethoscope">🩺</span>
+                </div>
+                <h3 className="text-base font-semibold text-foreground">Counselor Triage</h3>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  Priority queue with 5-tab case workspace enables university psychologists to review psychometric trends, log SOAP notes, and initiate outreach.
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card className="reveal card-hover bg-card border border-border rounded-2xl shadow-xs transition-all">
+              <CardContent className="p-6 space-y-3">
+                <div className="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
+                  <span className="text-xl" role="img" aria-label="lock">🔒</span>
+                </div>
+                <h3 className="text-base font-semibold text-foreground">k-Anonymity Privacy</h3>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  Admins see cohort data only, k ≥ 10. Student records are encrypted and decoupled from university academic standing or administrative viewing.
+                </p>
+              </CardContent>
+            </Card>
           </div>
         </div>
       </section>
 
-      {/* ── CRISIS ESCALATION HELPLINES ── */}
-      <section id="helplines" className="py-16 bg-rose-500/5 border-b border-rose-500/20">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 text-center space-y-6">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-500/10 text-rose-600 dark:text-rose-400 text-xs font-bold">
-            <PhoneCall className="w-3.5 h-3.5" />
-            <span>24/7 Immediate Emergency Helplines</span>
+      {/* ── STATS SECTION ── */}
+      <section
+        ref={s1.ref as React.RefObject<HTMLElement>}
+        className="stats-gradient relative z-10 py-20 overflow-hidden"
+      >
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center max-w-4xl mx-auto px-6 relative z-10">
+          <div>
+            <p className="text-5xl font-black text-white">
+              {s1.value}%
+            </p>
+            <p className="text-xs text-white/60 uppercase tracking-wider font-semibold mt-1">
+              Risk Accuracy
+            </p>
           </div>
-          <h2 className="text-2xl sm:text-3xl font-black text-foreground">
-            In Crisis? You Are Never Alone.
-          </h2>
-          <p className="text-xs sm:text-sm text-muted-foreground max-w-xl mx-auto">
-            If you or a fellow student are experiencing severe distress or thoughts of self-harm, confidential trained professionals are available 24/7 free of charge.
-          </p>
+          <div>
+            <p className="text-5xl font-black text-white">
+              {s2.value.toLocaleString()}+
+            </p>
+            <p className="text-xs text-white/60 uppercase tracking-wider font-semibold mt-1">
+              Students Monitored
+            </p>
+          </div>
+          <div>
+            <p className="text-5xl font-black text-white">
+              {s3.value}
+            </p>
+            <p className="text-xs text-white/60 uppercase tracking-wider font-semibold mt-1">
+              Emotion Classes
+            </p>
+          </div>
+          <div>
+            <p className="text-5xl font-black text-white">
+              {s4.value}
+            </p>
+            <p className="text-xs text-white/60 uppercase tracking-wider font-semibold mt-1">
+              Risk Tiers
+            </p>
+          </div>
+        </div>
+      </section>
 
-          <div className="grid sm:grid-cols-2 gap-4 max-w-2xl mx-auto pt-2">
+      {/* ── PRIVACY SECTION ── */}
+      <section
+        id="privacy"
+        ref={privRef as React.RefObject<HTMLElement>}
+        className="relative z-10 py-24 px-4 sm:px-6 bg-secondary/35 backdrop-blur-xs"
+      >
+        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+          {/* Left Column */}
+          <div className="lg:col-span-6 space-y-4">
+            <div className="reveal inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 text-xs font-semibold">
+              <Shield className="w-3.5 h-3.5" />
+              <span>Institutional Privacy Safeguard</span>
+            </div>
+            <h2 className="reveal text-3xl sm:text-4xl font-extrabold text-foreground tracking-tight">
+              Zero-Keystroke Privacy by Design
+            </h2>
+            <p className="reveal text-sm text-muted-foreground leading-relaxed">
+              We firmly believe mental healthcare cannot function under surveillance. MindGuardAI collects no keystroke logs, no screen captures, and no private message contents. Telemetry is limited to kernel sleep cycles and consented mood journals.
+            </p>
+            <p className="reveal text-sm text-muted-foreground leading-relaxed">
+              University administrators only receive k-anonymized aggregate cohort reports (k ≥ 10), ensuring no single student can ever be singled out.
+            </p>
+          </div>
+
+          {/* Right Column: 4 checklist items */}
+          <div className="reveal-group lg:col-span-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="reveal card-hover flex items-start gap-3 p-5 rounded-2xl bg-card border border-border shadow-xs">
+              <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0 mt-0.5" />
+              <div>
+                <h4 className="text-sm font-semibold text-foreground">Zero Keystroke Logging</h4>
+                <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                  No text typed in external applications is ever monitored, logged, or sent to server memory.
+                </p>
+              </div>
+            </div>
+
+            <div className="reveal card-hover flex items-start gap-3 p-5 rounded-2xl bg-card border border-border shadow-xs">
+              <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0 mt-0.5" />
+              <div>
+                <h4 className="text-sm font-semibold text-foreground">AES-256-GCM Encryption</h4>
+                <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                  All clinical journals and screening records are secured with cryptographic tenant isolation.
+                </p>
+              </div>
+            </div>
+
+            <div className="reveal card-hover flex items-start gap-3 p-5 rounded-2xl bg-card border border-border shadow-xs">
+              <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0 mt-0.5" />
+              <div>
+                <h4 className="text-sm font-semibold text-foreground">Differential Privacy & k ≥ 10</h4>
+                <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                  Campus-wide dashboards suppress small group data to mathematically prevent re-identification.
+                </p>
+              </div>
+            </div>
+
+            <div className="reveal card-hover flex items-start gap-3 p-5 rounded-2xl bg-card border border-border shadow-xs">
+              <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0 mt-0.5" />
+              <div>
+                <h4 className="text-sm font-semibold text-foreground">Data Revocation & Purge</h4>
+                <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                  Students retain full ownership to download, modify, or permanently purge their data at any time.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── FAQ SECTION ── */}
+      <section
+        id="faq"
+        ref={faqRef as React.RefObject<HTMLElement>}
+        className="relative z-10 py-24 px-4 sm:px-6 max-w-4xl mx-auto space-y-10"
+      >
+        <div className="text-center space-y-3">
+          <span className="reveal text-xs font-bold uppercase tracking-wider text-primary block">
+            Questions & Answers
+          </span>
+          <h2 className="reveal text-3xl sm:text-4xl font-extrabold text-foreground tracking-tight">
+            Frequently Asked Questions
+          </h2>
+          <p className="reveal text-sm text-muted-foreground">
+            Clear, transparent answers about student privacy, clinical ethics, and AI governance.
+          </p>
+        </div>
+
+        <div className="reveal-group space-y-4">
+          {faqs.map((f, i) => {
+            const isOpen = openFaq === i;
+            return (
+              <div
+                key={i}
+                className="reveal card-hover bg-card border border-border rounded-2xl p-6 transition-all"
+              >
+                <button
+                  type="button"
+                  onClick={() => setOpenFaq(isOpen ? null : i)}
+                  className="w-full text-left flex items-center justify-between gap-4 font-semibold text-foreground text-sm sm:text-base focus:outline-hidden"
+                >
+                  <span>{f.question}</span>
+                  <ChevronDown
+                    className={`w-4 h-4 text-muted-foreground shrink-0 transition-transform duration-200 ${
+                      isOpen ? "rotate-180 text-primary" : ""
+                    }`}
+                  />
+                </button>
+                {isOpen && (
+                  <p className="mt-3 text-xs sm:text-sm text-muted-foreground leading-relaxed pt-2 border-t border-border/60">
+                    {f.answer}
+                  </p>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </section>
+
+      {/* ── CRISIS HELPLINES ── */}
+      <section id="helplines" className="relative z-10 py-16 px-4 sm:px-6 max-w-5xl mx-auto">
+        <div className="p-6 sm:p-8 rounded-2xl bg-rose-500/5 border border-rose-500/20 text-center space-y-4">
+          <div className="w-12 h-12 mx-auto rounded-full bg-rose-500/10 flex items-center justify-center text-rose-500">
+            <PhoneCall className="w-6 h-6 pulse-soft" />
+          </div>
+          <div>
+            <h3 className="text-xl font-bold text-foreground">Emergency Crisis Escalation</h3>
+            <p className="text-xs sm:text-sm text-muted-foreground max-w-md mx-auto mt-1">
+              If you or someone on campus is in immediate distress or having thoughts of self-harm, confidential free help is available right now.
+            </p>
+          </div>
+
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-2">
             <a
               href="tel:14416"
-              className="p-5 rounded-2xl bg-card border border-rose-500/30 shadow-md hover:border-rose-500 hover:shadow-rose-500/10 transition-all flex items-center justify-between group"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-rose-500 text-white font-bold text-sm shadow-sm hover:bg-rose-600 transition-colors"
             >
-              <div className="text-left">
-                <span className="text-xs font-bold text-muted-foreground uppercase block">Tele-MANAS Hotline</span>
-                <span className="text-2xl font-black text-rose-600 dark:text-rose-400 font-mono">14416</span>
-              </div>
-              <Button size="sm" variant="destructive" className="rounded-xl text-xs font-bold group-hover:scale-105 transition-transform">
-                Call Free
-              </Button>
+              <PhoneCall className="w-4 h-4" />
+              <span>Tele-MANAS Helpline: 14416</span>
             </a>
-
             <a
               href="tel:18005990019"
-              className="p-5 rounded-2xl bg-card border border-rose-500/30 shadow-md hover:border-rose-500 hover:shadow-rose-500/10 transition-all flex items-center justify-between group"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-secondary border border-border text-foreground font-semibold text-sm hover:bg-secondary/80 transition-colors"
             >
-              <div className="text-left">
-                <span className="text-xs font-bold text-muted-foreground uppercase block">KIRAN Mental Health</span>
-                <span className="text-xl font-black text-foreground font-mono">1800-599-0019</span>
-              </div>
-              <Button size="sm" variant="outline" className="rounded-xl text-xs font-bold group-hover:scale-105 transition-transform">
-                Call Toll-Free
-              </Button>
+              <PhoneCall className="w-4 h-4 text-rose-500" />
+              <span>KIRAN Mental Health: 1800-599-0019</span>
             </a>
           </div>
         </div>
       </section>
 
       {/* ── FOOTER ── */}
-      <footer className="py-12 bg-card border-t border-border text-muted-foreground text-xs">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-6">
-          <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
-              <Brain className="w-4 h-4" />
+      <footer className="relative z-10 border-t border-border bg-card/85 backdrop-blur-md py-12 px-4 sm:px-6">
+        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-8">
+          {/* Logo + tagline */}
+          <div className="space-y-3">
+            <div className="flex items-center gap-2.5">
+              <div className="w-9 h-9 rounded-xl bg-card border border-border/80 p-0.5 flex items-center justify-center shrink-0 overflow-hidden">
+                <img src="/logo.png" alt="MindGuardAI Logo" className="w-full h-full object-contain" />
+              </div>
+              <span className="font-bold text-base text-foreground">MindGuardAI</span>
             </div>
-            <span className="font-bold text-sm text-foreground">MindGuardAI</span>
-            <span className="text-xs text-muted-foreground">© {new Date().getFullYear()} All Rights Reserved.</span>
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              AI-driven student mental wellness detection and early intervention platform for higher education.
+            </p>
           </div>
 
-          <div className="flex items-center gap-6 text-xs font-semibold">
-            <button onClick={() => scrollToSection("how-it-works")} className="hover:text-foreground">Workflow</button>
-            <button onClick={() => scrollToSection("features")} className="hover:text-foreground">Capabilities</button>
-            <button onClick={() => scrollToSection("privacy")} className="hover:text-foreground">Privacy</button>
-            <button onClick={() => scrollToSection("faq")} className="hover:text-foreground">FAQ</button>
-            <Link to="/login" className="hover:text-primary">Sign In</Link>
+          {/* Link Group 1: Portal */}
+          <div className="space-y-2.5">
+            <h4 className="text-xs font-bold uppercase tracking-wider text-foreground">Portal</h4>
+            <ul className="space-y-1.5 text-xs text-muted-foreground">
+              <li>
+                <Link to="/login" className="hover:text-primary transition-colors">
+                  Student Portal
+                </Link>
+              </li>
+              <li>
+                <Link to="/login" className="hover:text-primary transition-colors">
+                  Counselor Portal
+                </Link>
+              </li>
+              <li>
+                <Link to="/login" className="hover:text-primary transition-colors">
+                  Admin Dashboard
+                </Link>
+              </li>
+            </ul>
           </div>
+
+          {/* Link Group 2: Support */}
+          <div className="space-y-2.5">
+            <h4 className="text-xs font-bold uppercase tracking-wider text-foreground">Support</h4>
+            <ul className="space-y-1.5 text-xs text-muted-foreground">
+              <li>
+                <button
+                  onClick={() => scrollToSection("helplines")}
+                  className="hover:text-primary transition-colors"
+                >
+                  Crisis Lines
+                </button>
+              </li>
+              <li>
+                <button
+                  onClick={() => scrollToSection("privacy")}
+                  className="hover:text-primary transition-colors"
+                >
+                  Privacy Policy
+                </button>
+              </li>
+              <li>
+                <Link to="/student/privacy" className="hover:text-primary transition-colors">
+                  Consent Framework
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* Link Group 3: About */}
+          <div className="space-y-2.5">
+            <h4 className="text-xs font-bold uppercase tracking-wider text-foreground">About</h4>
+            <ul className="space-y-1.5 text-xs text-muted-foreground">
+              <li>
+                <button
+                  onClick={() => scrollToSection("how-it-works")}
+                  className="hover:text-primary transition-colors"
+                >
+                  How It Works
+                </button>
+              </li>
+              <li>
+                <button
+                  onClick={() => scrollToSection("features")}
+                  className="hover:text-primary transition-colors"
+                >
+                  Capabilities
+                </button>
+              </li>
+              <li>
+                <button
+                  onClick={() => scrollToSection("faq")}
+                  className="hover:text-primary transition-colors"
+                >
+                  FAQ
+                </button>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        {/* Bottom bar */}
+        <div className="max-w-7xl mx-auto mt-8 pt-6 border-t border-border flex flex-col sm:flex-row items-center justify-between text-xs text-muted-foreground gap-2">
+          <span>© {new Date().getFullYear()} MindGuardAI. All rights reserved.</span>
+          <span>Built for Student Wellbeing</span>
         </div>
       </footer>
     </div>
