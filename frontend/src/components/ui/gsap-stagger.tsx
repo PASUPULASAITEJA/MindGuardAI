@@ -6,7 +6,7 @@ interface GSAPStaggerProps extends React.HTMLAttributes<HTMLDivElement> {
   stagger?: number; // delay between each child in seconds (e.g. 0.08)
   duration?: number;
   yOffset?: number;
-  selector?: string; // target child selector, default is direct children "> *"
+  selector?: string; // target child selector, default is direct children
   className?: string;
   delay?: number;
 }
@@ -16,7 +16,7 @@ export const GSAPStagger: React.FC<GSAPStaggerProps> = ({
   stagger = 0.08,
   duration = 0.6,
   yOffset = 20,
-  selector = "> *",
+  selector,
   className = "",
   delay = 0,
   ...props
@@ -27,8 +27,19 @@ export const GSAPStagger: React.FC<GSAPStaggerProps> = ({
     const container = containerRef.current;
     if (!container) return;
 
-    const items = container.querySelectorAll(selector);
-    if (!items || items.length === 0) return;
+    // Use container.children by default, or querySelectorAll with safe fallback
+    let items: Element[] = [];
+    if (!selector || selector === "> *") {
+      items = Array.from(container.children);
+    } else {
+      try {
+        items = Array.from(container.querySelectorAll(selector));
+      } catch {
+        items = Array.from(container.children);
+      }
+    }
+
+    if (items.length === 0) return;
 
     gsap.fromTo(
       items,
