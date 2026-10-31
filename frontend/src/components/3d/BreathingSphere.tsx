@@ -1,10 +1,6 @@
-import React, { useRef, useState, useEffect, useMemo, Suspense } from "react";
-import { Canvas, useFrame } from "@react-three/fiber";
-import { MeshDistortMaterial, Sparkles } from "@react-three/drei";
-import * as THREE from "three";
-import { Play, Pause, RotateCcw, Wind, ShieldAlert, Sparkles as SparklesIcon } from "lucide-react";
+import React, { useState, useEffect, useMemo } from "react";
+import { Play, Pause, RotateCcw, Wind, ShieldAlert } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { ThreeErrorBoundary } from "./LazyCanvasWrapper";
 
 export type BreathingPhase = "Inhale" | "Hold" | "Exhale" | "Hold After";
 
@@ -33,142 +29,6 @@ export const PRESET_CADENCES: Record<string, { label: string; desc: string; conf
   },
 };
 
-interface InnerSphereMeshProps {
-  phase: BreathingPhase;
-  phaseProgress: number; // 0 to 1 within the current phase
-  isActive: boolean;
-  reducedMotion: boolean;
-}
-
-function InnerBreathingSphereMesh({
-  phase,
-  phaseProgress,
-  isActive,
-  reducedMotion,
-}: InnerSphereMeshProps) {
-  const meshRef = useRef<THREE.Mesh>(null);
-  const coreRef = useRef<THREE.Mesh>(null);
-  const targetScale = useRef(1.0);
-
-  // Compute smooth scale target based on current phase and progress
-  let calculatedScale = 1.0;
-  if (!isActive) {
-    calculatedScale = 1.0;
-  } else if (phase === "Inhale") {
-    // Smooth ease-out expansion from 0.82 to 1.45
-    const eased = Math.sin((phaseProgress * Math.PI) / 2);
-    calculatedScale = 0.82 + eased * (1.45 - 0.82);
-  } else if (phase === "Hold") {
-    // Gentle floating expansion around 1.45
-    calculatedScale = 1.45;
-  } else if (phase === "Exhale") {
-    // Smooth ease-in contraction from 1.45 down to 0.82
-    const eased = Math.cos((phaseProgress * Math.PI) / 2);
-    calculatedScale = 0.82 + eased * (1.45 - 0.82);
-  } else {
-    // Hold After
-    calculatedScale = 0.82;
-  }
-
-  targetScale.current = calculatedScale;
-
-  // Phase color themes
-  const colorTheme = useMemo(() => {
-    switch (phase) {
-      case "Inhale":
-        return {
-          main: new THREE.Color("#38BDF8"), // Cyan
-          emissive: "#0284C7",
-          core: "#818CF8",
-          sparkle: "#38BDF8",
-        };
-      case "Hold":
-      case "Hold After":
-        return {
-          main: new THREE.Color("#F59E0B"), // Calming Amber
-          emissive: "#B45309",
-          core: "#FDE68A",
-          sparkle: "#FBBF24",
-        };
-      case "Exhale":
-        return {
-          main: new THREE.Color("#10B981"), // Emerald Release
-          emissive: "#047857",
-          core: "#34D399",
-          sparkle: "#6EE7B7",
-        };
-      default:
-        return {
-          main: new THREE.Color("#38BDF8"),
-          emissive: "#0284C7",
-          core: "#818CF8",
-          sparkle: "#38BDF8",
-        };
-    }
-  }, [phase]);
-
-  useFrame((state, delta) => {
-    if (reducedMotion) return;
-
-    if (meshRef.current) {
-      // Direct smooth interpolation toward calculated target
-      meshRef.current.scale.setScalar(
-        THREE.MathUtils.lerp(meshRef.current.scale.x, targetScale.current, delta * 3.5)
-      );
-      // Gentle meditation rotation
-      meshRef.current.rotation.y += delta * 0.2;
-      meshRef.current.rotation.x += delta * 0.08;
-    }
-
-    if (coreRef.current && meshRef.current) {
-      coreRef.current.scale.setScalar(meshRef.current.scale.x * 0.62);
-    }
-  });
-
-  return (
-    <group>
-      {/* Outer breathing respiratory mesh */}
-      <mesh ref={meshRef} scale={1.0}>
-        <icosahedronGeometry args={[1, 32]} />
-        <MeshDistortMaterial
-          color={colorTheme.main}
-          emissive={colorTheme.emissive}
-          emissiveIntensity={0.65}
-          roughness={0.2}
-          metalness={0.2}
-          distort={reducedMotion ? 0 : 0.26}
-          speed={phase === "Inhale" ? 2.2 : 1.2}
-          transparent
-          opacity={0.85}
-        />
-      </mesh>
-
-      {/* Inner luminous nucleus */}
-      <mesh ref={coreRef} scale={0.62}>
-        <sphereGeometry args={[1, 24, 24]} />
-        <meshStandardMaterial
-          color="#FFFFFF"
-          emissive={colorTheme.core}
-          emissiveIntensity={0.85}
-          roughness={0.12}
-          metalness={0.2}
-        />
-      </mesh>
-
-      {!reducedMotion && isActive && (
-        <Sparkles
-          count={32}
-          scale={3.2}
-          size={2.2}
-          speed={phase === "Inhale" ? 0.7 : 0.3}
-          color={colorTheme.sparkle}
-          opacity={0.55}
-        />
-      )}
-    </group>
-  );
-}
-
 export interface BreathingSphereProps {
   initialConfig?: BreathingTimingConfig;
   showControls?: boolean;
@@ -188,50 +48,23 @@ export const BreathingSphere: React.FC<BreathingSphereProps> = ({
   const [activePreset, setActivePreset] = useState<string>("relax426");
   const [phase, setPhase] = useState<BreathingPhase>("Inhale");
   const [secondsLeft, setSecondsLeft] = useState<number>(initialConfig.inhale);
-  const [phaseProgress, setPhaseProgress] = useState<number>(0);
   const [status, setStatus] = useState<"idle" | "running" | "paused">("running");
 
-  const prefersReducedMotion = useMemo(() => {
-    if (typeof window === "undefined") return false;
-    return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  }, []);
-
-  // Timer loop with sub-second accuracy for smooth expansion
+  // Timer loop with 1-second cadence
   useEffect(() => {
     if (status !== "running") return;
 
-    const intervalMs = 50; // 20 updates per second for silky 3D expansion
-    const currentPhaseDuration =
-      phase === "Inhale"
-        ? config.inhale
-        : phase === "Hold"
-        ? config.hold
-        : phase === "Exhale"
-        ? config.exhale
-        : (config.holdAfter || 0);
-
-    const startTime = Date.now();
-    let accumulatedElapsed = (currentPhaseDuration - secondsLeft) * 1000;
-
-    const interval = setInterval(() => {
-      accumulatedElapsed += intervalMs;
-      const totalSec = accumulatedElapsed / 1000;
-      const remainingSec = Math.max(0, currentPhaseDuration - totalSec);
-      const progress = Math.min(1, Math.max(0, totalSec / currentPhaseDuration));
-
-      setSecondsLeft(Math.ceil(remainingSec));
-      setPhaseProgress(progress);
-
-      if (remainingSec <= 0.05) {
-        // Transition to next phase in sequence
-        setPhase((current) => {
+    const timer = setInterval(() => {
+      setSecondsLeft((prev) => {
+        if (prev <= 1) {
+          // Determine next phase
           let nextPhase: BreathingPhase = "Inhale";
-          if (current === "Inhale") {
+          if (phase === "Inhale") {
             nextPhase = config.hold > 0 ? "Hold" : "Exhale";
-          } else if (current === "Hold") {
+          } else if (phase === "Hold") {
             nextPhase = "Exhale";
-          } else if (current === "Exhale") {
-            nextPhase = (config.holdAfter && config.holdAfter > 0) ? "Hold After" : "Inhale";
+          } else if (phase === "Exhale") {
+            nextPhase = config.holdAfter && config.holdAfter > 0 ? "Hold After" : "Inhale";
           } else {
             nextPhase = "Inhale";
           }
@@ -243,17 +76,20 @@ export const BreathingSphere: React.FC<BreathingSphereProps> = ({
               ? config.hold
               : nextPhase === "Exhale"
               ? config.exhale
-              : (config.holdAfter || 0);
+              : config.holdAfter || 0;
 
-          setSecondsLeft(nextDuration);
-          setPhaseProgress(0);
+          setPhase(nextPhase);
           onPhaseChange?.(nextPhase, nextDuration);
-          return nextPhase;
-        });
-      }
-    }, intervalMs);
+          return nextDuration;
+        }
 
-    return () => clearInterval(interval);
+        const updated = prev - 1;
+        onPhaseChange?.(phase, updated);
+        return updated;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
   }, [status, phase, config, onPhaseChange]);
 
   const handleStart = () => setStatus("running");
@@ -263,7 +99,6 @@ export const BreathingSphere: React.FC<BreathingSphereProps> = ({
     setStatus("idle");
     setPhase("Inhale");
     setSecondsLeft(config.inhale);
-    setPhaseProgress(0);
   };
 
   const handleSelectPreset = (key: string) => {
@@ -273,7 +108,6 @@ export const BreathingSphere: React.FC<BreathingSphereProps> = ({
     setConfig(selected.config);
     setPhase("Inhale");
     setSecondsLeft(selected.config.inhale);
-    setPhaseProgress(0);
   };
 
   const phaseInstruction = useMemo(() => {
@@ -291,29 +125,62 @@ export const BreathingSphere: React.FC<BreathingSphereProps> = ({
     }
   }, [phase, status]);
 
-  const phaseBadgeClass = useMemo(() => {
+  // Phase color theme tokens
+  const phaseColors = useMemo(() => {
     switch (phase) {
       case "Inhale":
-        return "bg-sky-500/10 text-sky-600 dark:text-sky-400 border-sky-500/20";
+        return {
+          stroke: "#0ea5e9", // Sky blue
+          bg: "bg-sky-500/10",
+          border: "border-sky-500/30",
+          ring: "ring-sky-500/20",
+          badge: "bg-sky-500/15 text-sky-600 dark:text-sky-400 border-sky-500/30",
+          circleBg: "bg-gradient-to-br from-sky-400/15 via-blue-500/10 to-indigo-500/10",
+        };
       case "Hold":
       case "Hold After":
-        return "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20";
+        return {
+          stroke: "#f59e0b", // Amber
+          bg: "bg-amber-500/10",
+          border: "border-amber-500/30",
+          ring: "ring-amber-500/20",
+          badge: "bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/30",
+          circleBg: "bg-gradient-to-br from-amber-400/15 via-orange-500/10 to-yellow-500/10",
+        };
       case "Exhale":
-        return "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20";
+        return {
+          stroke: "#10b981", // Emerald
+          bg: "bg-emerald-500/10",
+          border: "border-emerald-500/30",
+          ring: "ring-emerald-500/20",
+          badge: "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30",
+          circleBg: "bg-gradient-to-br from-emerald-400/15 via-teal-500/10 to-green-500/10",
+        };
     }
   }, [phase]);
 
-  const staticFallback = (
-    <div className="flex h-56 w-56 items-center justify-center rounded-full bg-primary/10 border border-primary/20 animate-pulse">
-      <div className="text-center">
-        <span className="text-3xl font-black text-foreground">{secondsLeft}s</span>
-        <p className="text-xs font-semibold text-muted-foreground uppercase">{phase}</p>
-      </div>
-    </div>
-  );
+  // Total seconds in current phase
+  const currentPhaseTotal = useMemo(() => {
+    switch (phase) {
+      case "Inhale":
+        return config.inhale;
+      case "Hold":
+        return config.hold;
+      case "Exhale":
+        return config.exhale;
+      case "Hold After":
+        return config.holdAfter || 1;
+    }
+  }, [phase, config]);
+
+  // SVG circular progress calculation
+  const radius = 96;
+  const circumference = 2 * Math.PI * radius;
+  const progressRatio = Math.max(0, Math.min(1, (currentPhaseTotal - secondsLeft) / currentPhaseTotal));
+  const strokeDashoffset = circumference * (1 - progressRatio);
 
   return (
-    <div className={`flex flex-col items-center space-y-5 ${className}`}>
+    <div className={`flex flex-col items-center space-y-6 ${className}`}>
       {/* Preset Cadence Switcher */}
       {showPresets && (
         <div className="flex flex-wrap items-center justify-center gap-2 p-1.5 rounded-2xl bg-muted/60 border border-border/60">
@@ -333,39 +200,58 @@ export const BreathingSphere: React.FC<BreathingSphereProps> = ({
         </div>
       )}
 
-      {/* 3D Breathing Sphere Display with Synchronized Overlay */}
-      <div className="relative h-60 w-60 sm:h-64 sm:w-64 flex items-center justify-center">
-        <ThreeErrorBoundary fallback={staticFallback}>
-          <Canvas
-            camera={{ position: [0, 0, 3.6], fov: 45 }}
-            dpr={[1, 1.5]}
-            gl={{ powerPreference: "high-performance", alpha: true, antialias: true }}
-          >
-            <ambientLight intensity={1.3} />
-            <directionalLight position={[3, 4, 3]} intensity={2.2} />
-            <pointLight position={[-3, -3, -2]} intensity={1.4} color="#818CF8" />
+      {/* Clean, Normal 2D Breath Pacer Circle */}
+      <div className="relative flex items-center justify-center w-64 h-64 sm:w-72 sm:h-72">
+        {/* Outer subtle guide ring */}
+        <div className="absolute inset-0 rounded-full border border-border/40 bg-card/40 backdrop-blur-xs" />
 
-            <Suspense fallback={null}>
-              <InnerBreathingSphereMesh
-                phase={phase}
-                phaseProgress={phaseProgress}
-                isActive={status === "running"}
-                reducedMotion={prefersReducedMotion}
-              />
-            </Suspense>
-          </Canvas>
-        </ThreeErrorBoundary>
+        {/* Dynamic expanding/contracting breathing halo */}
+        <div
+          className={`absolute rounded-full border ${phaseColors.border} ${phaseColors.circleBg} transition-all duration-1000 ease-in-out ${
+            phase === "Inhale"
+              ? "w-52 h-52 sm:w-60 sm:h-60 scale-100 shadow-lg shadow-sky-500/10"
+              : phase === "Hold"
+              ? "w-52 h-52 sm:w-60 sm:h-60 scale-100 shadow-lg shadow-amber-500/10"
+              : phase === "Exhale"
+              ? "w-40 h-40 sm:w-44 sm:h-44 scale-95 shadow-md shadow-emerald-500/10"
+              : "w-40 h-40 sm:w-44 sm:h-44 scale-95 shadow-xs"
+          }`}
+        />
 
-        {/* Center Countdown & Phase Overlay */}
-        <div 
-          className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none drop-shadow-md"
-          aria-live="polite"
-        >
-          <span className="text-4xl sm:text-5xl font-black text-white mix-blend-difference tracking-tight">
+        {/* SVG Circular Progress Track */}
+        <svg className="absolute w-full h-full -rotate-90 pointer-events-none" viewBox="0 0 220 220">
+          {/* Base Track */}
+          <circle
+            cx="110"
+            cy="110"
+            r={radius}
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="3.5"
+            className="text-border/40"
+          />
+          {/* Active Phase Stroke */}
+          <circle
+            cx="110"
+            cy="110"
+            r={radius}
+            fill="none"
+            stroke={phaseColors.stroke}
+            strokeWidth="3.5"
+            strokeDasharray={circumference}
+            strokeDashoffset={strokeDashoffset}
+            strokeLinecap="round"
+            className="transition-[stroke-dashoffset] duration-1000 ease-linear"
+          />
+        </svg>
+
+        {/* Center Countdown & Phase Typography */}
+        <div className="relative z-10 flex flex-col items-center justify-center text-center select-none">
+          <span className="text-4xl sm:text-5xl font-black font-mono tracking-tight text-foreground">
             {secondsLeft}s
           </span>
           <span
-            className={`mt-1 px-2.5 py-0.5 rounded-full text-[11px] font-extrabold uppercase tracking-wider ${phaseBadgeClass} mix-blend-normal bg-card/90 backdrop-blur-sm border shadow-xs`}
+            className={`mt-2 px-3 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider border shadow-2xs ${phaseColors.badge}`}
           >
             {status === "paused" ? "Paused" : phase}
           </span>
@@ -373,19 +259,19 @@ export const BreathingSphere: React.FC<BreathingSphereProps> = ({
       </div>
 
       {/* Synchronized Verbal Guidance */}
-      <div className="text-center min-h-[38px] px-4 max-w-md">
-        <p className="text-xs sm:text-sm font-medium text-foreground transition-all">
+      <div className="text-center min-h-[40px] px-4 max-w-md">
+        <p className="text-xs sm:text-sm font-medium text-foreground leading-relaxed">
           {phaseInstruction}
         </p>
       </div>
 
-      {/* Interactive Controls: Start, Pause, Resume, Stop */}
+      {/* Controls: Start, Pause, Resume, Reset */}
       {showControls && (
         <div className="flex items-center gap-3">
           {status === "idle" ? (
             <Button
               onClick={handleStart}
-              className="gap-2 rounded-xl bg-primary text-primary-foreground font-semibold px-5 h-10 shadow-sm"
+              className="gap-2 rounded-xl bg-primary text-primary-foreground font-semibold px-5 h-10 shadow-xs"
             >
               <Play className="h-4 w-4 fill-current" />
               <span>Start Exercise</span>
@@ -402,7 +288,7 @@ export const BreathingSphere: React.FC<BreathingSphereProps> = ({
           ) : (
             <Button
               onClick={handleResume}
-              className="gap-2 rounded-xl bg-primary text-primary-foreground font-semibold px-5 h-10 shadow-sm"
+              className="gap-2 rounded-xl bg-primary text-primary-foreground font-semibold px-5 h-10 shadow-xs"
             >
               <Play className="h-4 w-4 fill-current" />
               <span>Resume</span>
