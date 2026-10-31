@@ -455,6 +455,19 @@
   animation: shine 5s linear infinite;
 }
 
+/* ReactBits Aurora Effect */
+@keyframes aurora {
+  from {
+    background-position: 50% 50%, 50% 50%;
+  }
+  to {
+    background-position: 350% 50%, 350% 50%;
+  }
+}
+.animate-aurora {
+  animation: aurora 60s linear infinite;
+}
+
 /* Global prefers-reduced-motion overrides */
 @media (prefers-reduced-motion: reduce) {
   .breathing-blob,
