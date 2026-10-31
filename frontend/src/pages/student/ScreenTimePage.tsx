@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import {
   Monitor,
   Moon,
@@ -15,7 +14,6 @@ import {
   Zap,
   CheckCircle2,
   AlertTriangle,
-  ArrowLeft,
   RefreshCw,
   ExternalLink,
   Laptop,
@@ -79,7 +77,6 @@ interface SearchTopicItem {
 }
 
 export const ScreenTimePage: React.FC = () => {
-  const navigate = useNavigate();
   const { theme } = useTheme();
   const isDark = theme === "dark";
 
@@ -293,29 +290,17 @@ export const ScreenTimePage: React.FC = () => {
 
       {/* Top Navigation & Status Banner */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => navigate("/student/dashboard")}
-            className="rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800"
+        <div className="flex items-center gap-2">
+          <Badge
+            variant="outline"
+            className={data?.is_agent_connected
+              ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/30 flex items-center gap-1.5 px-3 py-1"
+              : "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/30 flex items-center gap-1.5 px-3 py-1"
+            }
           >
-            <ArrowLeft className="w-4 h-4 mr-1.5" />
-            Back to Dashboard
-          </Button>
-          <div className="h-4 w-px bg-slate-300 dark:bg-slate-700 hidden md:block" />
-          <div className="flex items-center gap-2">
-            <Badge
-              variant="outline"
-              className={data?.is_agent_connected
-                ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/30 flex items-center gap-1.5 px-3 py-1"
-                : "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/30 flex items-center gap-1.5 px-3 py-1"
-              }
-            >
-              <span className={`w-2 h-2 rounded-full ${data?.is_agent_connected ? "bg-emerald-500 animate-pulse" : "bg-amber-500"}`} />
-              {data?.is_agent_connected ? "Live Desktop Telemetry Active" : "Passive Screen Time Tracking"}
-            </Badge>
-          </div>
+            <span className={`w-2 h-2 rounded-full ${data?.is_agent_connected ? "bg-emerald-500 animate-pulse" : "bg-amber-500"}`} />
+            {data?.is_agent_connected ? "Live Desktop Telemetry Active" : "Passive Screen Time Tracking"}
+          </Badge>
         </div>
 
         <div className="flex items-center gap-2">

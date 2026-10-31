@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { 
-  ArrowLeft, 
   Calendar, 
   TrendingUp, 
   Sparkles, 
@@ -59,19 +58,18 @@ export const MoodHistoryPage: React.FC = () => {
       <DotGridBackground />
 
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <Button 
-          variant="ghost" 
-          size="sm" 
-          onClick={() => navigate("/student/dashboard")}
-          className="gap-2 text-muted-foreground hover:text-foreground -ml-2"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          <span>Back to Dashboard</span>
-        </Button>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="space-y-1">
+          <h1 className="text-2xl md:text-3xl font-black text-foreground tracking-tight">
+            <ShinyText text="My Wellbeing Analytics & Trajectory" />
+          </h1>
+          <p className="text-sm text-muted-foreground">
+            Longitudinal view of your emotional health, multidimensional baselines, and chronological campus wellness events.
+          </p>
+        </div>
 
         {/* Timeframe selector */}
-        <div className="flex items-center gap-1.5 p-1 bg-muted/50 rounded-xl border border-border">
+        <div className="flex items-center gap-1.5 p-1 bg-muted/50 rounded-xl border border-border self-start sm:self-auto shrink-0">
           {[
             { key: "7d", label: "7 Days" },
             { key: "30d", label: "30 Days" },
@@ -90,15 +88,6 @@ export const MoodHistoryPage: React.FC = () => {
             </button>
           ))}
         </div>
-      </div>
-
-      <div className="space-y-1">
-        <h1 className="text-2xl md:text-3xl font-black text-foreground tracking-tight">
-          <ShinyText text="My Wellbeing Analytics & Trajectory" />
-        </h1>
-        <p className="text-sm text-muted-foreground">
-          Longitudinal view of your emotional health, multidimensional baselines, and chronological campus wellness events.
-        </p>
       </div>
 
       {/* Personal Baseline Range Notice */}
