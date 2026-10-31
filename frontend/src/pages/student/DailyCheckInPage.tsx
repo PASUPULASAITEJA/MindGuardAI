@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { 
   Smile, 
-  ArrowLeft, 
   CheckCircle2, 
   Moon, 
   BatteryMedium, 
@@ -80,21 +79,7 @@ export const DailyCheckInPage: React.FC = () => {
     >
       <DotGridBackground />
 
-      {/* Header */}
-      <div className="flex items-center justify-between border-b border-border pb-4">
-        <Button 
-          variant="ghost" 
-          size="sm" 
-          onClick={() => navigate("/student/dashboard")}
-          className="gap-1.5 text-muted-foreground hover:text-foreground -ml-2 text-xs font-medium"
-        >
-          <ArrowLeft className="h-3.5 w-3.5" />
-          <span>Dashboard</span>
-        </Button>
-        <span className="text-xs text-muted-foreground font-medium">
-          Daily Wellbeing Log
-        </span>
-      </div>
+
 
       <AnimatePresence mode="wait">
         {result ? (
