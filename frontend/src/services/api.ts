@@ -303,6 +303,12 @@ api.interceptors.response.use(
         }>;
       }>("/chat/behavioral-features/summary");
       return res.data;
+    },
+    deleteSearchTopic: async (query: string): Promise<any> => {
+      const res = await api.delete("/chat/behavioral-features/search-topics", {
+        data: { query }
+      });
+      return res.data;
     }
   };
 

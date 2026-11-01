@@ -804,4 +804,30 @@ class BehavioralService:
             }
         }
 
+    async def delete_student_search_topic(
+        self,
+        db: AsyncSession,
+        student_id: UUID,
+        query_to_delete: str
+    ) -> bool:
+        """Removes a specific search topic from the student's behavioral logs and state."""
+        clean_q = query_to_delete.strip().lower()
+        stmt = select(BehavioralLog).where(BehavioralLog.student_id == student_id)
+        res = await db.execute(stmt)
+        logs = res.scalars().all()
+        for log in logs:
+            if not log.active_window_categories:
+                continue
+            try:
+                data = json.loads(log.active_window_categories)
+                topics = data.get("search_topics", [])
+                filtered = [t for t in topics if t.get("query", "").strip().lower() != clean_q]
+                if len(filtered) != len(topics):
+                    data["search_topics"] = filtered
+                    log.active_window_categories = json.dumps(data)
+            except Exception:
+                pass
+        await db.commit()
+        return True
+
 behavioral_service = BehavioralService()

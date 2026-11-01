@@ -271,7 +271,11 @@ def extract_search_query_from_title(title: str) -> Optional[str]:
     patterns = [
         r"^(.+?)\s+-\s+google\s+search",
         r"^(.+?)\s+-\s+bing\s+search",
+        r"^(.+?)\s+-\s+bing",
         r"^(.+?)\s+-\s+duckduckgo",
+        r"^(.+?)\s+-\s+youtube\s+search",
+        r"^(.+?)\s+-\s+chatgpt",
+        r"^(.+?)\s+\|\s+coursera",
     ]
     for pat in patterns:
         m = re.search(pat, title.strip(), re.IGNORECASE)

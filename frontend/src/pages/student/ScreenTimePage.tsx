@@ -32,7 +32,8 @@ import {
   HeartPulse,
   Flame,
   Check,
-  Percent
+  Percent,
+  Trash2
 } from "lucide-react";
 import {
   PieChart,
@@ -86,6 +87,30 @@ export const ScreenTimePage: React.FC = () => {
   const [isEyeBreakOpen, setIsEyeBreakOpen] = useState(false);
   const [customContinuousMins, setCustomContinuousMins] = useState<number | null>(null);
   const [appCategoryFilter, setAppCategoryFilter] = useState<string>("ALL");
+  const [hiddenSearches, setHiddenSearches] = useState<string[]>(() => {
+    try {
+      const saved = localStorage.getItem("mindguard_hidden_searches");
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
+
+  const handleDeleteSearch = async (queryToDelete: string) => {
+    const lower = queryToDelete.toLowerCase().trim();
+    setHiddenSearches((prev) => {
+      const updated = [...prev, lower];
+      try {
+        localStorage.setItem("mindguard_hidden_searches", JSON.stringify(updated));
+      } catch {}
+      return updated;
+    });
+    try {
+      await chatAPI.deleteSearchTopic(queryToDelete);
+    } catch (err) {
+      console.error("Failed to delete search topic:", err);
+    }
+  };
 
   const fetchSummary = async () => {
     try {
@@ -230,7 +255,14 @@ export const ScreenTimePage: React.FC = () => {
   // 5. Online Searches (Only authentic tracked search queries)
   const rawSearchTopics: SearchTopicItem[] = data?.search_topics || latest?.search_topics || [];
   const searchTopics: SearchTopicItem[] = rawSearchTopics.filter(
-    (item) => !item.query.toLowerCase().includes("harsha kushi")
+    (item) => {
+      const q = item.query.toLowerCase().trim();
+      return (
+        !q.includes("harsha kushi") &&
+        !q.includes("metro") &&
+        !hiddenSearches.includes(q)
+      );
+    }
   );
 
   // Helper for App Icon
@@ -837,12 +869,22 @@ export const ScreenTimePage: React.FC = () => {
                     </div>
                   </div>
 
-                  <Badge
-                    variant="outline"
-                    className={`text-[10px] px-2 py-0.5 border shrink-0 ${getCategoryBadgeClass(item.category)}`}
-                  >
-                    {item.category}
-                  </Badge>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <Badge
+                      variant="outline"
+                      className={`text-[10px] px-2 py-0.5 border ${getCategoryBadgeClass(item.category)}`}
+                    >
+                      {item.category}
+                    </Badge>
+                    <button
+                      type="button"
+                      onClick={() => handleDeleteSearch(item.query)}
+                      title="Remove search from history"
+                      className="p-1 rounded-md text-slate-400 hover:text-rose-500 hover:bg-rose-500/10 transition-colors cursor-pointer"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
                 </div>
               ))
             ) : (

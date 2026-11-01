@@ -341,6 +341,31 @@ async def get_behavioral_summary(
         student_id=current_user.id
     )
 
+class DeleteSearchTopicRequest(BaseModel):
+    query: str
+
+@router.delete("/behavioral-features/search-topics", status_code=status.HTTP_200_OK)
+async def delete_search_topic(
+    payload: DeleteSearchTopicRequest,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    Removes a specific search query topic from the student's telemetry history.
+    """
+    if current_user.role != UserRole.STUDENT:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Access restricted to student accounts."
+        )
+
+    await behavioral_service.delete_student_search_topic(
+        db=db,
+        student_id=current_user.id,
+        query_to_delete=payload.query
+    )
+    return {"status": "success", "message": "Search topic removed."}
+
 @router.post("/wearable-sleep-sync", status_code=status.HTTP_200_OK)
 async def sync_wearable_sleep_metrics(
     payload: WearableSleepSyncPayload,
