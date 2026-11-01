@@ -1,6 +1,7 @@
 import json
 from typing import List
 from uuid import UUID
+from pydantic import BaseModel
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
