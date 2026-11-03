@@ -86,9 +86,26 @@ export const Login: React.FC = () => {
     setValue("password", pass, { shouldValidate: true });
   };
 
-  const handleDemoNav = (path: string, email: string) => {
+  const handleDemoNav = async (path: string, email: string) => {
     setDemoCredentials(email, "Student@123");
-    navigate(path);
+    setIsSubmitting(true);
+    try {
+      const loggedUser = await login(email, "Student@123", true);
+      toast({
+        title: "Authenticated Successfully",
+        description: `Signed in as ${loggedUser.role}.`,
+        variant: "success",
+      });
+      navigate(path);
+    } catch {
+      toast({
+        title: "Authentication Failed",
+        description: "Could not authenticate demo user. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
