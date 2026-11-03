@@ -32,7 +32,12 @@ import {
   HeartPulse,
   Flame,
   Check,
-  Percent
+  Percent,
+  Bell,
+  Smartphone,
+  ChevronLeft,
+  ChevronRight,
+  Calendar
 } from "lucide-react";
 import {
   PieChart,
@@ -54,6 +59,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { chatAPI } from "@/services/api";
 import { useTheme } from "@/contexts/ThemeContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { pageVariants, cardEntrance } from "@/utils/motion";
 import { EyeBreakModal } from "@/components/EyeBreakModal";
 import { SpotlightCard } from "@/components/ui/SpotlightCard";
@@ -64,6 +70,8 @@ interface AppUsageItem {
   name: string;
   proc: string;
   minutes: number;
+  times_opened?: number;
+  notifications?: number;
   category: string;
   percentage?: number;
   icon?: string;
@@ -79,19 +87,33 @@ interface SearchTopicItem {
 export const ScreenTimePage: React.FC = () => {
   const { theme } = useTheme();
   const isDark = theme === "dark";
+  const { user } = useAuth();
 
   const [loading, setLoading] = useState(true);
-  const [data, setData] = useState<any>(null);
+  const [data, setData] = useState<any>(() => {
+    try {
+      const cached = localStorage.getItem("mindguard_screen_summary_cache");
+      return cached ? JSON.parse(cached) : null;
+    } catch {
+      return null;
+    }
+  });
   const [refreshing, setRefreshing] = useState(false);
   const [isEyeBreakOpen, setIsEyeBreakOpen] = useState(false);
   const [customContinuousMins, setCustomContinuousMins] = useState<number | null>(null);
   const [appCategoryFilter, setAppCategoryFilter] = useState<string>("ALL");
+  const [appMetricMode, setAppMetricMode] = useState<"time" | "opens" | "notifications">("time");
 
   const fetchSummary = async () => {
     try {
       setRefreshing(true);
       const res = await chatAPI.getBehavioralSummary();
-      setData(res);
+      if (res) {
+        setData(res);
+        try {
+          localStorage.setItem("mindguard_screen_summary_cache", JSON.stringify(res));
+        } catch {}
+      }
     } catch (err) {
       console.error("Error fetching screen time telemetry:", err);
     } finally {
@@ -102,17 +124,42 @@ export const ScreenTimePage: React.FC = () => {
 
   useEffect(() => {
     fetchSummary();
-    const interval = setInterval(fetchSummary, 30000); // 30s auto-refresh
+    const interval = setInterval(fetchSummary, 15000); // 15s auto-refresh for live tracking
     return () => clearInterval(interval);
   }, []);
 
   const latest = data?.latest_log;
-  const totalMins = latest?.total_screen_time_minutes || 0;
-  const lateNightMins = latest?.late_night_usage_minutes || 0;
+  const rawTotalMins = latest?.total_screen_time_minutes || 0;
+
+  // Local date in YYYY-MM-DD
+  const now = new Date();
+  const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+
+  // Read local tracker accumulation from useScreenTimeTracker if available
+  let localActiveMins = 0;
+  let localAcademicMins = 0;
+  let localSocialMins = 0;
+  let localEntertainmentMins = 0;
+  let localLateNightMins = 0;
+  try {
+    const rawLocal = localStorage.getItem(`mindguard_screen_data_${user?.id}_${todayStr}`) ||
+                     localStorage.getItem(`mindguard_screen_data_default_${todayStr}`);
+    if (rawLocal) {
+      const parsed = JSON.parse(rawLocal);
+      localActiveMins = Math.round((parsed.activeSeconds || 0) / 60);
+      localAcademicMins = Math.round((parsed.academicSeconds || 0) / 60);
+      localSocialMins = Math.round((parsed.socialSeconds || 0) / 60);
+      localEntertainmentMins = Math.round((parsed.entertainmentSeconds || 0) / 60);
+      localLateNightMins = Math.round((parsed.lateNightSeconds || 0) / 60);
+    }
+  } catch {}
+
+  const totalMins = rawTotalMins > 0 ? rawTotalMins : localActiveMins;
+  const lateNightMins = latest?.late_night_usage_minutes ?? localLateNightMins;
   const daytimeMins = latest?.daytime_usage_minutes ?? Math.max(0, totalMins - lateNightMins);
-  const academicMins = latest?.academic_usage_minutes || 0;
-  const entertainmentMins = latest?.entertainment_usage_minutes || 0;
-  const socialMins = latest?.social_usage_minutes || 0;
+  const academicMins = latest?.academic_usage_minutes ?? localAcademicMins;
+  const entertainmentMins = latest?.entertainment_usage_minutes ?? localEntertainmentMins;
+  const socialMins = latest?.social_usage_minutes ?? localSocialMins;
   const adultMins = latest?.adult_usage_minutes || 0;
   const continuousMins = latest?.continuous_screen_minutes || 0;
   const displayContinuousMins = customContinuousMins !== null ? customContinuousMins : continuousMins;
@@ -126,54 +173,32 @@ export const ScreenTimePage: React.FC = () => {
     return `${h}h ${m}m`;
   };
 
-  // 1. Category Chart Data (Studying, Playing, Normal, Adult)
-  const categoryData = [
-    { name: "Studying", value: academicMins, color: "#3b82f6", icon: BookOpen, desc: "Academic, Coding & Coursework" },
-    { name: "Playing", value: entertainmentMins, color: "#8b5cf6", icon: Gamepad2, desc: "Gaming, Media & Streaming" },
-    { name: "Normal", value: socialMins, color: "#10b981", icon: MessageSquare, desc: "Social, Messaging & Browsing" },
-    { name: "Adult", value: adultMins, color: "#f43f5e", icon: ShieldAlert, desc: "Restricted / Sensitive Content" },
-  ].filter(c => c.value > 0);
-
-  // Dominant purpose analysis
-  const sortedCategories = [...categoryData].sort((a, b) => b.value - a.value);
-  const dominantCategory = sortedCategories[0] || {
-    name: "Unclassified",
-    value: 0,
-    desc: "Awaiting desktop agent classification",
-    color: "#64748b"
-  };
-  const dominantPercentage = totalMins > 0 && dominantCategory.value > 0 ? Math.round((dominantCategory.value / totalMins) * 100) : 0;
-
-  // 2. Day vs Late Night Data
-  const timeOfDayData = [
-    { name: "Daytime (5am-11:59pm)", minutes: daytimeMins, color: "#0ea5e9" },
-    { name: "Late Night (12am-5am)", minutes: lateNightMins, color: "#f59e0b" },
-  ];
-
-  // 3. 7-Day Longitudinal Daily Screen Time Data
+  // 1. 7-Day Longitudinal Daily Screen Time Data
   const daysOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-  const now = new Date();
   const rawWeekly = data?.weekly_history || [];
 
   const dailyScreenTimeData = Array.from({ length: 7 }).map((_, i) => {
     const d = new Date();
     d.setDate(now.getDate() - (6 - i));
-    const dateStr = d.toISOString().split("T")[0];
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    const dateStr = `${year}-${month}-${day}`;
     const dayName = daysOfWeek[d.getDay()];
     const label = i === 6 ? "Today" : `${dayName} ${d.getMonth() + 1}/${d.getDate()}`;
-    const isToday = i === 6;
+    const isToday = i === 6 || dateStr === todayStr;
 
-    const record = rawWeekly.find((w: any) => w.date === dateStr);
-    if (record) {
-      const sMins = record.academic_usage_minutes || 0;
-      const pMins = record.entertainment_usage_minutes || 0;
-      const socMins = record.social_usage_minutes || 0;
-      const lMins = record.late_night_usage_minutes || 0;
-      const tMins = record.total_screen_time_minutes || (sMins + pMins + socMins);
+    if (isToday) {
+      const sMins = academicMins;
+      const pMins = entertainmentMins;
+      const lMins = lateNightMins;
+      const tMins = totalMins;
+      // Allocate active browsing & general PC time to social/normal so stacked bar matches full total
+      const socMins = Math.max(socialMins, Math.max(0, tMins - sMins - pMins));
       return {
-        day: label,
+        day: "Today",
         date: dateStr,
-        isToday,
+        isToday: true,
         studyingHours: Number((sMins / 60).toFixed(1)),
         playingHours: Number((pMins / 60).toFixed(1)),
         socialHours: Number((socMins / 60).toFixed(1)),
@@ -182,20 +207,25 @@ export const ScreenTimePage: React.FC = () => {
       };
     }
 
-    if (isToday) {
+    const record = rawWeekly.find((w: any) => w.date === dateStr);
+    if (record) {
+      const sMins = record.academic_usage_minutes || 0;
+      const pMins = record.entertainment_usage_minutes || 0;
+      const lMins = record.late_night_usage_minutes || 0;
+      const tMins = record.total_screen_time_minutes || (sMins + pMins);
+      const socMins = Math.max(record.social_usage_minutes || 0, Math.max(0, tMins - sMins - pMins));
       return {
-        day: "Today",
+        day: label,
         date: dateStr,
-        isToday: true,
-        studyingHours: Number((academicMins / 60).toFixed(1)),
-        playingHours: Number((entertainmentMins / 60).toFixed(1)),
-        socialHours: Number((socialMins / 60).toFixed(1)),
-        lateNightHours: Number((lateNightMins / 60).toFixed(1)),
-        totalHours: Number((totalMins / 60).toFixed(1)),
+        isToday: false,
+        studyingHours: Number((sMins / 60).toFixed(1)),
+        playingHours: Number((pMins / 60).toFixed(1)),
+        socialHours: Number((socMins / 60).toFixed(1)),
+        lateNightHours: Number((lMins / 60).toFixed(1)),
+        totalHours: Number((tMins / 60).toFixed(1)),
       };
     }
 
-    // Untracked days strictly return 0 hours - zero synthetic fallback data
     return {
       day: label,
       date: dateStr,
@@ -212,11 +242,113 @@ export const ScreenTimePage: React.FC = () => {
     (dailyScreenTimeData.reduce((acc, curr) => acc + curr.totalHours, 0) / 7).toFixed(1)
   );
 
-  // 4. Top Apps (Only authentic tracked applications)
-  const allTopApps: AppUsageItem[] = (data?.top_apps || latest?.top_apps || []).filter(
-    (a: AppUsageItem) => a.minutes > 0
+  // Smartphone-Style Day Selector State
+  const [selectedDate, setSelectedDate] = useState<string>(todayStr);
+  const isSelectedToday = selectedDate === todayStr;
+  const currentDayIndex = dailyScreenTimeData.findIndex((d) => d.date === selectedDate);
+  const selectedDayObj = dailyScreenTimeData.find((d) => d.date === selectedDate) || dailyScreenTimeData[6];
+  const selectedDayLabel = selectedDayObj?.isToday ? "Today" : selectedDayObj?.day || "Selected Day";
+  const selectedPastRecord = rawWeekly.find((w: any) => w.date === selectedDate);
+
+  // Day Navigation Stepper Handlers
+  const handlePrevDay = () => {
+    if (currentDayIndex > 0) {
+      setSelectedDate(dailyScreenTimeData[currentDayIndex - 1].date);
+    }
+  };
+  const handleNextDay = () => {
+    if (currentDayIndex < dailyScreenTimeData.length - 1) {
+      setSelectedDate(dailyScreenTimeData[currentDayIndex + 1].date);
+    }
+  };
+  const handleResetToToday = () => {
+    setSelectedDate(todayStr);
+  };
+
+  // Dynamic values mapped to selected day (Live values if Today; Database record if past day)
+  const activeTotalMins = isSelectedToday
+    ? totalMins
+    : (selectedPastRecord?.total_screen_time_minutes ?? Math.round((selectedDayObj?.totalHours || 0) * 60));
+
+  const activeLateNightMins = isSelectedToday
+    ? lateNightMins
+    : (selectedPastRecord?.late_night_usage_minutes ?? Math.round((selectedDayObj?.lateNightHours || 0) * 60));
+
+  const activeDaytimeMins = isSelectedToday
+    ? daytimeMins
+    : (selectedPastRecord?.daytime_usage_minutes ?? Math.max(0, activeTotalMins - activeLateNightMins));
+
+  const activeAcademicMins = isSelectedToday
+    ? academicMins
+    : (selectedPastRecord?.academic_usage_minutes ?? Math.round((selectedDayObj?.studyingHours || 0) * 60));
+
+  const activeEntertainmentMins = isSelectedToday
+    ? entertainmentMins
+    : (selectedPastRecord?.entertainment_usage_minutes ?? Math.round((selectedDayObj?.playingHours || 0) * 60));
+
+  const activeSocialMins = isSelectedToday
+    ? socialMins
+    : (selectedPastRecord?.social_usage_minutes ?? Math.round((selectedDayObj?.socialHours || 0) * 60));
+
+  const activeAdultMins = isSelectedToday
+    ? adultMins
+    : (selectedPastRecord?.adult_usage_minutes || 0);
+
+  const activeContinuousMins = isSelectedToday
+    ? displayContinuousMins
+    : (selectedPastRecord?.continuous_screen_minutes || 0);
+
+  // 2. Category Chart Data for Selected Day (Studying, Playing, Normal, Adult)
+  const categoryData = [
+    { name: "Studying", value: activeAcademicMins, color: "#3b82f6", icon: BookOpen, desc: "Academic, Coding & Coursework" },
+    { name: "Playing", value: activeEntertainmentMins, color: "#8b5cf6", icon: Gamepad2, desc: "Gaming, Media & Streaming" },
+    { name: "Normal", value: activeSocialMins, color: "#10b981", icon: MessageSquare, desc: "Social, Messaging & Browsing" },
+    { name: "Adult", value: activeAdultMins, color: "#f43f5e", icon: ShieldAlert, desc: "Restricted / Sensitive Content" },
+  ].filter(c => c.value > 0);
+
+  // Dominant purpose analysis for Selected Day
+  const sortedCategories = [...categoryData].sort((a, b) => b.value - a.value);
+  const dominantCategory = sortedCategories[0] || {
+    name: "General Activity",
+    value: activeTotalMins,
+    desc: "Active desktop computing session",
+    color: "#3b82f6"
+  };
+  const dominantPercentage = activeTotalMins > 0 && dominantCategory.value > 0
+    ? Math.round((dominantCategory.value / activeTotalMins) * 100)
+    : 0;
+
+  // 3. Day vs Late Night Data for Selected Day
+  const timeOfDayData = [
+    { name: "Daytime (5am-11:59pm)", minutes: activeDaytimeMins, color: "#0ea5e9" },
+    { name: "Late Night (12am-5am)", minutes: activeLateNightMins, color: "#f59e0b" },
+  ];
+
+  // 4. Digital Wellbeing & Phone Screen Time Metrics for Selected Day
+  const rawTopApps: AppUsageItem[] = isSelectedToday
+    ? (data?.top_apps || latest?.top_apps || [])
+    : (selectedPastRecord?.top_apps || []);
+
+  const allTopApps: AppUsageItem[] = rawTopApps.filter(
+    (a: AppUsageItem) => a.minutes > 0 || (a.times_opened || 0) > 0 || (a.notifications || 0) > 0
   );
-  const topApps: AppUsageItem[] = appCategoryFilter === "ALL"
+
+  // Totals for the 3 Phone Digital Wellbeing features on Selected Day
+  const totalScreenTimeMins = activeTotalMins;
+  const totalTimesOpened = isSelectedToday
+    ? (data?.digital_wellbeing_summary?.total_times_opened ?? 
+       allTopApps.reduce((acc: number, a: AppUsageItem) => acc + (a.times_opened || 1), 0))
+    : (selectedPastRecord?.total_times_opened ?? 
+       allTopApps.reduce((acc: number, a: AppUsageItem) => acc + (a.times_opened || 1), 0));
+
+  const totalNotifications = isSelectedToday
+    ? (data?.digital_wellbeing_summary?.total_notifications ?? 
+       allTopApps.reduce((acc: number, a: AppUsageItem) => acc + (a.notifications || 0), 0))
+    : (selectedPastRecord?.total_notifications ?? 
+       allTopApps.reduce((acc: number, a: AppUsageItem) => acc + (a.notifications || 0), 0));
+
+  // Filter by category
+  const filteredApps = appCategoryFilter === "ALL"
     ? allTopApps
     : allTopApps.filter((a) => {
         const cat = (a.category || "").toLowerCase();
@@ -227,8 +359,22 @@ export const ScreenTimePage: React.FC = () => {
         return cat === target;
       });
 
-  // 5. Online Searches (Only authentic tracked search queries)
-  const rawSearchTopics: SearchTopicItem[] = data?.search_topics || latest?.search_topics || [];
+  // Dynamically sort apps based on selected Phone Screen Time feature
+  const topApps: AppUsageItem[] = [...filteredApps].sort((a, b) => {
+    if (appMetricMode === "opens") {
+      return (b.times_opened || 0) - (a.times_opened || 0);
+    }
+    if (appMetricMode === "notifications") {
+      return (b.notifications || 0) - (a.notifications || 0);
+    }
+    return (b.minutes || 0) - (a.minutes || 0);
+  });
+
+  // 5. Online Searches for Selected Day
+  const rawSearchTopics: SearchTopicItem[] = isSelectedToday
+    ? (data?.search_topics || latest?.search_topics || [])
+    : (selectedPastRecord?.search_topics || []);
+
   const searchTopics: SearchTopicItem[] = rawSearchTopics.filter(
     (item) => {
       const q = item.query.toLowerCase().trim();
@@ -347,22 +493,24 @@ export const ScreenTimePage: React.FC = () => {
         <SpotlightCard className="p-5" spotlightColor="rgba(59, 130, 246, 0.15)">
           <div>
             <div className="flex items-center justify-between">
-              <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Total Active Today</span>
+              <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                Total Active {isSelectedToday ? "Today" : `(${selectedDayLabel})`}
+              </span>
               <div className="w-9 h-9 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-500">
                 <Clock className="w-4 h-4" />
               </div>
             </div>
             <div className="mt-3">
-              <span className="text-2xl font-bold tracking-tight">{formatHoursMins(totalMins)}</span>
+              <span className="text-2xl font-bold tracking-tight">{formatHoursMins(activeTotalMins)}</span>
             </div>
             <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
-              <Sun className="w-3.5 h-3.5 text-amber-500" /> {formatHoursMins(daytimeMins)} daytime active
+              <Sun className="w-3.5 h-3.5 text-amber-500" /> {formatHoursMins(activeDaytimeMins)} daytime active
             </p>
           </div>
         </SpotlightCard>
 
         {/* Stat 2: Late Night Disruption */}
-        <SpotlightCard className="p-5" spotlightColor={lateNightMins >= 60 ? "rgba(245, 158, 11, 0.18)" : "rgba(16, 185, 129, 0.15)"}>
+        <SpotlightCard className="p-5" spotlightColor={activeLateNightMins >= 60 ? "rgba(245, 158, 11, 0.18)" : "rgba(16, 185, 129, 0.15)"}>
           <div>
             <div className="flex items-center justify-between">
               <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Late Night (12am–5am)</span>
@@ -371,11 +519,11 @@ export const ScreenTimePage: React.FC = () => {
               </div>
             </div>
             <div className="mt-3 flex items-baseline gap-2">
-              <span className={`text-2xl font-bold tracking-tight ${lateNightMins >= 60 ? "text-amber-600 dark:text-amber-400" : ""}`}>
-                {formatHoursMins(lateNightMins)}
+              <span className={`text-2xl font-bold tracking-tight ${activeLateNightMins >= 60 ? "text-amber-600 dark:text-amber-400" : ""}`}>
+                {formatHoursMins(activeLateNightMins)}
               </span>
-              <Badge variant="outline" className={lateNightMins >= 60 ? "bg-amber-500/15 text-amber-600 text-[10px]" : "bg-emerald-500/15 text-emerald-600 text-[10px]"}>
-                {lateNightMins >= 60 ? "Elevated Fatigue" : "Healthy Rest"}
+              <Badge variant="outline" className={activeLateNightMins >= 60 ? "bg-amber-500/15 text-amber-600 text-[10px]" : "bg-emerald-500/15 text-emerald-600 text-[10px]"}>
+                {activeLateNightMins >= 60 ? "Elevated Fatigue" : "Healthy Rest"}
               </Badge>
             </div>
             <p className="text-xs text-muted-foreground mt-1">
@@ -395,44 +543,52 @@ export const ScreenTimePage: React.FC = () => {
             </div>
             <div className="mt-3">
               <span className="text-2xl font-bold tracking-tight text-blue-600 dark:text-blue-400">
-                {totalMins > 0 ? Math.round((academicMins / totalMins) * 100) : 65}%
+                {activeTotalMins > 0 ? Math.round((activeAcademicMins / activeTotalMins) * 100) : 0}%
               </span>
               <span className="text-xs text-muted-foreground ml-1.5">Academic Focus</span>
             </div>
             <p className="text-xs text-muted-foreground mt-1">
-              {formatHoursMins(academicMins)} on coursework & tools
+              {formatHoursMins(activeAcademicMins)} on coursework & tools
             </p>
           </div>
         </SpotlightCard>
 
         {/* Stat 4: Unbroken Screen Session & 20-20-20 Pacer */}
-        <SpotlightCard className="p-5" spotlightColor={displayContinuousMins >= 50 ? "rgba(245, 158, 11, 0.18)" : "rgba(16, 185, 129, 0.15)"}>
+        <SpotlightCard className="p-5" spotlightColor={activeContinuousMins >= 50 ? "rgba(245, 158, 11, 0.18)" : "rgba(16, 185, 129, 0.15)"}>
           <div className="flex flex-col justify-between h-full">
             <div>
               <div className="flex items-center justify-between">
-                <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Active Strain Streak</span>
+                <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                  {isSelectedToday ? "Active Strain Streak" : "Continuous Session Peak"}
+                </span>
                 <div className="w-9 h-9 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-500">
                   <Zap className="w-4 h-4" />
                 </div>
               </div>
               <div className="mt-3 flex items-baseline justify-between">
-                <span className="text-2xl font-bold tracking-tight">{formatHoursMins(displayContinuousMins)}</span>
-                <Badge variant="outline" className={displayContinuousMins >= 50 ? "bg-amber-500/15 text-amber-600 dark:text-amber-400 text-[10px] border-amber-500/30" : "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 text-[10px] border-emerald-500/30"}>
-                  {displayContinuousMins >= 50 ? "Break Recommended" : "Rest Window OK"}
+                <span className="text-2xl font-bold tracking-tight">{formatHoursMins(activeContinuousMins)}</span>
+                <Badge variant="outline" className={activeContinuousMins >= 50 ? "bg-amber-500/15 text-amber-600 dark:text-amber-400 text-[10px] border-amber-500/30" : "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 text-[10px] border-emerald-500/30"}>
+                  {activeContinuousMins >= 50 ? "Break Recommended" : "Rest Window OK"}
                 </Badge>
               </div>
               <p className="text-xs text-muted-foreground mt-1">
-                {displayContinuousMins >= 50 ? "⚠️ Recommended: Take a 20-20-20 break" : "Within healthy eye-strain limits"}
+                {activeContinuousMins >= 50 ? "⚠️ Recommended: Take a 20-20-20 break" : "Within healthy eye-strain limits"}
               </p>
             </div>
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() => setIsEyeBreakOpen(true)}
-              className="mt-3 w-full text-xs h-8 rounded-xl border-emerald-500/40 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10 hover:text-emerald-700 dark:hover:text-emerald-300 flex items-center justify-center gap-1.5 font-semibold transition-all"
-            >
-              <Eye className="w-3.5 h-3.5" /> Start 20-20-20 Break
-            </Button>
+            {isSelectedToday ? (
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => setIsEyeBreakOpen(true)}
+                className="mt-3 w-full text-xs h-8 rounded-xl border-emerald-500/40 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10 hover:text-emerald-700 dark:hover:text-emerald-300 flex items-center justify-center gap-1.5 font-semibold transition-all"
+              >
+                <Eye className="w-3.5 h-3.5" /> Start 20-20-20 Break
+              </Button>
+            ) : (
+              <div className="mt-3 text-[11px] text-muted-foreground/80 flex items-center gap-1">
+                <Clock className="w-3.5 h-3.5 text-muted-foreground" /> Historical session metric
+              </div>
+            )}
           </div>
         </SpotlightCard>
       </div>
@@ -447,17 +603,19 @@ export const ScreenTimePage: React.FC = () => {
             <div>
               <div className="flex items-center gap-2 flex-wrap">
                 <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                  Primary Device Purpose Detected
+                  Primary Device Purpose {isSelectedToday ? "(Today)" : `(${selectedDayLabel})`}
                 </span>
                 <Badge className="bg-blue-600 text-white text-[11px] font-bold px-2.5 py-0.5 rounded-full shadow-xs">
                   {dominantCategory.name} • {dominantPercentage}% Dominance
                 </Badge>
               </div>
               <h2 className="text-xl font-black text-foreground mt-0.5">
-                Most Screen Time Spent on: <span className="text-blue-600 dark:text-blue-400">{dominantCategory.name}</span> ({formatHoursMins(dominantCategory.value)})
+                Most Screen Time Spent on: <span className="text-blue-600 dark:text-blue-400">{dominantCategory.name}</span> {dominantCategory.value > 0 ? `(${formatHoursMins(dominantCategory.value)})` : ""}
               </h2>
               <p className="text-xs text-muted-foreground mt-1 max-w-2xl leading-relaxed">
-                The student is predominantly using this computer for <strong>{dominantCategory.desc}</strong> ({dominantPercentage}% of total classified activity), followed by Playing & Entertainment ({100 - dominantPercentage}%).
+                {activeTotalMins > 0
+                  ? `Activity on ${selectedDayLabel} was predominantly dedicated to ${dominantCategory.desc} (${dominantPercentage}% of total classified activity).`
+                  : "No active computer sessions recorded for this day."}
               </p>
             </div>
           </div>
@@ -469,8 +627,8 @@ export const ScreenTimePage: React.FC = () => {
             </div>
             <div className="h-7 w-px bg-slate-200 dark:bg-slate-800" />
             <div className="text-center px-2">
-              <span className="text-[10px] uppercase font-bold text-muted-foreground block">Academic Ratio</span>
-              <span className="text-lg font-black text-blue-600 dark:text-blue-400">{dominantPercentage}%</span>
+              <span className="text-[10px] uppercase font-bold text-muted-foreground block">{isSelectedToday ? "Today's Time" : "Day's Time"}</span>
+              <span className="text-lg font-black text-blue-600 dark:text-blue-400">{formatHoursMins(activeTotalMins)}</span>
             </div>
           </div>
         </div>
@@ -512,10 +670,29 @@ export const ScreenTimePage: React.FC = () => {
         <CardContent>
           <div className="h-64 w-full">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={dailyScreenTimeData} margin={{ top: 15, right: 15, left: -10, bottom: 0 }}>
+              <BarChart
+                data={dailyScreenTimeData}
+                margin={{ top: 15, right: 20, left: 0, bottom: 0 }}
+                onClick={(state: any) => {
+                  if (state && state.activePayload && state.activePayload.length > 0) {
+                    const payload = state.activePayload[0].payload;
+                    if (payload && payload.date) {
+                      setSelectedDate(payload.date);
+                    }
+                  }
+                }}
+                className="cursor-pointer"
+              >
                 <CartesianGrid strokeDasharray="3 3" stroke={isDark ? "#1e293b" : "#f1f5f9"} vertical={false} />
                 <XAxis dataKey="day" stroke="#94a3b8" fontSize={11} tickLine={false} />
-                <YAxis unit="h" stroke="#94a3b8" fontSize={11} tickLine={false} domain={[0, 'dataMax + 2']} />
+                <YAxis 
+                  stroke="#94a3b8" 
+                  fontSize={11} 
+                  tickLine={false} 
+                  width={36}
+                  tickFormatter={(val: number) => `${Math.round(val)}h`}
+                  domain={[0, (dataMax: number) => Math.max(6, Math.ceil(Number(dataMax) + 1))]} 
+                />
                 <Tooltip
                   formatter={(val: any, name: string) => {
                     const labelMap: Record<string, string> = {
@@ -597,7 +774,7 @@ export const ScreenTimePage: React.FC = () => {
                   {/* Center Label */}
                   <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
                     <span className="text-xs text-muted-foreground font-medium">Classified</span>
-                    <span className="text-xl font-bold">{formatHoursMins(totalMins)}</span>
+                    <span className="text-xl font-bold">{formatHoursMins(activeTotalMins)}</span>
                   </div>
                 </div>
 
@@ -605,7 +782,7 @@ export const ScreenTimePage: React.FC = () => {
                 <div className="space-y-3">
                   {categoryData.map((cat) => {
                     const Icon = cat.icon;
-                    const pct = totalMins > 0 ? Math.round((cat.value / totalMins) * 100) : 0;
+                    const pct = activeTotalMins > 0 ? Math.round((cat.value / activeTotalMins) * 100) : 0;
                     return (
                       <div key={cat.name} className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200/50 dark:border-slate-800/50 flex items-center justify-between">
                         <div className="flex items-center gap-2.5">
@@ -631,9 +808,11 @@ export const ScreenTimePage: React.FC = () => {
             ) : (
               <div className="py-12 px-4 text-center border border-dashed rounded-xl border-slate-200 dark:border-slate-800 flex flex-col items-center justify-center">
                 <Clock className="w-8 h-8 text-muted-foreground/60 mb-2" />
-                <h4 className="text-xs font-semibold text-foreground">No Screen Time Classified Today</h4>
+                <h4 className="text-xs font-semibold text-foreground">No Screen Time Classified for {selectedDayLabel}</h4>
                 <p className="text-[11px] text-muted-foreground mt-1 max-w-xs mx-auto">
-                  Active computer time will be classified into Studying, Playing, Normal, and Adult content as you work.
+                  {isSelectedToday
+                    ? "Active computer time will be classified into Studying, Playing, Normal, and Adult content as you work."
+                    : "No screen usage sessions were recorded in the system on this date."}
                 </p>
               </div>
             )}
@@ -648,7 +827,7 @@ export const ScreenTimePage: React.FC = () => {
               Day vs. Late Night Divide
             </CardTitle>
             <CardDescription className="text-xs">
-              Circadian rhythm & melatonin preservation tracking.
+              Circadian rhythm & melatonin preservation tracking for {selectedDayLabel}.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -677,14 +856,14 @@ export const ScreenTimePage: React.FC = () => {
             </div>
 
             {/* Circadian Insight Card */}
-            <div className={`p-3.5 rounded-xl border text-xs ${lateNightMins >= 60 ? "bg-amber-500/10 border-amber-500/30 text-amber-700 dark:text-amber-300" : "bg-emerald-500/10 border-emerald-500/30 text-emerald-700 dark:text-emerald-300"}`}>
+            <div className={`p-3.5 rounded-xl border text-xs ${activeLateNightMins >= 60 ? "bg-amber-500/10 border-amber-500/30 text-amber-700 dark:text-amber-300" : "bg-emerald-500/10 border-emerald-500/30 text-emerald-700 dark:text-emerald-300"}`}>
               <div className="flex items-center gap-2 font-semibold">
-                {lateNightMins >= 60 ? <AlertTriangle className="w-4 h-4 text-amber-500 shrink-0" /> : <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />}
-                {lateNightMins >= 60 ? "Nocturnal Screen Delay Detected" : "Optimal Sleep Preservation"}
+                {activeLateNightMins >= 60 ? <AlertTriangle className="w-4 h-4 text-amber-500 shrink-0" /> : <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />}
+                {activeLateNightMins >= 60 ? "Nocturnal Screen Delay Detected" : "Optimal Sleep Preservation"}
               </div>
               <p className="mt-1 text-[11px] leading-relaxed text-muted-foreground">
-                {lateNightMins >= 60
-                  ? `Active screen exposure of ${formatHoursMins(lateNightMins)} occurred past midnight. Nocturnal blue light delays REM sleep and increases cognitive fatigue.`
+                {activeLateNightMins >= 60
+                  ? `Active screen exposure of ${formatHoursMins(activeLateNightMins)} occurred past midnight on this date. Nocturnal blue light delays REM sleep and increases cognitive fatigue.`
                   : "Minimal computer usage past midnight. Your natural sleep-wake cycle and melatonin production were preserved."}
               </p>
             </div>
@@ -694,23 +873,117 @@ export const ScreenTimePage: React.FC = () => {
 
       {/* Row 2: Top Apps Leaderboard & Online Searches */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* Left: Top Apps Leaderboard */}
+        {/* Left: Top Apps Leaderboard with Phone-Style Digital Wellbeing (Screen Time, Times Opened, Notifications) */}
         <Card className="lg:col-span-6 rounded-2xl border-slate-200/80 dark:border-slate-800/80 bg-card/60 backdrop-blur-sm shadow-sm flex flex-col justify-between">
           <div>
             <CardHeader className="pb-3">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                 <div>
                   <CardTitle className="text-lg font-bold flex items-center gap-2">
-                    <Laptop className="w-5 h-5 text-blue-500" />
-                    Most Used Applications
+                    <Smartphone className="w-5 h-5 text-blue-500" />
+                    Application Screen Time & Wellbeing
                   </CardTitle>
                   <CardDescription className="text-xs">
-                    Active foreground process duration ranked by time spent.
+                    Smartphone-style breakdown for {selectedDayLabel} across Screen Time, Times Opened, and Notifications Received.
                   </CardDescription>
                 </div>
-                <Badge variant="outline" className="text-xs self-start sm:self-auto">
-                  {topApps.length} Apps Tracked
+                <Badge variant="outline" className="text-xs self-start sm:self-auto font-medium">
+                  {topApps.length} Apps on {selectedDayLabel}
                 </Badge>
+              </div>
+
+              {/* 3 Phone Screen Time Overview Metric Cards */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-3">
+                {/* 1. Screen Time */}
+                <div
+                  onClick={() => setAppMetricMode("time")}
+                  className={`p-3 rounded-xl border cursor-pointer transition-all ${
+                    appMetricMode === "time"
+                      ? "bg-blue-500/10 border-blue-500/40 shadow-xs ring-1 ring-blue-500/30"
+                      : "bg-slate-50 dark:bg-slate-900/40 border-slate-200/60 dark:border-slate-800/60 hover:border-slate-300 dark:hover:border-slate-700"
+                  }`}
+                >
+                  <div className="flex items-center justify-between text-muted-foreground mb-1">
+                    <span className="text-[10px] font-bold uppercase tracking-wider">Screen Time</span>
+                    <Clock className={`w-3.5 h-3.5 ${appMetricMode === "time" ? "text-blue-500" : "text-muted-foreground"}`} />
+                  </div>
+                  <div className="text-lg font-bold text-foreground">{formatHoursMins(totalScreenTimeMins)}</div>
+                  <span className="text-[10px] text-muted-foreground mt-0.5 block">Daily device time</span>
+                </div>
+
+                {/* 2. Times Opened */}
+                <div
+                  onClick={() => setAppMetricMode("opens")}
+                  className={`p-3 rounded-xl border cursor-pointer transition-all ${
+                    appMetricMode === "opens"
+                      ? "bg-purple-500/10 border-purple-500/40 shadow-xs ring-1 ring-purple-500/30"
+                      : "bg-slate-50 dark:bg-slate-900/40 border-slate-200/60 dark:border-slate-800/60 hover:border-slate-300 dark:hover:border-slate-700"
+                  }`}
+                >
+                  <div className="flex items-center justify-between text-muted-foreground mb-1">
+                    <span className="text-[10px] font-bold uppercase tracking-wider">Times Opened</span>
+                    <ArrowUpRight className={`w-3.5 h-3.5 ${appMetricMode === "opens" ? "text-purple-500" : "text-muted-foreground"}`} />
+                  </div>
+                  <div className="text-lg font-bold text-foreground">{totalTimesOpened} opens</div>
+                  <span className="text-[10px] text-muted-foreground mt-0.5 block">App launches/pickups</span>
+                </div>
+
+                {/* 3. Notifications */}
+                <div
+                  onClick={() => setAppMetricMode("notifications")}
+                  className={`p-3 rounded-xl border cursor-pointer transition-all ${
+                    appMetricMode === "notifications"
+                      ? "bg-amber-500/10 border-amber-500/40 shadow-xs ring-1 ring-amber-500/30"
+                      : "bg-slate-50 dark:bg-slate-900/40 border-slate-200/60 dark:border-slate-800/60 hover:border-slate-300 dark:hover:border-slate-700"
+                  }`}
+                >
+                  <div className="flex items-center justify-between text-muted-foreground mb-1">
+                    <span className="text-[10px] font-bold uppercase tracking-wider">Notifications</span>
+                    <Bell className={`w-3.5 h-3.5 ${appMetricMode === "notifications" ? "text-amber-500" : "text-muted-foreground"}`} />
+                  </div>
+                  <div className="text-lg font-bold text-foreground">{totalNotifications} received</div>
+                  <span className="text-[10px] text-muted-foreground mt-0.5 block">Windows alerts</span>
+                </div>
+              </div>
+
+              {/* Segmented Tab Selector (Phone Settings Style) */}
+              <div className="flex p-1 bg-slate-100 dark:bg-slate-900/80 rounded-xl border border-slate-200/80 dark:border-slate-800/80 gap-1 mt-3">
+                <button
+                  type="button"
+                  onClick={() => setAppMetricMode("time")}
+                  className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 px-2.5 rounded-lg text-xs font-semibold transition-all ${
+                    appMetricMode === "time"
+                      ? "bg-white dark:bg-slate-800 text-blue-600 dark:text-blue-400 shadow-xs border border-slate-200/60 dark:border-slate-700"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  <Clock className="w-3.5 h-3.5 shrink-0" />
+                  <span>Screen Time</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setAppMetricMode("opens")}
+                  className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 px-2.5 rounded-lg text-xs font-semibold transition-all ${
+                    appMetricMode === "opens"
+                      ? "bg-white dark:bg-slate-800 text-purple-600 dark:text-purple-400 shadow-xs border border-slate-200/60 dark:border-slate-700"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  <ArrowUpRight className="w-3.5 h-3.5 shrink-0" />
+                  <span>Times Opened</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setAppMetricMode("notifications")}
+                  className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 px-2.5 rounded-lg text-xs font-semibold transition-all ${
+                    appMetricMode === "notifications"
+                      ? "bg-white dark:bg-slate-800 text-amber-600 dark:text-amber-400 shadow-xs border border-slate-200/60 dark:border-slate-700"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  <Bell className="w-3.5 h-3.5 shrink-0" />
+                  <span>Notifications</span>
+                </button>
               </div>
 
               {/* Category Filter Pills */}
@@ -735,7 +1008,14 @@ export const ScreenTimePage: React.FC = () => {
               {topApps.length > 0 ? (
                 topApps.map((app, idx) => {
                   const maxMinutes = Math.max(...topApps.map(a => a.minutes), 1);
-                  const barWidth = Math.min(100, Math.round((app.minutes / maxMinutes) * 100));
+                  const maxOpens = Math.max(...topApps.map(a => a.times_opened || 1), 1);
+                  const maxNotifs = Math.max(...topApps.map(a => a.notifications || 0), 1);
+
+                  const barWidth = appMetricMode === "time"
+                    ? Math.min(100, Math.round((app.minutes / maxMinutes) * 100))
+                    : appMetricMode === "opens"
+                    ? Math.min(100, Math.round(((app.times_opened || 1) / maxOpens) * 100))
+                    : Math.min(100, Math.round(((app.notifications || 0) / maxNotifs) * 100));
 
                   return (
                     <div
@@ -743,33 +1023,53 @@ export const ScreenTimePage: React.FC = () => {
                       className="p-3 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200/50 dark:border-slate-800/50 space-y-2 hover:border-blue-500/40 transition-colors"
                     >
                       <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <span className="text-xs font-bold text-muted-foreground w-4 text-center">
+                        <div className="flex items-center gap-3 min-w-0">
+                          <span className="text-xs font-bold text-muted-foreground w-4 text-center shrink-0">
                             #{idx + 1}
                           </span>
                           <div className="w-9 h-9 rounded-xl bg-background border border-slate-200 dark:border-slate-800 flex items-center justify-center shrink-0 shadow-xs">
                             {renderAppIcon(app.icon, app.category)}
                           </div>
-                          <div>
-                            <span className="font-semibold text-xs block text-foreground">{app.name}</span>
-                            <span className="text-[11px] text-muted-foreground font-mono">{app.proc}</span>
+                          <div className="min-w-0">
+                            <span className="font-semibold text-xs block text-foreground truncate">{app.name}</span>
+                            <div className="flex items-center gap-2 text-[10px] text-muted-foreground">
+                              <span>⏱️ {formatHoursMins(app.minutes)}</span>
+                              <span>•</span>
+                              <span>📱 {app.times_opened || 1} opens</span>
+                              <span>•</span>
+                              <span>🔔 {app.notifications || 0} alerts</span>
+                            </div>
                           </div>
                         </div>
 
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 shrink-0">
                           <Badge variant="outline" className={`text-[10px] font-medium border px-2 py-0.5 ${getCategoryBadgeClass(app.category)}`}>
                             {app.category}
                           </Badge>
-                          <span className="text-xs font-bold text-foreground min-w-[50px] text-right">
-                            {formatHoursMins(app.minutes)}
-                          </span>
+                          {appMetricMode === "time" && (
+                            <span className="text-xs font-bold text-foreground min-w-[55px] text-right font-mono">
+                              {formatHoursMins(app.minutes)}
+                            </span>
+                          )}
+                          {appMetricMode === "opens" && (
+                            <span className="text-xs font-bold text-purple-600 dark:text-purple-400 min-w-[55px] text-right font-mono">
+                              {app.times_opened || 1} opens
+                            </span>
+                          )}
+                          {appMetricMode === "notifications" && (
+                            <span className="text-xs font-bold text-amber-600 dark:text-amber-400 min-w-[55px] text-right font-mono">
+                              {app.notifications || 0} alerts
+                            </span>
+                          )}
                         </div>
                       </div>
 
-                      {/* Progress Bar */}
+                      {/* Dynamic Progress Bar */}
                       <div className="w-full bg-slate-200/60 dark:bg-slate-800 rounded-full h-1.5 overflow-hidden">
                         <div
                           className={`h-full rounded-full transition-all duration-500 ${
+                            appMetricMode === "opens" ? "bg-purple-500" :
+                            appMetricMode === "notifications" ? "bg-amber-500" :
                             app.category === "Studying" ? "bg-blue-500" :
                             app.category === "Playing" ? "bg-purple-500" :
                             app.category === "Adult" ? "bg-rose-500" : "bg-emerald-500"
@@ -783,11 +1083,13 @@ export const ScreenTimePage: React.FC = () => {
               ) : (
                 <div className="py-12 px-4 text-center border border-dashed rounded-xl border-slate-200 dark:border-slate-800 flex flex-col items-center justify-center">
                   <Laptop className="w-8 h-8 text-muted-foreground/60 mb-2" />
-                  <h4 className="text-xs font-semibold text-foreground">No Applications Recorded</h4>
+                  <h4 className="text-xs font-semibold text-foreground">No Applications Recorded for {selectedDayLabel}</h4>
                   <p className="text-[11px] text-muted-foreground mt-1 max-w-xs mx-auto">
                     {appCategoryFilter !== "ALL"
-                      ? `No applications detected under the "${appCategoryFilter}" filter today.`
-                      : "Foreground applications will be automatically detected and ranked as you work on your PC."}
+                      ? `No applications detected under the "${appCategoryFilter}" filter on this date.`
+                      : isSelectedToday
+                      ? "Foreground applications will be automatically detected and ranked as you work on your PC."
+                      : "No application telemetry was archived for this date."}
                   </p>
                 </div>
               )}
@@ -805,7 +1107,7 @@ export const ScreenTimePage: React.FC = () => {
                   Online Search Topics & Intent
                 </CardTitle>
                 <CardDescription className="text-xs">
-                  Keywords and research topics extracted from browser search queries.
+                  Keywords and research topics observed on {selectedDayLabel}.
                 </CardDescription>
               </div>
               <Badge variant="outline" className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/30 text-xs flex items-center gap-1">
@@ -835,7 +1137,7 @@ export const ScreenTimePage: React.FC = () => {
                         "{item.query}"
                       </span>
                       <span className="text-[10px] text-muted-foreground flex items-center gap-1">
-                        {item.count} search queries observed today
+                        {item.count} search queries observed on {selectedDayLabel}
                       </span>
                     </div>
                   </div>
@@ -851,9 +1153,11 @@ export const ScreenTimePage: React.FC = () => {
             ) : (
               <div className="py-12 px-4 text-center border border-dashed rounded-xl border-slate-200 dark:border-slate-800 flex flex-col items-center justify-center">
                 <Search className="w-8 h-8 text-muted-foreground/60 mb-2" />
-                <h4 className="text-xs font-semibold text-foreground">No Web Searches Recorded Today</h4>
+                <h4 className="text-xs font-semibold text-foreground">No Web Searches Recorded on {selectedDayLabel}</h4>
                 <p className="text-[11px] text-muted-foreground mt-1 max-w-xs mx-auto">
-                  Queries performed in Google, Bing, YouTube, or DuckDuckGo will be logged here with category tags.
+                  {isSelectedToday
+                    ? "Queries performed in Google, Bing, YouTube, or DuckDuckGo will be logged here with category tags."
+                    : "No browser queries were archived for this historical date."}
                 </p>
               </div>
             )}
@@ -875,7 +1179,7 @@ export const ScreenTimePage: React.FC = () => {
           <div>
             <h3 className="text-lg font-bold text-foreground flex items-center gap-2">
               <HeartPulse className="w-5 h-5 text-rose-500" />
-              Digital Wellbeing & Habit Correlations
+              Digital Wellbeing & Habit Correlations ({selectedDayLabel})
             </h3>
             <p className="text-xs text-muted-foreground">
               Clinical insights bridging screen time habits with mood resilience and cognitive stamina.
@@ -896,13 +1200,13 @@ export const ScreenTimePage: React.FC = () => {
                 </div>
                 <span className="text-xs font-bold">Circadian Rest Impact</span>
               </div>
-              <Badge variant="outline" className={lateNightMins >= 60 ? "bg-amber-500/15 text-amber-600 dark:text-amber-400 text-[10px]" : "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 text-[10px]"}>
-                {lateNightMins >= 60 ? "Disruption Risk" : "Healthy Alignment"}
+              <Badge variant="outline" className={activeLateNightMins >= 60 ? "bg-amber-500/15 text-amber-600 dark:text-amber-400 text-[10px]" : "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 text-[10px]"}>
+                {activeLateNightMins >= 60 ? "Disruption Risk" : "Healthy Alignment"}
               </Badge>
             </div>
             <p className="text-xs text-muted-foreground leading-relaxed">
-              {lateNightMins >= 60
-                ? `${formatHoursMins(lateNightMins)} of screen exposure past midnight suppresses natural melatonin secretion, correlating with lower focus scores during morning study sessions.`
+              {activeLateNightMins >= 60
+                ? `${formatHoursMins(activeLateNightMins)} of screen exposure past midnight suppresses natural melatonin secretion, correlating with lower focus scores during morning study sessions.`
                 : "Nocturnal computer usage was kept under critical thresholds, protecting restorative REM sleep cycles and next-day attention span."}
             </p>
           </Card>
@@ -921,9 +1225,9 @@ export const ScreenTimePage: React.FC = () => {
               </Badge>
             </div>
             <p className="text-xs text-muted-foreground leading-relaxed">
-              {academicMins > entertainmentMins
-                ? `You dedicated ${formatHoursMins(academicMins)} to coursework vs ${formatHoursMins(entertainmentMins)} to recreation. Remember to weave in 5-minute cognitive resets between intensive study blocks.`
-                : `Entertainment usage (${formatHoursMins(entertainmentMins)}) balanced your study hours (${formatHoursMins(academicMins)}), preventing mental saturation.`}
+              {activeAcademicMins > activeEntertainmentMins
+                ? `You dedicated ${formatHoursMins(activeAcademicMins)} to coursework vs ${formatHoursMins(activeEntertainmentMins)} to recreation on ${selectedDayLabel}. Remember to weave in 5-minute cognitive resets between intensive study blocks.`
+                : `Entertainment usage (${formatHoursMins(activeEntertainmentMins)}) balanced your study hours (${formatHoursMins(activeAcademicMins)}) on ${selectedDayLabel}, preventing mental saturation.`}
             </p>
           </Card>
 
@@ -936,12 +1240,19 @@ export const ScreenTimePage: React.FC = () => {
                 </div>
                 <span className="text-xs font-bold">Digital Equilibrium</span>
               </div>
-              <Badge variant="outline" className="bg-teal-500/15 text-teal-600 dark:text-teal-400 text-[10px] font-bold">
-                {lateNightMins >= 60 ? "Score: 78 / 100" : "Score: 92 / 100"}
-              </Badge>
+              {(() => {
+                const lateNightPenalty = Math.min(35, Math.round((activeLateNightMins / 60) * 15));
+                const strainPenalty = activeContinuousMins >= 50 ? Math.min(25, Math.round(((activeContinuousMins - 50) / 20) * 10)) : 0;
+                const computedScore = activeTotalMins > 0 ? Math.max(30, 100 - lateNightPenalty - strainPenalty) : 100;
+                return (
+                  <Badge variant="outline" className="bg-teal-500/15 text-teal-600 dark:text-teal-400 text-[10px] font-bold">
+                    Score: {computedScore} / 100
+                  </Badge>
+                );
+              })()}
             </div>
             <p className="text-xs text-muted-foreground leading-relaxed">
-              {lateNightMins >= 60
+              {activeLateNightMins >= 60
                 ? "Slight fatigue penalty applied due to late-night screen time. Shifting 45 minutes of evening study to earlier in the day will elevate your equilibrium score."
                 : "Excellent digital balance. Healthy daytime study focus combined with proper nocturnal rest preserves high mental clarity and mood equilibrium."}
             </p>
