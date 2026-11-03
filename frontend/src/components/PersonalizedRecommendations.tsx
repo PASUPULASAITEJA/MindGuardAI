@@ -62,6 +62,67 @@ export const PersonalizedRecommendations: React.FC = () => {
     }
   });
 
+  const handleLaunchProtocol = (rec: PersonalizedRecommendationItem) => {
+    const url = rec.action_url || "";
+    if (url.startsWith("http")) {
+      window.open(url, "_blank");
+      return;
+    }
+
+    const cat = rec.category.toUpperCase();
+    if (url.includes("box") || url.includes("478") || url.includes("breath") || cat === "BREATHING") {
+      const el = document.getElementById("breath-pacer");
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "center" });
+        return;
+      }
+      navigate("/student/resources");
+      return;
+    }
+
+    if (url.includes("54321") || url.includes("grounding") || cat === "GROUNDING") {
+      const el = document.getElementById("sensory-grounding");
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "center" });
+        return;
+      }
+      navigate("/student/resources");
+      return;
+    }
+
+    if (url.includes("sleep") || cat === "SLEEP_HYGIENE") {
+      const el = document.getElementById("sleep-guidelines");
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "center" });
+        return;
+      }
+      navigate("/student/resources");
+      return;
+    }
+
+    if (url.includes("sos") || url.includes("crisis") || cat === "CRISIS_SUPPORT") {
+      const el = document.getElementById("crisis-support");
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "center" });
+        return;
+      }
+      navigate("/student/resources");
+      return;
+    }
+
+    if (url.includes("journal") || cat === "JOURNALING") {
+      navigate("/student/check-in");
+      return;
+    }
+
+    if (url.includes("chat") || url.includes("reframer") || cat === "COGNITIVE_REFRAME") {
+      navigate("/student/chat");
+      return;
+    }
+
+    navigate(url);
+  };
+
   const getCategoryMeta = (cat: string) => {
     switch (cat.toUpperCase()) {
       case "BREATHING":
@@ -228,13 +289,7 @@ export const PersonalizedRecommendations: React.FC = () => {
                   <Button
                     size="sm"
                     variant={isCompleted ? "outline" : "default"}
-                    onClick={() => {
-                      if (rec.action_url.startsWith("http")) {
-                        window.open(rec.action_url, "_blank");
-                      } else {
-                        navigate(rec.action_url);
-                      }
-                    }}
+                    onClick={() => handleLaunchProtocol(rec)}
                     className="h-7 text-[11px] font-bold gap-1 flex-1 rounded-lg shadow-2xs"
                   >
                     <span>Launch Protocol</span>
