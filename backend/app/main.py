@@ -204,6 +204,8 @@ app.include_router(notifications_router, prefix="/api/v1/notifications", tags=["
 app.include_router(notifications_router, prefix="/api/notifications", tags=["User Notifications"])
 from app.api.v1.notifications import websocket_notifications
 app.add_api_websocket_route("/ws/notifications", websocket_notifications)
+app.add_api_websocket_route("/api/v1/ws/notifications", websocket_notifications)
+app.add_api_websocket_route("/api/ws/notifications", websocket_notifications)
 app.include_router(analytics_router, prefix="/api/v1/analytics", tags=["Campus Analytics"])
 app.include_router(chatbot_router, prefix="/api/v1", tags=["AI Wellness Chatbot"])
 app.include_router(appointments_router, prefix="/api/v1/appointments", tags=["Counselor Appointments"])
