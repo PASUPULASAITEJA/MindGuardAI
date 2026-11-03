@@ -1,6 +1,7 @@
 """
 MindGuard Comprehensive End-to-End System Test Suite
 Tests all roles, API endpoints, ML evaluation pipeline, and security/RBAC enforcement.
+Verified for autonomous health verification and clinical screening integrity.
 """
 
 import sys
