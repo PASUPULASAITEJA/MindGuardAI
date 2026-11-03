@@ -26,8 +26,6 @@ import { useScrollReveal } from "@/hooks/useScrollReveal";
 import { useCountUp } from "@/hooks/useCountUp";
 import { GlowOrb } from "@/components/ui/GlowOrb";
 import { BioNeuralSynapseMesh } from "@/components/ui/BioNeuralSynapseMesh";
-import type { BrainMood } from "@/components/3d/NeuralParticleBrain";
-const NeuralParticleBrain = React.lazy(() => import("@/components/3d/NeuralParticleBrain"));
 
 interface FAQItem {
   question: string;
@@ -67,8 +65,6 @@ export const LandingPage: React.FC = () => {
   const navigate = useNavigate();
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
-  const [heroVisualMode, setHeroVisualMode] = useState<"brain" | "hud">("brain");
-  const [brainMood, setBrainMood] = useState<BrainMood>("calm");
 
   const scrollToSection = (id: string) => {
     const el = document.getElementById(id);
@@ -326,33 +322,17 @@ export const LandingPage: React.FC = () => {
             </div>
           </div>
 
-          {/* RIGHT COLUMN — 3D Neural Particle Brain & Telemetry HUD */}
+          {/* RIGHT COLUMN — Multimodal Live Telemetry HUD */}
           <div className="flex flex-col justify-center relative fade-up-2 mt-4 lg:mt-0 space-y-3">
-            {/* View Switcher Controls */}
             <div className="flex items-center justify-between px-1">
-              <div className="flex items-center gap-1.5 p-1 rounded-xl bg-card/80 dark:bg-white/[0.04] border border-border/80 dark:border-white/10 backdrop-blur-md shadow-xs">
-                <button
-                  onClick={() => setHeroVisualMode("brain")}
-                  className={`px-3 py-1 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
-                    heroVisualMode === "brain"
-                      ? "bg-primary text-primary-foreground shadow-sm shadow-primary/20"
-                      : "text-muted-foreground hover:text-foreground"
-                  }`}
-                >
-                  <Brain className="w-3.5 h-3.5" />
-                  <span>3D Neural Brain</span>
-                </button>
-                <button
-                  onClick={() => setHeroVisualMode("hud")}
-                  className={`px-3 py-1 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
-                    heroVisualMode === "hud"
-                      ? "bg-primary text-primary-foreground shadow-sm shadow-primary/20"
-                      : "text-muted-foreground hover:text-foreground"
-                  }`}
-                >
-                  <Activity className="w-3.5 h-3.5" />
-                  <span>Telemetry HUD</span>
-                </button>
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shadow-xs">
+                  <Activity className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="text-xs sm:text-sm font-semibold text-foreground">Live Telemetry Synchrony</h3>
+                  <p className="text-[10px] sm:text-[11px] text-muted-foreground">Autonomous Neural Signal Mesh</p>
+                </div>
               </div>
 
               <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 text-[10px] sm:text-xs font-semibold shrink-0 shadow-[0_0_15px_-3px_rgba(16,185,129,0.25)]">
@@ -361,95 +341,55 @@ export const LandingPage: React.FC = () => {
               </div>
             </div>
 
-            {/* View 1: 3D Neural Particle Brain */}
-            {heroVisualMode === "brain" ? (
-              <div className="relative group">
-                <React.Suspense fallback={
-                  <div className="w-full h-[380px] sm:h-[440px] flex items-center justify-center rounded-3xl border border-white/10 bg-slate-950/60 backdrop-blur-xl">
-                    <div className="h-16 w-16 rounded-full border-2 border-cyan-500/20 border-t-cyan-500 animate-spin" />
-                  </div>
-                }>
-                  <NeuralParticleBrain
-                    mood={brainMood}
-                    className="w-full h-[380px] sm:h-[440px]"
-                  />
-                </React.Suspense>
-
-                {/* Floating Telemetry Metric Pills over the 3D Canvas */}
-                <div className="grid grid-cols-2 gap-2 mt-2">
-                  <div className="px-3 py-2 rounded-xl bg-card/70 dark:bg-slate-900/60 border border-border/70 dark:border-white/10 backdrop-blur-md flex items-center justify-between text-xs shadow-xs">
-                    <span className="text-muted-foreground text-[11px] font-medium">Cognitive Load</span>
-                    <span className="font-bold text-emerald-500">Optimal (88%)</span>
-                  </div>
-                  <div className="px-3 py-2 rounded-xl bg-card/70 dark:bg-slate-900/60 border border-border/70 dark:border-white/10 backdrop-blur-md flex items-center justify-between text-xs shadow-xs">
-                    <span className="text-muted-foreground text-[11px] font-medium">Circadian Sleep</span>
-                    <span className="font-bold text-blue-500">7.4h Regular</span>
-                  </div>
-                </div>
-              </div>
-            ) : (
-              /* View 2: Multimodal Telemetry Grid */
-              <div className="relative rounded-2xl cinematic-glass p-5 sm:p-7 space-y-4 sm:space-y-5 overflow-hidden">
-                <div className="flex items-center justify-between pb-3 sm:pb-4 border-b border-border/60 dark:border-white/[0.08]">
-                  <div className="flex items-center gap-2 sm:gap-2.5">
-                    <div className="w-9 h-9 rounded-xl bg-primary/10 dark:bg-primary/[0.15] border border-primary/20 flex items-center justify-center text-primary shrink-0 shadow-xs">
-                      <Activity className="w-4 h-4" />
-                    </div>
-                    <div>
-                      <h3 className="text-xs sm:text-sm font-semibold text-foreground">Live Telemetry Synchrony</h3>
-                      <p className="text-[10px] sm:text-[11px] text-muted-foreground">Autonomous Neural Signal Mesh</p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-2.5 sm:gap-3.5">
-                  <div className="p-3 sm:p-4 rounded-xl bg-background/70 dark:bg-card/60 border border-border/70 dark:border-white/[0.08] hover:border-primary/40 transition-all duration-200 space-y-1 shadow-xs">
-                    <span className="text-[9px] sm:text-[10px] uppercase font-bold text-muted-foreground tracking-wider block truncate">
-                      Cognitive Sentiment
-                    </span>
-                    <p className="text-base sm:text-xl font-extrabold text-foreground">Positive (88%)</p>
-                    <p className="text-[10px] sm:text-[11px] text-primary flex items-center gap-1">
-                      <span>NLP DistilBERT 6-Class</span>
-                    </p>
-                  </div>
-
-                  <div className="p-3 sm:p-4 rounded-xl bg-background/70 dark:bg-card/60 border border-border/70 dark:border-white/[0.08] hover:border-blue-500/40 transition-all duration-200 space-y-1 shadow-xs">
-                    <span className="text-[9px] sm:text-[10px] uppercase font-bold text-muted-foreground tracking-wider block truncate">
-                      Circadian Rhythm
-                    </span>
-                    <p className="text-base sm:text-xl font-extrabold text-blue-500">7.4h Regular</p>
-                    <p className="text-[10px] sm:text-[11px] text-muted-foreground">Fragmentation 0.12</p>
-                  </div>
-
-                  <div className="p-3 sm:p-4 rounded-xl bg-background/70 dark:bg-card/60 border border-border/70 dark:border-white/[0.08] hover:border-emerald-500/40 transition-all duration-200 space-y-1 shadow-xs">
-                    <span className="text-[9px] sm:text-[10px] uppercase font-bold text-muted-foreground tracking-wider block truncate">
-                      Screen Time
-                    </span>
-                    <p className="text-base sm:text-xl font-extrabold text-emerald-500">Balanced</p>
-                    <p className="text-[10px] sm:text-[11px] text-muted-foreground">Zero-keystroke</p>
-                  </div>
-
-                  <div className="p-3 sm:p-4 rounded-xl bg-background/70 dark:bg-card/60 border border-border/70 dark:border-white/[0.08] hover:border-emerald-500/40 transition-all duration-200 space-y-1 shadow-xs">
-                    <span className="text-[9px] sm:text-[10px] uppercase font-bold text-muted-foreground tracking-wider block truncate">
-                      Risk Tier
-                    </span>
-                    <p className="text-base sm:text-xl font-extrabold text-emerald-500">Low (0.14)</p>
-                    <p className="text-[10px] sm:text-[11px] text-muted-foreground">PHQ-9 Validated</p>
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-between pt-2.5 sm:pt-3 border-t border-border/60 dark:border-white/[0.08] text-[11px] sm:text-xs text-muted-foreground">
-                  <span className="flex items-center gap-1.5">
-                    <span className="relative flex h-2 w-2">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
-                      <span className="relative inline-flex rounded-full h-2 w-2 bg-cyan-500"></span>
-                    </span>
-                    Active Synaptic Axon Links
+            {/* Multimodal Telemetry Grid */}
+            <div className="relative rounded-2xl cinematic-glass p-5 sm:p-7 space-y-4 sm:space-y-5 overflow-hidden">
+              <div className="grid grid-cols-2 gap-2.5 sm:gap-3.5">
+                <div className="p-3 sm:p-4 rounded-xl bg-background/70 dark:bg-card/60 border border-border/70 dark:border-white/[0.08] hover:border-primary/40 transition-all duration-200 space-y-1 shadow-xs">
+                  <span className="text-[9px] sm:text-[10px] uppercase font-bold text-muted-foreground tracking-wider block truncate">
+                    Cognitive Sentiment
                   </span>
-                  <span className="font-mono text-[11px] text-foreground font-semibold">1,400+ Nodes</span>
+                  <p className="text-base sm:text-xl font-extrabold text-foreground">Positive (88%)</p>
+                  <p className="text-[10px] sm:text-[11px] text-primary flex items-center gap-1">
+                    <span>NLP DistilBERT 6-Class</span>
+                  </p>
+                </div>
+
+                <div className="p-3 sm:p-4 rounded-xl bg-background/70 dark:bg-card/60 border border-border/70 dark:border-white/[0.08] hover:border-blue-500/40 transition-all duration-200 space-y-1 shadow-xs">
+                  <span className="text-[9px] sm:text-[10px] uppercase font-bold text-muted-foreground tracking-wider block truncate">
+                    Circadian Rhythm
+                  </span>
+                  <p className="text-base sm:text-xl font-extrabold text-blue-500">7.4h Regular</p>
+                  <p className="text-[10px] sm:text-[11px] text-muted-foreground">Fragmentation 0.12</p>
+                </div>
+
+                <div className="p-3 sm:p-4 rounded-xl bg-background/70 dark:bg-card/60 border border-border/70 dark:border-white/[0.08] hover:border-emerald-500/40 transition-all duration-200 space-y-1 shadow-xs">
+                  <span className="text-[9px] sm:text-[10px] uppercase font-bold text-muted-foreground tracking-wider block truncate">
+                    Screen Time
+                  </span>
+                  <p className="text-base sm:text-xl font-extrabold text-emerald-500">Balanced</p>
+                  <p className="text-[10px] sm:text-[11px] text-muted-foreground">Zero-keystroke</p>
+                </div>
+
+                <div className="p-3 sm:p-4 rounded-xl bg-background/70 dark:bg-card/60 border border-border/70 dark:border-white/[0.08] hover:border-emerald-500/40 transition-all duration-200 space-y-1 shadow-xs">
+                  <span className="text-[9px] sm:text-[10px] uppercase font-bold text-muted-foreground tracking-wider block truncate">
+                    Risk Tier
+                  </span>
+                  <p className="text-base sm:text-xl font-extrabold text-emerald-500">Low (0.14)</p>
+                  <p className="text-[10px] sm:text-[11px] text-muted-foreground">PHQ-9 Validated</p>
                 </div>
               </div>
-            )}
+
+              <div className="flex items-center justify-between pt-2.5 sm:pt-3 border-t border-border/60 dark:border-white/[0.08] text-[11px] sm:text-xs text-muted-foreground">
+                <span className="flex items-center gap-1.5">
+                  <span className="relative flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-cyan-500"></span>
+                  </span>
+                  Active Synaptic Axon Links
+                </span>
+                <span className="font-mono text-[11px] text-foreground font-semibold">1,400+ Nodes</span>
+              </div>
+            </div>
           </div>
         </div>
       </section>
