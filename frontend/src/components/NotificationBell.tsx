@@ -72,9 +72,9 @@ export const NotificationBell: React.FC = () => {
 
     cleanupWebSocket();
 
-    // Determine WebSocket host URL
+    // Determine WebSocket host URL - route seamlessly via Vite dev server proxy or direct backend
     const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-    const host = window.location.port === "5173" ? `${window.location.hostname}:8000` : window.location.host;
+    const host = window.location.host;
     const wsUrl = `${protocol}//${host}/ws/notifications?token=${token}`;
 
     try {
