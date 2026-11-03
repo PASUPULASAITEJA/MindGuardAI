@@ -93,6 +93,8 @@ class BehavioralFeaturesPayload(BaseModel):
     wearable_synced: Optional[bool] = Field(default=False, description="Whether data originated or was augmented from wearable device")
     top_apps: Optional[List[Dict[str, Any]]] = Field(default=None, description="Ranked list of top active applications with minutes and category")
     search_topics: Optional[List[Dict[str, Any]]] = Field(default=None, description="Extracted search queries and topics with category and frequency")
+    total_times_opened: Optional[int] = Field(default=None, description="Total times applications were opened or foregrounded today")
+    total_notifications: Optional[int] = Field(default=None, description="Total notifications received today from apps")
 
 class WearableSleepSyncPayload(BaseModel):
     sleep_duration_hours: float = Field(..., ge=1.0, le=18.0, description="Total sleep duration in hours")
