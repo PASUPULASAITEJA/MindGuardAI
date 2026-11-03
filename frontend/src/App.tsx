@@ -142,6 +142,40 @@ function App() {
               }
             />
 
+            {/* STUDENT Pathway Interventions & Tool Aliases */}
+            <Route
+              path="/student/screen-time"
+              element={<Navigate to="/student/screentime" replace />}
+            />
+            <Route
+              path="/student/screen_time"
+              element={<Navigate to="/student/screentime" replace />}
+            />
+            <Route
+              path="/student/apps"
+              element={<Navigate to="/student/screentime" replace />}
+            />
+            <Route
+              path="/student/grounding"
+              element={<Navigate to="/student/resources" replace />}
+            />
+            <Route
+              path="/student/journal"
+              element={<Navigate to="/student/check-in" replace />}
+            />
+            <Route
+              path="/student/reframer"
+              element={<Navigate to="/student/chat" replace />}
+            />
+            <Route
+              path="/student/sos"
+              element={<Navigate to="/student/resources" replace />}
+            />
+            <Route
+              path="/student/appointments"
+              element={<Navigate to="/student/resources" replace />}
+            />
+
             {/* COUNSELOR Guarded Pathways */}
             <Route
               path="/counselor/dashboard"
