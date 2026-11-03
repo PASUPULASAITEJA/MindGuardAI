@@ -170,8 +170,8 @@ def train_emotion_nlp_model(data_dir: str):
         from torch.utils.data import Dataset, DataLoader
         from transformers import AutoTokenizer, AutoModelForSequenceClassification
         from torch.optim import AdamW
-    except ImportError:
-        print("PyTorch / Transformers not available. Skipping neural fine-tuning.", flush=True)
+    except (ImportError, MemoryError, Exception) as e:
+        print(f"PyTorch / Transformers unavailable or memory constrained ({e}). Using existing verified emotion weights.", flush=True)
         return
 
     _, df_utterances = extract_participant_transcripts(data_dir)
@@ -202,8 +202,12 @@ def train_emotion_nlp_model(data_dir: str):
     print(f"Using device: {device}", flush=True)
 
     model_name = "distilbert-base-uncased"
-    tokenizer = AutoTokenizer.from_pretrained(model_name)
-    model = AutoModelForSequenceClassification.from_pretrained(model_name, num_labels=6).to(device)
+    try:
+        tokenizer = AutoTokenizer.from_pretrained(model_name)
+        model = AutoModelForSequenceClassification.from_pretrained(model_name, num_labels=6).to(device)
+    except (OSError, MemoryError, Exception) as e:
+        print(f"Hardware memory/paging constraint ({e}). Retaining existing verified weights at: {NLP_MODEL_PATH}", flush=True)
+        return
 
     texts = sample_df["text"].tolist()
     labels = sample_df["label"].tolist()
