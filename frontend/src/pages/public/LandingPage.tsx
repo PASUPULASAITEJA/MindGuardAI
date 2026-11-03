@@ -89,14 +89,15 @@ export const LandingPage: React.FC = () => {
     <div className="relative min-h-screen bg-background text-foreground font-sans antialiased selection:bg-primary/20 selection:text-primary transition-colors duration-200">
       {/* ── PERSISTENT FULL-PAGE NEURAL SYNAPSE BACKGROUND (TOP TO BOTTOM) ── */}
       <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+        <div className="absolute inset-0 cinematic-grid-pattern opacity-40 dark:opacity-30" />
         <BioNeuralSynapseMesh className="w-full h-full" />
       </div>
 
       {/* ── TOP NAVBAR ── */}
-      <header className="sticky top-0 z-50 w-full backdrop-blur-md bg-background/85 border-b border-border transition-colors">
+      <header className="sticky top-0 z-50 w-full backdrop-blur-xl bg-background/80 dark:bg-[#070A11]/85 border-b border-border/80 dark:border-white/[0.08] transition-all">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2.5 group">
-            <div className="w-10 h-10 rounded-xl bg-card border border-border/80 p-0.5 flex items-center justify-center shrink-0 shadow-xs overflow-hidden transition-transform group-hover:scale-105">
+            <div className="w-10 h-10 rounded-xl bg-card/90 dark:bg-white/[0.04] border border-border/80 dark:border-white/10 p-0.5 flex items-center justify-center shrink-0 shadow-xs overflow-hidden transition-transform group-hover:scale-105">
               <img src="/logo.png" alt="MindGuardAI Logo" className="w-full h-full object-contain" />
             </div>
             <div className="flex flex-col">
@@ -112,31 +113,31 @@ export const LandingPage: React.FC = () => {
           <nav className="hidden md:flex items-center gap-7 text-sm font-medium text-muted-foreground">
             <button
               onClick={() => scrollToSection("how-it-works")}
-              className="hover:text-foreground transition-colors"
+              className="hover:text-foreground transition-colors hover:scale-105"
             >
               How It Works
             </button>
             <button
               onClick={() => scrollToSection("features")}
-              className="hover:text-foreground transition-colors"
+              className="hover:text-foreground transition-colors hover:scale-105"
             >
               Capabilities
             </button>
             <button
               onClick={() => scrollToSection("privacy")}
-              className="hover:text-foreground transition-colors"
+              className="hover:text-foreground transition-colors hover:scale-105"
             >
               Privacy
             </button>
             <button
               onClick={() => scrollToSection("faq")}
-              className="hover:text-foreground transition-colors"
+              className="hover:text-foreground transition-colors hover:scale-105"
             >
               FAQ
             </button>
             <button
               onClick={() => scrollToSection("helplines")}
-              className="hover:text-foreground transition-colors"
+              className="hover:text-rose-500 transition-colors hover:scale-105"
             >
               Crisis Lines
             </button>
@@ -145,34 +146,34 @@ export const LandingPage: React.FC = () => {
           <div className="flex items-center gap-2 sm:gap-2.5">
             <button
               onClick={toggleTheme}
-              className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
+              className="p-2 rounded-xl text-muted-foreground hover:text-foreground hover:bg-secondary/70 dark:hover:bg-white/[0.06] transition-colors border border-transparent hover:border-border/60"
               title="Toggle theme"
               aria-label="Toggle dark/light theme"
             >
-              {theme === "dark" ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+              {theme === "dark" ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-primary" />}
             </button>
 
             <Link to="/login" className="hidden sm:inline-block">
               <Button
                 variant="ghost"
                 size="sm"
-                className="text-xs sm:text-sm font-semibold rounded-lg hover:text-primary"
+                className="text-xs sm:text-sm font-semibold rounded-xl hover:text-primary dark:hover:bg-white/[0.05]"
               >
                 Sign In
               </Button>
             </Link>
 
             <Link to="/login" className="hidden sm:inline-block">
-              <Button size="sm" className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-lg text-xs sm:text-sm font-semibold shadow-xs">
+              <Button size="sm" className="cinematic-glow-btn bg-primary text-primary-foreground hover:bg-primary/90 rounded-xl text-xs sm:text-sm font-semibold shadow-md">
                 Student Portal
-                <ArrowRight className="w-3.5 h-3.5 ml-1.5" />
+                <ArrowRight className="w-3.5 h-3.5 ml-1.5 transition-transform group-hover:translate-x-0.5" />
               </Button>
             </Link>
 
             {/* Mobile Hamburger Button */}
             <button
               onClick={() => setIsMobileNavOpen(!isMobileNavOpen)}
-              className="p-2 md:hidden rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
+              className="p-2 md:hidden rounded-xl text-muted-foreground hover:text-foreground hover:bg-secondary/80 dark:hover:bg-white/[0.06] transition-colors"
               aria-label="Toggle mobile menu"
             >
               {isMobileNavOpen ? <X className="w-5 h-5 text-primary" /> : <Menu className="w-5 h-5" />}
@@ -182,7 +183,7 @@ export const LandingPage: React.FC = () => {
 
         {/* Mobile Navigation Drawer */}
         {isMobileNavOpen && (
-          <div className="md:hidden border-t border-border bg-background/95 backdrop-blur-xl px-4 py-4 space-y-3 shadow-xl animate-in slide-in-from-top-2 duration-200">
+          <div className="md:hidden border-t border-border/80 dark:border-white/[0.08] bg-background/95 dark:bg-[#070A11]/95 backdrop-blur-2xl px-4 py-4 space-y-3 shadow-2xl animate-in slide-in-from-top-2 duration-200">
             <div className="flex flex-col space-y-1.5 text-sm font-medium">
               <button
                 onClick={() => {
@@ -232,7 +233,7 @@ export const LandingPage: React.FC = () => {
             </div>
             <div className="pt-2 border-t border-border/60 flex flex-col gap-2">
               <Link to="/login" onClick={() => setIsMobileNavOpen(false)}>
-                <Button className="w-full bg-primary text-primary-foreground font-semibold rounded-lg text-sm shadow-xs">
+                <Button className="w-full cinematic-glow-btn bg-primary text-primary-foreground font-semibold rounded-xl text-sm shadow-sm">
                   Student Portal
                   <ArrowRight className="w-3.5 h-3.5 ml-1.5" />
                 </Button>
@@ -243,24 +244,29 @@ export const LandingPage: React.FC = () => {
       </header>
 
       {/* ── HERO SECTION ── */}
-      <section className="hero-gradient relative min-h-screen flex items-center border-b border-border overflow-hidden py-12 sm:py-20 lg:py-0">
+      <section className="hero-gradient relative min-h-screen flex items-center border-b border-border/80 dark:border-white/[0.08] overflow-hidden py-12 sm:py-20 lg:py-0">
         {/* Glow orbs — decorative depth */}
         <GlowOrb
-          size={500}
+          size={550}
           variant="primary"
           className="top-[-100px] right-[-100px] opacity-40 pointer-events-none"
         />
         <GlowOrb
-          size={300}
+          size={400}
           variant="purple"
-          className="bottom-[-50px] left-[-50px] opacity-25 pointer-events-none"
+          className="bottom-[-80px] left-[-80px] opacity-30 pointer-events-none"
+        />
+        <GlowOrb
+          size={320}
+          variant="emerald"
+          className="top-[40%] left-[30%] opacity-20 pointer-events-none"
         />
 
         {/* Content — relative z-10 so it sits above canvas */}
-        <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 w-full grid lg:grid-cols-2 gap-8 lg:gap-12 items-center py-12 sm:py-16 lg:py-24">
+        <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 w-full grid lg:grid-cols-2 gap-8 lg:gap-14 items-center py-12 sm:py-16 lg:py-24">
           {/* Left: text */}
           <div>
-            <div className="fade-up inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-xs font-semibold text-primary mb-4 sm:mb-6 max-w-full">
+            <div className="fade-up cinematic-pill mb-4 sm:mb-6 max-w-full">
               <span className="relative flex h-2 w-2 shrink-0">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
@@ -268,9 +274,9 @@ export const LandingPage: React.FC = () => {
               <span className="truncate">Autonomous Neural Synapse Architecture</span>
             </div>
 
-            <h1 className="fade-up-1 text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-foreground leading-[1.15]">
+            <h1 className="fade-up-1 text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-foreground leading-[1.12]">
               Detect Burnout
-              <span className="gradient-text block">Before It Becomes</span>
+              <span className="bg-gradient-to-r from-blue-600 via-indigo-600 to-cyan-500 dark:from-blue-400 dark:via-indigo-300 dark:to-cyan-300 bg-clip-text text-transparent block">Before It Becomes</span>
               a Crisis.
             </h1>
 
@@ -279,11 +285,11 @@ export const LandingPage: React.FC = () => {
               sleep patterns, and clinical screeners — to surface early warnings weeks before students reach breaking point.
             </p>
 
-            <div className="fade-up-3 flex flex-col sm:flex-row gap-3 mt-6 sm:mt-8">
+            <div className="fade-up-3 flex flex-col sm:flex-row gap-3.5 mt-6 sm:mt-8">
               <Link to="/login" className="w-full sm:w-auto">
                 <Button
                   size="lg"
-                  className="w-full sm:w-auto bg-primary text-primary-foreground hover:bg-primary/90 font-semibold px-7 rounded-xl shadow-md shadow-primary/20"
+                  className="w-full sm:w-auto cinematic-glow-btn bg-primary text-primary-foreground hover:bg-primary/90 font-semibold px-7 rounded-xl shadow-lg shadow-primary/25"
                 >
                   Enter Student Portal
                   <ArrowRight className="w-4 h-4 ml-2" />
@@ -293,23 +299,23 @@ export const LandingPage: React.FC = () => {
                 variant="outline"
                 size="lg"
                 onClick={() => scrollToSection("how-it-works")}
-                className="w-full sm:w-auto font-semibold text-muted-foreground hover:text-foreground px-6 rounded-xl border-border"
+                className="w-full sm:w-auto font-semibold text-foreground/90 hover:text-foreground px-6 rounded-xl border-border/80 dark:border-white/10 bg-card/60 dark:bg-white/[0.03] backdrop-blur-md hover:bg-secondary/70 hover:border-primary/40 transition-all"
               >
                 Explore Capabilities ↓
               </Button>
             </div>
 
             {/* Trust badges */}
-            <div className="fade-up-4 flex flex-wrap items-center gap-4 sm:gap-6 mt-8 sm:mt-10 pt-6 border-t border-border/80 text-xs text-muted-foreground">
-              <div className="flex items-center gap-1.5">
+            <div className="fade-up-4 flex flex-wrap items-center gap-3 sm:gap-5 mt-8 sm:mt-10 pt-6 border-t border-border/80 dark:border-white/[0.08] text-xs text-muted-foreground">
+              <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-card/60 dark:bg-white/[0.03] border border-border/70 dark:border-white/[0.08] shadow-xs">
                 <FileCheck2 className="w-4 h-4 text-primary shrink-0" />
                 <span>PHQ-9 & GAD-7 Validated</span>
               </div>
-              <div className="flex items-center gap-1.5">
+              <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-card/60 dark:bg-white/[0.03] border border-border/70 dark:border-white/[0.08] shadow-xs">
                 <BarChart3 className="w-4 h-4 text-primary shrink-0" />
                 <span>SHAP Explainable AI</span>
               </div>
-              <div className="flex items-center gap-1.5">
+              <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-card/60 dark:bg-white/[0.03] border border-border/70 dark:border-white/[0.08] shadow-xs">
                 <Lock className="w-4 h-4 text-emerald-500 shrink-0" />
                 <span>Zero-Keystroke Privacy</span>
               </div>
@@ -318,11 +324,11 @@ export const LandingPage: React.FC = () => {
 
           {/* RIGHT COLUMN — Responsive Glassmorphic Telemetry HUD on Phone and Desktop */}
           <div className="flex flex-col justify-center relative fade-up-2 mt-4 lg:mt-0">
-            <div className="relative rounded-2xl bg-card/50 backdrop-blur-md border border-border/80 shadow-2xl p-4 sm:p-6 space-y-4 sm:space-y-5 overflow-hidden">
+            <div className="relative rounded-2xl cinematic-glass p-5 sm:p-7 space-y-4 sm:space-y-5 overflow-hidden">
               {/* Header */}
-              <div className="flex items-center justify-between pb-3 sm:pb-4 border-b border-border/60">
+              <div className="flex items-center justify-between pb-3 sm:pb-4 border-b border-border/60 dark:border-white/[0.08]">
                 <div className="flex items-center gap-2 sm:gap-2.5">
-                  <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary shrink-0">
+                  <div className="w-9 h-9 rounded-xl bg-primary/10 dark:bg-primary/[0.15] border border-primary/20 flex items-center justify-center text-primary shrink-0 shadow-xs">
                     <Activity className="w-4 h-4" />
                   </div>
                   <div>
@@ -330,15 +336,15 @@ export const LandingPage: React.FC = () => {
                     <p className="text-[10px] sm:text-[11px] text-muted-foreground">Autonomous Neural Signal Mesh</p>
                   </div>
                 </div>
-                <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-500 text-[10px] sm:text-xs font-semibold shrink-0">
+                <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 text-[10px] sm:text-xs font-semibold shrink-0 shadow-[0_0_15px_-3px_rgba(16,185,129,0.25)]">
                   <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                   <span>Synchronized</span>
                 </div>
               </div>
 
               {/* Multimodal Telemetry Grid */}
-              <div className="grid grid-cols-2 gap-2 sm:gap-3">
-                <div className="p-2.5 sm:p-3.5 rounded-xl bg-background/60 border border-border/60 space-y-1">
+              <div className="grid grid-cols-2 gap-2.5 sm:gap-3.5">
+                <div className="p-3 sm:p-4 rounded-xl bg-background/70 dark:bg-card/60 border border-border/70 dark:border-white/[0.08] hover:border-primary/40 transition-all duration-200 space-y-1 shadow-xs">
                   <span className="text-[9px] sm:text-[10px] uppercase font-bold text-muted-foreground tracking-wider block truncate">
                     Cognitive Sentiment
                   </span>
@@ -348,7 +354,7 @@ export const LandingPage: React.FC = () => {
                   </p>
                 </div>
 
-                <div className="p-2.5 sm:p-3.5 rounded-xl bg-background/60 border border-border/60 space-y-1">
+                <div className="p-3 sm:p-4 rounded-xl bg-background/70 dark:bg-card/60 border border-border/70 dark:border-white/[0.08] hover:border-blue-500/40 transition-all duration-200 space-y-1 shadow-xs">
                   <span className="text-[9px] sm:text-[10px] uppercase font-bold text-muted-foreground tracking-wider block truncate">
                     Circadian Rhythm
                   </span>
@@ -356,7 +362,7 @@ export const LandingPage: React.FC = () => {
                   <p className="text-[10px] sm:text-[11px] text-muted-foreground">Fragmentation 0.12</p>
                 </div>
 
-                <div className="p-2.5 sm:p-3.5 rounded-xl bg-background/60 border border-border/60 space-y-1">
+                <div className="p-3 sm:p-4 rounded-xl bg-background/70 dark:bg-card/60 border border-border/70 dark:border-white/[0.08] hover:border-emerald-500/40 transition-all duration-200 space-y-1 shadow-xs">
                   <span className="text-[9px] sm:text-[10px] uppercase font-bold text-muted-foreground tracking-wider block truncate">
                     Screen Time
                   </span>
@@ -364,7 +370,7 @@ export const LandingPage: React.FC = () => {
                   <p className="text-[10px] sm:text-[11px] text-muted-foreground">Zero-keystroke</p>
                 </div>
 
-                <div className="p-2.5 sm:p-3.5 rounded-xl bg-background/60 border border-border/60 space-y-1">
+                <div className="p-3 sm:p-4 rounded-xl bg-background/70 dark:bg-card/60 border border-border/70 dark:border-white/[0.08] hover:border-emerald-500/40 transition-all duration-200 space-y-1 shadow-xs">
                   <span className="text-[9px] sm:text-[10px] uppercase font-bold text-muted-foreground tracking-wider block truncate">
                     Risk Tier
                   </span>
@@ -374,7 +380,7 @@ export const LandingPage: React.FC = () => {
               </div>
 
               {/* Status footer with action potentials notice */}
-              <div className="flex items-center justify-between pt-2.5 sm:pt-3 border-t border-border/60 text-[11px] sm:text-xs text-muted-foreground">
+              <div className="flex items-center justify-between pt-2.5 sm:pt-3 border-t border-border/60 dark:border-white/[0.08] text-[11px] sm:text-xs text-muted-foreground">
                 <span className="flex items-center gap-1.5">
                   <span className="relative flex h-2 w-2">
                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
@@ -409,12 +415,12 @@ export const LandingPage: React.FC = () => {
 
         <div className="reveal-group grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {/* Step 01 */}
-          <Card className="reveal card-hover relative bg-card border border-border rounded-2xl shadow-xs transition-all">
+          <Card className="reveal cinematic-card relative rounded-2xl transition-all">
             <CardContent className="p-6 space-y-4">
-              <span className="text-2xl font-mono font-extrabold text-muted-foreground/30 block">
+              <span className="text-2xl font-mono font-extrabold text-foreground/20 dark:text-white/20 block">
                 01
               </span>
-              <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
+              <div className="w-10 h-10 rounded-xl bg-primary/10 border border-primary/20 text-primary flex items-center justify-center shadow-xs">
                 <Smile className="w-5 h-5" />
               </div>
               <h3 className="text-base font-semibold text-foreground">Daily Check-in</h3>
@@ -425,12 +431,12 @@ export const LandingPage: React.FC = () => {
           </Card>
 
           {/* Step 02 */}
-          <Card className="reveal card-hover relative bg-card border border-border rounded-2xl shadow-xs transition-all">
+          <Card className="reveal cinematic-card relative rounded-2xl transition-all">
             <CardContent className="p-6 space-y-4">
-              <span className="text-2xl font-mono font-extrabold text-muted-foreground/30 block">
+              <span className="text-2xl font-mono font-extrabold text-foreground/20 dark:text-white/20 block">
                 02
               </span>
-              <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
+              <div className="w-10 h-10 rounded-xl bg-primary/10 border border-primary/20 text-primary flex items-center justify-center shadow-xs">
                 <Brain className="w-5 h-5" />
               </div>
               <h3 className="text-base font-semibold text-foreground">AI Emotion Analysis</h3>
@@ -441,12 +447,12 @@ export const LandingPage: React.FC = () => {
           </Card>
 
           {/* Step 03 */}
-          <Card className="reveal card-hover relative bg-card border border-border rounded-2xl shadow-xs transition-all">
+          <Card className="reveal cinematic-card relative rounded-2xl transition-all">
             <CardContent className="p-6 space-y-4">
-              <span className="text-2xl font-mono font-extrabold text-muted-foreground/30 block">
+              <span className="text-2xl font-mono font-extrabold text-foreground/20 dark:text-white/20 block">
                 03
               </span>
-              <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
+              <div className="w-10 h-10 rounded-xl bg-primary/10 border border-primary/20 text-primary flex items-center justify-center shadow-xs">
                 <Activity className="w-5 h-5" />
               </div>
               <h3 className="text-base font-semibold text-foreground">Risk Stratification</h3>
@@ -457,12 +463,12 @@ export const LandingPage: React.FC = () => {
           </Card>
 
           {/* Step 04 */}
-          <Card className="reveal card-hover relative bg-card border border-border rounded-2xl shadow-xs transition-all">
+          <Card className="reveal cinematic-card relative rounded-2xl transition-all">
             <CardContent className="p-6 space-y-4">
-              <span className="text-2xl font-mono font-extrabold text-muted-foreground/30 block">
+              <span className="text-2xl font-mono font-extrabold text-foreground/20 dark:text-white/20 block">
                 04
               </span>
-              <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
+              <div className="w-10 h-10 rounded-xl bg-primary/10 border border-primary/20 text-primary flex items-center justify-center shadow-xs">
                 <HeartHandshake className="w-5 h-5" />
               </div>
               <h3 className="text-base font-semibold text-foreground">Guided Care Pathway</h3>
@@ -478,7 +484,7 @@ export const LandingPage: React.FC = () => {
       <section
         id="features"
         ref={featRef as React.RefObject<HTMLElement>}
-        className="relative z-10 py-24 px-4 sm:px-6 bg-secondary/35 backdrop-blur-xs border-y border-border"
+        className="relative z-10 py-24 px-4 sm:px-6 bg-secondary/35 dark:bg-card/25 backdrop-blur-sm border-y border-border/80 dark:border-white/[0.08]"
       >
         <div className="max-w-7xl mx-auto space-y-14">
           <div className="text-center max-w-2xl mx-auto space-y-3">
@@ -495,9 +501,9 @@ export const LandingPage: React.FC = () => {
 
           {/* 6 feature cards each with reveal card-hover */}
           <div className="reveal-group grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <Card className="reveal card-hover bg-card border border-border rounded-2xl shadow-xs transition-all">
+            <Card className="reveal cinematic-card rounded-2xl transition-all">
               <CardContent className="p-6 space-y-3">
-                <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
+                <div className="w-10 h-10 rounded-xl bg-primary/10 border border-primary/20 text-primary flex items-center justify-center shadow-xs">
                   <span className="text-xl" role="img" aria-label="brain">🧠</span>
                 </div>
                 <h3 className="text-base font-semibold text-foreground">Emotion NLP</h3>
@@ -507,9 +513,9 @@ export const LandingPage: React.FC = () => {
               </CardContent>
             </Card>
 
-            <Card className="reveal card-hover bg-card border border-border rounded-2xl shadow-xs transition-all">
+            <Card className="reveal cinematic-card rounded-2xl transition-all">
               <CardContent className="p-6 space-y-3">
-                <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
+                <div className="w-10 h-10 rounded-xl bg-primary/10 border border-primary/20 text-primary flex items-center justify-center shadow-xs">
                   <span className="text-xl" role="img" aria-label="bar chart">📊</span>
                 </div>
                 <h3 className="text-base font-semibold text-foreground">SHAP Explainability</h3>
@@ -519,9 +525,9 @@ export const LandingPage: React.FC = () => {
               </CardContent>
             </Card>
 
-            <Card className="reveal card-hover bg-card border border-border rounded-2xl shadow-xs transition-all">
+            <Card className="reveal cinematic-card rounded-2xl transition-all">
               <CardContent className="p-6 space-y-3">
-                <div className="w-10 h-10 rounded-xl bg-rose-500/10 text-rose-500 flex items-center justify-center">
+                <div className="w-10 h-10 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-500 flex items-center justify-center shadow-xs">
                   <span className="text-xl" role="img" aria-label="emergency siren">🚨</span>
                 </div>
                 <h3 className="text-base font-semibold text-foreground">Emergency SOS</h3>
@@ -531,9 +537,9 @@ export const LandingPage: React.FC = () => {
               </CardContent>
             </Card>
 
-            <Card className="reveal card-hover bg-card border border-border rounded-2xl shadow-xs transition-all">
+            <Card className="reveal cinematic-card rounded-2xl transition-all">
               <CardContent className="p-6 space-y-3">
-                <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
+                <div className="w-10 h-10 rounded-xl bg-primary/10 border border-primary/20 text-primary flex items-center justify-center shadow-xs">
                   <span className="text-xl" role="img" aria-label="sleeping face">😴</span>
                 </div>
                 <h3 className="text-base font-semibold text-foreground">Sleep & Circadian</h3>
@@ -543,9 +549,9 @@ export const LandingPage: React.FC = () => {
               </CardContent>
             </Card>
 
-            <Card className="reveal card-hover bg-card border border-border rounded-2xl shadow-xs transition-all">
+            <Card className="reveal cinematic-card rounded-2xl transition-all">
               <CardContent className="p-6 space-y-3">
-                <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
+                <div className="w-10 h-10 rounded-xl bg-primary/10 border border-primary/20 text-primary flex items-center justify-center shadow-xs">
                   <span className="text-xl" role="img" aria-label="stethoscope">🩺</span>
                 </div>
                 <h3 className="text-base font-semibold text-foreground">Counselor Triage</h3>
@@ -555,9 +561,9 @@ export const LandingPage: React.FC = () => {
               </CardContent>
             </Card>
 
-            <Card className="reveal card-hover bg-card border border-border rounded-2xl shadow-xs transition-all">
+            <Card className="reveal cinematic-card rounded-2xl transition-all">
               <CardContent className="p-6 space-y-3">
-                <div className="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
+                <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shadow-xs">
                   <span className="text-xl" role="img" aria-label="lock">🔒</span>
                 </div>
                 <h3 className="text-base font-semibold text-foreground">k-Anonymity Privacy</h3>
@@ -573,11 +579,11 @@ export const LandingPage: React.FC = () => {
       {/* ── STATS SECTION ── */}
       <section
         ref={s1.ref as React.RefObject<HTMLElement>}
-        className="stats-gradient relative z-10 py-20 overflow-hidden"
+        className="stats-gradient relative z-10 py-20 overflow-hidden border-y border-white/10 dark:border-white/[0.08] shadow-[inset_0_0_80px_rgba(0,0,0,0.5)]"
       >
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center max-w-4xl mx-auto px-6 relative z-10">
           <div>
-            <p className="text-5xl font-black text-white">
+            <p className="text-5xl font-black text-white drop-shadow-md">
               {s1.value}%
             </p>
             <p className="text-xs text-white/60 uppercase tracking-wider font-semibold mt-1">
@@ -585,7 +591,7 @@ export const LandingPage: React.FC = () => {
             </p>
           </div>
           <div>
-            <p className="text-5xl font-black text-white">
+            <p className="text-5xl font-black text-white drop-shadow-md">
               {s2.value.toLocaleString()}+
             </p>
             <p className="text-xs text-white/60 uppercase tracking-wider font-semibold mt-1">
@@ -593,7 +599,7 @@ export const LandingPage: React.FC = () => {
             </p>
           </div>
           <div>
-            <p className="text-5xl font-black text-white">
+            <p className="text-5xl font-black text-white drop-shadow-md">
               {s3.value}
             </p>
             <p className="text-xs text-white/60 uppercase tracking-wider font-semibold mt-1">
@@ -601,7 +607,7 @@ export const LandingPage: React.FC = () => {
             </p>
           </div>
           <div>
-            <p className="text-5xl font-black text-white">
+            <p className="text-5xl font-black text-white drop-shadow-md">
               {s4.value}
             </p>
             <p className="text-xs text-white/60 uppercase tracking-wider font-semibold mt-1">
@@ -615,12 +621,12 @@ export const LandingPage: React.FC = () => {
       <section
         id="privacy"
         ref={privRef as React.RefObject<HTMLElement>}
-        className="relative z-10 py-24 px-4 sm:px-6 bg-secondary/35 backdrop-blur-xs"
+        className="relative z-10 py-24 px-4 sm:px-6 bg-secondary/35 dark:bg-card/25 backdrop-blur-sm"
       >
         <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
           {/* Left Column */}
           <div className="lg:col-span-6 space-y-4">
-            <div className="reveal inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 text-xs font-semibold">
+            <div className="reveal inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/25 dark:border-emerald-500/35 text-xs font-semibold shadow-[0_0_20px_-3px_rgba(16,185,129,0.25)]">
               <Shield className="w-3.5 h-3.5" />
               <span>Institutional Privacy Safeguard</span>
             </div>
@@ -637,8 +643,10 @@ export const LandingPage: React.FC = () => {
 
           {/* Right Column: 4 checklist items */}
           <div className="reveal-group lg:col-span-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="reveal card-hover flex items-start gap-3 p-5 rounded-2xl bg-card border border-border shadow-xs">
-              <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0 mt-0.5" />
+            <div className="reveal cinematic-card flex items-start gap-3.5 p-5 rounded-2xl hover:border-emerald-500/40 transition-all">
+              <div className="p-1 rounded-lg bg-emerald-500/10 text-emerald-500 shrink-0 mt-0.5 border border-emerald-500/20">
+                <CheckCircle2 className="w-4 h-4" />
+              </div>
               <div>
                 <h4 className="text-sm font-semibold text-foreground">Zero Keystroke Logging</h4>
                 <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
@@ -647,8 +655,10 @@ export const LandingPage: React.FC = () => {
               </div>
             </div>
 
-            <div className="reveal card-hover flex items-start gap-3 p-5 rounded-2xl bg-card border border-border shadow-xs">
-              <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0 mt-0.5" />
+            <div className="reveal cinematic-card flex items-start gap-3.5 p-5 rounded-2xl hover:border-emerald-500/40 transition-all">
+              <div className="p-1 rounded-lg bg-emerald-500/10 text-emerald-500 shrink-0 mt-0.5 border border-emerald-500/20">
+                <CheckCircle2 className="w-4 h-4" />
+              </div>
               <div>
                 <h4 className="text-sm font-semibold text-foreground">AES-256-GCM Encryption</h4>
                 <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
@@ -657,8 +667,10 @@ export const LandingPage: React.FC = () => {
               </div>
             </div>
 
-            <div className="reveal card-hover flex items-start gap-3 p-5 rounded-2xl bg-card border border-border shadow-xs">
-              <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0 mt-0.5" />
+            <div className="reveal cinematic-card flex items-start gap-3.5 p-5 rounded-2xl hover:border-emerald-500/40 transition-all">
+              <div className="p-1 rounded-lg bg-emerald-500/10 text-emerald-500 shrink-0 mt-0.5 border border-emerald-500/20">
+                <CheckCircle2 className="w-4 h-4" />
+              </div>
               <div>
                 <h4 className="text-sm font-semibold text-foreground">Differential Privacy & k ≥ 10</h4>
                 <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
@@ -667,8 +679,10 @@ export const LandingPage: React.FC = () => {
               </div>
             </div>
 
-            <div className="reveal card-hover flex items-start gap-3 p-5 rounded-2xl bg-card border border-border shadow-xs">
-              <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0 mt-0.5" />
+            <div className="reveal cinematic-card flex items-start gap-3.5 p-5 rounded-2xl hover:border-emerald-500/40 transition-all">
+              <div className="p-1 rounded-lg bg-emerald-500/10 text-emerald-500 shrink-0 mt-0.5 border border-emerald-500/20">
+                <CheckCircle2 className="w-4 h-4" />
+              </div>
               <div>
                 <h4 className="text-sm font-semibold text-foreground">Data Revocation & Purge</h4>
                 <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
@@ -704,7 +718,9 @@ export const LandingPage: React.FC = () => {
             return (
               <div
                 key={i}
-                className="reveal card-hover bg-card border border-border rounded-2xl p-6 transition-all"
+                className={`reveal cinematic-card rounded-2xl p-6 transition-all ${
+                  isOpen ? "border-primary/50 shadow-md shadow-primary/10" : "hover:border-primary/30"
+                }`}
               >
                 <button
                   type="button"
@@ -719,7 +735,7 @@ export const LandingPage: React.FC = () => {
                   />
                 </button>
                 {isOpen && (
-                  <p className="mt-3 text-xs sm:text-sm text-muted-foreground leading-relaxed pt-2 border-t border-border/60">
+                  <p className="mt-3 text-xs sm:text-sm text-muted-foreground leading-relaxed pt-2 border-t border-border/60 dark:border-white/[0.08]">
                     {f.answer}
                   </p>
                 )}
@@ -731,8 +747,8 @@ export const LandingPage: React.FC = () => {
 
       {/* ── CRISIS HELPLINES ── */}
       <section id="helplines" className="relative z-10 py-16 px-4 sm:px-6 max-w-5xl mx-auto">
-        <div className="p-6 sm:p-8 rounded-2xl bg-rose-500/5 border border-rose-500/20 text-center space-y-4">
-          <div className="w-12 h-12 mx-auto rounded-full bg-rose-500/10 flex items-center justify-center text-rose-500">
+        <div className="cinematic-glass p-6 sm:p-10 rounded-2xl border-rose-500/25 text-center space-y-4 shadow-[0_0_40px_-10px_rgba(244,63,94,0.18)]">
+          <div className="w-14 h-14 mx-auto rounded-2xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-rose-500 shadow-[0_0_25px_-5px_rgba(244,63,94,0.3)]">
             <PhoneCall className="w-6 h-6 pulse-soft" />
           </div>
           <div>
@@ -745,14 +761,14 @@ export const LandingPage: React.FC = () => {
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-2">
             <a
               href="tel:14416"
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-rose-500 text-white font-bold text-sm shadow-sm hover:bg-rose-600 transition-colors"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl cinematic-glow-btn bg-rose-500 text-white font-bold text-sm shadow-md shadow-rose-500/30 hover:bg-rose-600 transition-colors"
             >
               <PhoneCall className="w-4 h-4" />
               <span>Tele-MANAS Helpline: 14416</span>
             </a>
             <a
               href="tel:18005990019"
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-secondary border border-border text-foreground font-semibold text-sm hover:bg-secondary/80 transition-colors"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-card/70 dark:bg-white/[0.04] border border-border/80 dark:border-white/10 text-foreground font-semibold text-sm hover:bg-secondary/70 hover:border-rose-500/30 transition-all"
             >
               <PhoneCall className="w-4 h-4 text-rose-500" />
               <span>KIRAN Mental Health: 1800-599-0019</span>
@@ -762,12 +778,12 @@ export const LandingPage: React.FC = () => {
       </section>
 
       {/* ── FOOTER ── */}
-      <footer className="relative z-10 border-t border-border bg-card/85 backdrop-blur-md py-12 px-4 sm:px-6">
+      <footer className="relative z-10 border-t border-border/80 dark:border-white/[0.08] bg-card/85 dark:bg-[#070A11]/90 backdrop-blur-xl py-12 px-4 sm:px-6">
         <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Logo + tagline */}
           <div className="space-y-3">
             <div className="flex items-center gap-2.5">
-              <div className="w-9 h-9 rounded-xl bg-card border border-border/80 p-0.5 flex items-center justify-center shrink-0 overflow-hidden">
+              <div className="w-9 h-9 rounded-xl bg-card/90 dark:bg-white/[0.04] border border-border/80 dark:border-white/10 p-0.5 flex items-center justify-center shrink-0 overflow-hidden shadow-xs">
                 <img src="/logo.png" alt="MindGuardAI Logo" className="w-full h-full object-contain" />
               </div>
               <span className="font-bold text-base text-foreground">MindGuardAI</span>

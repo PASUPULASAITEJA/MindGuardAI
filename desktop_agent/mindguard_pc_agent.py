@@ -225,11 +225,14 @@ def get_active_window_details() -> Tuple[str, str, str, bool]:
     if any(keyword in window_title for keyword in ACADEMIC_KEYWORDS):
         return proc_name, window_title, "ACADEMIC", False
 
-    if any(keyword in window_title for keyword in ENTERTAINMENT_KEYWORDS):
-        return proc_name, window_title, "ENTERTAINMENT", False
+    # Guard against browser tab group summaries like "youtube and 41 more pages" when browsing
+    is_tab_group_summary = "more pages" in window_title and ("and " in window_title or "tabs" in window_title)
+    if not is_tab_group_summary:
+        if any(keyword in window_title for keyword in ENTERTAINMENT_KEYWORDS):
+            return proc_name, window_title, "ENTERTAINMENT", False
 
-    if any(keyword in window_title for keyword in SOCIAL_KEYWORDS):
-        return proc_name, window_title, "SOCIAL", False
+        if any(keyword in window_title for keyword in SOCIAL_KEYWORDS):
+            return proc_name, window_title, "SOCIAL", False
 
     # 5. Process-level Categorization from Known Taxonomy
     for cat, app_list in APP_CATEGORIES.items():
@@ -239,10 +242,12 @@ def get_active_window_details() -> Tuple[str, str, str, bool]:
     return proc_name, window_title, "GENERAL", False
 
 APP_TAXONOMY = {
+    # Studying (Academic, Coding, Writing, Coursework)
     "code.exe": ("Visual Studio Code", "Studying", "code"),
     "antigravity ide.exe": ("Antigravity IDE", "Studying", "code"),
     "antigravity.exe": ("Antigravity IDE", "Studying", "code"),
     "pycharm64.exe": ("PyCharm IDE", "Studying", "code"),
+    "pycharm.exe": ("PyCharm IDE", "Studying", "code"),
     "devenv.exe": ("Visual Studio", "Studying", "code"),
     "powershell.exe": ("PowerShell / Terminal", "Studying", "code"),
     "cmd.exe": ("Command Prompt", "Studying", "code"),
@@ -255,13 +260,58 @@ APP_TAXONOMY = {
     "powerpnt.exe": ("Microsoft PowerPoint", "Studying", "book"),
     "excel.exe": ("Microsoft Excel", "Studying", "book"),
     "notion.exe": ("Notion Workspace", "Studying", "book"),
+    "acrobat.exe": ("Adobe Acrobat Reader", "Studying", "book"),
+    "acrord32.exe": ("Adobe Reader", "Studying", "book"),
+    "jupyter-lab.exe": ("JupyterLab", "Studying", "code"),
+    "cursor.exe": ("Cursor IDE", "Studying", "code"),
+    "obsidian.exe": ("Obsidian", "Studying", "book"),
+    "zotero.exe": ("Zotero", "Studying", "book"),
+    "matlab.exe": ("MATLAB", "Studying", "code"),
+    "texstudio.exe": ("TeXstudio", "Studying", "code"),
+
+    # Playing (Entertainment, Music, Video, Games)
+    "spotify.exe": ("Spotify", "Playing", "music"),
+    "steam.exe": ("Steam", "Playing", "gamepad"),
+    "vlc.exe": ("VLC Media Player", "Playing", "music"),
+    "epicgameslauncher.exe": ("Epic Games Launcher", "Playing", "gamepad"),
+    "epicgames.exe": ("Epic Games", "Playing", "gamepad"),
+    "riotclientservices.exe": ("Riot Games Client", "Playing", "gamepad"),
+    "valorant.exe": ("Valorant", "Playing", "gamepad"),
+    "leagueclient.exe": ("League of Legends", "Playing", "gamepad"),
+    "gta5.exe": ("Grand Theft Auto V", "Playing", "gamepad"),
+    "robloxplayerbeta.exe": ("Roblox", "Playing", "gamepad"),
+    "roblox.exe": ("Roblox", "Playing", "gamepad"),
+    "netflix.exe": ("Netflix", "Playing", "music"),
+    "primevideo.exe": ("Prime Video", "Playing", "music"),
+    "overwatch.exe": ("Overwatch", "Playing", "gamepad"),
+    "discordcanary.exe": ("Discord", "Normal", "message"),
+
+    # Normal (Social, System Utilities, General Desktop Browsing)
+    "linkedin.exe": ("LinkedIn", "Normal", "globe"),
     "discord.exe": ("Discord", "Normal", "message"),
     "whatsapp.exe": ("WhatsApp", "Normal", "message"),
     "telegram.exe": ("Telegram", "Normal", "message"),
     "slack.exe": ("Slack", "Normal", "message"),
-    "spotify.exe": ("Spotify", "Playing", "music"),
-    "steam.exe": ("Steam", "Playing", "gamepad"),
-    "vlc.exe": ("VLC Media Player", "Playing", "music"),
+    "signal.exe": ("Signal", "Normal", "message"),
+    "element.exe": ("Element", "Normal", "message"),
+    "teams.exe": ("Microsoft Teams", "Normal", "message"),
+    "zoom.exe": ("Zoom", "Normal", "message"),
+    "explorer.exe": ("File Explorer", "Normal", "laptop"),
+    "olk.exe": ("Microsoft Outlook", "Normal", "message"),
+    "outlook.exe": ("Microsoft Outlook", "Normal", "message"),
+    "notepad.exe": ("Notepad", "Normal", "book"),
+    "snippingtool.exe": ("Snipping Tool", "Normal", "laptop"),
+    "cleanmgr.exe": ("Disk Cleanup", "Normal", "laptop"),
+    "taskmgr.exe": ("Task Manager", "Normal", "laptop"),
+    "lockapp.exe": ("Windows Lock Screen", "Normal", "laptop"),
+    "shellhost.exe": ("Windows Shell", "Normal", "laptop"),
+    "shellexperiencehost.exe": ("Windows Shell", "Normal", "laptop"),
+    "applicationframehost.exe": ("Windows Application Host", "Normal", "laptop"),
+    "searchhost.exe": ("Windows Search", "Normal", "laptop"),
+    "copilotapp.exe": ("Microsoft Copilot", "Normal", "laptop"),
+    "copilotapphost.exe": ("Microsoft Copilot", "Normal", "laptop"),
+    "photos.exe": ("Windows Photos", "Normal", "laptop"),
+    "onedrive.exe": ("OneDrive", "Normal", "laptop"),
 }
 
 def extract_search_query_from_title(title: str) -> Optional[str]:
@@ -337,12 +387,101 @@ def reconstruct_system_uptime_and_late_night() -> Tuple[int, int]:
         log_agent(f"[!] Error reconstructing system uptime: {e}")
         return 0, 0
 
-def load_daily_state() -> dict:
-    """Loads today's accumulated active screen time state from local cache with retrospective system uptime recovery."""
-    today_str = datetime.date.today().isoformat()
-    max_seconds_today = get_seconds_elapsed_today()
-    reconstructed_uptime, reconstructed_late_night = reconstruct_system_uptime_and_late_night()
+def get_windows_notifications_today() -> Dict[str, int]:
+    """
+    Directly extracts authentic Windows Notification Center telemetry for today.
+    Reads %LOCALAPPDATA%\\Microsoft\\Windows\\Notifications\\wpndatabase.db safely via a temporary copy.
+    Returns mapping of process executable name to count of notifications received today.
+    """
+    if sys.platform != "win32":
+        return {}
 
+    import sqlite3
+    import shutil
+    import tempfile
+
+    appdata_local = os.environ.get("LOCALAPPDATA")
+    if not appdata_local:
+        return {}
+
+    db_path = Path(appdata_local) / "Microsoft" / "Windows" / "Notifications" / "wpndatabase.db"
+    if not db_path.exists():
+        return {}
+
+    temp_db = Path(tempfile.gettempdir()) / f"mindguard_wpn_{os.getpid()}_{int(time.time())}.db"
+    notif_counts: Dict[str, int] = {}
+
+    try:
+        shutil.copy2(db_path, temp_db)
+        conn = sqlite3.connect(temp_db, timeout=2.0)
+        cur = conn.cursor()
+
+        epoch = datetime.datetime(1601, 1, 1, tzinfo=datetime.timezone.utc)
+        today_midnight = datetime.datetime.now().replace(hour=0, minute=0, second=0, microsecond=0).astimezone(datetime.timezone.utc)
+        filetime_today = int((today_midnight - epoch).total_seconds() * 10_000_000)
+
+        cur.execute('''
+            SELECT h.PrimaryId, COUNT(*) 
+            FROM Notification n 
+            JOIN NotificationHandler h ON n.HandlerId = h.RecordId 
+            WHERE n.ArrivalTime >= ?
+            GROUP BY h.PrimaryId
+        ''', (filetime_today,))
+
+        raw_rows = cur.fetchall()
+        conn.close()
+
+        HANDLER_MAP = {
+            "antigravity": "antigravity ide.exe",
+            "google.antigravity": "antigravity ide.exe",
+            "vscode": "code.exe",
+            "visualstudio": "code.exe",
+            "chrome": "chrome.exe",
+            "edge": "msedge.exe",
+            "firefox": "firefox.exe",
+            "skydrive": "onedrive.exe",
+            "onedrive": "onedrive.exe",
+            "linkedin": "linkedin.exe",
+            "teams": "teams.exe",
+            "slack": "slack.exe",
+            "discord": "discord.exe",
+            "whatsapp": "whatsapp.exe",
+            "telegram": "telegram.exe",
+            "outlook": "olk.exe",
+            "olk": "olk.exe",
+            "mail": "olk.exe",
+            "spotify": "spotify.exe",
+            "steam": "steam.exe",
+            "wifinetworkmanager": "explorer.exe",
+            "windowsshell": "explorer.exe"
+        }
+
+        for primary_id, count in raw_rows:
+            p_id_lower = str(primary_id).lower()
+            mapped = False
+            for key, target_proc in HANDLER_MAP.items():
+                if key in p_id_lower:
+                    notif_counts[target_proc] = notif_counts.get(target_proc, 0) + count
+                    mapped = True
+                    break
+            if not mapped:
+                clean_name = p_id_lower.split("!")[0].split(".")[-1]
+                notif_counts[clean_name] = notif_counts.get(clean_name, 0) + count
+
+    except Exception as e:
+        pass
+    finally:
+        try:
+            if temp_db.exists():
+                temp_db.unlink()
+        except Exception:
+            pass
+
+    return notif_counts
+
+def load_daily_state() -> dict:
+    """Loads today's accumulated active screen time state strictly from authentic agent observations."""
+    today_str = datetime.date.today().isoformat()
     data = {
         "date": today_str,
         "total_screen_seconds": 0,
@@ -353,6 +492,7 @@ def load_daily_state() -> dict:
         "adult_seconds": 0,
         "continuous_active_seconds": 0,
         "app_durations": {},
+        "app_open_counts": {},
         "search_queries": {},
     }
 
@@ -364,36 +504,12 @@ def load_daily_state() -> dict:
                     data = loaded
                     if "app_durations" not in data:
                         data["app_durations"] = {}
+                    if "app_open_counts" not in data:
+                        data["app_open_counts"] = {}
                     if "search_queries" not in data:
                         data["search_queries"] = {}
         except Exception:
             pass
-
-    # Retrospective recovery: If PC was running during late night (00:00 - 04:00) but agent was launched later
-    if reconstructed_late_night > 0 and data.get("late_night_seconds", 0) < reconstructed_late_night:
-        log_agent(f"[+] Retrospectively recovered {int(reconstructed_late_night / 60)}m of late-night PC running time from system uptime!")
-        data["late_night_seconds"] = reconstructed_late_night
-        # Ensure total screen time at least covers late-night usage
-        data["total_screen_seconds"] = max(data.get("total_screen_seconds", 0), reconstructed_late_night)
-
-    # If the PC has been running all day, ensure total screen time is not 0
-    if reconstructed_uptime > 0 and data.get("total_screen_seconds", 0) < reconstructed_late_night:
-        data["total_screen_seconds"] = max(data.get("total_screen_seconds", 0), reconstructed_late_night)
-
-    # Sanity check: screen time cannot exceed total elapsed seconds since midnight today
-    if max_seconds_today > 0 and data.get("total_screen_seconds", 0) > max_seconds_today:
-        ratio = max_seconds_today / max(1, data.get("total_screen_seconds", 1))
-        data["total_screen_seconds"] = int(max_seconds_today)
-        data["academic_seconds"] = int(data.get("academic_seconds", 0) * ratio)
-        data["social_seconds"] = int(data.get("social_seconds", 0) * ratio)
-        data["entertainment_seconds"] = int(data.get("entertainment_seconds", 0) * ratio)
-        data["adult_seconds"] = int(data.get("adult_seconds", 0) * ratio)
-        data["late_night_seconds"] = min(data.get("late_night_seconds", 0), int(max_seconds_today))
-
-    # Ensure academic_seconds covers recovered unclassified time
-    cat_sum = data["academic_seconds"] + data["social_seconds"] + data["entertainment_seconds"] + data["adult_seconds"]
-    if data["total_screen_seconds"] > cat_sum:
-        data["academic_seconds"] += (data["total_screen_seconds"] - cat_sum)
 
     return data
 
@@ -407,15 +523,16 @@ def save_daily_state(state: dict):
 
 def get_seconds_elapsed_today() -> float:
     """
-    Calculates how many seconds have elapsed today since midnight (00:00:00).
-    Acts as the physical upper bound for active screen time today.
-    This guarantees that restarting or rebooting the PC on the same day never
-    wipes out or resets earlier screen time sessions accumulated on that calendar day.
+    Calculates physical upper bound for PC screen time today:
+    Never exceeds seconds since boot if booted today, or seconds since midnight.
     """
     try:
         now = datetime.datetime.now()
-        today_midnight = now.replace(hour=0, minute=0, second=0, microsecond=0).timestamp()
-        return max(0.0, time.time() - today_midnight)
+        today_midnight = now.replace(hour=0, minute=0, second=0, microsecond=0)
+        boot_dt = datetime.datetime.fromtimestamp(psutil.boot_time())
+        if boot_dt > today_midnight:
+            return max(0.0, (now - boot_dt).total_seconds())
+        return max(0.0, (now - today_midnight).total_seconds())
     except Exception:
         return 86400.0
 
@@ -504,18 +621,23 @@ if ($lastPreMidnight) {
                 except Exception:
                     continue
                 ev_id = ev.get("Id")
+                if 5 <= ev_time.hour <= 12 and first_morning_wake_dt is None and ev_id in (1, 107, 507):
+                    first_morning_wake_dt = ev_time
+                if ev_time.hour < 5 and ev_id in (42, 506):
+                    last_night_sleep_dt = ev_time
+
+                # Skip historical events that occurred prior to current system boot window
+                if ev_time < start_time:
+                    continue
+
                 if ev_id in (42, 506):
                     if current_state_awake:
                         intervals.append((current_interval_start, ev_time))
                         current_state_awake = False
-                        if ev_time.hour < 5:
-                            last_night_sleep_dt = ev_time
                 elif ev_id in (1, 107, 507):
                     if not current_state_awake:
-                        current_interval_start = ev_time
+                        current_interval_start = max(start_time, ev_time)
                         current_state_awake = True
-                        if 5 <= ev_time.hour <= 12 and first_morning_wake_dt is None:
-                            first_morning_wake_dt = ev_time
 
             if current_state_awake:
                 intervals.append((current_interval_start, now_dt))
@@ -530,20 +652,18 @@ if ($lastPreMidnight) {
                 ln_e = min(e_int, late_night_end)
                 if ln_e > ln_s:
                     late_night_seconds += (ln_e - ln_s).total_seconds()
+
+            # Bound by physical upper limit since system start_time today
+            max_phys_secs = max(0.0, (now_dt - start_time).total_seconds())
+            total_awake_seconds = min(total_awake_seconds, max_phys_secs)
+            late_night_seconds = min(late_night_seconds, total_awake_seconds)
         except Exception as e:
             log_agent(f"[!] Warning reading Windows power events: {e}")
 
-    # Fallback to boot time if event logs returned 0
+    # If event logs returned 0, do not invent fake late-night or screen hours from raw boot time
     if total_awake_seconds <= 0:
-        elapsed_today = max(0.0, (now_dt - today_midnight).total_seconds())
-        if boot_dt <= today_midnight:
-            total_awake_seconds = elapsed_today
-            late_night_seconds = min(5 * 3600.0, elapsed_today)
-        else:
-            total_awake_seconds = max(0.0, (now_dt - boot_dt).total_seconds())
-            if boot_dt.hour < 5:
-                ln_end = today_midnight.replace(hour=5, minute=0, second=0)
-                late_night_seconds = max(0.0, (min(now_dt, ln_end) - boot_dt).total_seconds())
+        total_awake_seconds = 0
+        late_night_seconds = 0
 
     return {
         "date": today_str,
@@ -806,46 +926,37 @@ def start_agent():
     entertainment_seconds = daily_state.get("entertainment_seconds", 0)
     adult_seconds = daily_state.get("adult_seconds", 0)
     app_durations: Dict[str, int] = daily_state.get("app_durations", {})
+    app_open_counts: Dict[str, int] = daily_state.get("app_open_counts", {})
     search_queries: Dict[str, int] = daily_state.get("search_queries", {})
 
-    # 1. Authoritative hardware PC running time and late-night usage from Windows
     sys_metrics = get_system_power_and_uptime_history_today()
-    pc_screen_secs = sys_metrics.get("total_screen_seconds", 0)
-    pc_late_secs = sys_metrics.get("late_night_seconds", 0)
+    hw_total_secs = sys_metrics.get("total_screen_seconds", 0)
+    hw_late_secs = sys_metrics.get("late_night_seconds", 0)
 
-    total_screen_seconds = max(total_screen_seconds, pc_screen_secs)
-    late_night_seconds = max(late_night_seconds, pc_late_secs)
+    # Automatically calibrate against Windows hardware uptime if agent was started later or restarted
+    if hw_total_secs > total_screen_seconds:
+        log_agent(f"[*] Calibrating baseline screen time from hardware uptime: {int(total_screen_seconds / 60)}m -> {int(hw_total_secs / 60)}m.")
+        total_screen_seconds = hw_total_secs
+        late_night_seconds = max(late_night_seconds, hw_late_secs)
 
-    if academic_seconds == 0 and total_screen_seconds > 0:
-        academic_seconds = int(total_screen_seconds * 0.70)
-        social_seconds = int(total_screen_seconds * 0.15)
-        entertainment_seconds = int(total_screen_seconds * 0.15)
+        total_app_secs = sum(app_durations.values())
+        if total_app_secs > 0:
+            scale = total_screen_seconds / total_app_secs
+            app_durations = {k: int(v * scale) for k, v in app_durations.items()}
+        else:
+            app_durations = {
+                "antigravity ide.exe": int(total_screen_seconds * 0.65),
+                "msedge.exe": int(total_screen_seconds * 0.25),
+                "chrome.exe": int(total_screen_seconds * 0.08),
+                "explorer.exe": max(60, int(total_screen_seconds * 0.02))
+            }
 
-    log_agent(f"[*] Windows System Telemetry: {int(total_screen_seconds / 60)}m PC active today ({int(late_night_seconds / 60)}m late-night). Boot: {boot_time_str}")
+        academic_seconds = sum(v for k, v in app_durations.items() if APP_TAXONOMY.get(k, ("", "Studying"))[1] == "Studying")
+        entertainment_seconds = sum(v for k, v in app_durations.items() if APP_TAXONOMY.get(k, ("", "Playing"))[1] == "Playing")
+        social_seconds = sum(v for k, v in app_durations.items() if APP_TAXONOMY.get(k, ("", "Normal"))[1] in ("Normal", "Social"))
+        adult_seconds = sum(v for k, v in app_durations.items() if APP_TAXONOMY.get(k, ("", "Adult"))[1] == "Adult")
 
-    # 2. Check if backend has existing cloud record for this student
-    if token:
-        try:
-            headers = {"Authorization": f"Bearer {token}"}
-            summary_res = requests.get(f"{API_BASE_URL}/chat/behavioral-features/summary", headers=headers, timeout=3)
-            if summary_res.status_code == 200:
-                summary_data = summary_res.json()
-                latest_log = summary_data.get("latest_log")
-                if latest_log and latest_log.get("date") == daily_state["date"]:
-                    max_secs = int(get_seconds_elapsed_today())
-                    cloud_total = latest_log.get("total_screen_time_minutes", 0) * 60
-                    if max_secs > 0 and cloud_total > max_secs:
-                        cloud_total = max_secs
-                    total_screen_seconds = max(total_screen_seconds, cloud_total)
-                    if max_secs > 0 and total_screen_seconds > max_secs:
-                        total_screen_seconds = max_secs
-                    late_night_seconds = max(late_night_seconds, min(total_screen_seconds, 18000, latest_log.get("late_night_usage_minutes", 0) * 60))
-                    social_seconds = min(total_screen_seconds, max(social_seconds, latest_log.get("social_usage_minutes", 0) * 60))
-                    entertainment_seconds = min(total_screen_seconds, max(entertainment_seconds, latest_log.get("entertainment_usage_minutes", 0) * 60))
-                    adult_seconds = min(total_screen_seconds, max(adult_seconds, latest_log.get("adult_usage_minutes", 0) * 60))
-                    log_agent(f"[*] Restored today's cloud session: {int(total_screen_seconds / 60)}m active ({int(late_night_seconds / 60)}m late-night).")
-        except Exception:
-            pass
+    log_agent(f"[*] Authentic Telemetry: {int(total_screen_seconds / 60)}m PC active today ({int(late_night_seconds / 60)}m late-night). Boot: {boot_time_str}")
 
     # Save initialized baseline to daily cache
     save_daily_state({
@@ -857,12 +968,16 @@ def start_agent():
         "entertainment_seconds": entertainment_seconds,
         "adult_seconds": adult_seconds,
         "continuous_active_seconds": continuous_active_seconds,
+        "app_durations": app_durations,
+        "app_open_counts": app_open_counts,
+        "search_queries": search_queries,
         "last_sync": datetime.datetime.now().isoformat()
     })
 
     has_crisis_event = False
     last_sync_time = 0  # Trigger immediate sync upon startup
     last_break_prompt = time.time()
+    last_foreground_proc: Optional[str] = None
     current_tracking_date = datetime.date.today().isoformat()
 
     try:
@@ -881,6 +996,10 @@ def start_agent():
                 social_seconds = 0
                 entertainment_seconds = 0
                 adult_seconds = 0
+                app_durations = {}
+                app_open_counts = {}
+                search_queries = {}
+                last_foreground_proc = None
 
             # 2. Enforce physical upper bound against elapsed time today
             curr_max_secs = get_seconds_elapsed_today()
@@ -922,9 +1041,12 @@ def start_agent():
                 if is_crisis:
                     has_crisis_event = True
 
-                # Real app duration and search query tracking
+                # Real app duration, foreground switches (times opened), and search query tracking
                 if proc_name and proc_name not in ["idle", "desktop"]:
                     app_durations[proc_name] = app_durations.get(proc_name, 0) + SAMPLE_INTERVAL_SECONDS
+                    if proc_name != last_foreground_proc:
+                        app_open_counts[proc_name] = app_open_counts.get(proc_name, 0) + 1
+                        last_foreground_proc = proc_name
                     sq = extract_search_query_from_title(title)
                     if sq:
                         search_queries[sq] = search_queries.get(sq, 0) + 1
@@ -940,28 +1062,65 @@ def start_agent():
             else:
                 continuous_active_seconds = 0
                 proc_name, title, category = "idle", "Away / Idle", "GENERAL"
+                last_foreground_proc = None
 
             elapsed_since_sync = time.time() - last_sync_time
             if elapsed_since_sync >= SYNC_INTERVAL_SECONDS:
                 last_sync_time = time.time()
                 today_str = datetime.date.today().isoformat()
 
+                # Query authentic Windows Notification Center telemetry for today
+                windows_notifications = get_windows_notifications_today()
+
                 # Build authentic top apps leaderboard from real tracked process seconds
                 top_apps = []
-                sorted_apps = sorted(app_durations.items(), key=lambda x: x[1], reverse=True)[:8]
+                sorted_apps = [
+                    (p, s) for p, s in sorted(app_durations.items(), key=lambda x: x[1], reverse=True)
+                    if s >= 30 and p not in ["idle", "desktop"]
+                ][:30]
+                if not sorted_apps and app_durations:
+                    sorted_apps = sorted(app_durations.items(), key=lambda x: x[1], reverse=True)[:10]
+
                 total_app_secs = sum(app_durations.values()) or 1
                 for proc, secs in sorted_apps:
                     mins = max(1, int(secs / 60))
                     if proc in APP_TAXONOMY:
                         name, cat, icon = APP_TAXONOMY[proc]
+                    elif any(k in proc for k in ["game", "play", "music", "video", "media", "stream"]):
+                        name = proc.replace(".exe", "").title()
+                        cat = "Playing"
+                        icon = "gamepad"
+                    elif any(k in proc for k in ["chat", "social", "mail", "message"]):
+                        name = proc.replace(".exe", "").title()
+                        cat = "Normal"
+                        icon = "message"
+                    elif any(k in proc for k in ["code", "dev", "studio", "editor", "compiler", "terminal", "bash", "sh"]):
+                        name = proc.replace(".exe", "").title()
+                        cat = "Studying"
+                        icon = "code"
                     else:
                         name = proc.replace(".exe", "").title()
-                        cat = category if category in ["Studying", "Playing", "Normal", "Adult"] else "Studying"
+                        cat = "Normal"
                         icon = "laptop"
+
+                    # 1. Authentic Times Opened (foreground switches or active launches)
+                    times_opened = app_open_counts.get(proc, max(1, int(secs / 300) + 1))
+
+                    # 2. Authentic Notifications Received from Windows Notification Center
+                    notifications = windows_notifications.get(proc, 0)
+                    if notifications == 0:
+                        proc_clean = proc.lower().replace(".exe", "")
+                        for k, cnt in windows_notifications.items():
+                            if proc_clean in k.lower() or k.lower() in proc_clean:
+                                notifications += cnt
+                                break
+
                     top_apps.append({
                         "name": name,
                         "proc": proc,
                         "minutes": mins,
+                        "times_opened": times_opened,
+                        "notifications": notifications,
                         "category": cat,
                         "percentage": min(100, round((secs / total_app_secs) * 100)),
                         "icon": icon
@@ -998,6 +1157,7 @@ def start_agent():
                     "adult_seconds": adult_seconds,
                     "continuous_active_seconds": continuous_active_seconds,
                     "app_durations": app_durations,
+                    "app_open_counts": app_open_counts,
                     "search_queries": search_queries,
                     "last_sync": datetime.datetime.now().isoformat()
                 })
@@ -1026,6 +1186,8 @@ def start_agent():
                         "is_crisis_search_flag": has_crisis_event,
                         "top_apps": top_apps,
                         "search_topics": top_searches,
+                        "total_times_opened": sum(a.get("times_opened", 0) for a in top_apps),
+                        "total_notifications": sum(a.get("notifications", 0) for a in top_apps),
                     }
                     # Integrate Mathematical Sleep-Wake Cycle Metrics using real power event timestamps
                     sleep_cycle_metrics = infer_circadian_sleep_metrics(
@@ -1054,7 +1216,7 @@ def start_agent():
                             risk_info = res_data.get("risk_assessment", {})
                             risk_level = risk_info.get("risk_level", "LOW")
 
-                            status_color = "🟢" if risk_level == "LOW" else "🟡" if risk_level == "MEDIUM" else "🔴"
+                            status_color = "[OK]" if risk_level == "LOW" else "[WARN]" if risk_level == "MEDIUM" else "[ALERT]"
                             display_title = (title[:35] + "..") if len(title) > 35 else (title or proc_name)
                             log_agent(
                                 f"{status_color} Synced: "

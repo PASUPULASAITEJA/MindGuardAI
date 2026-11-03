@@ -7,10 +7,12 @@ from app.core.config import settings
 is_dev = settings.ENVIRONMENT == "development"
 
 # Configure the asynchronous database engine (echo=False keeps terminal output clean)
+connect_args = {"check_same_thread": False} if "sqlite" in settings.DATABASE_URL else {}
 async_engine = create_async_engine(
     settings.DATABASE_URL,
     echo=False,
     pool_pre_ping=True,  # Checks connection liveness before executing queries
+    connect_args=connect_args,
 )
 
 # Async session factory

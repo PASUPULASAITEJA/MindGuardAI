@@ -18,6 +18,7 @@ export const useScreenTimeTracker = () => {
   const socialSecondsRef = useRef(0);
   const entertainmentSecondsRef = useRef(0);
   const lastActiveTimestampRef = useRef(Date.now());
+  const isDesktopAgentConnectedRef = useRef(false);
 
   useEffect(() => {
     if (!isAuthenticated || !user || user.role !== "STUDENT") {
@@ -52,6 +53,9 @@ export const useScreenTimeTracker = () => {
     // 1b. Fetch authoritative server daily baseline to prevent clobbering desktop agent tracking
     api.get("/chat/behavioral-features/summary")
       .then((res) => {
+        if (res.data?.is_agent_connected) {
+          isDesktopAgentConnectedRef.current = true;
+        }
         const latest = res.data?.latest_log;
         if (latest && latest.date === todayStr) {
           const serverActive = (latest.total_screen_time_minutes || 0) * 60;
@@ -138,6 +142,9 @@ export const useScreenTimeTracker = () => {
 
     // 4. Function to sync with MindGuard Backend API using authenticated axios client
     const syncWithBackend = async () => {
+      // If the desktop PC agent is actively tracking the system, it is authoritative.
+      // Do not post browser-only seconds that could collide with complete system metrics.
+      if (isDesktopAgentConnectedRef.current) return;
       if (activeSecondsRef.current <= 0) return;
 
       const activeMinutes = Math.max(1, Math.round(activeSecondsRef.current / 60));

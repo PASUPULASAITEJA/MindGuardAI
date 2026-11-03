@@ -364,21 +364,153 @@
 .glow-orb {
   position: absolute;
   border-radius: 50%;
-  filter: blur(80px);
+  filter: blur(90px);
   pointer-events: none;
-  animation: blob-glow 6s ease-in-out infinite;
+  animation: blob-glow 7s ease-in-out infinite;
 }
 
 .glow-orb-primary {
-  background: hsl(var(--primary) / 0.12);
+  background: radial-gradient(circle, rgba(59, 130, 246, 0.35) 0%, rgba(99, 102, 241, 0.22) 40%, rgba(14, 165, 233, 0.1) 65%, transparent 80%);
 }
 
 .glow-orb-purple {
-  background: hsl(250 91% 60% / 0.08);
+  background: radial-gradient(circle, rgba(168, 85, 247, 0.3) 0%, rgba(139, 92, 246, 0.18) 40%, rgba(192, 132, 252, 0.08) 65%, transparent 80%);
 }
 
 .glow-orb-emerald {
-  background: hsl(158 64% 52% / 0.10);
+  background: radial-gradient(circle, rgba(16, 185, 129, 0.28) 0%, rgba(45, 212, 191, 0.15) 40%, rgba(5, 150, 105, 0.07) 65%, transparent 80%);
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   SCROLLTIDE CINEMATIC DESIGN SYSTEM EXTENSIONS
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+/* Cinematic Micro-Grid Matrix Background */
+.cinematic-grid-pattern {
+  background-image: 
+    linear-gradient(to right, rgba(148, 163, 184, 0.07) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(148, 163, 184, 0.07) 1px, transparent 1px);
+  background-size: 56px 56px;
+}
+.dark .cinematic-grid-pattern {
+  background-image: 
+    linear-gradient(to right, rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+  background-size: 56px 56px;
+}
+
+/* Cinematic Frosted Glass Panel */
+.cinematic-glass {
+  background: hsl(var(--card) / 0.65);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid hsl(var(--border) / 0.85);
+  box-shadow: 0 20px 45px -15px rgba(0, 0, 0, 0.08), inset 0 1px 0 0 rgba(255, 255, 255, 0.6);
+}
+.dark .cinematic-glass {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.035) 0%, rgba(255, 255, 255, 0.008) 100%), hsl(var(--card) / 0.7);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.75), inset 0 1px 0 0 rgba(255, 255, 255, 0.09);
+}
+
+/* Cinematic Interactive Card with Edge Refraction */
+.cinematic-card {
+  position: relative;
+  border-radius: 1.25rem;
+  background: hsl(var(--card));
+  border: 1px solid hsl(var(--border));
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.04);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.dark .cinematic-card {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.025) 0%, rgba(255, 255, 255, 0.005) 100%), hsl(var(--card) / 0.75);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  box-shadow: 0 16px 36px -12px rgba(0, 0, 0, 0.6), inset 0 1px 0 0 rgba(255, 255, 255, 0.07);
+}
+.cinematic-card:hover {
+  transform: translateY(-3px);
+  border-color: hsl(var(--primary) / 0.45);
+  box-shadow: 0 20px 40px -12px hsl(var(--primary) / 0.16), inset 0 1px 0 0 rgba(255, 255, 255, 0.12);
+}
+.dark .cinematic-card:hover {
+  border-color: rgba(99, 102, 241, 0.45);
+  box-shadow: 0 24px 50px -12px rgba(59, 130, 246, 0.28), inset 0 1px 0 0 rgba(255, 255, 255, 0.15);
+}
+
+/* Cinematic Glow CTA Button */
+.cinematic-glow-btn {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 0 20px -3px hsl(var(--primary) / 0.35);
+}
+.cinematic-glow-btn::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    60deg,
+    transparent 30%,
+    rgba(255, 255, 255, 0.2) 50%,
+    transparent 70%
+  );
+  transform: rotate(25deg) translateY(-120%);
+  transition: transform 0.65s ease;
+}
+.cinematic-glow-btn:hover::after {
+  transform: rotate(25deg) translateY(120%);
+}
+.cinematic-glow-btn:hover {
+  box-shadow: 0 0 32px -2px hsl(var(--primary) / 0.55);
+  transform: translateY(-1px);
+}
+
+/* Cinematic Pill Badge */
+.cinematic-pill {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.375rem 0.875rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  background: hsl(var(--primary) / 0.08);
+  border: 1px solid hsl(var(--primary) / 0.25);
+  color: hsl(var(--primary));
+  box-shadow: 0 0 20px -3px hsl(var(--primary) / 0.15);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+.dark .cinematic-pill {
+  background: rgba(59, 130, 246, 0.1);
+  border: 1px solid rgba(147, 197, 253, 0.25);
+  box-shadow: 0 0 24px -2px rgba(59, 130, 246, 0.25), inset 0 1px 0 0 rgba(255, 255, 255, 0.1);
+}
+
+/* Light refraction border glow */
+.cinematic-border-glow {
+  position: relative;
+}
+.cinematic-border-glow::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, transparent 60%, rgba(59, 130, 246, 0.2) 100%);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
 }
 
 /* ── Animation 4: Scroll Reveal, Stagger & Page Transitions ── */
