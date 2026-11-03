@@ -87,7 +87,7 @@ export const SelfCareResourcesPage: React.FC = () => {
 
       <div className="space-y-2">
         <h1 className="text-2xl md:text-3xl font-black text-foreground tracking-tight">
-          <ShinyText text="Mental Recovery & Calming Toolkit" />
+          Mental Recovery & Calming Toolkit
         </h1>
         <p className="text-sm text-muted-foreground max-w-2xl leading-relaxed">
           Clinically backed relaxation protocols to ground your autonomic nervous system, reduce cognitive fatigue, and restore mental focus.
@@ -105,7 +105,7 @@ export const SelfCareResourcesPage: React.FC = () => {
         className="grid grid-cols-1 lg:grid-cols-2 gap-6"
       >
         {/* 1. Breathing Sphere Interactive Widget */}
-        <motion.div variants={cardEntrance} whileHover={{ y: -3 }}>
+        <motion.div id="breath-pacer" variants={cardEntrance} whileHover={{ y: -3 }}>
           <SpotlightCard spotlightColor="rgba(99, 102, 241, 0.15)" className="p-5 flex flex-col justify-between h-full">
             <div className="pb-3 border-b border-border/40 mb-3">
               <div className="flex items-center gap-2.5">
@@ -130,7 +130,7 @@ export const SelfCareResourcesPage: React.FC = () => {
         </motion.div>
 
         {/* 2. 5-4-3-2-1 Sensory Grounding Tool */}
-        <motion.div variants={cardEntrance} whileHover={{ y: -3 }}>
+        <motion.div id="sensory-grounding" variants={cardEntrance} whileHover={{ y: -3 }}>
           <SpotlightCard spotlightColor="rgba(16, 185, 129, 0.15)" className="p-5 flex flex-col justify-between h-full">
             <div className="pb-3 border-b border-border/40 mb-3 flex items-center justify-between">
               <div className="flex items-center gap-2.5">
@@ -208,7 +208,7 @@ export const SelfCareResourcesPage: React.FC = () => {
 
       {/* Sleep & Exam Stress Guidance */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <SpotlightCard spotlightColor="rgba(139, 92, 246, 0.15)" className="p-4 space-y-2.5">
+        <SpotlightCard id="sleep-guidelines" spotlightColor="rgba(139, 92, 246, 0.15)" className="p-4 space-y-2.5">
           <div className="flex items-center gap-2">
             <div className="p-1 rounded-lg bg-violet-500/10 text-violet-500">
               <Moon className="h-3.5 w-3.5" />
@@ -232,7 +232,7 @@ export const SelfCareResourcesPage: React.FC = () => {
         </SpotlightCard>
 
         {/* Emergency Helplines Card */}
-        <SpotlightCard spotlightColor="rgba(244, 63, 94, 0.18)" className="border-rose-500/30 bg-rose-500/5 p-4 space-y-2.5">
+        <SpotlightCard id="crisis-support" spotlightColor="rgba(244, 63, 94, 0.18)" className="border-rose-500/30 bg-rose-500/5 p-4 space-y-2.5">
           <div className="flex items-center gap-2 text-rose-500">
             <div className="p-1 rounded-lg bg-rose-500/10">
               <ShieldAlert className="h-3.5 w-3.5" />
