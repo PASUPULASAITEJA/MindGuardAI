@@ -92,3 +92,4 @@ if __name__ == "__main__":
         train_model()
     except Exception as e:
         logger.error(f"Training failed: {e}")
+
