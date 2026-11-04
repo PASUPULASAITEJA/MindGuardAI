@@ -26,6 +26,8 @@ import { useScrollReveal } from "@/hooks/useScrollReveal";
 import { useCountUp } from "@/hooks/useCountUp";
 import { GlowOrb } from "@/components/ui/GlowOrb";
 import { BioNeuralSynapseMesh } from "@/components/ui/BioNeuralSynapseMesh";
+import { CognitiveSynapseEngine } from "@/components/ui/CognitiveSynapseEngine";
+import { cn } from "@/utils/cn";
 
 interface FAQItem {
   question: string;
@@ -65,6 +67,7 @@ export const LandingPage: React.FC = () => {
   const navigate = useNavigate();
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
+  const [heroTab, setHeroTab] = useState<"brain" | "hud">("brain");
 
   const scrollToSection = (id: string) => {
     const el = document.getElementById(id);
@@ -322,17 +325,37 @@ export const LandingPage: React.FC = () => {
             </div>
           </div>
 
-          {/* RIGHT COLUMN — Multimodal Live Telemetry HUD */}
+          {/* RIGHT COLUMN — 3D Neural Brain & Live Telemetry HUD */}
           <div className="flex flex-col justify-center relative fade-up-2 mt-4 lg:mt-0 space-y-3">
+            {/* Top Toggle Bar */}
             <div className="flex items-center justify-between px-1">
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shadow-xs">
-                  <Activity className="w-4 h-4" />
-                </div>
-                <div>
-                  <h3 className="text-xs sm:text-sm font-semibold text-foreground">Live Telemetry Synchrony</h3>
-                  <p className="text-[10px] sm:text-[11px] text-muted-foreground">Autonomous Neural Signal Mesh</p>
-                </div>
+              <div className="flex items-center gap-1.5 p-1 rounded-full bg-black/40 border border-border/80 dark:border-white/10 backdrop-blur-md">
+                <button
+                  type="button"
+                  onClick={() => setHeroTab("brain")}
+                  className={cn(
+                    "flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all duration-200",
+                    heroTab === "brain"
+                      ? "bg-primary text-primary-foreground shadow-md shadow-primary/25"
+                      : "text-muted-foreground hover:text-foreground"
+                  )}
+                >
+                  <Brain className="w-3.5 h-3.5" />
+                  <span>3D Neural Brain</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setHeroTab("hud")}
+                  className={cn(
+                    "flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all duration-200",
+                    heroTab === "hud"
+                      ? "bg-primary text-primary-foreground shadow-md shadow-primary/25"
+                      : "text-muted-foreground hover:text-foreground"
+                  )}
+                >
+                  <Activity className="w-3.5 h-3.5" />
+                  <span>Telemetry HUD</span>
+                </button>
               </div>
 
               <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 text-[10px] sm:text-xs font-semibold shrink-0 shadow-[0_0_15px_-3px_rgba(16,185,129,0.25)]">
@@ -341,55 +364,73 @@ export const LandingPage: React.FC = () => {
               </div>
             </div>
 
-            {/* Multimodal Telemetry Grid */}
-            <div className="relative rounded-2xl cinematic-glass p-5 sm:p-7 space-y-4 sm:space-y-5 overflow-hidden">
-              <div className="grid grid-cols-2 gap-2.5 sm:gap-3.5">
-                <div className="p-3 sm:p-4 rounded-xl bg-background/70 dark:bg-card/60 border border-border/70 dark:border-white/[0.08] hover:border-primary/40 transition-all duration-200 space-y-1 shadow-xs">
-                  <span className="text-[9px] sm:text-[10px] uppercase font-bold text-muted-foreground tracking-wider block truncate">
-                    Cognitive Sentiment
-                  </span>
-                  <p className="text-base sm:text-xl font-extrabold text-foreground">Positive (88%)</p>
-                  <p className="text-[10px] sm:text-[11px] text-primary flex items-center gap-1">
-                    <span>NLP DistilBERT 6-Class</span>
-                  </p>
-                </div>
-
-                <div className="p-3 sm:p-4 rounded-xl bg-background/70 dark:bg-card/60 border border-border/70 dark:border-white/[0.08] hover:border-blue-500/40 transition-all duration-200 space-y-1 shadow-xs">
-                  <span className="text-[9px] sm:text-[10px] uppercase font-bold text-muted-foreground tracking-wider block truncate">
-                    Circadian Rhythm
-                  </span>
-                  <p className="text-base sm:text-xl font-extrabold text-blue-500">7.4h Regular</p>
-                  <p className="text-[10px] sm:text-[11px] text-muted-foreground">Fragmentation 0.12</p>
-                </div>
-
-                <div className="p-3 sm:p-4 rounded-xl bg-background/70 dark:bg-card/60 border border-border/70 dark:border-white/[0.08] hover:border-emerald-500/40 transition-all duration-200 space-y-1 shadow-xs">
-                  <span className="text-[9px] sm:text-[10px] uppercase font-bold text-muted-foreground tracking-wider block truncate">
-                    Screen Time
-                  </span>
-                  <p className="text-base sm:text-xl font-extrabold text-emerald-500">Balanced</p>
-                  <p className="text-[10px] sm:text-[11px] text-muted-foreground">Zero-keystroke</p>
-                </div>
-
-                <div className="p-3 sm:p-4 rounded-xl bg-background/70 dark:bg-card/60 border border-border/70 dark:border-white/[0.08] hover:border-emerald-500/40 transition-all duration-200 space-y-1 shadow-xs">
-                  <span className="text-[9px] sm:text-[10px] uppercase font-bold text-muted-foreground tracking-wider block truncate">
-                    Risk Tier
-                  </span>
-                  <p className="text-base sm:text-xl font-extrabold text-emerald-500">Low (0.14)</p>
-                  <p className="text-[10px] sm:text-[11px] text-muted-foreground">PHQ-9 Validated</p>
+            {/* TAB CONTENT: 3D Neural Brain */}
+            {heroTab === "brain" ? (
+              <div className="space-y-3">
+                <CognitiveSynapseEngine />
+                {/* Bottom Badges */}
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="flex items-center justify-between px-4 py-2.5 rounded-2xl cinematic-glass border border-white/[0.08] text-xs">
+                    <span className="text-muted-foreground font-medium">Cognitive Load</span>
+                    <span className="text-emerald-400 font-bold">Optimal (88%)</span>
+                  </div>
+                  <div className="flex items-center justify-between px-4 py-2.5 rounded-2xl cinematic-glass border border-white/[0.08] text-xs">
+                    <span className="text-muted-foreground font-medium">Circadian Sleep</span>
+                    <span className="text-cyan-400 font-bold">7.4h Regular</span>
+                  </div>
                 </div>
               </div>
+            ) : (
+              /* TAB CONTENT: Multimodal Telemetry Grid */
+              <div className="relative rounded-2xl cinematic-glass p-5 sm:p-7 space-y-4 sm:space-y-5 overflow-hidden">
+                <div className="grid grid-cols-2 gap-2.5 sm:gap-3.5">
+                  <div className="p-3 sm:p-4 rounded-xl bg-background/70 dark:bg-card/60 border border-border/70 dark:border-white/[0.08] hover:border-primary/40 transition-all duration-200 space-y-1 shadow-xs">
+                    <span className="text-[9px] sm:text-[10px] uppercase font-bold text-muted-foreground tracking-wider block truncate">
+                      Cognitive Sentiment
+                    </span>
+                    <p className="text-base sm:text-xl font-extrabold text-foreground">Positive (88%)</p>
+                    <p className="text-[10px] sm:text-[11px] text-primary flex items-center gap-1">
+                      <span>NLP DistilBERT 6-Class</span>
+                    </p>
+                  </div>
 
-              <div className="flex items-center justify-between pt-2.5 sm:pt-3 border-t border-border/60 dark:border-white/[0.08] text-[11px] sm:text-xs text-muted-foreground">
-                <span className="flex items-center gap-1.5">
-                  <span className="relative flex h-2 w-2">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-cyan-500"></span>
+                  <div className="p-3 sm:p-4 rounded-xl bg-background/70 dark:bg-card/60 border border-border/70 dark:border-white/[0.08] hover:border-blue-500/40 transition-all duration-200 space-y-1 shadow-xs">
+                    <span className="text-[9px] sm:text-[10px] uppercase font-bold text-muted-foreground tracking-wider block truncate">
+                      Circadian Rhythm
+                    </span>
+                    <p className="text-base sm:text-xl font-extrabold text-blue-500">7.4h Regular</p>
+                    <p className="text-[10px] sm:text-[11px] text-muted-foreground">Fragmentation 0.12</p>
+                  </div>
+
+                  <div className="p-3 sm:p-4 rounded-xl bg-background/70 dark:bg-card/60 border border-border/70 dark:border-white/[0.08] hover:border-emerald-500/40 transition-all duration-200 space-y-1 shadow-xs">
+                    <span className="text-[9px] sm:text-[10px] uppercase font-bold text-muted-foreground tracking-wider block truncate">
+                      Screen Time
+                    </span>
+                    <p className="text-base sm:text-xl font-extrabold text-emerald-500">Balanced</p>
+                    <p className="text-[10px] sm:text-[11px] text-muted-foreground">Zero-keystroke</p>
+                  </div>
+
+                  <div className="p-3 sm:p-4 rounded-xl bg-background/70 dark:bg-card/60 border border-border/70 dark:border-white/[0.08] hover:border-emerald-500/40 transition-all duration-200 space-y-1 shadow-xs">
+                    <span className="text-[9px] sm:text-[10px] uppercase font-bold text-muted-foreground tracking-wider block truncate">
+                      Risk Tier
+                    </span>
+                    <p className="text-base sm:text-xl font-extrabold text-emerald-500">Low (0.14)</p>
+                    <p className="text-[10px] sm:text-[11px] text-muted-foreground">PHQ-9 Validated</p>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between pt-2.5 sm:pt-3 border-t border-border/60 dark:border-white/[0.08] text-[11px] sm:text-xs text-muted-foreground">
+                  <span className="flex items-center gap-1.5">
+                    <span className="relative flex h-2 w-2">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-2 w-2 bg-cyan-500"></span>
+                    </span>
+                    Active Synaptic Axon Links
                   </span>
-                  Active Synaptic Axon Links
-                </span>
-                <span className="font-mono text-[11px] text-foreground font-semibold">1,400+ Nodes</span>
+                  <span className="font-mono text-[11px] text-foreground font-semibold">1,400+ Nodes</span>
+                </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
       </section>
