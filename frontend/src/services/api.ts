@@ -330,22 +330,24 @@ api.interceptors.response.use(
     }
   };
 
+
   export interface DeviceItem {
     id: string;
     device_identifier: string;
     device_name: string;
     platform: string;
-    os_version?: string;
-    agent_version?: string;
+    os_version?: string | null;
+    agent_version?: string | null;
     is_active: boolean;
     is_monitoring_paused: boolean;
     features_enabled: {
+      screen_time: boolean;
       app_tracking: boolean;
       web_tracking: boolean;
       search_tracking: boolean;
       notification_tracking: boolean;
     };
-    last_sync_at?: string;
+    last_sync_at?: string | null;
     created_at: string;
   }
 
@@ -369,11 +371,15 @@ api.interceptors.response.use(
       is_monitoring_paused?: boolean;
       features_enabled?: Record<string, boolean>;
     }) => {
-      const res = await api.patch<DeviceItem>(`/devices/${deviceId}`, data);
+      const res = await api.patch(`/devices/${deviceId}`, data);
       return res.data;
     },
     deleteDevice: async (deviceId: string, deleteData: boolean = false) => {
       const res = await api.delete(`/devices/${deviceId}?delete_data=${deleteData}`);
+      return res.data;
+    },
+    removeDevice: async (deviceId: string) => {
+      const res = await api.delete(`/devices/${deviceId}`);
       return res.data;
     }
   };
