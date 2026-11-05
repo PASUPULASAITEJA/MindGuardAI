@@ -83,7 +83,7 @@ export const DeviceManagementView: React.FC = () => {
     }
   };
 
-  const isOnline = (lastSync?: string) => {
+  const isOnline = (lastSync?: string | null) => {
     if (!lastSync) return false;
     const diffMins = (Date.now() - new Date(lastSync).getTime()) / (1000 * 60);
     return diffMins < 5;
