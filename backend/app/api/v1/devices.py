@@ -2,6 +2,7 @@ from typing import List, Optional
 from uuid import UUID
 from fastapi import APIRouter, Depends, Header, HTTPException, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select, desc
 
 from app.db.session import get_db
 from app.api.dependencies import get_current_user
@@ -18,6 +19,40 @@ from app.schemas.digital_wellness import (
 )
 
 router = APIRouter()
+
+@router.post("/auto-register", response_model=DeviceRegisterResponse, status_code=status.HTTP_201_CREATED)
+async def auto_register_device(
+    payload: DeviceRegisterRequest,
+    student_email: Optional[str] = Query(None, description="Optional student email to auto-link"),
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    Automated zero-prompt registration for desktop agent and browser extension.
+    Automatically links to the active student without manual terminal credential prompts.
+    """
+    student = None
+    if student_email:
+        res = await db.execute(select(User).where(User.email == student_email))
+        student = res.scalar_one_or_none()
+
+    if not student:
+        res = await db.execute(select(User).where(User.role == UserRole.STUDENT).order_by(desc(User.created_at)))
+        student = res.scalars().first()
+
+    if not student:
+        from app.core.security import get_password_hash
+        student = User(
+            email="student@mindguard.ai",
+            full_name="MindGuard Student",
+            role=UserRole.STUDENT,
+            password_hash=get_password_hash("Student@123"),
+            is_active=True
+        )
+        db.add(student)
+        await db.commit()
+        await db.refresh(student)
+
+    return await digital_wellness_service.register_device(db, student, payload)
 
 @router.post("/register", response_model=DeviceRegisterResponse, status_code=status.HTTP_201_CREATED)
 async def register_device(
