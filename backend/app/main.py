@@ -28,6 +28,8 @@ from app.api.v1.checkins import router as checkins_router, counselor_checkins_ro
 from app.api.v1.sleep import router as sleep_router, counselor_sleep_router
 from app.api.v1.interventions import router as interventions_router
 from app.api.v1.academic import router as academic_router
+from app.api.v1.devices import router as devices_router
+from app.api.v1.digital_wellness import router as digital_wellness_router
 from app.middleware.audit_logging import AuditLoggingMiddleware
 
 from contextlib import asynccontextmanager
@@ -150,12 +152,13 @@ async def sqlalchemy_exception_handler(request: Request, exc: SQLAlchemyError):
     Handle relational database exceptions. Hides connection strings/queries from client details.
     """
     logger.error(f"SQLAlchemy Exception: {str(exc)}", exc_info=True)
+    details = {"reason": str(exc)} if settings.ENVIRONMENT == "development" else {}
     return JSONResponse(
         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
         content={
             "error_code": "INTERNAL_SERVER_ERROR",
             "message": "A database error occurred while processing the request.",
-            "details": {}
+            "details": details
         }
     )
 
@@ -233,6 +236,12 @@ app.include_router(interventions_router, prefix="/api/v1", tags=["Interventions"
 app.include_router(interventions_router, prefix="/api", tags=["Interventions"])
 app.include_router(academic_router, prefix="/api/v1", tags=["Academic Calendar"])
 app.include_router(academic_router, prefix="/api", tags=["Academic Calendar"])
+app.include_router(devices_router, prefix="/api/v1/devices", tags=["Connected Devices"])
+app.include_router(devices_router, prefix="/api/devices", tags=["Connected Devices"])
+app.include_router(digital_wellness_router, prefix="/api/v1/digital-wellness", tags=["Digital Wellness"])
+app.include_router(digital_wellness_router, prefix="/api/digital-wellness", tags=["Digital Wellness"])
+app.include_router(digital_wellness_router, prefix="/api/v1/activity", tags=["Digital Wellness"])
+app.include_router(digital_wellness_router, prefix="/api/activity", tags=["Digital Wellness"])
 
 @app.get("/health", tags=["Health"])
 @app.get("/api/health", tags=["Health"])
