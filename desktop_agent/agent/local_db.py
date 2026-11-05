@@ -221,3 +221,4 @@ class LocalStorage:
                 WHERE date = ?
             """, (date_str,))
             return [dict(r) for r in cur.fetchall()]
+

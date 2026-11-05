@@ -264,3 +264,4 @@ export const SearchAnalyticsView: React.FC = () => {
 };
 
 export default SearchAnalyticsView;
+

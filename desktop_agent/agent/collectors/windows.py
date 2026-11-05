@@ -170,3 +170,4 @@ class WindowsCollector(BaseCollector):
                 pass
 
         return results
+

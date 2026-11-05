@@ -93,3 +93,4 @@ class LinuxCollector(BaseCollector):
     def get_notifications_summary(self, date_str: str) -> List[Dict[str, Any]]:
         """Linux notification daemon does not persist historical logs without specialized daemon plugins."""
         return []
+

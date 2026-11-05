@@ -85,3 +85,4 @@ class MacOSCollector(BaseCollector):
         If permission is not granted, returns empty list with zero synthetic data.
         """
         return []
+

@@ -113,3 +113,4 @@ class BaseCollector(ABC):
             return "File Manager / System", "Productivity"
 
         return proc_name.replace(".exe", "").title(), "Other"
+

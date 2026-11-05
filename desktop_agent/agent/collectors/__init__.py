@@ -16,3 +16,4 @@ def get_platform_collector() -> BaseCollector:
     else:
         # Default fallback to Windows or Linux interface
         return WindowsCollector()
+

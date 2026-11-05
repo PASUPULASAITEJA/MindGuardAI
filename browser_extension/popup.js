@@ -56,3 +56,4 @@ document.addEventListener("DOMContentLoaded", async () => {
     chrome.tabs.create({ url: "http://localhost:5173/student/screentime" });
   });
 });
+

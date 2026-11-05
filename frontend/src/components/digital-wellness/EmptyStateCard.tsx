@@ -49,3 +49,4 @@ export const EmptyStateCard: React.FC<EmptyStateCardProps> = ({
 };
 
 export default EmptyStateCard;
+

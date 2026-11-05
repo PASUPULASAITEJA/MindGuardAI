@@ -365,3 +365,4 @@ export const PrivacyConsentView: React.FC = () => {
 };
 
 export default PrivacyConsentView;
+

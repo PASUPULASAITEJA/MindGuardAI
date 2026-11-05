@@ -113,3 +113,4 @@ def start_local_ipc_server(storage: LocalStorage, port: int = 42424) -> Optional
     except Exception as e:
         logger.warning(f"Could not bind local IPC server on port {port}: {e}")
         return None
+

@@ -200,3 +200,4 @@ class DigitalWellnessConsent(Base):
     )
 
     user: Mapped["User"] = relationship("User", foreign_keys=[user_id])
+

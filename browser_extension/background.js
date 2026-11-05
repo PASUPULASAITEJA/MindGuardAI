@@ -179,3 +179,4 @@ function categorizeDomain(domain) {
   }
   return "General";
 }
+

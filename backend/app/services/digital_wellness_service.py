@@ -786,3 +786,4 @@ class DigitalWellnessService:
         return {"status": "success", "message": "All digital activity telemetry permanently deleted."}
 
 digital_wellness_service = DigitalWellnessService()
+

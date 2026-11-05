@@ -136,3 +136,4 @@ class UserDevice(Base):
     __table_args__ = (
         Index("ix_user_device_identifier", "user_id", "device_identifier", unique=True),
     )
+

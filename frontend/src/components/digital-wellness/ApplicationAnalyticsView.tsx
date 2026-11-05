@@ -362,3 +362,4 @@ export const ApplicationAnalyticsView: React.FC = () => {
 };
 
 export default ApplicationAnalyticsView;
+
