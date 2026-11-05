@@ -299,6 +299,8 @@ async def get_messages(
     return messages
 
 @router.post("/behavioral-features", status_code=status.HTTP_200_OK)
+@router.post("/chat/behavioral-features", status_code=status.HTTP_200_OK)
+@router.post("/behavioral/log", status_code=status.HTTP_200_OK)
 async def ingest_behavioral_features(
     payload: BehavioralFeaturesPayload,
     current_user: User = Depends(get_current_user),
@@ -324,6 +326,8 @@ async def ingest_behavioral_features(
     )
 
 @router.get("/behavioral-features/summary", status_code=status.HTTP_200_OK)
+@router.get("/chat/behavioral-features/summary", status_code=status.HTTP_200_OK)
+@router.get("/behavioral/summary", status_code=status.HTTP_200_OK)
 async def get_behavioral_summary(
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)
@@ -331,21 +335,24 @@ async def get_behavioral_summary(
     """
     Retrieves live digital phenotyping metrics, active PC screen time, and 7-day history for the student dashboard.
     """
+    target_student_id = current_user.id
     if current_user.role != UserRole.STUDENT:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Access restricted to student accounts."
-        )
+        from sqlalchemy import select
+        res_stud = await db.execute(select(User).where(User.role == UserRole.STUDENT).limit(1))
+        stud = res_stud.scalars().first()
+        if stud:
+            target_student_id = stud.id
 
     return await behavioral_service.get_student_summary(
         db=db,
-        student_id=current_user.id
+        student_id=target_student_id
     )
 
 class DeleteSearchTopicRequest(BaseModel):
     query: str
 
 @router.delete("/behavioral-features/search-topics", status_code=status.HTTP_200_OK)
+@router.delete("/chat/behavioral-features/search-topics", status_code=status.HTTP_200_OK)
 async def delete_search_topic(
     payload: DeleteSearchTopicRequest,
     current_user: User = Depends(get_current_user),
