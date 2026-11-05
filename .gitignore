@@ -59,6 +59,8 @@ frontend/coverage/
 *.pkl
 *.bin
 *.onnx
+*.safetensors
+backend/app/ml/models/distilbert_v1_hf/
 backend/app/ml/models/*.pkl
 backend/app/ml/models/*.pt
 backend/app/ml/models/*.bin
