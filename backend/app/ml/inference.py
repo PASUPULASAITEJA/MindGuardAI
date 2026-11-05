@@ -28,6 +28,7 @@ class MLService:
         
         self.model_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "models"))
         self.nlp_model_path = os.path.join(self.model_dir, "distilbert_v1.pt")
+        self.nlp_hf_dir = os.path.join(self.model_dir, "distilbert_v1_hf")
         self.risk_model_path = os.path.join(self.model_dir, "risk_rf_v2.joblib")
         
         self.tokenizer = None
@@ -46,15 +47,20 @@ class MLService:
                 logger.warning("PyTorch or Transformers not installed. Using rule-based fallback inference.")
                 return
 
-            if os.path.exists(self.nlp_model_path) and os.path.exists(self.risk_model_path):
+            if (os.path.exists(self.nlp_hf_dir) or os.path.exists(self.nlp_model_path)) and os.path.exists(self.risk_model_path):
                 logger.info("Loading ML models into memory...")
                 
-                # 1. Load DistilBERT tokenizer and classification weights
-                self.tokenizer = AutoTokenizer.from_pretrained("distilbert-base-uncased")
-                self.emotion_model = AutoModelForSequenceClassification.from_pretrained(
-                    "distilbert-base-uncased", num_labels=6
-                )
-                self.emotion_model.load_state_dict(torch.load(self.nlp_model_path, map_location=torch.device("cpu")))
+                # 1. Load fine-tuned DistilBERT without uninitialized head warnings
+                if os.path.exists(self.nlp_hf_dir):
+                    self.tokenizer = AutoTokenizer.from_pretrained(self.nlp_hf_dir)
+                    self.emotion_model = AutoModelForSequenceClassification.from_pretrained(self.nlp_hf_dir)
+                else:
+                    from transformers import AutoConfig
+                    self.tokenizer = AutoTokenizer.from_pretrained("distilbert-base-uncased")
+                    config = AutoConfig.from_pretrained("distilbert-base-uncased", num_labels=6)
+                    self.emotion_model = AutoModelForSequenceClassification.from_config(config)
+                    self.emotion_model.load_state_dict(torch.load(self.nlp_model_path, map_location=torch.device("cpu")))
+                
                 self.emotion_model.eval()
 
                 # 2. Load Tree-based classifier
