@@ -221,7 +221,8 @@ api.interceptors.response.use(
       return res.data;
     },
     getBehavioralSummary: async () => {
-      const res = await api.get<{
+      try {
+        const res = await api.get<{
         is_agent_connected: boolean;
         is_currently_active: boolean;
         last_synced_minutes_ago: number;
@@ -302,13 +303,30 @@ api.interceptors.response.use(
           risk_level: string;
         }>;
       }>("/chat/behavioral-features/summary");
-      return res.data;
+        return res.data;
+      } catch (err: any) {
+        if (err.response?.status === 404) {
+          const fallback = await api.get<any>("/behavioral-features/summary");
+          return fallback.data;
+        }
+        throw err;
+      }
     },
     deleteSearchTopic: async (query: string): Promise<any> => {
-      const res = await api.delete("/chat/behavioral-features/search-topics", {
-        data: { query }
-      });
-      return res.data;
+      try {
+        const res = await api.delete("/chat/behavioral-features/search-topics", {
+          data: { query }
+        });
+        return res.data;
+      } catch (err: any) {
+        if (err.response?.status === 404) {
+          const fallback = await api.delete("/behavioral-features/search-topics", {
+            data: { query }
+          });
+          return fallback.data;
+        }
+        throw err;
+      }
     }
   };
 
