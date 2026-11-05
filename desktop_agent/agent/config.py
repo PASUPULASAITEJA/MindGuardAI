@@ -9,25 +9,29 @@ from typing import Optional, Dict, Any
 
 def get_app_data_dir() -> Path:
     """Returns platform-appropriate secure user configuration directory."""
-    system = platform.system().lower()
+    project_root = Path(__file__).resolve().parents[2]
+    local_data = project_root / "desktop_agent" / ".mindguard_data"
     try:
-        if system == "windows":
-            base = os.environ.get("LOCALAPPDATA", os.path.expanduser("~\\AppData\\Local"))
-            path = Path(base) / "MindGuard"
-        elif system == "darwin":
-            path = Path.home() / "Library" / "Application Support" / "MindGuard"
-        else:
-            base = os.environ.get("XDG_CONFIG_HOME", os.path.expanduser("~/.config"))
-            path = Path(base) / "mindguard"
+        local_data.mkdir(parents=True, exist_ok=True)
+        test_file = local_data / ".write_test"
+        test_file.write_text("ok", encoding="utf-8")
+        test_file.unlink()
+        return local_data
+    except Exception:
+        pass
 
-        path.mkdir(parents=True, exist_ok=True)
-        return path
-    except (PermissionError, OSError):
-        # Fallback to local agent folder if OS user directory is write-restricted
-        project_root = Path(__file__).resolve().parents[2]
-        fallback = project_root / "desktop_agent" / ".mindguard_data"
-        fallback.mkdir(parents=True, exist_ok=True)
-        return fallback
+    system = platform.system().lower()
+    if system == "windows":
+        base = os.environ.get("LOCALAPPDATA", os.path.expanduser("~\\AppData\\Local"))
+        path = Path(base) / "MindGuard"
+    elif system == "darwin":
+        path = Path.home() / "Library" / "Application Support" / "MindGuard"
+    else:
+        base = os.environ.get("XDG_CONFIG_HOME", os.path.expanduser("~/.config"))
+        path = Path(base) / "mindguard"
+
+    path.mkdir(parents=True, exist_ok=True)
+    return path
 
 def get_hardware_uuid() -> str:
     """
@@ -39,20 +43,19 @@ def get_hardware_uuid() -> str:
 
     if system == "windows":
         try:
-            # Try powershell CIM instance
-            cmd = ["powershell", "-NoProfile", "-Command", "(Get-CimInstance -Class Win32_ComputerSystemProduct).UUID"]
-            out = subprocess.check_output(cmd, text=True, timeout=3).strip()
-            if out and len(out) > 10 and "error" not in out.lower():
-                hardware_id = out
+            import winreg
+            with winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, r"SOFTWARE\Microsoft\Cryptography") as key:
+                guid, _ = winreg.QueryValueEx(key, "MachineGuid")
+                if guid:
+                    hardware_id = str(guid).strip()
         except Exception:
             pass
         if not hardware_id:
             try:
-                cmd = ["wmic", "csproduct", "get", "uuid"]
-                out = subprocess.check_output(cmd, text=True, timeout=3)
-                lines = [l.strip() for l in out.splitlines() if l.strip() and "uuid" not in l.lower()]
-                if lines:
-                    hardware_id = lines[0]
+                cmd = ["powershell", "-NoProfile", "-Command", "(Get-CimInstance -Class Win32_ComputerSystemProduct).UUID"]
+                out = subprocess.check_output(cmd, text=True, timeout=2).strip()
+                if out and len(out) > 10 and "error" not in out.lower():
+                    hardware_id = out
             except Exception:
                 pass
 

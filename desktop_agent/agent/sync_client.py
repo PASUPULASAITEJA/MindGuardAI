@@ -21,6 +21,41 @@ class SyncClient:
             "Content-Type": "application/json"
         })
 
+    def auto_register_device(self, student_email: Optional[str] = None) -> bool:
+        """
+        Automatically registers device with backend using zero-prompt auto-pairing.
+        Eliminates the need for manual student email/password typing.
+        """
+        if agent_config.device_id and agent_config.device_token:
+            return True
+
+        url = f"{agent_config.api_base_url}/devices/auto-register"
+        params = {}
+        if student_email or agent_config.user_email:
+            params["student_email"] = student_email or agent_config.user_email
+
+        payload = {
+            "device_identifier": agent_config.device_identifier,
+            "device_name": agent_config.device_name,
+            "platform": agent_config.platform_name,
+            "os_version": agent_config.os_version,
+            "agent_version": agent_config.agent_version
+        }
+
+        try:
+            res = self.session.post(url, json=payload, params=params, timeout=5)
+            if res.status_code in [200, 201]:
+                data = res.json()
+                agent_config.device_id = str(data["device_id"])
+                agent_config.device_token = data["device_token"]
+                agent_config.save()
+                logger.info(f"Successfully auto-registered device {agent_config.device_id}")
+                return True
+        except Exception:
+            pass
+
+        return False
+
     def register_or_verify_device(self, student_jwt: Optional[str] = None) -> bool:
         """
         Registers device with backend if device_id or token is not yet established.
@@ -108,3 +143,4 @@ class SyncClient:
             logger.error(f"Network error during telemetry sync: {e}")
 
         return False
+
