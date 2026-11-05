@@ -12,6 +12,8 @@
 
 # Agent Tooling, Caches & Buffers
 .agent/
+.mindguard_data/
+desktop_agent/.mindguard_data/
 .mindguard_agent_auth.json
 *.agent_auth.json
 desktop_agent/.mindguard_agent_auth.json
