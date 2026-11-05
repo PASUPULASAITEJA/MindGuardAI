@@ -375,8 +375,9 @@ export const ScreenTimePage: React.FC = () => {
     ? (data?.search_topics || latest?.search_topics || [])
     : (selectedPastRecord?.search_topics || []);
 
-  const searchTopics: SearchTopicItem[] = rawSearchTopics.filter(
+  const searchTopics: SearchTopicItem[] = (rawSearchTopics || []).filter(
     (item) => {
+      if (!item || typeof item.query !== "string") return false;
       const q = item.query.toLowerCase().trim();
       return !q.includes("harsha kushi") && !q.includes("metro");
     }
