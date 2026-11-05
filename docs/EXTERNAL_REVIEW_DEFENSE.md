@@ -282,3 +282,4 @@ GROUP BY department;
 | **3. Multimodal Ablation Study** | 4-tier ablation (Demographics 72.4% $\to$ +Surveys 88.1% $\to$ +NLP 94.8% $\to$ Full Multimodal 99.24%). | **Validated** ([`scripts/test_all_features.py`](file:///d:/mindguard/scripts/test_all_features.py)) |
 | **4. Personal Baseline & Missing Data** | Rolling Z-score engine ($7\text{d}, 30\text{d}, 90\text{d}, 180\text{d}$), 3-tier cold start, non-penalizing denominator exclusion. | **Validated** ([`PERSONAL_BASELINE_ENGINE.md`](file:///d:/mindguard/docs/PERSONAL_BASELINE_ENGINE.md)) |
 | **5. Consent, Retention & $k \ge 10$** | Granular consent toggles, 30-day raw telemetry purge, un-dismissible SOS modal (14416), $k \ge 10$ SQL group suppression. | **Validated** ([`K_ANONYMITY_IMPLEMENTATION.md`](file:///d:/mindguard/docs/K_ANONYMITY_IMPLEMENTATION.md)) |
+
