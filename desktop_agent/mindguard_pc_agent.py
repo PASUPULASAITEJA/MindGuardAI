@@ -1,14 +1,21 @@
 #!/usr/bin/env python3
 """
-MindGuard AI - Desktop Behavioral Phenotyping Agent (PC / Laptop)
-================================================================
-Context-Aware Passive Digital Biomarker Agent:
-1. Non-Invasive Active Window Title & Search Intent Analysis
-   - Accurately classifies Exam Study, Homework, Coding, and Project work.
-   - Differentiates late-night exam preparation from depressive doom-scrolling.
-   - Detects crisis search queries for immediate counselor protection.
-2. Total Active Screen Time & Circadian Sleep Disruption Monitoring.
-3. Automated Synchronization with MindGuard Cloud AI.
+MindGuard AI - Cross-Platform Modular Digital Activity Monitoring Agent
+======================================================================
+1. Multi-User & Multi-Device Architecture:
+   - Unique persistent hardware UUID device identification.
+   - Device-level token authentication with MindGuard FastAPI Cloud.
+   - Encrypted / secure local credential management.
+2. Authentic Screen-Time & Activity Tracking:
+   - OS-level user idle detection (Windows GetLastInputInfo, macOS IOHID, Linux xprintidle).
+   - Screen locked / asleep detection.
+   - Real foreground application durations and launches (Zero synthetic data).
+   - Non-intrusive Windows Notification Center count metrics.
+3. Offline-First Hybrid Storage:
+   - SQLite local queue with transaction-safe event batches.
+   - Conflict handling and idempotency keys.
+4. Browser Extension Local IPC Bridge:
+   - Local loopback server for Chrome and Edge active browsing telemetry.
 """
 
 import sys
@@ -19,45 +26,22 @@ import ctypes
 import getpass
 import datetime
 import threading
-import webbrowser
-import re
 from pathlib import Path
 from typing import Dict, Optional, Tuple, Any, List
 
-import requests
-import psutil
-import math
+# Ensure agent package is in path
+AGENT_DIR = Path(__file__).resolve().parent
+if str(AGENT_DIR) not in sys.path:
+    sys.path.insert(0, str(AGENT_DIR))
 
-def notify_break_reminder(title: str, message: str):
-    """
-    Triggers non-intrusive desktop notification reminder using Windows API or ctypes.
-    """
-    try:
-        # Try win10toast or native Windows balloon notification
-        if sys.platform == "win32":
-            # Windows native notification message box in background thread without blocking
-            def _popup():
-                try:
-                    ctypes.windll.user32.MessageBoxW(0, message, title, 0x00001040 | 0x00040000)
-                except Exception:
-                    pass
-            t = threading.Thread(target=_popup, daemon=True)
-            t.start()
-    except Exception:
-        print(f"\n[!] Reminder: {title} - {message}\n")
-
-
-# API & Gateway Configuration
-API_BASE_URL = os.environ.get("MINDGUARD_API_URL", "http://127.0.0.1:8000/api/v1")
-PROJECT_ROOT = Path(__file__).resolve().parent if (Path(__file__).resolve().parent / "backend").exists() else Path(__file__).resolve().parent.parent
-TOKEN_CACHE_FILE = PROJECT_ROOT / ".mindguard_agent_auth.json"
-STATE_CACHE_FILE = PROJECT_ROOT / ".mindguard_agent_state.json"
-LOG_FILE = PROJECT_ROOT / "desktop_agent" / "mindguard_agent.log"
-SAMPLE_INTERVAL_SECONDS = 5
-SYNC_INTERVAL_SECONDS = 30
+from agent.config import agent_config, get_app_data_dir
+from agent.local_db import LocalStorage
+from agent.sync_client import SyncClient
+from agent.local_server import start_local_ipc_server
+from agent.collectors import get_platform_collector
 
 def log_agent(msg: str):
-    """Outputs to terminal if available and appends to persistent agent log file."""
+    """Outputs to terminal and appends to persistent agent log file."""
     timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     line = f"[{timestamp}] {msg}"
     try:
@@ -65,802 +49,17 @@ def log_agent(msg: str):
     except Exception:
         pass
     try:
-        LOG_FILE.parent.mkdir(parents=True, exist_ok=True)
-        with open(LOG_FILE, "a", encoding="utf-8") as f:
+        agent_config.log_path.parent.mkdir(parents=True, exist_ok=True)
+        with open(agent_config.log_path, "a", encoding="utf-8") as f:
             f.write(line + "\n")
             f.flush()
     except Exception:
         pass
 
-# Canonical Application Categorization Taxonomy
-APP_CATEGORIES = {
-    "ACADEMIC": [
-        "antigravity ide.exe", "antigravity.exe", "antigravity",
-        "code.exe", "code", "pycharm64.exe", "pycharm", "devenv.exe",
-        "winword.exe", "powerpnt.exe", "excel.exe", "acrobat.exe", "acrord32.exe",
-        "notion.exe", "zoom.exe", "teams.exe", "jupyter-lab.exe", "cursor.exe",
-        "texstudio.exe", "matlab.exe", "obsidian.exe", "zotero.exe"
-    ],
-    "ENTERTAINMENT": [
-        "steam.exe", "steam", "spotify.exe", "spotify", "vlc.exe", "netflix.exe",
-        "epicgameslauncher.exe", "riotclientservices.exe", "valorant.exe", "gta5.exe",
-        "leagueclient.exe", "overwatch.exe", "robloxplayerbeta.exe"
-    ],
-    "SOCIAL": [
-        "discord.exe", "discord", "telegram.exe", "whatsapp.exe", "slack.exe",
-        "signal.exe", "element.exe"
-    ]
-}
-
-# Semantic Keywords for Search Intent & Window Title Classification
-ACADEMIC_KEYWORDS = [
-    "antigravity", "leetcode", "github", "stackoverflow", "docs", "documentation", "tutorial",
-    "assignment", "syllabus", "midterm", "exam", "quiz", "coursera", "edx", "udemy",
-    "overleaf", "jupyter", "chatgpt", "gemini", "claude", "notion", "canvas",
-    "blackboard", "moodle", "arxiv", "research", "python", "react", "c++", "java",
-    "algorithm", "data structure", "compiler", "lecture", "textbook", "notes"
-]
-
-# Universal Code & Academic File Extensions (Any editor displaying these files is Academic)
-CODE_AND_STUDY_EXTENSIONS = (
-    ".py", ".ts", ".tsx", ".js", ".jsx", ".java", ".cpp", ".c", ".h", ".hpp",
-    ".cs", ".go", ".rs", ".php", ".rb", ".swift", ".kt", ".scala", ".html",
-    ".css", ".scss", ".sql", ".sh", ".bash", ".zsh", ".json", ".xml", ".yaml",
-    ".yml", ".md", ".ipynb", ".tex", ".pdf", ".epub", ".docx", ".pptx", ".xlsx"
-)
-
-# Generic Academic & Development Process / Window Indicators
-DEVELOPMENT_GENERIC_PATTERNS = [
-    "ide", "editor", "compiler", "terminal", "powershell", "cmd.exe", "bash",
-    "wsl", "debugger", "workspace", "workbench", "studio", "developer", "localhost",
-    "127.0.0.1", "git ", "docker", "postman"
-]
-
-ENTERTAINMENT_KEYWORDS = [
-    "youtube", "netflix", "anime", "twitch", "prime video", "spotify", "crunchyroll",
-    "hulu", "disney+", "9gag", "memes", "gameplay", "stream"
-]
-
-SOCIAL_KEYWORDS = [
-    "discord", "reddit", "instagram", "twitter", "x.com", "tiktok", "whatsapp",
-    "telegram", "facebook", "snapchat", "threads"
-]
-
-CRISIS_KEYWORDS = [
-    "how to commit suicide", "how to kill myself", "i want to die", "feeling hopeless",
-    "end my life", "suicide hotline", "self harm", "can't take this anymore",
-    "worthless", "how to overdose", "no reason to live"
-]
-
-ADULT_KEYWORDS = [
-    "porn", "xxx", "xvideos", "pornhub", "onlyfans", "nsfw", "erotic", 
-    "adult content", "camgirl", "chaturbate", "xhamster", "redtube", "brazzers"
-]
-
-
-# Windows API Struct for Idle Detection
-class LASTINPUTINFO(ctypes.Structure):
-    _fields_ = [("cbSize", ctypes.c_uint), ("dwTime", ctypes.c_uint)]
-
-def get_system_idle_seconds() -> float:
-    """Returns the number of seconds since the user last interacted with mouse/keyboard."""
-    if sys.platform == "win32":
-        try:
-            last_input_info = LASTINPUTINFO()
-            last_input_info.cbSize = ctypes.sizeof(LASTINPUTINFO)
-            if ctypes.windll.user32.GetLastInputInfo(ctypes.byref(last_input_info)):
-                millis = ctypes.windll.kernel32.GetTickCount() - last_input_info.dwTime
-                return max(0.0, millis / 1000.0)
-        except Exception:
-            return 0.0
-    return 0.0
-
-_DESKTOP_HANDLE = None
-
-def attach_interactive_desktop():
-    """Ensures the thread is attached to the user's interactive desktop to read foreground windows."""
-    global _DESKTOP_HANDLE
-    if sys.platform == "win32":
-        try:
-            if _DESKTOP_HANDLE is None:
-                _DESKTOP_HANDLE = ctypes.windll.user32.OpenDesktopW("Default", 0, False, 0x01FF)
-            if _DESKTOP_HANDLE:
-                ctypes.windll.user32.SetThreadDesktop(_DESKTOP_HANDLE)
-        except Exception:
-            pass
-
-def get_active_window_details() -> Tuple[str, str, str, bool]:
-    """
-    Returns (process_name, window_title, category, is_crisis_flag)
-    Extracts foreground process and inspects window title/search intent.
-    """
-    global _DESKTOP_HANDLE
-    proc_name = "desktop"
-    window_title = ""
-    is_crisis = False
-
-    if sys.platform == "win32":
-        try:
-            attach_interactive_desktop()
-            hwnd = ctypes.windll.user32.GetForegroundWindow()
-            if not hwnd:
-                _DESKTOP_HANDLE = None
-                attach_interactive_desktop()
-                hwnd = ctypes.windll.user32.GetForegroundWindow()
-
-            if hwnd:
-                pid = ctypes.c_ulong()
-                ctypes.windll.user32.GetWindowThreadProcessId(hwnd, ctypes.byref(pid))
-                if pid.value > 0:
-                    p = psutil.Process(pid.value)
-                    proc_name = p.name().lower()
-
-                # Extract window title text
-                length = ctypes.windll.user32.GetWindowTextLengthW(hwnd)
-                if length > 0:
-                    buff = ctypes.create_unicode_buffer(length + 1)
-                    ctypes.windll.user32.GetWindowTextW(hwnd, buff, length + 1)
-                    window_title = buff.value.lower()
-        except Exception:
-            proc_name = "desktop"
-
-    # 1. Immediate Crisis Search Detection
-    if any(keyword in window_title for keyword in CRISIS_KEYWORDS):
-        return proc_name, window_title, "CRISIS", True
-
-    # 2. Sensitive / Compulsive Adult Content Detection
-    if any(keyword in window_title for keyword in ADULT_KEYWORDS):
-        return proc_name, window_title, "ADULT", False
-
-    # 3. Universal Academic & Coding Heuristics (Extension & Generic Tool Tokens)
-    # A. Window title displays code/study file extensions (e.g., "StudentDashboard.tsx", "main.py", "thesis.pdf")
-    if any(ext in window_title for ext in CODE_AND_STUDY_EXTENSIONS):
-        return proc_name, window_title, "ACADEMIC", False
-
-    # B. Generic developer environment / terminal / workspace tokens in process or title
-    if any(token in proc_name or token in window_title for token in DEVELOPMENT_GENERIC_PATTERNS):
-        return proc_name, window_title, "ACADEMIC", False
-
-    # 4. Window Title / Search Intent Semantic Categorization (especially for Chrome, Edge, Firefox)
-    if any(keyword in window_title for keyword in ACADEMIC_KEYWORDS):
-        return proc_name, window_title, "ACADEMIC", False
-
-    # Guard against browser tab group summaries like "youtube and 41 more pages" when browsing
-    is_tab_group_summary = "more pages" in window_title and ("and " in window_title or "tabs" in window_title)
-    if not is_tab_group_summary:
-        if any(keyword in window_title for keyword in ENTERTAINMENT_KEYWORDS):
-            return proc_name, window_title, "ENTERTAINMENT", False
-
-        if any(keyword in window_title for keyword in SOCIAL_KEYWORDS):
-            return proc_name, window_title, "SOCIAL", False
-
-    # 5. Process-level Categorization from Known Taxonomy
-    for cat, app_list in APP_CATEGORIES.items():
-        if any(app == proc_name or proc_name.startswith(app.replace(".exe", "")) for app in app_list):
-            return proc_name, window_title, cat, False
-
-    return proc_name, window_title, "GENERAL", False
-
-APP_TAXONOMY = {
-    # Studying (Academic, Coding, Writing, Coursework)
-    "code.exe": ("Visual Studio Code", "Studying", "code"),
-    "antigravity ide.exe": ("Antigravity IDE", "Studying", "code"),
-    "antigravity.exe": ("Antigravity IDE", "Studying", "code"),
-    "pycharm64.exe": ("PyCharm IDE", "Studying", "code"),
-    "pycharm.exe": ("PyCharm IDE", "Studying", "code"),
-    "devenv.exe": ("Visual Studio", "Studying", "code"),
-    "powershell.exe": ("PowerShell / Terminal", "Studying", "code"),
-    "cmd.exe": ("Command Prompt", "Studying", "code"),
-    "windowsterminal.exe": ("Windows Terminal", "Studying", "code"),
-    "chrome.exe": ("Google Chrome", "Studying", "globe"),
-    "msedge.exe": ("Microsoft Edge", "Studying", "globe"),
-    "firefox.exe": ("Mozilla Firefox", "Studying", "globe"),
-    "brave.exe": ("Brave Browser", "Studying", "globe"),
-    "winword.exe": ("Microsoft Word", "Studying", "book"),
-    "powerpnt.exe": ("Microsoft PowerPoint", "Studying", "book"),
-    "excel.exe": ("Microsoft Excel", "Studying", "book"),
-    "notion.exe": ("Notion Workspace", "Studying", "book"),
-    "acrobat.exe": ("Adobe Acrobat Reader", "Studying", "book"),
-    "acrord32.exe": ("Adobe Reader", "Studying", "book"),
-    "jupyter-lab.exe": ("JupyterLab", "Studying", "code"),
-    "cursor.exe": ("Cursor IDE", "Studying", "code"),
-    "obsidian.exe": ("Obsidian", "Studying", "book"),
-    "zotero.exe": ("Zotero", "Studying", "book"),
-    "matlab.exe": ("MATLAB", "Studying", "code"),
-    "texstudio.exe": ("TeXstudio", "Studying", "code"),
-
-    # Playing (Entertainment, Music, Video, Games)
-    "spotify.exe": ("Spotify", "Playing", "music"),
-    "steam.exe": ("Steam", "Playing", "gamepad"),
-    "vlc.exe": ("VLC Media Player", "Playing", "music"),
-    "epicgameslauncher.exe": ("Epic Games Launcher", "Playing", "gamepad"),
-    "epicgames.exe": ("Epic Games", "Playing", "gamepad"),
-    "riotclientservices.exe": ("Riot Games Client", "Playing", "gamepad"),
-    "valorant.exe": ("Valorant", "Playing", "gamepad"),
-    "leagueclient.exe": ("League of Legends", "Playing", "gamepad"),
-    "gta5.exe": ("Grand Theft Auto V", "Playing", "gamepad"),
-    "robloxplayerbeta.exe": ("Roblox", "Playing", "gamepad"),
-    "roblox.exe": ("Roblox", "Playing", "gamepad"),
-    "netflix.exe": ("Netflix", "Playing", "music"),
-    "primevideo.exe": ("Prime Video", "Playing", "music"),
-    "overwatch.exe": ("Overwatch", "Playing", "gamepad"),
-    "discordcanary.exe": ("Discord", "Normal", "message"),
-
-    # Normal (Social, System Utilities, General Desktop Browsing)
-    "linkedin.exe": ("LinkedIn", "Normal", "globe"),
-    "discord.exe": ("Discord", "Normal", "message"),
-    "whatsapp.exe": ("WhatsApp", "Normal", "message"),
-    "telegram.exe": ("Telegram", "Normal", "message"),
-    "slack.exe": ("Slack", "Normal", "message"),
-    "signal.exe": ("Signal", "Normal", "message"),
-    "element.exe": ("Element", "Normal", "message"),
-    "teams.exe": ("Microsoft Teams", "Normal", "message"),
-    "zoom.exe": ("Zoom", "Normal", "message"),
-    "explorer.exe": ("File Explorer", "Normal", "laptop"),
-    "olk.exe": ("Microsoft Outlook", "Normal", "message"),
-    "outlook.exe": ("Microsoft Outlook", "Normal", "message"),
-    "notepad.exe": ("Notepad", "Normal", "book"),
-    "snippingtool.exe": ("Snipping Tool", "Normal", "laptop"),
-    "cleanmgr.exe": ("Disk Cleanup", "Normal", "laptop"),
-    "taskmgr.exe": ("Task Manager", "Normal", "laptop"),
-    "lockapp.exe": ("Windows Lock Screen", "Normal", "laptop"),
-    "shellhost.exe": ("Windows Shell", "Normal", "laptop"),
-    "shellexperiencehost.exe": ("Windows Shell", "Normal", "laptop"),
-    "applicationframehost.exe": ("Windows Application Host", "Normal", "laptop"),
-    "searchhost.exe": ("Windows Search", "Normal", "laptop"),
-    "copilotapp.exe": ("Microsoft Copilot", "Normal", "laptop"),
-    "copilotapphost.exe": ("Microsoft Copilot", "Normal", "laptop"),
-    "photos.exe": ("Windows Photos", "Normal", "laptop"),
-    "onedrive.exe": ("OneDrive", "Normal", "laptop"),
-}
-
-def extract_search_query_from_title(title: str) -> Optional[str]:
-    """Extracts authentic search query keywords from active browser window titles."""
-    if not title:
-        return None
-    patterns = [
-        r"^(.+?)\s+-\s+google\s+search",
-        r"^(.+?)\s+-\s+bing\s+search",
-        r"^(.+?)\s+-\s+bing",
-        r"^(.+?)\s+-\s+duckduckgo",
-        r"^(.+?)\s+-\s+youtube\s+search",
-        r"^(.+?)\s+-\s+chatgpt",
-        r"^(.+?)\s+\|\s+coursera",
-    ]
-    for pat in patterns:
-        m = re.search(pat, title.strip(), re.IGNORECASE)
-        if m:
-            clean = m.group(1).strip()
-            clean = re.sub(r"\s+-\s+.*$", "", clean).strip()
-            if len(clean) >= 2 and not clean.lower().startswith("http"):
-                return clean
-    return None
-
-def reconstruct_system_uptime_and_late_night() -> Tuple[int, int]:
-    """
-    Retrospectively inspects Windows Boot Time, System Uptime, and Windows Event Logs
-    to compute how long the PC has been powered on today, and how much time was spent
-    running during the critical late-night window (12:00 AM - 04:00 AM).
-    
-    This ensures that even if the student starts or restarts the agent in the afternoon/evening,
-    the platform accurately captures the PC's actual uptime and late-night usage.
-    """
-    try:
-        boot_ts = psutil.boot_time()
-        boot_dt = datetime.datetime.fromtimestamp(boot_ts)
-        now = datetime.datetime.now()
-        today_midnight = now.replace(hour=0, minute=0, second=0, microsecond=0)
-        four_am = today_midnight.replace(hour=4)
-
-        # 1. Total PC uptime today (seconds since midnight or boot, whichever is later)
-        if boot_dt < today_midnight:
-            uptime_today_seconds = int((now - today_midnight).total_seconds())
-        else:
-            uptime_today_seconds = int((now - boot_dt).total_seconds())
-        uptime_today_seconds = max(0, uptime_today_seconds)
-
-        # 2. Late-night running seconds today (between 00:00 and 04:00 AM)
-        late_night_seconds = 0
-        if boot_dt < four_am and now > today_midnight:
-            effective_start = max(boot_dt, today_midnight)
-            effective_end = min(now, four_am)
-            running_late_night = int((effective_end - effective_start).total_seconds())
-            
-            # Check for sleep/hibernate events during 00:00 - 04:00 on Windows
-            if sys.platform == "win32":
-                try:
-                    import subprocess
-                    ps_cmd = (
-                        "$m = (Get-Date).Date; $f = $m.AddHours(4); "
-                        "$s = Get-WinEvent -FilterHashtable @{LogName='System'; StartTime=$m; EndTime=$f; Id=@(42, 506)} "
-                        "-ErrorAction SilentlyContinue; "
-                        "if ($s) { Write-Output $s.Count } else { Write-Output 0 }"
-                    )
-                    out = subprocess.check_output(["powershell", "-NoProfile", "-Command", ps_cmd], text=True, timeout=5).strip()
-                except Exception:
-                    pass
-            
-            late_night_seconds = max(0, min(14400, running_late_night))
-
-        return uptime_today_seconds, late_night_seconds
-    except Exception as e:
-        log_agent(f"[!] Error reconstructing system uptime: {e}")
-        return 0, 0
-
-def get_windows_notifications_today() -> Dict[str, int]:
-    """
-    Directly extracts authentic Windows Notification Center telemetry for today.
-    Reads %LOCALAPPDATA%\\Microsoft\\Windows\\Notifications\\wpndatabase.db safely via a temporary copy.
-    Returns mapping of process executable name to count of notifications received today.
-    """
-    if sys.platform != "win32":
-        return {}
-
-    import sqlite3
-    import shutil
-    import tempfile
-
-    appdata_local = os.environ.get("LOCALAPPDATA")
-    if not appdata_local:
-        return {}
-
-    db_path = Path(appdata_local) / "Microsoft" / "Windows" / "Notifications" / "wpndatabase.db"
-    if not db_path.exists():
-        return {}
-
-    temp_db = Path(tempfile.gettempdir()) / f"mindguard_wpn_{os.getpid()}_{int(time.time())}.db"
-    notif_counts: Dict[str, int] = {}
-
-    try:
-        shutil.copy2(db_path, temp_db)
-        conn = sqlite3.connect(temp_db, timeout=2.0)
-        cur = conn.cursor()
-
-        epoch = datetime.datetime(1601, 1, 1, tzinfo=datetime.timezone.utc)
-        today_midnight = datetime.datetime.now().replace(hour=0, minute=0, second=0, microsecond=0).astimezone(datetime.timezone.utc)
-        filetime_today = int((today_midnight - epoch).total_seconds() * 10_000_000)
-
-        cur.execute('''
-            SELECT h.PrimaryId, COUNT(*) 
-            FROM Notification n 
-            JOIN NotificationHandler h ON n.HandlerId = h.RecordId 
-            WHERE n.ArrivalTime >= ?
-            GROUP BY h.PrimaryId
-        ''', (filetime_today,))
-
-        raw_rows = cur.fetchall()
-        conn.close()
-
-        HANDLER_MAP = {
-            "antigravity": "antigravity ide.exe",
-            "google.antigravity": "antigravity ide.exe",
-            "vscode": "code.exe",
-            "visualstudio": "code.exe",
-            "chrome": "chrome.exe",
-            "edge": "msedge.exe",
-            "firefox": "firefox.exe",
-            "skydrive": "onedrive.exe",
-            "onedrive": "onedrive.exe",
-            "linkedin": "linkedin.exe",
-            "teams": "teams.exe",
-            "slack": "slack.exe",
-            "discord": "discord.exe",
-            "whatsapp": "whatsapp.exe",
-            "telegram": "telegram.exe",
-            "outlook": "olk.exe",
-            "olk": "olk.exe",
-            "mail": "olk.exe",
-            "spotify": "spotify.exe",
-            "steam": "steam.exe",
-            "wifinetworkmanager": "explorer.exe",
-            "windowsshell": "explorer.exe"
-        }
-
-        for primary_id, count in raw_rows:
-            p_id_lower = str(primary_id).lower()
-            mapped = False
-            for key, target_proc in HANDLER_MAP.items():
-                if key in p_id_lower:
-                    notif_counts[target_proc] = notif_counts.get(target_proc, 0) + count
-                    mapped = True
-                    break
-            if not mapped:
-                clean_name = p_id_lower.split("!")[0].split(".")[-1]
-                notif_counts[clean_name] = notif_counts.get(clean_name, 0) + count
-
-    except Exception as e:
-        pass
-    finally:
-        try:
-            if temp_db.exists():
-                temp_db.unlink()
-        except Exception:
-            pass
-
-    return notif_counts
-
-def load_daily_state() -> dict:
-    """Loads today's accumulated active screen time state strictly from authentic agent observations."""
-    today_str = datetime.date.today().isoformat()
-    data = {
-        "date": today_str,
-        "total_screen_seconds": 0,
-        "late_night_seconds": 0,
-        "academic_seconds": 0,
-        "social_seconds": 0,
-        "entertainment_seconds": 0,
-        "adult_seconds": 0,
-        "continuous_active_seconds": 0,
-        "app_durations": {},
-        "app_open_counts": {},
-        "search_queries": {},
-    }
-
-    if STATE_CACHE_FILE.exists():
-        try:
-            with open(STATE_CACHE_FILE, "r", encoding="utf-8") as f:
-                loaded = json.load(f)
-                if loaded.get("date") == today_str:
-                    data = loaded
-                    if "app_durations" not in data:
-                        data["app_durations"] = {}
-                    if "app_open_counts" not in data:
-                        data["app_open_counts"] = {}
-                    if "search_queries" not in data:
-                        data["search_queries"] = {}
-        except Exception:
-            pass
-
-    return data
-
-def save_daily_state(state: dict):
-    """Saves daily screen tracking state to local cache."""
-    try:
-        with open(STATE_CACHE_FILE, "w", encoding="utf-8") as f:
-            json.dump(state, f, indent=2)
-    except Exception:
-        pass
-
-def get_seconds_elapsed_today() -> float:
-    """
-    Calculates physical upper bound for PC screen time today:
-    Never exceeds seconds since boot if booted today, or seconds since midnight.
-    """
-    try:
-        now = datetime.datetime.now()
-        today_midnight = now.replace(hour=0, minute=0, second=0, microsecond=0)
-        boot_dt = datetime.datetime.fromtimestamp(psutil.boot_time())
-        if boot_dt > today_midnight:
-            return max(0.0, (now - boot_dt).total_seconds())
-        return max(0.0, (now - today_midnight).total_seconds())
-    except Exception:
-        return 86400.0
-
-def get_system_power_and_uptime_history_today() -> Dict[str, Any]:
-    """
-    Directly extracts Windows hardware and kernel power telemetry for today (00:00:00 to now):
-    - Calculates exact minutes the PC was powered on and running/awake.
-    - Accurately computes late-night usage (12:00 AM - 5:00 AM) even if the app was closed.
-    - Discovers exact sleep onset time (when PC entered sleep/hibernate) and morning wake time.
-    """
-    import subprocess
-    now_dt = datetime.datetime.now()
-    today_midnight = now_dt.replace(hour=0, minute=0, second=0, microsecond=0)
-    today_str = now_dt.date().isoformat()
-
-    boot_time_ts = psutil.boot_time()
-    boot_dt = datetime.datetime.fromtimestamp(boot_time_ts)
-
-    total_awake_seconds = 0.0
-    late_night_seconds = 0.0
-    last_night_sleep_dt = None
-    first_morning_wake_dt = None
-
-    if sys.platform == "win32":
-        try:
-            ps_code = """
-$events = Get-WinEvent -FilterHashtable @{
-    LogName='System'; 
-    StartTime=(Get-Date).Date; 
-    ProviderName=@('Microsoft-Windows-Kernel-Power', 'Microsoft-Windows-Power-Troubleshooter')
-} -ErrorAction SilentlyContinue
-
-$results = @()
-foreach ($e in $events) {
-    if ($e.Id -in @(1, 42, 107, 506, 507)) {
-        $results += [PSCustomObject]@{
-            Time = $e.TimeCreated.ToString('yyyy-MM-dd HH:mm:ss')
-            Id = $e.Id
-        }
-    }
-}
-$results | Sort-Object Time | ConvertTo-Json -Depth 2
-"""
-            events = []
-            res = subprocess.run(["powershell", "-NoProfile", "-Command", ps_code], capture_output=True, text=True, timeout=8)
-            if res.stdout.strip():
-                raw = json.loads(res.stdout)
-                if isinstance(raw, dict):
-                    raw = [raw]
-                events = raw
-
-            is_awake_at_midnight = False
-            ps_midnight_state = """
-$lastPreMidnight = Get-WinEvent -FilterHashtable @{
-    LogName='System'; 
-    EndTime=(Get-Date).Date; 
-    ProviderName=@('Microsoft-Windows-Kernel-Power', 'Microsoft-Windows-Power-Troubleshooter')
-} -MaxEvents 5 -ErrorAction SilentlyContinue | Where-Object { $_.Id -in @(1, 42, 107, 506, 507) } | Select-Object -First 1
-
-if ($lastPreMidnight) {
-    [PSCustomObject]@{
-        Time = $lastPreMidnight.TimeCreated.ToString('yyyy-MM-dd HH:mm:ss')
-        Id = $lastPreMidnight.Id
-    } | ConvertTo-Json
-} else {
-    Write-Output "NONE"
-}
-"""
-            try:
-                res_pre = subprocess.run(["powershell", "-NoProfile", "-Command", ps_midnight_state], capture_output=True, text=True, timeout=8)
-                if res_pre.stdout.strip() and "NONE" not in res_pre.stdout:
-                    pre_ev = json.loads(res_pre.stdout)
-                    if pre_ev.get("Id") not in (42, 506):
-                        is_awake_at_midnight = True
-            except Exception:
-                pass
-
-            start_time = max(today_midnight, boot_dt)
-            current_state_awake = is_awake_at_midnight if boot_dt < today_midnight else True
-            current_interval_start = start_time
-
-            intervals = []
-            for ev in events:
-                try:
-                    ev_time = datetime.datetime.strptime(ev["Time"], "%Y-%m-%d %H:%M:%S")
-                except Exception:
-                    continue
-                ev_id = ev.get("Id")
-                if 5 <= ev_time.hour <= 12 and first_morning_wake_dt is None and ev_id in (1, 107, 507):
-                    first_morning_wake_dt = ev_time
-                if ev_time.hour < 5 and ev_id in (42, 506):
-                    last_night_sleep_dt = ev_time
-
-                # Skip historical events that occurred prior to current system boot window
-                if ev_time < start_time:
-                    continue
-
-                if ev_id in (42, 506):
-                    if current_state_awake:
-                        intervals.append((current_interval_start, ev_time))
-                        current_state_awake = False
-                elif ev_id in (1, 107, 507):
-                    if not current_state_awake:
-                        current_interval_start = max(start_time, ev_time)
-                        current_state_awake = True
-
-            if current_state_awake:
-                intervals.append((current_interval_start, now_dt))
-
-            late_night_start = today_midnight
-            late_night_end = today_midnight.replace(hour=5, minute=0, second=0)
-
-            for s_int, e_int in intervals:
-                dur = (e_int - s_int).total_seconds()
-                total_awake_seconds += max(0.0, dur)
-                ln_s = max(s_int, late_night_start)
-                ln_e = min(e_int, late_night_end)
-                if ln_e > ln_s:
-                    late_night_seconds += (ln_e - ln_s).total_seconds()
-
-            # Bound by physical upper limit since system start_time today
-            max_phys_secs = max(0.0, (now_dt - start_time).total_seconds())
-            total_awake_seconds = min(total_awake_seconds, max_phys_secs)
-            late_night_seconds = min(late_night_seconds, total_awake_seconds)
-        except Exception as e:
-            log_agent(f"[!] Warning reading Windows power events: {e}")
-
-    # If event logs returned 0, do not invent fake late-night or screen hours from raw boot time
-    if total_awake_seconds <= 0:
-        total_awake_seconds = 0
-        late_night_seconds = 0
-
-    return {
-        "date": today_str,
-        "total_screen_seconds": int(total_awake_seconds),
-        "late_night_seconds": int(late_night_seconds),
-        "total_screen_time_minutes": int(total_awake_seconds / 60),
-        "late_night_usage_minutes": int(late_night_seconds / 60),
-        "last_night_sleep_dt": last_night_sleep_dt,
-        "first_morning_wake_dt": first_morning_wake_dt,
-    }
-
-def get_system_first_wake_time_today() -> Optional[datetime.datetime]:
-    """
-    Checks when the system first resumed from sleep or Modern Standby today (5:00 AM - 12:00 PM).
-    Returns the datetime of first morning resume, or None.
-    """
-    if sys.platform != "win32":
-        return None
-    try:
-        import subprocess
-        cmd = [
-            "powershell",
-            "-NoProfile",
-            "-Command",
-            "$e = Get-WinEvent -FilterHashtable @{LogName='System'; StartTime=(Get-Date).Date.AddHours(5); EndTime=(Get-Date).Date.AddHours(12); Id=@(507, 1)} -Oldest -MaxEvents 1 -ErrorAction SilentlyContinue; if ($e) { $e.TimeCreated.ToString('o') }"
-        ]
-        out = subprocess.check_output(cmd, text=True, timeout=6).strip()
-        if out:
-            return datetime.datetime.fromisoformat(out)
-    except Exception:
-        pass
-    return None
-
-def infer_circadian_sleep_metrics(
-    late_night_seconds: float,
-    entertainment_seconds: float,
-    wake_hour_override: Optional[float] = None,
-    sleep_dt_override: Optional[datetime.datetime] = None,
-    wake_dt_override: Optional[datetime.datetime] = None
-) -> dict:
-    """
-    Mathematical Circadian Sleep-Wake Cycle Estimator:
-    - Inferred Sleep Onset (T_sleep): Last activity after 10:00 PM followed by >= 4 hours idle/sleep
-    - Inferred Wake Time (T_wake): First input / resume between 5:00 AM and 12:00 PM
-    - Sleep Duration: Delta T = T_wake - T_sleep (in hours)
-    - Circadian Regularity Index (CRI): Standard deviation of sleep onset over rolling 7 days
-    - Pre-bedtime high stimulus screen time: Entertainment/gaming in 2h before bed
-    """
-    late_mins = int(late_night_seconds / 60)
-    
-    # 1. Inferred Sleep Onset (T_sleep)
-    if sleep_dt_override:
-        sleep_onset_str = sleep_dt_override.strftime("%I:%M %p")
-        sleep_onset_hour = sleep_dt_override.hour + sleep_dt_override.minute / 60.0
-    elif late_mins >= 180:
-        sleep_onset_hour = 3.5
-        sleep_onset_str = "03:30 AM"
-    elif late_mins >= 120:
-        sleep_onset_hour = 2.75
-        sleep_onset_str = "02:45 AM"
-    elif late_mins >= 60:
-        sleep_onset_hour = 1.5
-        sleep_onset_str = "01:30 AM"
-    elif late_mins >= 20:
-        sleep_onset_hour = 0.5
-        sleep_onset_str = "12:30 AM"
-    else:
-        sleep_onset_hour = 23.5
-        sleep_onset_str = "11:30 PM"
-        
-    # 2. Inferred Wake Time (T_wake) - between 5:00 AM and 12:00 PM
-    if wake_dt_override:
-        wake_time_str = wake_dt_override.strftime("%I:%M %p")
-        wake_hour = wake_dt_override.hour + wake_dt_override.minute / 60.0
-    elif wake_hour_override is not None:
-        wake_hour = wake_hour_override
-        h = int(wake_hour)
-        m = int((wake_hour - h) * 60)
-        period = "AM" if h < 12 else "PM"
-        display_h = h if h <= 12 else (h - 12)
-        if display_h == 0:
-            display_h = 12
-        wake_time_str = f"{display_h:02d}:{m:02d} {period}"
-    else:
-        first_wake_dt = get_system_first_wake_time_today()
-        if first_wake_dt and 5 <= first_wake_dt.hour <= 12:
-            wake_time_str = first_wake_dt.strftime("%I:%M %p")
-            wake_hour = first_wake_dt.hour + first_wake_dt.minute / 60.0
-        else:
-            wake_hour = 8.25
-            wake_time_str = "08:15 AM"
-        
-    # 3. Estimated Sleep Duration (Delta T)
-    if sleep_dt_override and wake_dt_override and wake_dt_override > sleep_dt_override:
-        duration_hours = round(max(3.5, min(10.5, (wake_dt_override - sleep_dt_override).total_seconds() / 3600.0)), 1)
-    else:
-        effective_onset = sleep_onset_hour if sleep_onset_hour < 12 else (sleep_onset_hour - 24)
-        duration_hours = max(3.5, min(10.5, wake_hour - effective_onset))
-        duration_hours = round(duration_hours, 1)
-    
-    # 4. Circadian Regularity Index (CRI, 0-100)
-    cri = max(20.0, min(100.0, round(100.0 - (late_mins * 0.42), 1)))
-    
-    # 5. Pre-Bedtime Screen Blue Light Minutes
-    pre_bedtime_screen = min(120, int(late_mins * 0.6 + (entertainment_seconds / 60) * 0.2))
-    
-    return {
-        "inferred_sleep_onset": sleep_onset_str,
-        "inferred_wake_time": wake_time_str,
-        "sleep_duration_hours": duration_hours,
-        "circadian_regularity_score": cri,
-        "pre_bedtime_screen_minutes": pre_bedtime_screen
-    }
-
-def get_startup_dir() -> Path:
-    """Returns the Windows user Startup directory path."""
-    if sys.platform == "win32":
-        appdata = os.environ.get("APPDATA")
-        if appdata:
-            return Path(appdata) / "Microsoft" / "Windows" / "Start Menu" / "Programs" / "Startup"
-    return Path.home()
-
-def install_to_startup() -> bool:
-    """Installs a silent background auto-start launcher to Windows Startup."""
-    startup_dir = get_startup_dir()
-    if not startup_dir.exists():
-        print(f"[!] Windows Startup directory not found: {startup_dir}")
-        return False
-
-    vbs_path = startup_dir / "MindGuardAgent.vbs"
-    agent_script = Path(__file__).resolve()
-
-    # Search for pythonw executable for 100% silent background execution without cmd window
-    python_dir = Path(sys.executable).parent
-    candidates = [
-        PROJECT_ROOT / "backend" / ".venv" / "Scripts" / "pythonw.exe",
-        python_dir / "pythonw.exe",
-        Path(r"C:\Users\HP\AppData\Local\Microsoft\WindowsApps\pythonw.exe"),
-    ]
-    pythonw_exe = "pythonw.exe"
-    for c in candidates:
-        if c.exists():
-            pythonw_exe = str(c)
-            break
-
-    vbs_content = (
-        'Set WshShell = CreateObject("WScript.Shell")\n'
-        f'WshShell.Run """{pythonw_exe}"" ""{agent_script}"" --background", 0, False\n'
-    )
-    try:
-        with open(vbs_path, "w", encoding="utf-8") as f:
-            f.write(vbs_content)
-        print("========================================================")
-        print("[+] SUCCESS: MindGuard Agent Installed to Windows Startup!")
-        print("========================================================")
-        print(f"Startup Script: {vbs_path}")
-        print(f"Target Binary : {pythonw_exe}")
-        print(f"Agent Script  : {agent_script}")
-        print("\n[*] Tracking will automatically commence the second Windows turns ON.")
-        print("[*] Runs 100% silently in the background with zero terminal popups.")
-        return True
-    except Exception as e:
-        print(f"[!] Failed to write startup script: {e}")
-        return False
-
-def uninstall_from_startup() -> bool:
-    """Removes the MindGuard launcher from Windows Startup."""
-    startup_dir = get_startup_dir()
-    vbs_path = startup_dir / "MindGuardAgent.vbs"
-    if vbs_path.exists():
-        try:
-            vbs_path.unlink()
-            print("[+] Successfully uninstalled MindGuard Agent from Windows Startup.")
-            return True
-        except Exception as e:
-            print(f"[!] Failed to remove startup script: {e}")
-            return False
-    else:
-        print("[*] MindGuard Agent was not installed in Windows Startup.")
-        return True
-
-def get_active_student_auth() -> Optional[Dict[str, str]]:
-    """Loads student authentication data if present in local token cache."""
-    if TOKEN_CACHE_FILE.exists():
-        try:
-            with open(TOKEN_CACHE_FILE, "r", encoding="utf-8") as f:
-                data = json.load(f)
-                if data.get("access_token") and data.get("id"):
-                    return data
-        except Exception:
-            pass
-    return None
-
-def prompt_student_login() -> Dict[str, str]:
-    """Interactive student login for terminal setup."""
+def prompt_student_login(storage: LocalStorage, sync_client: SyncClient) -> bool:
+    """Interactive student login and device registration."""
     print("\n========================================================")
-    print("   MindGuard AI - Desktop Behavioral Agent Setup        ")
+    print("   MindGuard AI - Desktop Monitoring Setup & Login       ")
     print("========================================================")
     print("Please authenticate with your student account credentials.\n")
 
@@ -871,443 +70,247 @@ def prompt_student_login() -> Dict[str, str]:
         password = getpass.getpass("Password: ").strip()
 
         try:
-            res = requests.post(
-                f"{API_BASE_URL}/auth/login",
-                json={"email": email, "password": password},
-                timeout=10
-            )
+            import requests
+            url = f"{agent_config.api_base_url}/auth/login"
+            res = requests.post(url, json={"email": email, "password": password}, timeout=10)
             if res.status_code == 200:
-                auth_data = res.json()
-                if auth_data.get("role") != "STUDENT":
-                    print("[!] Error: This desktop agent is only for student accounts.\n")
+                data = res.json()
+                if data.get("role") != "STUDENT":
+                    print("[!] Error: This desktop agent is intended only for student accounts.\n")
                     continue
 
-                with open(TOKEN_CACHE_FILE, "w", encoding="utf-8") as f:
-                    json.dump(auth_data, f)
+                access_token = data.get("access_token")
+                agent_config.user_id = str(data.get("id"))
+                agent_config.user_email = data.get("email")
+                agent_config.save()
 
-                print(f"[+] Login successful! Connected as: {auth_data.get('email')}\n")
-                return auth_data
-            else:
-                err_detail = res.json().get("message", "Invalid email or password.")
-                print(f"[!] Login failed: {err_detail}. Please try again.\n")
-        except requests.exceptions.ConnectionError:
-            print("[!] Could not connect to MindGuard API server at http://127.0.0.1:8000. Is the backend running?\n")
-            time.sleep(2)
-
-def start_agent():
-    auth_data = get_active_student_auth()
-    token = auth_data.get("access_token") if auth_data else None
-    student_id = auth_data.get("id") if auth_data else None
-    student_email = auth_data.get("email") if auth_data else None
-
-    log_agent("========================================================")
-    if token and student_email:
-        log_agent(f"  MindGuard PC Agent Active - Syncing for: {student_email} ")
-    else:
-        log_agent("  MindGuard PC Agent Active - Passive System-Boot Tracking ")
-        log_agent("  [*] Student not logged in yet. Recording screen time from boot.")
-        log_agent("  [*] Will automatically link and sync to dashboard once student logs in.")
-    log_agent("========================================================")
-    log_agent("[*] Privacy Guarantee: Zero keystrokes or full screen pixels recorded.")
-    log_agent("[*] Context Engine: Differentiates Exam Study from Circadian Fatigue.")
-    log_agent("[*] Sampling system activity every 5 seconds...")
-
-    # Load daily state or calculate baseline from system boot time
-    daily_state = load_daily_state()
-    boot_time_ts = psutil.boot_time()
-    boot_time_str = datetime.datetime.fromtimestamp(boot_time_ts).strftime("%Y-%m-%d %H:%M:%S")
-    max_seconds_today = get_seconds_elapsed_today()
-
-    continuous_active_seconds = daily_state.get("continuous_active_seconds", 0)
-    total_screen_seconds = daily_state.get("total_screen_seconds", 0)
-    late_night_seconds = daily_state.get("late_night_seconds", 0)
-    academic_seconds = daily_state.get("academic_seconds", 0)
-    social_seconds = daily_state.get("social_seconds", 0)
-    entertainment_seconds = daily_state.get("entertainment_seconds", 0)
-    adult_seconds = daily_state.get("adult_seconds", 0)
-    app_durations: Dict[str, int] = daily_state.get("app_durations", {})
-    app_open_counts: Dict[str, int] = daily_state.get("app_open_counts", {})
-    search_queries: Dict[str, int] = daily_state.get("search_queries", {})
-
-    sys_metrics = get_system_power_and_uptime_history_today()
-    hw_total_secs = sys_metrics.get("total_screen_seconds", 0)
-    hw_late_secs = sys_metrics.get("late_night_seconds", 0)
-
-    # Automatically calibrate against Windows hardware uptime if agent was started later or restarted
-    if hw_total_secs > total_screen_seconds:
-        log_agent(f"[*] Calibrating baseline screen time from hardware uptime: {int(total_screen_seconds / 60)}m -> {int(hw_total_secs / 60)}m.")
-        total_screen_seconds = hw_total_secs
-        late_night_seconds = max(late_night_seconds, hw_late_secs)
-
-        total_app_secs = sum(app_durations.values())
-        if total_app_secs > 0:
-            scale = total_screen_seconds / total_app_secs
-            app_durations = {k: int(v * scale) for k, v in app_durations.items()}
-        else:
-            app_durations = {
-                "antigravity ide.exe": int(total_screen_seconds * 0.65),
-                "msedge.exe": int(total_screen_seconds * 0.25),
-                "chrome.exe": int(total_screen_seconds * 0.08),
-                "explorer.exe": max(60, int(total_screen_seconds * 0.02))
-            }
-
-        academic_seconds = sum(v for k, v in app_durations.items() if APP_TAXONOMY.get(k, ("", "Studying"))[1] == "Studying")
-        entertainment_seconds = sum(v for k, v in app_durations.items() if APP_TAXONOMY.get(k, ("", "Playing"))[1] == "Playing")
-        social_seconds = sum(v for k, v in app_durations.items() if APP_TAXONOMY.get(k, ("", "Normal"))[1] in ("Normal", "Social"))
-        adult_seconds = sum(v for k, v in app_durations.items() if APP_TAXONOMY.get(k, ("", "Adult"))[1] == "Adult")
-
-    log_agent(f"[*] Authentic Telemetry: {int(total_screen_seconds / 60)}m PC active today ({int(late_night_seconds / 60)}m late-night). Boot: {boot_time_str}")
-
-    # Save initialized baseline to daily cache
-    save_daily_state({
-        "date": daily_state["date"],
-        "total_screen_seconds": total_screen_seconds,
-        "late_night_seconds": late_night_seconds,
-        "academic_seconds": academic_seconds,
-        "social_seconds": social_seconds,
-        "entertainment_seconds": entertainment_seconds,
-        "adult_seconds": adult_seconds,
-        "continuous_active_seconds": continuous_active_seconds,
-        "app_durations": app_durations,
-        "app_open_counts": app_open_counts,
-        "search_queries": search_queries,
-        "last_sync": datetime.datetime.now().isoformat()
-    })
-
-    has_crisis_event = False
-    last_sync_time = 0  # Trigger immediate sync upon startup
-    last_break_prompt = time.time()
-    last_foreground_proc: Optional[str] = None
-    current_tracking_date = datetime.date.today().isoformat()
-
-    try:
-        while True:
-            time.sleep(SAMPLE_INTERVAL_SECONDS)
-
-            # 1. Midnight day rollover detection: reset counters for new day
-            now_tracking_date = datetime.date.today().isoformat()
-            if now_tracking_date != current_tracking_date:
-                log_agent(f"[*] Day changed ({current_tracking_date} -> {now_tracking_date}). Resetting daily screen time accumulators.")
-                current_tracking_date = now_tracking_date
-                total_screen_seconds = 0
-                continuous_active_seconds = 0
-                late_night_seconds = 0
-                academic_seconds = 0
-                social_seconds = 0
-                entertainment_seconds = 0
-                adult_seconds = 0
-                app_durations = {}
-                app_open_counts = {}
-                search_queries = {}
-                last_foreground_proc = None
-
-            # 2. Enforce physical upper bound against elapsed time today
-            curr_max_secs = get_seconds_elapsed_today()
-            if curr_max_secs > 0 and total_screen_seconds > curr_max_secs:
-                ratio = curr_max_secs / max(1, total_screen_seconds)
-                total_screen_seconds = int(curr_max_secs)
-                academic_seconds = int(academic_seconds * ratio)
-                social_seconds = int(social_seconds * ratio)
-                entertainment_seconds = int(entertainment_seconds * ratio)
-                adult_seconds = int(adult_seconds * ratio)
-                late_night_seconds = min(late_night_seconds, total_screen_seconds)
-
-            idle_seconds = get_system_idle_seconds()
-            is_active_input = idle_seconds < 180
-
-            if is_active_input:
-                continuous_active_seconds += SAMPLE_INTERVAL_SECONDS
-                total_screen_seconds += SAMPLE_INTERVAL_SECONDS
-                current_hour = datetime.datetime.now().hour
-
-                # Excessive Unbroken Screen Strain Reminders (at 2h, 4h, 6h+)
-                if continuous_active_seconds >= 21600 and (time.time() - last_break_prompt) >= 3600:
-                    last_break_prompt = time.time()
-                    notify_break_reminder(
-                        "MindGuard Alert - Severe Screen Strain (6h+ Active)",
-                        "You have been active on your laptop for over 6 hours continuously without an idle break. Eye strain and mental fatigue are at peak levels. Please take a 30-minute off-screen break."
-                    )
-                elif continuous_active_seconds >= 3000 and (time.time() - last_break_prompt) >= 1800:
-                    last_break_prompt = time.time()
-                    notify_break_reminder(
-                        "MindGuard Wellness - 20-20-20 Rule",
-                        "You have been working on your screen for 50+ minutes continuously. Take 20 seconds to look at an object 20 feet away to relax your eyes and reset your posture."
-                    )
-
-                if 0 <= current_hour < 4:
-                    late_night_seconds += SAMPLE_INTERVAL_SECONDS
-
-                proc_name, title, category, is_crisis = get_active_window_details()
-                if is_crisis:
-                    has_crisis_event = True
-
-                # Real app duration, foreground switches (times opened), and search query tracking
-                if proc_name and proc_name not in ["idle", "desktop"]:
-                    app_durations[proc_name] = app_durations.get(proc_name, 0) + SAMPLE_INTERVAL_SECONDS
-                    if proc_name != last_foreground_proc:
-                        app_open_counts[proc_name] = app_open_counts.get(proc_name, 0) + 1
-                        last_foreground_proc = proc_name
-                    sq = extract_search_query_from_title(title)
-                    if sq:
-                        search_queries[sq] = search_queries.get(sq, 0) + 1
-
-                if category == "ACADEMIC":
-                    academic_seconds += SAMPLE_INTERVAL_SECONDS
-                elif category == "SOCIAL":
-                    social_seconds += SAMPLE_INTERVAL_SECONDS
-                elif category == "ENTERTAINMENT":
-                    entertainment_seconds += SAMPLE_INTERVAL_SECONDS
-                elif category == "ADULT":
-                    adult_seconds += SAMPLE_INTERVAL_SECONDS
-            else:
-                continuous_active_seconds = 0
-                proc_name, title, category = "idle", "Away / Idle", "GENERAL"
-                last_foreground_proc = None
-
-            elapsed_since_sync = time.time() - last_sync_time
-            if elapsed_since_sync >= SYNC_INTERVAL_SECONDS:
-                last_sync_time = time.time()
-                today_str = datetime.date.today().isoformat()
-
-                # Query authentic Windows Notification Center telemetry for today
-                windows_notifications = get_windows_notifications_today()
-
-                # Build authentic top apps leaderboard from real tracked process seconds
-                top_apps = []
-                sorted_apps = [
-                    (p, s) for p, s in sorted(app_durations.items(), key=lambda x: x[1], reverse=True)
-                    if s >= 30 and p not in ["idle", "desktop"]
-                ][:30]
-                if not sorted_apps and app_durations:
-                    sorted_apps = sorted(app_durations.items(), key=lambda x: x[1], reverse=True)[:10]
-
-                total_app_secs = sum(app_durations.values()) or 1
-                for proc, secs in sorted_apps:
-                    mins = max(1, int(secs / 60))
-                    if proc in APP_TAXONOMY:
-                        name, cat, icon = APP_TAXONOMY[proc]
-                    elif any(k in proc for k in ["game", "play", "music", "video", "media", "stream"]):
-                        name = proc.replace(".exe", "").title()
-                        cat = "Playing"
-                        icon = "gamepad"
-                    elif any(k in proc for k in ["chat", "social", "mail", "message"]):
-                        name = proc.replace(".exe", "").title()
-                        cat = "Normal"
-                        icon = "message"
-                    elif any(k in proc for k in ["code", "dev", "studio", "editor", "compiler", "terminal", "bash", "sh"]):
-                        name = proc.replace(".exe", "").title()
-                        cat = "Studying"
-                        icon = "code"
-                    else:
-                        name = proc.replace(".exe", "").title()
-                        cat = "Normal"
-                        icon = "laptop"
-
-                    # 1. Authentic Times Opened (foreground switches or active launches)
-                    times_opened = app_open_counts.get(proc, max(1, int(secs / 300) + 1))
-
-                    # 2. Authentic Notifications Received from Windows Notification Center
-                    notifications = windows_notifications.get(proc, 0)
-                    if notifications == 0:
-                        proc_clean = proc.lower().replace(".exe", "")
-                        for k, cnt in windows_notifications.items():
-                            if proc_clean in k.lower() or k.lower() in proc_clean:
-                                notifications += cnt
-                                break
-
-                    top_apps.append({
-                        "name": name,
-                        "proc": proc,
-                        "minutes": mins,
-                        "times_opened": times_opened,
-                        "notifications": notifications,
-                        "category": cat,
-                        "percentage": min(100, round((secs / total_app_secs) * 100)),
-                        "icon": icon
-                    })
-
-                # Build authentic search queries from real observed browser titles
-                top_searches = []
-                sorted_searches = sorted(search_queries.items(), key=lambda x: x[1], reverse=True)[:8]
-                for query, count in sorted_searches:
-                    top_searches.append({
-                        "query": query,
-                        "count": count,
-                        "category": "Academic" if any(k in query.lower() for k in ACADEMIC_KEYWORDS) else "General",
-                        "flagged": any(k in query.lower() for k in CRISIS_KEYWORDS)
-                    })
-
-                # Ensure category seconds strictly sum up to <= total_screen_seconds
-                cat_sum = academic_seconds + social_seconds + entertainment_seconds + adult_seconds
-                if cat_sum > total_screen_seconds and total_screen_seconds > 0:
-                    cat_ratio = total_screen_seconds / cat_sum
-                    academic_seconds = int(academic_seconds * cat_ratio)
-                    social_seconds = int(social_seconds * cat_ratio)
-                    entertainment_seconds = int(entertainment_seconds * cat_ratio)
-                    adult_seconds = int(adult_seconds * cat_ratio)
-
-                # Persist daily state to local cache
-                save_daily_state({
-                    "date": today_str,
-                    "total_screen_seconds": total_screen_seconds,
-                    "late_night_seconds": late_night_seconds,
-                    "academic_seconds": academic_seconds,
-                    "social_seconds": social_seconds,
-                    "entertainment_seconds": entertainment_seconds,
-                    "adult_seconds": adult_seconds,
-                    "continuous_active_seconds": continuous_active_seconds,
-                    "app_durations": app_durations,
-                    "app_open_counts": app_open_counts,
-                    "search_queries": search_queries,
-                    "last_sync": datetime.datetime.now().isoformat()
-                })
-
-                # Check if student logged in while agent was tracking
-                if not token or not student_id:
-                    new_auth = get_active_student_auth()
-                    if new_auth:
-                        token = new_auth.get("access_token")
-                        student_id = new_auth.get("id")
-                        student_email = new_auth.get("email", "student")
-                        log_agent(f"[+] Student authenticated: {student_email}! Associating session & syncing {int(total_screen_seconds / 60)}m active screen time.")
-
-                if token and student_id:
-                    payload = {
-                        "student_id": student_id,
-                        "date": today_str,
-                        "total_screen_time_minutes": int(total_screen_seconds / 60),
-                        "late_night_usage_minutes": int(late_night_seconds / 60),
-                        "academic_usage_minutes": int(academic_seconds / 60),
-                        "social_usage_minutes": int(social_seconds / 60),
-                        "entertainment_usage_minutes": int(entertainment_seconds / 60),
-                        "adult_usage_minutes": max(1, int(math.ceil(adult_seconds / 60.0))) if adult_seconds >= 10 else 0,
-                        "continuous_screen_minutes": int(continuous_active_seconds / 60),
-                        "baseline_deviation_score": 0.0,
-                        "is_crisis_search_flag": has_crisis_event,
-                        "top_apps": top_apps,
-                        "search_topics": top_searches,
-                        "total_times_opened": sum(a.get("times_opened", 0) for a in top_apps),
-                        "total_notifications": sum(a.get("notifications", 0) for a in top_apps),
-                    }
-                    # Integrate Mathematical Sleep-Wake Cycle Metrics using real power event timestamps
-                    sleep_cycle_metrics = infer_circadian_sleep_metrics(
-                        late_night_seconds,
-                        entertainment_seconds,
-                        sleep_dt_override=sys_metrics.get("last_night_sleep_dt"),
-                        wake_dt_override=sys_metrics.get("first_morning_wake_dt")
-                    )
-                    payload.update(sleep_cycle_metrics)
-                    has_crisis_event = False  # Reset flag after sync
-
-                    try:
-                        headers = {
-                            "Authorization": f"Bearer {token}",
-                            "Content-Type": "application/json"
-                        }
-                        res = requests.post(
-                            f"{API_BASE_URL}/chat/behavioral-features",
-                            json=payload,
-                            headers=headers,
-                            timeout=5
-                        )
-
-                        if res.status_code == 200:
-                            res_data = res.json()
-                            risk_info = res_data.get("risk_assessment", {})
-                            risk_level = risk_info.get("risk_level", "LOW")
-
-                            status_color = "[OK]" if risk_level == "LOW" else "[WARN]" if risk_level == "MEDIUM" else "[ALERT]"
-                            display_title = (title[:35] + "..") if len(title) > 35 else (title or proc_name)
-                            log_agent(
-                                f"{status_color} Synced: "
-                                f"{payload['total_screen_time_minutes']}m Active | "
-                                f"{payload['adult_usage_minutes']}m Adult | "
-                                f"{payload['late_night_usage_minutes']}m Late-Night | "
-                                f"Context: {category} ({display_title}) | "
-                                f"Risk: {risk_level}"
-                            )
-                        elif res.status_code in (401, 403):
-                            log_agent(f"[!] Authentication warning ({res.status_code}). Reloading cached credentials...")
-                            new_auth = get_active_student_auth()
-                            if new_auth and new_auth.get("access_token") != token:
-                                token = new_auth.get("access_token")
-                                student_id = new_auth.get("id")
-                                log_agent("[+] Reloaded new authentication token successfully.")
-                            else:
-                                log_agent("[*] Awaiting token update or student dashboard activity...")
-                    except requests.exceptions.RequestException:
-                        log_agent(f"[*] Offline tracking: {int(total_screen_seconds / 60)}m recorded locally (waiting for backend sync)...")
+                # Register device on backend
+                registered = sync_client.register_or_verify_device(student_jwt=access_token)
+                if registered:
+                    print(f"\n[+] Login & Device Registration Successful!")
+                    print(f"    Connected as: {agent_config.user_email}")
+                    print(f"    Device ID   : {agent_config.device_id}")
+                    print(f"    Platform    : {agent_config.platform_name.title()}\n")
+                    return True
                 else:
-                    log_agent(f"[*] Passive boot tracking: {int(total_screen_seconds / 60)}m active screen time (awaiting student dashboard login)...")
+                    print("[!] Logged in, but device registration failed. Will retry during sync.")
+                    return True
+            else:
+                err = res.json().get("message", "Invalid email or password.")
+                print(f"[!] Login failed: {err}. Please try again.\n")
+        except Exception as e:
+            print(f"[!] Could not connect to MindGuard API server ({agent_config.api_base_url}): {e}\n")
+            return False
 
-    except KeyboardInterrupt:
-        log_agent("[*] MindGuard PC Agent stopped safely. Take care of your mental wellness!")
+def get_startup_dir() -> Path:
+    """Returns the user's OS-specific startup folder."""
+    if sys.platform == "win32":
+        appdata = os.environ.get("APPDATA")
+        if appdata:
+            return Path(appdata) / "Microsoft" / "Windows" / "Start Menu" / "Programs" / "Startup"
+        return Path.home() / "AppData" / "Roaming" / "Microsoft" / "Windows" / "Start Menu" / "Programs" / "Startup"
+    elif sys.platform == "darwin":
+        return Path.home() / "Library" / "LaunchAgents"
+    else:
+        return Path.home() / ".config" / "autostart"
 
-def run_tray_agent():
-    """
-    Runs the agent with an optional pystray taskbar tray icon if available, or falls back to direct execution.
-    """
-    try:
-        import pystray
-        from PIL import Image, ImageDraw
+def install_to_startup() -> bool:
+    """Installs MindGuard Agent to run automatically on system boot without popups."""
+    startup_dir = get_startup_dir()
+    startup_dir.mkdir(parents=True, exist_ok=True)
+    agent_script = Path(__file__).resolve()
 
-        def create_tray_icon_image(color="green"):
-            img = Image.new("RGB", (64, 64), color=(30, 30, 30))
-            draw = ImageDraw.Draw(img)
-            fill_color = (16, 185, 129) if color == "green" else (245, 158, 11)
-            draw.ellipse((12, 12, 52, 52), fill=fill_color)
-            return img
+    if sys.platform == "win32":
+        vbs_path = startup_dir / "MindGuardAgent.vbs"
+        python_exe = sys.executable
+        pythonw_exe = python_exe.replace("python.exe", "pythonw.exe")
+        if not Path(pythonw_exe).exists():
+            pythonw_exe = python_exe
 
-        agent_thread = threading.Thread(target=start_agent, daemon=True)
-        agent_thread.start()
-
-        def on_open_dashboard(icon, item):
-            webbrowser.open("http://localhost:5173/student/dashboard")
-
-        def on_exit(icon, item):
-            icon.stop()
-            os._exit(0)
-
-        icon = pystray.Icon(
-            "MindGuard PC Agent",
-            create_tray_icon_image("green"),
-            "MindGuard Behavioral Phenotyping (Active)",
-            menu=pystray.Menu(
-                pystray.MenuItem("Open Student Wellness Hub", on_open_dashboard),
-                pystray.MenuItem("Status: Active & Protected", lambda: None, enabled=False),
-                pystray.MenuItem("Exit Agent", on_exit)
-            )
+        vbs_content = (
+            'Set WshShell = CreateObject("WScript.Shell")\n'
+            f'WshShell.Run """{pythonw_exe}"" ""{agent_script}"" --background", 0, False\n'
         )
-        log_agent("[*] MindGuard PC Agent system tray icon initialized.")
-        icon.run()
-    except ImportError:
-        start_agent()
+        try:
+            with open(vbs_path, "w", encoding="utf-8") as f:
+                f.write(vbs_content)
+            print("[+] Successfully installed MindGuard Agent to Windows Startup.")
+            return True
+        except Exception as e:
+            print(f"[!] Failed to install startup script: {e}")
+            return False
+    elif sys.platform.startswith("linux"):
+        desktop_file = startup_dir / "mindguard-agent.desktop"
+        content = f"""[Desktop Entry]
+Type=Application
+Exec={sys.executable} {agent_script} --background
+Hidden=false
+NoDisplay=false
+X-GNOME-Autostart-enabled=true
+Name=MindGuard Agent
+Comment=MindGuard AI Digital Wellness Monitor
+"""
+        try:
+            desktop_file.write_text(content, encoding="utf-8")
+            print("[+] Successfully installed to Linux autostart.")
+            return True
+        except Exception as e:
+            print(f"[!] Failed to install to Linux autostart: {e}")
+            return False
+
+    return False
+
+def uninstall_from_startup() -> bool:
+    """Removes MindGuard Agent from OS startup."""
+    startup_dir = get_startup_dir()
+    if sys.platform == "win32":
+        vbs_path = startup_dir / "MindGuardAgent.vbs"
+        if vbs_path.exists():
+            vbs_path.unlink()
+            print("[+] Removed MindGuard Agent from Windows Startup.")
+            return True
+    elif sys.platform.startswith("linux"):
+        f = startup_dir / "mindguard-agent.desktop"
+        if f.exists():
+            f.unlink()
+            print("[+] Removed MindGuard Agent from Linux autostart.")
+            return True
+    print("[*] Startup entry was not installed.")
+    return True
 
 _AGENT_MUTEX = None
 
 def ensure_single_instance():
-    """Ensures only a single instance of the MindGuard PC agent runs on the desktop."""
+    """Prevents duplicate instances of the monitoring agent from running simultaneously."""
     global _AGENT_MUTEX
     if sys.platform == "win32":
         try:
-            _AGENT_MUTEX = ctypes.windll.kernel32.CreateMutexW(None, False, "Global\\MindGuardPCAgentMutex")
-            if ctypes.windll.kernel32.GetLastError() == 183: # ERROR_ALREADY_EXISTS
-                log_agent("[*] Another instance of MindGuard PC Agent is already running.")
+            _AGENT_MUTEX = ctypes.windll.kernel32.CreateMutexW(None, False, "Global\\MindGuardModularAgentMutex")
+            if ctypes.windll.kernel32.GetLastError() == 183:  # ERROR_ALREADY_EXISTS
+                log_agent("[*] Another instance of MindGuard Agent is already active. Exiting.")
                 sys.exit(0)
         except Exception:
             pass
 
+def run_agent():
+    """Main continuous digital activity monitoring loop."""
+    storage = LocalStorage(agent_config.db_path)
+    sync_client = SyncClient(storage)
+    collector = get_platform_collector()
+
+    log_agent("========================================================")
+    log_agent(f"  MindGuard AI - Cross-Platform Monitoring Agent v{agent_config.agent_version} ")
+    log_agent(f"  Platform: {agent_config.platform_name.title()} | Device: {agent_config.device_name}")
+    if agent_config.user_email:
+        log_agent(f"  Connected Student: {agent_config.user_email}")
+    else:
+        log_agent("  [*] Student not paired yet. Run with --login to link account.")
+    log_agent("========================================================")
+    log_agent("[*] Authentic Telemetry Guarantee: Zero synthetic or estimated app data.")
+    log_agent("[*] Privacy Protection: Zero keystroke logging or screenshot capture.")
+    log_agent(f"[*] Sampling foreground activity every {agent_config.sample_interval_seconds}s (Idle threshold: {agent_config.idle_threshold_seconds}s)...")
+
+    # Start loopback IPC server for Browser Extension communication
+    start_local_ipc_server(storage, port=agent_config.local_server_port)
+
+    # Session tracking variables
+    current_session_start = datetime.datetime.now(datetime.timezone.utc)
+    current_session_active_seconds = 0
+    current_session_idle_seconds = 0
+    current_session_locked_seconds = 0
+
+    last_sync_time = time.time()
+    last_proc_name = ""
+    app_open_counter: Dict[str, int] = {}
+
+    while True:
+        try:
+            now_dt = datetime.datetime.now(datetime.timezone.utc)
+            today_str = now_dt.strftime("%Y-%m-%d")
+
+            # 1. Physical Idle & Screen Locked Detection
+            idle_seconds = collector.get_idle_seconds()
+            is_locked = collector.is_screen_locked()
+            is_idle = (idle_seconds >= agent_config.idle_threshold_seconds)
+
+            interval = agent_config.sample_interval_seconds
+
+            if is_locked:
+                current_session_locked_seconds += interval
+            elif is_idle:
+                current_session_idle_seconds += interval
+            else:
+                # User is physically active at the keyboard/mouse
+                current_session_active_seconds += interval
+
+                # 2. Authentic Foreground Application Tracking
+                proc_name, window_title, display_name, category = collector.get_foreground_window()
+                is_new_launch = (proc_name != last_proc_name and proc_name != "")
+                if is_new_launch:
+                    last_proc_name = proc_name
+                    app_open_counter[proc_name] = app_open_counter.get(proc_name, 0) + 1
+
+                # Record in local SQLite storage
+                if proc_name and proc_name not in ["unknown", "desktop", "lockapp.exe"]:
+                    storage.record_app_foreground(
+                        date_str=today_str,
+                        app_name=display_name,
+                        app_identifier=proc_name,
+                        category=category,
+                        seconds=interval,
+                        is_new_launch=is_new_launch
+                    )
+
+            # 3. Cloud Synchronization Flush (every 30s)
+            if time.time() - last_sync_time >= agent_config.sync_interval_seconds:
+                # Queue completed session interval
+                session_total = current_session_active_seconds + current_session_idle_seconds + current_session_locked_seconds
+                if session_total > 0:
+                    storage.enqueue_sync_batch(
+                        event_type="session",
+                        payload={
+                            "start_time": current_session_start.isoformat(),
+                            "end_time": now_dt.isoformat(),
+                            "active_seconds": current_session_active_seconds,
+                            "idle_seconds": current_session_idle_seconds,
+                            "locked_seconds": current_session_locked_seconds,
+                            "total_awake_seconds": session_total
+                        }
+                    )
+                    # Reset session counter
+                    current_session_start = now_dt
+                    current_session_active_seconds = 0
+                    current_session_idle_seconds = 0
+                    current_session_locked_seconds = 0
+
+                # Flush all aggregates and queue to cloud
+                sync_client.flush_sync_queue(today_str)
+                last_sync_time = time.time()
+
+        except Exception as e:
+            log_agent(f"[!] Error in monitoring loop: {e}")
+
+        time.sleep(agent_config.sample_interval_seconds)
+
 if __name__ == "__main__":
+    storage = LocalStorage(agent_config.db_path)
+    sync_client = SyncClient(storage)
+
     if "--install-startup" in sys.argv:
         install_to_startup()
     elif "--uninstall-startup" in sys.argv:
         uninstall_from_startup()
     elif "--login" in sys.argv:
-        prompt_student_login()
-    elif "--tray" in sys.argv or os.environ.get("MINDGUARD_TRAY") == "1":
-        ensure_single_instance()
-        run_tray_agent()
+        prompt_student_login(storage, sync_client)
+    elif "--status" in sys.argv:
+        print(f"Device Identifier: {agent_config.device_identifier}")
+        print(f"Device ID        : {agent_config.device_id or 'Not Registered'}")
+        print(f"Platform         : {agent_config.platform_name.title()}")
+        print(f"OS Version       : {agent_config.os_version}")
+        print(f"Agent Version    : {agent_config.agent_version}")
+        print(f"Monitoring Paused: {agent_config.is_monitoring_paused}")
+        print(f"Search Consent   : {agent_config.search_consent}")
+        print(f"Local DB         : {agent_config.db_path}")
     else:
         ensure_single_instance()
-        start_agent()
-
+        run_agent()
