@@ -53,6 +53,7 @@ import {
   Monitor,
   Gamepad2,
   BookOpen,
+  TrendingUp,
 } from "lucide-react";
 
 // Modals
@@ -123,15 +124,19 @@ export const StudentDashboard: React.FC = () => {
   const lateNightMins = log?.late_night_usage_minutes || 0;
   const academicMins = log?.academic_usage_minutes || 0;
 
-  // Wellness score computation
-  const rawScore =
-    (latestAssessment as any)?.mental_wellness_score ??
-    (latestAssessment as any)?.wellness_score ??
-    (trendData?.summary?.average_wellness_score && trendData.summary.average_wellness_score > 0
-      ? trendData.summary.average_wellness_score
-      : 82);
-  const wellnessScore = Math.min(100, Math.max(0, Math.round(rawScore)));
-  const wellnessClass = classifyMentalWellness(wellnessScore);
+  // Wellness score computation (authentic; null if unassessed)
+  const hasAssessment = Boolean(
+    (latestAssessment as any)?.mental_wellness_score !== undefined ||
+    (latestAssessment as any)?.wellness_score !== undefined ||
+    (trendData?.summary?.average_wellness_score && trendData.summary.average_wellness_score > 0)
+  );
+  const rawScore = hasAssessment
+    ? ((latestAssessment as any)?.mental_wellness_score ??
+       (latestAssessment as any)?.wellness_score ??
+       trendData?.summary?.average_wellness_score ?? 0)
+    : null;
+  const wellnessScore = rawScore !== null ? Math.min(100, Math.max(0, Math.round(rawScore))) : null;
+  const wellnessClass = wellnessScore !== null ? classifyMentalWellness(wellnessScore) : null;
 
   // Risk Level computation
   const normalizedRisk: "LOW" | "MODERATE" | "HIGH" =
@@ -143,21 +148,23 @@ export const StudentDashboard: React.FC = () => {
 
   // Score color: ≥65 text-emerald-500, 35-64 text-amber-500, <35 text-rose-500
   const scoreColorClass =
-    wellnessScore >= 65
+    wellnessScore === null
+      ? "text-muted-foreground"
+      : wellnessScore >= 65
       ? "text-emerald-500"
       : wellnessScore >= 35
       ? "text-amber-500"
       : "text-rose-500";
 
-  // Streak days calculation
-  const streakDays = Math.max(1, moodHistory.length > 0 ? Math.min(moodHistory.length, 14) : 5);
+  // Streak days calculation (strictly authentic, zero if no mood history)
+  const streakDays = moodHistory.length > 0 ? Math.min(moodHistory.length, 14) : 0;
 
   // Last check-in time
   const lastCheckinTime = moodHistory[0]?.logged_at
     ? new Date(moodHistory[0].logged_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
-    : "Today, 9:15 AM";
+    : "No check-ins yet";
 
-  // Chart data
+  // Chart data (strictly authentic, zero synthetic unshifts)
   const chartData =
     trendData?.points && trendData.points.length > 0
       ? trendData.points.map((p) => ({
@@ -166,27 +173,22 @@ export const StudentDashboard: React.FC = () => {
         }))
       : moodHistory.map((m) => ({
           name: new Date(m.logged_at).toLocaleDateString("en-US", { month: "short", day: "numeric" }),
-          score: (m.self_reported_score || 7) * 10,
-        }));
+          score: (m.self_reported_score || 0) * 10,
+        })).filter(item => item.score > 0);
 
-  if (chartData.length < 3) {
-    chartData.unshift(
-      { name: "3 wks ago", score: 72 },
-      { name: "2 wks ago", score: 78 },
-      { name: "Last wk", score: 80 }
-    );
-  }
-
-  // 7-day sleep data
-  const sleepChartData = [
-    { day: "Mon", hours: 6.8 },
-    { day: "Tue", hours: 7.2 },
-    { day: "Wed", hours: 6.5 },
-    { day: "Thu", hours: 7.8 },
-    { day: "Fri", hours: 5.5 },
-    { day: "Sat", hours: 8.2 },
-    { day: "Sun", hours: 7.4 },
-  ];
+  // 7-day sleep data from authentic history (empty array if no telemetry recorded yet)
+  const sleepChartData: { day: string; hours: number }[] = (behavioralSummary?.weekly_history || [])
+    .slice(-7)
+    .map((item: any) => {
+      const d = new Date(item.date);
+      const dayName = d.toLocaleDateString("en-US", { weekday: "short" });
+      const activeHrs = (item.total_screen_time_minutes || 0) / 60;
+      const restHrs = Math.max(0, Math.min(12, Math.round((24 - activeHrs) * 10) / 10));
+      return { day: dayName, hours: restHrs };
+    });
+  const avgSleepHours = sleepChartData.length > 0
+    ? (sleepChartData.reduce((acc, c) => acc + c.hours, 0) / sleepChartData.length).toFixed(1)
+    : null;
 
   const studentFirstName = user?.full_name ? user.full_name.split(" ")[0] : "Student";
 
@@ -250,22 +252,46 @@ export const StudentDashboard: React.FC = () => {
         <GSAPTilt maxTilt={8} scaleOnHover={1.02} className="h-full">
           <SpotlightCard
             className="p-5 h-full"
-            spotlightColor={wellnessScore >= 65 ? "rgba(16, 185, 129, 0.15)" : wellnessScore >= 35 ? "rgba(245, 158, 11, 0.15)" : "rgba(244, 63, 94, 0.15)"}
+            spotlightColor={
+              wellnessScore === null
+                ? "rgba(148, 163, 184, 0.15)"
+                : wellnessScore >= 65
+                ? "rgba(16, 185, 129, 0.15)"
+                : wellnessScore >= 35
+                ? "rgba(245, 158, 11, 0.15)"
+                : "rgba(244, 63, 94, 0.15)"
+            }
           >
             <div className="flex items-center justify-between w-full">
               <div className="space-y-1">
                 <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block">
                   Wellness Score
                 </span>
-                <div className={cn("text-5xl font-extrabold tracking-tight", scoreColorClass)}>
-                  <AnimatedCounter value={wellnessScore} />
-                </div>
-                <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold inline-flex items-center gap-1">
-                  +3.5% vs last week
-                </span>
+                {wellnessScore !== null ? (
+                  <>
+                    <div className={cn("text-5xl font-extrabold tracking-tight", scoreColorClass)}>
+                      <AnimatedCounter value={wellnessScore} />
+                    </div>
+                    <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold inline-flex items-center gap-1">
+                      Assessment baseline active
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    <div className="text-2xl font-extrabold tracking-tight text-muted-foreground py-1">
+                      Unassessed
+                    </div>
+                    <button
+                      onClick={() => navigate("/student/check-in")}
+                      className="text-[11px] text-primary font-semibold hover:underline block"
+                    >
+                      Start First Check-in →
+                    </button>
+                  </>
+                )}
               </div>
               <div className="w-12 h-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
-                <Smile className={cn("w-6 h-6", scoreColorClass)} />
+                <Smile className={cn("w-6 h-6", wellnessScore !== null ? scoreColorClass : "text-muted-foreground")} />
               </div>
             </div>
           </SpotlightCard>
@@ -331,11 +357,11 @@ export const StudentDashboard: React.FC = () => {
                 <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block">
                   Last Check-in
                 </span>
-                <div className="text-2xl font-bold text-foreground">
+                <div className={cn("font-bold text-foreground", moodHistory.length > 0 ? "text-2xl" : "text-lg text-muted-foreground")}>
                   {lastCheckinTime}
                 </div>
                 <span className="text-xs text-muted-foreground block">
-                  Completed via web portal
+                  {moodHistory.length > 0 ? "Completed via web portal" : "No check-ins logged yet"}
                 </span>
               </div>
               <div className="w-12 h-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
@@ -361,11 +387,11 @@ export const StudentDashboard: React.FC = () => {
                   <span className="text-sm font-semibold text-muted-foreground">Days</span>
                 </div>
                 <span className="text-xs text-muted-foreground block">
-                  Daily mindfulness habit
+                  {streakDays > 0 ? "Daily mindfulness habit" : "Check in daily to build streak"}
                 </span>
               </div>
               <div className="w-12 h-12 rounded-xl bg-amber-500/10 text-amber-500 flex items-center justify-center shrink-0">
-                <Flame className="w-6 h-6 fill-amber-500" />
+                <Flame className={cn("w-6 h-6", streakDays > 0 ? "fill-amber-500 text-amber-500" : "text-muted-foreground")} />
               </div>
             </div>
           </SpotlightCard>
@@ -458,11 +484,15 @@ export const StudentDashboard: React.FC = () => {
             <div className="flex items-center gap-2">
               <h3 className="text-sm font-bold text-foreground">Screen Time & Digital Phenotyping</h3>
               <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-blue-500/15 text-blue-600 dark:text-blue-400 border border-blue-500/20">
-                {totalMins > 0 ? `${Math.floor(totalMins / 60)}h ${totalMins % 60}m Active` : "Active Tracking"}
+                {totalMins > 0 ? `${Math.floor(totalMins / 60)}h ${totalMins % 60}m Active` : isConnected ? "Standby" : "Not Connected"}
               </span>
             </div>
             <p className="text-xs text-muted-foreground mt-0.5">
-              Breakdown: Studying ({academicMins}m) • Playing ({log?.entertainment_usage_minutes || 0}m) • Late Night ({lateNightMins}m)
+              {totalMins > 0 ? (
+                `Breakdown: Studying (${academicMins}m) • Playing (${log?.entertainment_usage_minutes || 0}m) • Late Night (${lateNightMins}m)`
+              ) : (
+                "No activity data recorded yet • Connect Desktop Agent or Extension to monitor active study time"
+              )}
             </p>
           </div>
         </div>
@@ -473,7 +503,7 @@ export const StudentDashboard: React.FC = () => {
             onClick={() => navigate("/student/screentime")}
             className="rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold shrink-0 shadow-xs"
           >
-            View Full Graphics & Apps
+            {totalMins > 0 ? "View Full Graphics & Apps" : "Connect Device & Monitor"}
             <ChevronRight className="w-4 h-4 ml-1" />
           </Button>
         </GSAPMagnetic>
@@ -526,6 +556,22 @@ export const StudentDashboard: React.FC = () => {
           <div className="h-64 w-full">
             {isLoadingTrends ? (
               <Skeleton className="w-full h-full rounded-xl" />
+            ) : chartData.length === 0 ? (
+              <div className="h-full w-full flex flex-col items-center justify-center border border-dashed border-border/70 rounded-xl p-6 text-center">
+                <TrendingUp className="w-8 h-8 text-muted-foreground/60 mb-2" />
+                <p className="text-sm font-semibold text-foreground">No wellness history recorded yet</p>
+                <p className="text-xs text-muted-foreground mt-1 max-w-sm">
+                  Complete your daily check-in to start tracking your mood and recovery trajectory over time.
+                </p>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => navigate("/student/check-in")}
+                  className="mt-3 text-xs rounded-xl"
+                >
+                  Start First Check-In
+                </Button>
+              </div>
             ) : (
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
@@ -570,7 +616,7 @@ export const StudentDashboard: React.FC = () => {
                 <h2 className="text-base font-semibold text-foreground">Sleep Quality</h2>
               </div>
               <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-primary/10 text-primary">
-                7.2 hrs avg
+                {sleepChartData.length > 0 ? `${avgSleepHours} hrs avg` : "Awaiting data"}
               </span>
             </div>
 
@@ -579,28 +625,40 @@ export const StudentDashboard: React.FC = () => {
             </p>
 
             <div className="h-44 w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={sleepChartData} margin={{ top: 5, right: 5, left: -25, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="currentColor" className="text-border" opacity={0.4} />
-                  <XAxis dataKey="day" tick={{ fontSize: 10 }} stroke="currentColor" className="text-muted-foreground" />
-                  <YAxis domain={[0, 10]} tick={{ fontSize: 10 }} stroke="currentColor" className="text-muted-foreground" unit="h" />
-                  <Tooltip
-                    contentStyle={{
-                      borderRadius: "8px",
-                      fontSize: "11px",
-                      backgroundColor: "hsl(var(--card))",
-                      color: "hsl(var(--card-foreground))",
-                      border: "1px solid hsl(var(--border))",
-                    }}
-                  />
-                  <Bar dataKey="hours" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
+              {sleepChartData.length === 0 ? (
+                <div className="h-full w-full flex flex-col items-center justify-center border border-dashed border-border/70 rounded-xl p-4 text-center">
+                  <MoonStar className="w-7 h-7 text-muted-foreground/50 mb-2" />
+                  <p className="text-xs font-semibold text-foreground">No sleep telemetry yet</p>
+                  <p className="text-[11px] text-muted-foreground mt-1 max-w-[200px]">
+                    Connect Desktop Agent or log daily check-ins to monitor circadian quality.
+                  </p>
+                </div>
+              ) : (
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={sleepChartData} margin={{ top: 5, right: 5, left: -25, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="currentColor" className="text-border" opacity={0.4} />
+                    <XAxis dataKey="day" tick={{ fontSize: 10 }} stroke="currentColor" className="text-muted-foreground" />
+                    <YAxis domain={[0, 10]} tick={{ fontSize: 10 }} stroke="currentColor" className="text-muted-foreground" unit="h" />
+                    <Tooltip
+                      contentStyle={{
+                        borderRadius: "8px",
+                        fontSize: "11px",
+                        backgroundColor: "hsl(var(--card))",
+                        color: "hsl(var(--card-foreground))",
+                        border: "1px solid hsl(var(--border))",
+                      }}
+                    />
+                    <Bar dataKey="hours" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              )}
             </div>
           </div>
 
           <div className="mt-4 pt-4 border-t border-border flex items-center justify-between text-xs text-muted-foreground">
-            <span>Circadian Debt: 1.2 hrs</span>
+            <span>
+              {sleepChartData.length > 0 ? "Circadian tracking active" : "Circadian baseline calibrating"}
+            </span>
             <Button
               variant="ghost"
               size="sm"
@@ -860,7 +918,7 @@ export const StudentDashboard: React.FC = () => {
             <ShapExplanationCard predictionId={latestAssessment?.assessment_id} />
             <ExplainableAIFactors
               studentId={user?.id}
-              wellnessScore={wellnessScore}
+              wellnessScore={wellnessScore ?? undefined}
               riskLevel={normalizedRisk}
               lateNightMins={lateNightMins}
               totalScreenMins={totalMins}

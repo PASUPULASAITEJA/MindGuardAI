@@ -231,12 +231,11 @@ export const DeviceManagementView: React.FC = () => {
         </CardHeader>
         <CardContent className="space-y-2 text-xs text-muted-foreground">
           <div className="p-3 rounded-xl bg-card border border-border/60 font-mono text-[11px] text-foreground space-y-1">
-            <p className="text-slate-400"># 1. In your workstation terminal, navigate to your MindGuard directory:</p>
+            <p className="text-slate-400"># 1. In your terminal, navigate to the desktop agent folder:</p>
             <p className="text-blue-500">cd desktop_agent</p>
-            <p className="text-slate-400 pt-1"># 2. Authenticate and register this device with your student account:</p>
-            <p className="text-blue-500">python mindguard_pc_agent.py --login</p>
-            <p className="text-slate-400 pt-1"># 3. Start background monitoring (runs silently with zero popups):</p>
+            <p className="text-slate-400 pt-1"># 2. Start monitoring (Zero manual login needed — automatically pairs with your account):</p>
             <p className="text-blue-500">python mindguard_pc_agent.py</p>
+            <p className="text-slate-400 pt-1"># Or on Windows, simply double-click: start_agent.bat</p>
           </div>
           <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400 pt-1">
             <ShieldCheck className="w-4 h-4" />

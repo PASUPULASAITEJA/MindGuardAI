@@ -399,10 +399,8 @@ class BehavioralService:
         existing_res = await db.execute(existing_stmt)
         existing_log = existing_res.scalar_one_or_none()
 
-        # Sanity bound payload by machine uptime today
-        machine_metrics = get_machine_screen_metrics_today()
-        uptime_cap = machine_metrics.get("uptime_mins_today", 1440)
-        sanitized_screen_time = min(payload.total_screen_time_minutes, uptime_cap)
+        # Sanity bound payload by max minutes in a 24-hour day
+        sanitized_screen_time = min(payload.total_screen_time_minutes, 1440)
 
         if existing_log:
             # Never downgrade total screen time on the same day from an incomplete or lagging client
@@ -441,7 +439,7 @@ class BehavioralService:
             existing_log.synced_at = datetime.now(timezone.utc)
             db_log = existing_log
         else:
-            initial_screen_time = max(sanitized_screen_time, machine_metrics.get("total_screen_time_minutes", 0))
+            initial_screen_time = sanitized_screen_time
             meta_json = None
             if getattr(payload, "top_apps", None) or getattr(payload, "search_topics", None):
                 meta = {}
@@ -561,39 +559,7 @@ class BehavioralService:
         res = await db.execute(stmt)
         all_logs: List[BehavioralLog] = res.scalars().all()
 
-        today_iso = datetime.now().date().isoformat()
-        machine_metrics = get_machine_screen_metrics_today()
-
-        # If no telemetry records exist yet, only record today if machine actively has telemetry
-        if not all_logs:
-            active_today_mins = machine_metrics.get("total_screen_time_minutes", 0)
-            if active_today_mins > 0:
-                cur_acad = machine_metrics.get("academic_usage_minutes", 0)
-                cur_soc = machine_metrics.get("social_usage_minutes", 0)
-                cur_ent = machine_metrics.get("entertainment_usage_minutes", 0)
-                cur_late = machine_metrics.get("late_night_usage_minutes", 0)
-                new_log = BehavioralLog(
-                    id=uuid4(),
-                    student_id=student_id,
-                    date=today_iso,
-                    total_screen_time_minutes=active_today_mins,
-                    academic_usage_minutes=cur_acad,
-                    social_usage_minutes=cur_soc,
-                    entertainment_usage_minutes=cur_ent,
-                    adult_usage_minutes=0,
-                    late_night_usage_minutes=cur_late,
-                    continuous_screen_minutes=machine_metrics.get("continuous_screen_minutes", 0),
-                    is_crisis_detected=False,
-                    synced_at=now
-                )
-                try:
-                    db.add(new_log)
-                    await db.commit()
-                    all_logs = [new_log]
-                except Exception as e:
-                    logger.warning(f"Failed to commit initial telemetry: {e}")
-
-        # Deduplicate to pick the latest record per date
+        # Deduplicate to pick the latest record per date for this student
         seen_dates = set()
         recent_logs: List[BehavioralLog] = []
         for log in all_logs:
@@ -602,32 +568,6 @@ class BehavioralService:
                 recent_logs.append(log)
             if len(recent_logs) >= 7:
                 break
-
-        # If no historical logs exist and no machine activity today, return standard empty state
-        active_today_mins = machine_metrics.get("total_screen_time_minutes", 0)
-        has_today = any(l.date == today_iso for l in recent_logs)
-        
-        if not has_today and active_today_mins > 0:
-            today_entry = BehavioralLog(
-                id=uuid4(),
-                student_id=student_id,
-                date=today_iso,
-                total_screen_time_minutes=active_today_mins,
-                academic_usage_minutes=machine_metrics.get("academic_usage_minutes", 0),
-                social_usage_minutes=machine_metrics.get("social_usage_minutes", 0),
-                entertainment_usage_minutes=machine_metrics.get("entertainment_usage_minutes", 0),
-                adult_usage_minutes=machine_metrics.get("adult_usage_minutes", 0),
-                late_night_usage_minutes=machine_metrics.get("late_night_usage_minutes", 0),
-                continuous_screen_minutes=machine_metrics.get("continuous_screen_minutes", 0),
-                is_crisis_detected=False,
-                synced_at=now
-            )
-            try:
-                db.add(today_entry)
-                await db.commit()
-                recent_logs.insert(0, today_entry)
-            except Exception:
-                pass
 
         if not recent_logs:
             return {
