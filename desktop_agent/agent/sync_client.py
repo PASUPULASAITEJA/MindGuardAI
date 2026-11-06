@@ -110,9 +110,19 @@ class SyncClient:
         webs = self.storage.get_daily_web_aggregates(date_str)
         searches = self.storage.get_unflushed_searches(date_str)
 
+        # Gather pending activity session events from local sync_queue
+        pending = self.storage.get_pending_sync_items(200)
+        sessions = []
+        for p in pending:
+            if p.get("event_type") == "session":
+                sess_payload = dict(p["payload"])
+                sess_payload["idempotency_key"] = p["idempotency_key"]
+                sessions.append(sess_payload)
+
         # Build payload
         payload: Dict[str, Any] = {
             "date": date_str,
+            "sessions": sessions,
             "apps": apps,
             "web": webs,
             "searches": searches
@@ -129,7 +139,6 @@ class SyncClient:
                 agent_config.save()
 
                 # Mark pending sync queue items as completed
-                pending = self.storage.get_pending_sync_items(50)
                 if pending:
                     self.storage.mark_items_synced([p["id"] for p in pending])
 

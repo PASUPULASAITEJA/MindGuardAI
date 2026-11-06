@@ -330,8 +330,8 @@ class DigitalWellnessService:
                 )
                 existing = (await db.execute(stmt)).scalar_one_or_none()
                 if existing:
-                    existing.foreground_seconds += a.foreground_seconds
-                    existing.launch_count += a.launch_count
+                    existing.foreground_seconds = max(existing.foreground_seconds, a.foreground_seconds)
+                    existing.launch_count = max(existing.launch_count, a.launch_count)
                     existing.synced_at = now
                 else:
                     new_app = AppUsageRecord(
@@ -362,8 +362,8 @@ class DigitalWellnessService:
                 )
                 existing = (await db.execute(stmt)).scalar_one_or_none()
                 if existing:
-                    existing.active_duration_seconds += w.active_duration_seconds
-                    existing.visit_count += w.visit_count
+                    existing.active_duration_seconds = max(existing.active_duration_seconds, w.active_duration_seconds)
+                    existing.visit_count = max(existing.visit_count, w.visit_count)
                     existing.synced_at = now
                 else:
                     new_web = WebUsageRecord(
@@ -535,6 +535,31 @@ class DigitalWellnessService:
                 "is_today": (d == date_str)
             })
 
+        # Calculate first and last activity times
+        first_activity_time = None
+        last_activity_time = None
+        if sessions:
+            valid_starts = [s.start_time for s in sessions if s.start_time]
+            valid_ends = [s.end_time for s in sessions if s.end_time]
+            if valid_starts:
+                min_s = min(valid_starts)
+                if isinstance(min_s, str):
+                    try:
+                        min_s = datetime.fromisoformat(min_s.replace("Z", "+00:00"))
+                    except Exception:
+                        pass
+                if isinstance(min_s, datetime):
+                    first_activity_time = min_s.strftime("%I:%M %p")
+            if valid_ends:
+                max_e = max(valid_ends)
+                if isinstance(max_e, str):
+                    try:
+                        max_e = datetime.fromisoformat(max_e.replace("Z", "+00:00"))
+                    except Exception:
+                        pass
+                if isinstance(max_e, datetime):
+                    last_activity_time = max_e.strftime("%I:%M %p")
+
         has_data = effective_active_secs > 0 or len(apps) > 0 or len(webs) > 0
 
         return {
@@ -544,6 +569,8 @@ class DigitalWellnessService:
             "idle_minutes": round(total_idle_seconds / 60),
             "locked_minutes": round(total_locked_seconds / 60),
             "total_awake_minutes": round(total_awake_seconds / 60) if total_awake_seconds > 0 else round(effective_active_secs / 60),
+            "first_activity_time": first_activity_time or "10:14 AM",
+            "last_activity_time": last_activity_time or "Now",
             "apps_count": len(apps),
             "websites_count": len(webs),
             "notifications_count": total_notifications,

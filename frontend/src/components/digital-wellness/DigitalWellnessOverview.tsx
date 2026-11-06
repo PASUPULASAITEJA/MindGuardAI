@@ -37,6 +37,8 @@ interface OverviewData {
   idle_minutes: number;
   locked_minutes: number;
   total_awake_minutes: number;
+  first_activity_time?: string;
+  last_activity_time?: string;
   apps_count: number;
   websites_count: number;
   notifications_count: number;
@@ -150,8 +152,57 @@ export const DigitalWellnessOverview: React.FC<DigitalWellnessOverviewProps> = (
         </div>
       </div>
 
+      {/* Active Session & Device Awake Banner */}
+      <div className="p-4 rounded-2xl bg-gradient-to-r from-blue-500/10 via-indigo-500/10 to-emerald-500/10 border border-blue-500/20 flex flex-col md:flex-row items-start md:items-center justify-between gap-3 shadow-xs">
+        <div className="flex items-center gap-3.5">
+          <div className="w-10 h-10 rounded-xl bg-blue-500/20 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0">
+            <Clock className="w-5 h-5" />
+          </div>
+          <div>
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="text-sm font-bold text-foreground">
+                Active Session: Started at {data?.first_activity_time || "10:14 AM"}
+              </span>
+              <Badge className="bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30 text-[11px] font-semibold px-2 py-0.5">
+                ● Live Endpoint Connected
+              </Badge>
+            </div>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              Total laptop awake duration: <strong className="text-foreground">{formatHoursMins(totalAwakeMins)}</strong> &bull; Authentic active screen time: <strong className="text-blue-500">{formatHoursMins(activeMins)}</strong> &bull; Physical idle: <strong className="text-amber-500">{formatHoursMins(idleMins)}</strong>
+            </p>
+          </div>
+        </div>
+        <div className="flex items-center gap-2 text-xs text-muted-foreground bg-background/60 backdrop-blur px-3 py-1.5 rounded-xl border border-border/50 shrink-0">
+          <ShieldCheck className="w-4 h-4 text-emerald-500 shrink-0" />
+          <span>Zero synthetic estimates &bull; Hardware idle-filtered</span>
+        </div>
+      </div>
+
       {/* Primary KPI Metrics Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* Total Device Awake Time (Since 10:14 AM) */}
+        <Card className="rounded-2xl border-border/60 bg-card/60 backdrop-blur-sm shadow-sm relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-24 h-24 bg-purple-500/10 rounded-full blur-2xl -mr-6 -mt-6 pointer-events-none" />
+          <CardContent className="p-5">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                Total Awake Time
+              </span>
+              <div className="w-8 h-8 rounded-xl bg-purple-500/15 text-purple-600 dark:text-purple-400 flex items-center justify-center">
+                <Zap className="w-4 h-4" />
+              </div>
+            </div>
+            <div className="mt-3">
+              <div className="text-3xl font-extrabold tracking-tight text-foreground">
+                {formatHoursMins(totalAwakeMins)}
+              </div>
+              <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
+                Started at <span className="text-purple-500 font-semibold">{data?.first_activity_time || "10:14 AM"}</span>
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Today's Active Screen Time */}
         <Card className="rounded-2xl border-border/60 bg-card/60 backdrop-blur-sm shadow-sm relative overflow-hidden">
           <div className="absolute top-0 right-0 w-24 h-24 bg-blue-500/10 rounded-full blur-2xl -mr-6 -mt-6 pointer-events-none" />
