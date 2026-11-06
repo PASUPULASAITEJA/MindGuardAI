@@ -88,14 +88,7 @@ export const CircadianTimelineView: React.FC = () => {
   const { user } = useAuth();
 
   const [loading, setLoading] = useState(true);
-  const [data, setData] = useState<any>(() => {
-    try {
-      const cached = localStorage.getItem("mindguard_screen_summary_cache");
-      return cached ? JSON.parse(cached) : null;
-    } catch {
-      return null;
-    }
-  });
+  const [data, setData] = useState<any>(null);
   const [refreshing, setRefreshing] = useState(false);
   const [isEyeBreakOpen, setIsEyeBreakOpen] = useState(false);
   const [customContinuousMins, setCustomContinuousMins] = useState<number | null>(null);
