@@ -6,6 +6,10 @@ import LandingPage from "./pages/public/LandingPage";
 import Login from "./pages/auth/Login";
 import Register from "./pages/auth/Register";
 import ForgotPassword from "./pages/auth/ForgotPassword";
+import PrivacyPolicyPage from "./pages/public/PrivacyPolicyPage";
+import TermsAndConditionsPage from "./pages/public/TermsAndConditionsPage";
+import NotFoundPage from "./pages/public/NotFoundPage";
+import CookieConsentBanner from "./components/public/CookieConsentBanner";
 import ProtectedRoute from "./components/ProtectedRoute";
 import DashboardLayout from "./components/layouts/DashboardLayout";
 import { ThemeProvider } from "./contexts/ThemeContext";
@@ -47,6 +51,8 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/privacy" element={<PrivacyPolicyPage />} />
+            <Route path="/terms" element={<TermsAndConditionsPage />} />
 
 
             {/* STUDENT Guarded Pathways */}
@@ -299,9 +305,10 @@ function App() {
               }
             />
 
-            {/* Catch-all Redirect */}
-            <Route path="*" element={<Navigate to="/login" replace />} />
+            {/* 404 Dedicated Not Found Page */}
+            <Route path="*" element={<NotFoundPage />} />
           </Routes>
+          <CookieConsentBanner />
         </Router>
       </ThemeProvider>
     </QueryClientProvider>

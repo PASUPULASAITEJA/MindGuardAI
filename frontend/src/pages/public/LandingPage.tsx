@@ -827,12 +827,14 @@ export const LandingPage: React.FC = () => {
                 </button>
               </li>
               <li>
-                <button
-                  onClick={() => scrollToSection("privacy")}
-                  className="hover:text-primary transition-colors"
-                >
+                <Link to="/privacy" className="hover:text-primary transition-colors">
                   Privacy Policy
-                </button>
+                </Link>
+              </li>
+              <li>
+                <Link to="/terms" className="hover:text-primary transition-colors">
+                  Terms of Service
+                </Link>
               </li>
               <li>
                 <Link to="/student/privacy" className="hover:text-primary transition-colors">

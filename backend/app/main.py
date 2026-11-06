@@ -109,6 +109,14 @@ async def add_request_id_and_process_time(request: Request, call_next):
     response.headers["X-Request-ID"] = request_id
     response.headers["X-Process-Time"] = f"{process_time:.4f}s"
     
+    # Production Security & HTTPS Hardening Headers
+    response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains; preload"
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "DENY"
+    response.headers["X-XSS-Protection"] = "1; mode=block"
+    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+    response.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()"
+    
     logger.info(
         f"Processed request: {request.method} {request.url.path} - status: {response.status_code} "
         f"- ID: {request_id} - time: {process_time:.4f}s"
