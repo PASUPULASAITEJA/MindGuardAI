@@ -6,7 +6,9 @@ import joblib
 
 try:
     import torch
+    import transformers
     from transformers import AutoTokenizer, AutoModelForSequenceClassification
+    transformers.logging.set_verbosity_error()
     TORCH_AVAILABLE = True
 except (ImportError, OSError, Exception):
     TORCH_AVAILABLE = False

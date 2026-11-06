@@ -1,5 +1,9 @@
 import os
 os.environ.setdefault("OPENBLAS_NUM_THREADS", "1")
+os.environ.setdefault("TRANSFORMERS_NO_ADVISORY_WARNINGS", "1")
+_mpl_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".cache", "matplotlib"))
+os.makedirs(_mpl_dir, exist_ok=True)
+os.environ.setdefault("MPLCONFIGDIR", _mpl_dir)
 import logging
 import time
 import uuid
