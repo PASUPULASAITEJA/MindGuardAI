@@ -126,7 +126,13 @@ async def sync_device_telemetry(
         
         # Verify device belongs to user
         from sqlalchemy import select, and_
-        stmt = select(Device).where(and_(Device.id == device_id, Device.user_id == UUID(user_id_str)))
+        from app.services.digital_wellness_service import get_id_variants
+        stmt = select(Device).where(
+            and_(
+                Device.id.in_(get_id_variants(device_id)),
+                Device.user_id.in_(get_id_variants(user_id_str))
+            )
+        )
         device = (await db.execute(stmt)).scalar_one_or_none()
         if not device:
             raise HTTPException(status_code=404, detail="Device not found for authenticated student.")

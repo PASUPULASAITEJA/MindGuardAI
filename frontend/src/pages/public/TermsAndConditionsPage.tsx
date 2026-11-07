@@ -6,6 +6,9 @@ import { Badge } from "@/components/ui/badge";
 import { DotGridBackground } from "@/components/ui/DotGridBackground";
 
 export const TermsAndConditionsPage: React.FC = () => {
+  React.useEffect(() => {
+    document.title = "Terms & Conditions | MindGuard AI";
+  }, []);
   return (
     <div className="relative min-h-screen bg-background text-foreground py-12 px-4 sm:px-6 lg:px-8">
       <DotGridBackground />

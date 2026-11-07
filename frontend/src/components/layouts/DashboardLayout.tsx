@@ -36,6 +36,13 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ title, subtitl
   // Seamlessly track active student computer / browser session time across all guarded views
   useScreenTimeTracker();
 
+  // Dynamically synchronize document head title with current page title
+  React.useEffect(() => {
+    if (title) {
+      document.title = `${title} | MindGuard AI`;
+    }
+  }, [title]);
+
   // Close mobile drawer on route navigation or desktop switch
   React.useEffect(() => {
     if (isMobileMenuOpen) {

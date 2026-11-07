@@ -32,6 +32,10 @@ export const Login: React.FC = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
 
+  React.useEffect(() => {
+    document.title = "Sign In | MindGuard AI";
+  }, []);
+
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);

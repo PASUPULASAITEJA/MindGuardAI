@@ -1,0 +1,21 @@
+{
+  "short_name": "MindGuard",
+  "name": "MindGuard AI — Student Wellbeing & Digital Phenotyping",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "type": "image/svg+xml",
+      "sizes": "any"
+    },
+    {
+      "src": "/logo.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": "/",
+  "background_color": "#0B0F19",
+  "theme_color": "#7657E8",
+  "display": "standalone",
+  "orientation": "portrait"
+}

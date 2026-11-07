@@ -66,6 +66,10 @@ export const LandingPage: React.FC = () => {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
 
+  useEffect(() => {
+    document.title = "MindGuard AI | Calm Intelligence for Student Wellbeing";
+  }, []);
+
   const scrollToSection = (id: string) => {
     const el = document.getElementById(id);
     if (el) {

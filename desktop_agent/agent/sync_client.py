@@ -21,18 +21,19 @@ class SyncClient:
             "Content-Type": "application/json"
         })
 
-    def auto_register_device(self, student_email: Optional[str] = None) -> bool:
+    def auto_register_device(self, student_email: Optional[str] = None, force: bool = False) -> bool:
         """
         Automatically registers device with backend using zero-prompt auto-pairing.
         Eliminates the need for manual student email/password typing.
         """
-        if agent_config.device_id and agent_config.device_token:
+        if not force and agent_config.device_id and agent_config.device_token and not agent_config.device_token.startswith("local_"):
             return True
 
         url = f"{agent_config.api_base_url}/devices/auto-register"
         params = {}
-        if student_email or agent_config.user_email:
-            params["student_email"] = student_email or agent_config.user_email
+        target_email = student_email or agent_config.user_email
+        if target_email:
+            params["student_email"] = target_email
 
         payload = {
             "device_identifier": agent_config.device_identifier,
@@ -43,7 +44,7 @@ class SyncClient:
         }
 
         try:
-            res = self.session.post(url, json=payload, params=params, timeout=5)
+            res = self.session.post(url, json=payload, params=params, timeout=10)
             if res.status_code in [200, 201]:
                 data = res.json()
                 agent_config.device_id = str(data["device_id"])
@@ -51,8 +52,10 @@ class SyncClient:
                 agent_config.save()
                 logger.info(f"Successfully auto-registered device {agent_config.device_id}")
                 return True
-        except Exception:
-            pass
+            else:
+                logger.warning(f"Auto-register responded with status {res.status_code}: {res.text}")
+        except Exception as e:
+            logger.warning(f"Could not reach auto-register endpoint: {e}")
 
         return False
 
@@ -144,8 +147,20 @@ class SyncClient:
 
                 logger.info(f"Synced telemetry: {data.get('records_ingested')}")
                 return True
-            elif res.status_code == 401:
-                logger.warning("Device token unauthorized. Device may have been unlinked from portal.")
+            elif res.status_code in [401, 404]:
+                logger.warning(f"Device unauthorized or not found ({res.status_code}). Triggering automatic re-registration...")
+                if self.auto_register_device(force=True):
+                    retry_url = f"{agent_config.api_base_url}/devices/{agent_config.device_id}/sync"
+                    retry_headers = {"X-Device-Token": agent_config.device_token}
+                    retry_res = self.session.post(retry_url, json=payload, headers=retry_headers, timeout=15)
+                    if retry_res.status_code == 200:
+                        retry_data = retry_res.json()
+                        agent_config.is_monitoring_paused = retry_data.get("is_monitoring_paused", False)
+                        agent_config.save()
+                        if pending:
+                            self.storage.mark_items_synced([p["id"] for p in pending])
+                        logger.info(f"Successfully re-registered and synced: {retry_data.get('records_ingested')}")
+                        return True
             else:
                 logger.error(f"Sync error {res.status_code}: {res.text}")
         except Exception as e:

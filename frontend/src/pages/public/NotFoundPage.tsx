@@ -9,6 +9,10 @@ import { DotGridBackground } from "@/components/ui/DotGridBackground";
 export const NotFoundPage: React.FC = () => {
   const navigate = useNavigate();
 
+  React.useEffect(() => {
+    document.title = "404 - Page Not Found | MindGuard AI";
+  }, []);
+
   return (
     <div className="relative min-h-screen bg-background text-foreground flex items-center justify-center p-4 sm:p-6 lg:p-8">
       <DotGridBackground />
