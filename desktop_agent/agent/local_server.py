@@ -51,7 +51,7 @@ class LocalTelemetryHandler(BaseHTTPRequestHandler):
             self.wfile.write(b'{"error": "invalid_json"}')
             return
 
-        today_str = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+        today_str = datetime.now().strftime("%Y-%m-%d")
 
         if self.path == "/api/web-activity":
             domain = payload.get("domain", "").strip().lower()

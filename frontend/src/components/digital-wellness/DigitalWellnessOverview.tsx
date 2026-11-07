@@ -42,6 +42,8 @@ interface OverviewData {
   apps_count: number;
   websites_count: number;
   notifications_count: number;
+  available_dates?: string[];
+  latest_active_date?: string;
   daily_trend: Array<{
     date: string;
     active_minutes: number;
@@ -49,21 +51,26 @@ interface OverviewData {
   }>;
 }
 
-interface DigitalWellnessOverviewProps {
+export interface DigitalWellnessOverviewProps {
   onNavigateTab?: (tab: string) => void;
+  selectedDate?: string;
+  onSelectDate?: (date: string) => void;
 }
 
 export const DigitalWellnessOverview: React.FC<DigitalWellnessOverviewProps> = ({
-  onNavigateTab
+  onNavigateTab,
+  selectedDate,
+  onSelectDate,
 }) => {
   const [data, setData] = useState<OverviewData | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
-  const fetchOverview = async () => {
+  const fetchOverview = async (targetDate?: string) => {
     try {
       setRefreshing(true);
-      const res = await digitalWellnessAPI.getOverview();
+      const queryDate = targetDate !== undefined ? targetDate : selectedDate;
+      const res = await digitalWellnessAPI.getOverview(queryDate);
       setData(res);
     } catch (err) {
       console.error("Failed to fetch digital wellness overview:", err);
@@ -74,8 +81,8 @@ export const DigitalWellnessOverview: React.FC<DigitalWellnessOverviewProps> = (
   };
 
   useEffect(() => {
-    fetchOverview();
-  }, []);
+    fetchOverview(selectedDate);
+  }, [selectedDate]);
 
   const formatHoursMins = (mins: number) => {
     const h = Math.floor(mins / 60);
@@ -85,7 +92,11 @@ export const DigitalWellnessOverview: React.FC<DigitalWellnessOverviewProps> = (
     return `${h}h ${m}m`;
   };
 
-  if (!loading && (!data || !data.has_data)) {
+  const hasAnyHistory =
+    (data?.daily_trend || []).some((t) => t.active_minutes > 0) ||
+    Boolean(data?.available_dates?.length);
+
+  if (!loading && (!data || (!data.has_data && !hasAnyHistory))) {
     return (
       <div className="space-y-6">
         <div className="flex items-center justify-between pb-2 border-b border-border/40">
@@ -101,7 +112,7 @@ export const DigitalWellnessOverview: React.FC<DigitalWellnessOverviewProps> = (
           <Button
             variant="outline"
             size="sm"
-            onClick={fetchOverview}
+            onClick={() => fetchOverview(selectedDate)}
             disabled={refreshing}
             className="rounded-xl border-border/60 hover:bg-muted/50"
           >
@@ -142,7 +153,7 @@ export const DigitalWellnessOverview: React.FC<DigitalWellnessOverviewProps> = (
           <Button
             variant="outline"
             size="sm"
-            onClick={fetchOverview}
+            onClick={() => fetchOverview(selectedDate)}
             disabled={refreshing}
             className="rounded-xl border-border/60 hover:bg-muted/50"
           >
@@ -151,6 +162,33 @@ export const DigitalWellnessOverview: React.FC<DigitalWellnessOverviewProps> = (
           </Button>
         </div>
       </div>
+
+      {/* Zero active minutes notice for selected day if historical data exists */}
+      {!data?.has_data && (
+        <div className="p-4 rounded-2xl bg-blue-500/10 border border-blue-500/20 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-xs">
+          <div className="flex items-center gap-3">
+            <Activity className="w-5 h-5 text-blue-500 shrink-0" />
+            <div>
+              <p className="text-xs sm:text-sm font-semibold text-foreground">
+                Active telemetry listening for {selectedDate || data?.date}
+              </p>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Physical keyboard & mouse activity is actively sampled. Historical aggregates are preserved below.
+              </p>
+            </div>
+          </div>
+          {data?.latest_active_date && onSelectDate && (
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => onSelectDate(data.latest_active_date!)}
+              className="rounded-xl border-blue-500/30 text-blue-600 dark:text-blue-400 hover:bg-blue-500/10 text-xs shrink-0 font-semibold"
+            >
+              View Recent Active Day ({data.latest_active_date}) &rarr;
+            </Button>
+          )}
+        </div>
+      )}
 
       {/* Active Session & Device Awake Banner */}
       <div className="p-4 rounded-2xl bg-gradient-to-r from-blue-500/10 via-indigo-500/10 to-emerald-500/10 border border-blue-500/20 flex flex-col md:flex-row items-start md:items-center justify-between gap-3 shadow-xs">

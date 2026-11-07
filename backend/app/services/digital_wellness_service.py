@@ -34,30 +34,33 @@ def hash_token(token: str) -> str:
     """Computes SHA-256 hash of device token for secure storage."""
     return hashlib.sha256(token.encode("utf-8")).hexdigest()
 
+def to_uuid(val: Any) -> Optional[UUID]:
+    """Safely converts an input (str, UUID, etc.) into a python UUID instance."""
+    if val is None:
+        return None
+    if isinstance(val, UUID):
+        return val
+    try:
+        return UUID(str(val).strip())
+    except Exception:
+        return None
+
 def get_id_variants(val: Any) -> list:
     """
-    Returns all compatible database representations for an ID (UUID object, hyphenated str, hex str).
-    Crucial for SQLite/PostgreSQL interop where IDs may be stored without hyphens (32-char hex)
-    or with hyphens (36-char standard UUID).
+    Returns UUID instances for database column matching.
+    Guarantees every element is a UUID object (with .hex attribute) so SQLAlchemy SQLite UUID processor does not fail.
     """
     if val is None:
         return []
-    variants = [val]
-    val_str = str(val).strip()
-    variants.append(val_str)
-    try:
-        u = UUID(val_str)
-        variants.extend([u, str(u), u.hex])
-    except Exception:
-        pass
-    seen = set()
-    res = []
-    for v in variants:
-        v_repr = str(v).lower()
-        if v_repr not in seen:
-            seen.add(v_repr)
-            res.append(v)
-    return res
+    if isinstance(val, (list, tuple, set)):
+        res = []
+        for item in val:
+            u = to_uuid(item)
+            if u is not None and u not in res:
+                res.append(u)
+        return res
+    u = to_uuid(val)
+    return [u] if u is not None else []
 
 class DigitalWellnessService:
     """
@@ -637,6 +640,13 @@ class DigitalWellnessService:
 
         has_data = effective_active_secs > 0 or len(apps) > 0 or len(webs) > 0
 
+        # Discover all dates with authentic telemetry for the student
+        dates_stmt = select(func.distinct(AppUsageRecord.date)).where(
+            AppUsageRecord.user_id.in_(u_vars)
+        ).order_by(desc(AppUsageRecord.date)).limit(14)
+        available_dates = list((await db.execute(dates_stmt)).scalars().all())
+        latest_active_date = available_dates[0] if available_dates else None
+
         return {
             "date": date_str,
             "has_data": has_data,
@@ -649,7 +659,9 @@ class DigitalWellnessService:
             "apps_count": len(apps),
             "websites_count": len(webs),
             "notifications_count": total_notifications,
-            "daily_trend": daily_trend
+            "daily_trend": daily_trend,
+            "available_dates": available_dates,
+            "latest_active_date": latest_active_date
         }
 
     async def get_application_analytics(
@@ -729,12 +741,21 @@ class DigitalWellnessService:
             for k, v in sorted(category_map.items(), key=lambda x: x[1], reverse=True)
         ]
 
+        # Discover all dates with authentic telemetry for the student
+        dates_stmt = select(func.distinct(AppUsageRecord.date)).where(
+            AppUsageRecord.user_id.in_(u_vars)
+        ).order_by(desc(AppUsageRecord.date)).limit(14)
+        available_dates = list((await db.execute(dates_stmt)).scalars().all())
+        latest_active_date = available_dates[0] if available_dates else None
+
         return {
             "date": date_str,
             "has_data": len(app_list) > 0,
             "total_app_minutes": round(total_seconds / 60),
             "applications": app_list,
-            "categories": categories
+            "categories": categories,
+            "available_dates": available_dates,
+            "latest_active_date": latest_active_date
         }
 
     async def get_website_analytics(

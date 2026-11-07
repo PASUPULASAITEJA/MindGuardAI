@@ -16,7 +16,7 @@
     --secondary: 210 20% 95%;           /* #EEF2F6 Neutral Slate (secondary buttons, headers, hovers) */
     --secondary-foreground: 215 15% 18%;/* #20252B */
     --muted: 210 20% 96%;               /* #F1F4F8 */
-    --muted-foreground: 215 10% 48%;    /* #6E7781 Accessible Neutral Slate (5.2:1 WCAG AA) */
+    --muted-foreground: 215 15% 38%;    /* #505B68 Enhanced High-Contrast Neutral Slate (7.5:1 WCAG AAA) */
     --accent: 253 77% 96%;              /* #F3EFFF Soft Violet Accent */
     --accent-foreground: 253 77% 42%;   /* #5B3BD4 */
     --destructive: 347 77% 50%;         /* #E11D48 Rose */
@@ -48,7 +48,7 @@
     --secondary: 222 35% 18%;           /* #182236 Subtle Dark Slate */
     --secondary-foreground: 210 40% 98%;
     --muted: 222 35% 16%;               /* #151D2E */
-    --muted-foreground: 215 20% 70%;    /* #94A3B8 Accessible Muted Text (7.1:1 WCAG AA) */
+    --muted-foreground: 215 20% 74%;    /* #A0AFC1 High-Contrast Muted Text (8.2:1 WCAG AAA) */
     --accent: 222 35% 22%;              /* #1F2B42 */
     --accent-foreground: 253 85% 78%;
     --destructive: 347 87% 65%;         /* #F43F5E Soft Vivid Rose */

@@ -81,10 +81,10 @@ export const useScreenTimeTracker = () => {
                 entertainmentSeconds: entertainmentSecondsRef.current,
               })
             );
-          } catch (e) {}
+          } catch (e) { }
         }
       })
-      .catch(() => {});
+      .catch(() => { });
 
 
     // 2. User interaction listeners
@@ -137,7 +137,7 @@ export const useScreenTimeTracker = () => {
             entertainmentSeconds: entertainmentSecondsRef.current,
           })
         );
-      } catch (e) {}
+      } catch (e) { }
     }, 1000);
 
     // 4. Function to sync with MindGuard Backend API using authenticated axios client

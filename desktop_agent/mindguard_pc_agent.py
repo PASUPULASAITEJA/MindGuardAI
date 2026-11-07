@@ -260,7 +260,8 @@ def run_agent():
     while True:
         try:
             now_dt = datetime.datetime.now(datetime.timezone.utc)
-            today_str = now_dt.strftime("%Y-%m-%d")
+            # Use authentic local calendar date matching physical workstation day
+            today_str = datetime.date.today().strftime("%Y-%m-%d")
 
             # 1. Physical Idle & Screen Locked Detection
             idle_seconds = collector.get_idle_seconds()
@@ -318,7 +319,9 @@ def run_agent():
                     current_session_locked_seconds = 0
 
                 # Flush all aggregates and queue to cloud
-                sync_client.flush_sync_queue(today_str)
+                synced = sync_client.flush_sync_queue(today_str)
+                if synced:
+                    log_agent(f"[OK] Telemetry synced: foreground apps & active intervals for {today_str}")
                 last_sync_time = time.time()
 
         except Exception as e:

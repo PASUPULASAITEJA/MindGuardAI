@@ -52,6 +52,8 @@ interface ApplicationData {
   total_app_minutes: number;
   applications: AppItem[];
   categories: CategorySummary[];
+  available_dates?: string[];
+  latest_active_date?: string;
 }
 
 const CATEGORY_COLORS: Record<string, string> = {
@@ -65,21 +67,28 @@ const CATEGORY_COLORS: Record<string, string> = {
   Other: "#64748b"
 };
 
-interface ApplicationAnalyticsViewProps {
+export interface ApplicationAnalyticsViewProps {
   onNavigateTab?: (tab: string) => void;
+  selectedDate?: string;
+  onSelectDate?: (date: string) => void;
 }
 
-export const ApplicationAnalyticsView: React.FC<ApplicationAnalyticsViewProps> = ({ onNavigateTab }) => {
+export const ApplicationAnalyticsView: React.FC<ApplicationAnalyticsViewProps> = ({
+  onNavigateTab,
+  selectedDate,
+  onSelectDate,
+}) => {
   const [data, setData] = useState<ApplicationData | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("ALL");
 
-  const fetchApps = async () => {
+  const fetchApps = async (targetDate?: string) => {
     try {
       setRefreshing(true);
-      const res = await digitalWellnessAPI.getApplications();
+      const queryDate = targetDate !== undefined ? targetDate : selectedDate;
+      const res = await digitalWellnessAPI.getApplications(queryDate);
       setData(res);
     } catch (err) {
       console.error("Failed to fetch application analytics:", err);
@@ -90,8 +99,8 @@ export const ApplicationAnalyticsView: React.FC<ApplicationAnalyticsViewProps> =
   };
 
   useEffect(() => {
-    fetchApps();
-  }, []);
+    fetchApps(selectedDate);
+  }, [selectedDate]);
 
   const formatHoursMins = (mins: number) => {
     const h = Math.floor(mins / 60);
@@ -136,7 +145,7 @@ export const ApplicationAnalyticsView: React.FC<ApplicationAnalyticsViewProps> =
           <Button
             variant="outline"
             size="sm"
-            onClick={fetchApps}
+            onClick={() => fetchApps(selectedDate)}
             disabled={refreshing}
             className="rounded-xl border-border/60 hover:bg-muted/50"
           >
@@ -144,11 +153,36 @@ export const ApplicationAnalyticsView: React.FC<ApplicationAnalyticsViewProps> =
             Refresh
           </Button>
         </div>
-        <EmptyStateCard
-          title="No application data available yet. Start monitoring to see your digital wellness analytics."
-          description="MindGuard desktop agent tracks foreground application windows with zero synthetic estimates."
-          onOpenDevices={onNavigateTab ? () => onNavigateTab("devices") : undefined}
-        />
+
+        {data?.latest_active_date && onSelectDate ? (
+          <div className="p-8 rounded-2xl bg-card border border-border/70 text-center space-y-4 max-w-xl mx-auto shadow-sm">
+            <div className="w-12 h-12 rounded-2xl bg-indigo-500/10 text-indigo-500 flex items-center justify-center mx-auto">
+              <Smartphone className="w-6 h-6" />
+            </div>
+            <div>
+              <h3 className="text-base font-bold text-foreground">
+                No Application Launches Recorded for {selectedDate || data?.date}
+              </h3>
+              <p className="text-xs text-muted-foreground mt-1.5 max-w-md mx-auto">
+                Live desktop agent is monitoring in background. You have detailed application metrics from your recent session.
+              </p>
+            </div>
+            <div className="pt-2">
+              <Button
+                onClick={() => onSelectDate(data.latest_active_date!)}
+                className="rounded-xl bg-primary text-primary-foreground text-xs font-semibold px-4 py-2 hover:bg-primary/90 shadow-sm"
+              >
+                View Recent Active Session ({data.latest_active_date}) &rarr;
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <EmptyStateCard
+            title="No application data available yet. Start monitoring to see your digital wellness analytics."
+            description="MindGuard desktop agent tracks foreground application windows with zero synthetic estimates."
+            onOpenDevices={onNavigateTab ? () => onNavigateTab("devices") : undefined}
+          />
+        )}
       </div>
     );
   }
