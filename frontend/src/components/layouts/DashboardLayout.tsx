@@ -118,7 +118,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ title, subtitl
       </main>
 
       {/* MOBILE BOTTOM TAB BAR (< md) */}
-      <nav className="fixed bottom-0 left-0 right-0 z-40 md:hidden bg-white/95 dark:bg-slate-950/95 backdrop-blur-lg border-t border-slate-200 dark:border-slate-800 px-2 py-1.5 flex items-center justify-around">
+      <nav className="fixed bottom-0 left-0 right-0 z-40 md:hidden bg-card/95 backdrop-blur-lg border-t border-border px-2 py-1.5 flex items-center justify-around">
         {mobileTabs.map((tab) => {
           const Icon = tab.icon;
           const isActive = location.pathname === tab.to;
@@ -129,8 +129,8 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ title, subtitl
               className={cn(
                 "flex flex-col items-center justify-center py-1 px-2.5 rounded-xl text-[10px] font-semibold transition-all",
                 isActive
-                  ? "text-indigo-600 dark:text-indigo-400 font-bold scale-105"
-                  : "text-slate-500 hover:text-slate-900 dark:hover:text-white"
+                  ? "text-primary font-bold scale-105"
+                  : "text-muted-foreground hover:text-foreground"
               )}
             >
               <Icon className="w-5 h-5 mb-0.5" />
