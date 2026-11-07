@@ -62,6 +62,28 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        teal: {
+          DEFAULT: "hsl(var(--brand-teal))",
+          foreground: "hsl(var(--brand-teal-foreground))",
+        },
+        sage: {
+          DEFAULT: "hsl(var(--brand-sage))",
+          foreground: "hsl(var(--foreground))",
+        },
+        orchid: {
+          DEFAULT: "hsl(var(--brand-orchid))",
+          foreground: "#ffffff",
+        },
+        amber: {
+          DEFAULT: "hsl(var(--brand-amber))",
+          foreground: "#ffffff",
+        },
+        navy: {
+          900: "#0B1120",
+          800: "#10172A",
+          700: "#151E34",
+          600: "#1E293B",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",

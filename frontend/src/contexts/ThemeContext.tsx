@@ -22,11 +22,13 @@ const getStoredTheme = (): Theme | null => {
 
 export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const storedTheme = getStoredTheme();
-  const [theme, setThemeState] = useState<Theme>(storedTheme ?? getSystemTheme());
+  // Primary student experience defaults to light unless stored user preference exists
+  const [theme, setThemeState] = useState<Theme>(storedTheme ?? "light");
   const [hasManualPreference, setHasManualPreference] = useState<boolean>(storedTheme !== null);
 
   const applyTheme = useCallback((nextTheme: Theme) => {
-    document.documentElement.classList.toggle("dark", nextTheme === "dark");
+    document.documentElement.classList.remove("light", "dark");
+    document.documentElement.classList.add(nextTheme);
     document.documentElement.style.colorScheme = nextTheme;
   }, []);
 
