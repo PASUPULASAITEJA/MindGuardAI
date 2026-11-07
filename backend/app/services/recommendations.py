@@ -100,8 +100,6 @@ class RecommendationService:
 
         # 2. Query latest assessment & emotional state
         latest_assessment = await assessment_repository.get_latest_for_student(db, student_id=student.id)
-        risk_tier = latest_assessment.risk_level.value if latest_assessment else "LOW"
-        wellness_score = latest_assessment.mental_wellness_score if latest_assessment else 75.0
 
         # Query latest emotion analysis
         stmt = (
@@ -113,6 +111,19 @@ class RecommendationService:
         )
         res = await db.execute(stmt)
         latest_emotion_obj = res.scalars().first()
+
+        # If student is brand new (zero assessments and zero check-ins), return empty recommendations without fake defaults
+        if not latest_assessment and not latest_emotion_obj:
+            return PersonalizedRecommendationsResponse(
+                risk_tier="UNASSESSED",
+                primary_emotion="unrecorded",
+                wellness_score=0.0,
+                rationale="Complete your first check-in or clinical screening to receive AI-calibrated recommendations.",
+                recommendations=[]
+            )
+
+        risk_tier = latest_assessment.risk_level.value if latest_assessment else "LOW"
+        wellness_score = latest_assessment.mental_wellness_score if latest_assessment else 50.0
         primary_emotion = (latest_emotion_obj.primary_emotion.lower() if latest_emotion_obj and latest_emotion_obj.primary_emotion else "calm")
 
         # If active recommendations already exist and are fresh (within 24 hours), return them

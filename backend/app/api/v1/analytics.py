@@ -53,13 +53,11 @@ async def get_institution_report(
     student_count_result = await db.execute(student_count_query)
     total_students = student_count_result.scalar() or 0
     
-    # Provide a default fallback if database is empty for visual showcase
+    # If no students have assessments in the window, count total active registered students
     if total_students == 0:
         db_student_count_query = select(func.count(User.id)).where(User.role == UserRole.STUDENT, User.is_active == True)
         db_student_count_result = await db.execute(db_student_count_query)
         total_students = db_student_count_result.scalar() or 0
-        if total_students == 0:
-            total_students = 1500
 
     # 2. Average mental wellness score
     wellness_avg_query = select(func.avg(Assessment.mental_wellness_score))

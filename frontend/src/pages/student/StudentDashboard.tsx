@@ -98,7 +98,8 @@ export const StudentDashboard: React.FC = () => {
 
   // Data Queries
   const { data: latestAssessment, isLoading: isLoadingAssessment } = useLatestAssessment();
-  const { data: recommendations = [], isLoading: isLoadingRecs } = useCurrentRecommendations();
+  const { data: recsData, isLoading: isLoadingRecs } = useCurrentRecommendations();
+  const activities = recsData?.activities || [];
   const { data: moodHistory = [], isLoading: isLoadingMood } = useMoodHistory("30d");
   const { data: trendData, isLoading: isLoadingTrends } = useWellnessTrends(selectedTimeframe);
 
@@ -135,9 +136,12 @@ export const StudentDashboard: React.FC = () => {
   const wellnessScore = rawScore !== null ? Math.min(100, Math.max(0, Math.round(rawScore))) : null;
   const wellnessClass = wellnessScore !== null ? classifyMentalWellness(wellnessScore) : null;
 
-  // Risk Level computation
-  const normalizedRisk: "LOW" | "MODERATE" | "HIGH" =
-    lateNightMins >= 120 || (latestAssessment?.risk_level as string) === "CRITICAL"
+  // Risk Level computation (strictly authentic: UNASSESSED if brand-new account with zero assessments)
+  const isAssessed = wellnessScore !== null || Boolean(latestAssessment);
+  const normalizedRisk: "LOW" | "MODERATE" | "HIGH" | "UNASSESSED" =
+    !isAssessed
+      ? "UNASSESSED"
+      : lateNightMins >= 120 || (latestAssessment?.risk_level as string) === "CRITICAL"
       ? "HIGH"
       : (latestAssessment?.risk_level as string) === "MEDIUM"
       ? "MODERATE"
@@ -298,7 +302,15 @@ export const StudentDashboard: React.FC = () => {
         <GSAPTilt maxTilt={8} scaleOnHover={1.02} className="h-full">
           <SpotlightCard
             className="p-5 h-full"
-            spotlightColor={normalizedRisk === "HIGH" ? "rgba(244, 63, 94, 0.15)" : normalizedRisk === "MODERATE" ? "rgba(245, 158, 11, 0.15)" : "rgba(16, 185, 129, 0.15)"}
+            spotlightColor={
+              normalizedRisk === "HIGH"
+                ? "rgba(244, 63, 94, 0.15)"
+                : normalizedRisk === "MODERATE"
+                ? "rgba(245, 158, 11, 0.15)"
+                : normalizedRisk === "LOW"
+                ? "rgba(16, 185, 129, 0.15)"
+                : "rgba(148, 163, 184, 0.15)"
+            }
           >
             <div className="flex items-center justify-between w-full">
               <div className="space-y-1.5">
@@ -306,35 +318,54 @@ export const StudentDashboard: React.FC = () => {
                   Risk Level
                 </span>
                 <div className="pt-0.5">
-                  <span
-                    className={cn(
-                      "inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wider border",
-                      normalizedRisk === "HIGH"
-                        ? "badge-elevated"
-                        : normalizedRisk === "MODERATE"
-                        ? "badge-moderate"
-                        : "badge-stable"
-                    )}
-                  >
+                  {normalizedRisk === "UNASSESSED" ? (
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wider border bg-secondary text-muted-foreground border-border">
+                      <span className="w-1.5 h-1.5 rounded-full shrink-0 bg-muted-foreground" />
+                      <span>Not Assessed</span>
+                    </span>
+                  ) : (
                     <span
                       className={cn(
-                        "w-1.5 h-1.5 rounded-full shrink-0",
+                        "inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wider border",
                         normalizedRisk === "HIGH"
-                          ? "bg-rose-500"
+                          ? "badge-elevated"
                           : normalizedRisk === "MODERATE"
-                          ? "bg-amber-500"
-                          : "bg-emerald-500"
+                          ? "badge-moderate"
+                          : "badge-stable"
                       )}
-                    />
-                    <span>{normalizedRisk}</span>
-                  </span>
+                    >
+                      <span
+                        className={cn(
+                          "w-1.5 h-1.5 rounded-full shrink-0",
+                          normalizedRisk === "HIGH"
+                            ? "bg-rose-500"
+                            : normalizedRisk === "MODERATE"
+                            ? "bg-amber-500"
+                            : "bg-emerald-500"
+                        )}
+                      />
+                      <span>{normalizedRisk}</span>
+                    </span>
+                  )}
                 </div>
-                <button
-                  onClick={() => setIsExplainOpen(true)}
-                  className="text-[11px] text-primary font-semibold hover:underline block pt-1"
-                >
-                  View SHAP Factors →
-                </button>
+                {normalizedRisk === "UNASSESSED" ? (
+                  <button
+                    onClick={() => {
+                      setSurveyType("phq-9");
+                      setIsSurveyOpen(true);
+                    }}
+                    className="text-[11px] text-primary font-semibold hover:underline block pt-1"
+                  >
+                    Take First Screener →
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => setIsExplainOpen(true)}
+                    className="text-[11px] text-primary font-semibold hover:underline block pt-1"
+                  >
+                    View SHAP Factors →
+                  </button>
+                )}
               </div>
               <div className="w-12 h-12 rounded-xl bg-secondary text-muted-foreground flex items-center justify-center shrink-0">
                 <Activity className="w-6 h-6 text-primary" />
@@ -825,72 +856,69 @@ export const StudentDashboard: React.FC = () => {
           <span className="text-xs text-muted-foreground font-medium">Calibrated by AI Coping Engine</span>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="p-5 rounded-2xl bg-card border border-border shadow-xs flex flex-col justify-between card-hover">
-            <div>
-              <span className="px-2.5 py-0.5 rounded-full bg-primary/10 text-primary text-[10px] font-bold uppercase tracking-wider">
-                Circadian Recovery
-              </span>
-              <h3 className="text-sm font-semibold text-foreground mt-2">
-                Digital Sunset Protocol
-              </h3>
-              <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
-                Step away from academic screen workloads 45 minutes before bedtime to accelerate melatonin release.
-              </p>
+        {activities.length === 0 ? (
+          <div className="p-8 rounded-2xl bg-card border border-dashed border-border/80 text-center space-y-3">
+            <Sparkles className="w-8 h-8 text-primary/60 mx-auto" />
+            <h3 className="text-sm font-bold text-foreground">Welcome to MindGuard AI!</h3>
+            <p className="text-xs text-muted-foreground max-w-md mx-auto leading-relaxed">
+              Your personalized wellness pathway will be calibrated automatically once you complete your first daily check-in or clinical screening.
+            </p>
+            <div className="flex items-center justify-center gap-3 pt-2">
+              <Button
+                size="sm"
+                onClick={() => navigate("/student/check-in")}
+                className="rounded-xl text-xs font-semibold h-8"
+              >
+                Start First Check-In
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => {
+                  setSurveyType("phq-9");
+                  setIsSurveyOpen(true);
+                }}
+                className="rounded-xl text-xs font-semibold h-8"
+              >
+                Take PHQ-9 Screener
+              </Button>
             </div>
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() => setIsBreathOpen(true)}
-              className="mt-4 rounded-xl text-xs font-semibold w-full"
-            >
-              Start Breathing Pacer
-            </Button>
           </div>
-
-          <div className="p-5 rounded-2xl bg-card border border-border shadow-xs flex flex-col justify-between card-hover">
-            <div>
-              <span className="px-2.5 py-0.5 rounded-full bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 text-[10px] font-bold uppercase tracking-wider">
-                Cognitive Reframing
-              </span>
-              <h3 className="text-sm font-semibold text-foreground mt-2">
-                Exam Stress Dialogue
-              </h3>
-              <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
-                Notice feelings of catastrophic thinking around upcoming assignments. Chat through them with the AI companion.
-              </p>
-            </div>
-            <Button
-              size="sm"
-              onClick={() => navigate("/student/chat")}
-              className="mt-4 bg-primary text-primary-foreground hover:bg-primary/90 rounded-xl text-xs font-semibold w-full"
-            >
-              Open AI Chatbot
-            </Button>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {activities.map((act, idx) => (
+              <div key={idx} className="p-5 rounded-2xl bg-card border border-border shadow-xs flex flex-col justify-between card-hover">
+                <div>
+                  <span className="px-2.5 py-0.5 rounded-full bg-primary/10 text-primary text-[10px] font-bold uppercase tracking-wider">
+                    {act.type || "Coping Tool"}
+                  </span>
+                  <h3 className="text-sm font-semibold text-foreground mt-2">
+                    {act.title}
+                  </h3>
+                  <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                    Evidence-based self-care activity tailored to your current wellbeing signals.
+                  </p>
+                </div>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => {
+                    if (act.url?.startsWith("/")) {
+                      navigate(act.url);
+                    } else if (act.url) {
+                      window.open(act.url, "_blank");
+                    } else {
+                      navigate("/student/resources");
+                    }
+                  }}
+                  className="mt-4 rounded-xl text-xs font-semibold w-full"
+                >
+                  Open Resource →
+                </Button>
+              </div>
+            ))}
           </div>
-
-          <div className="p-5 rounded-2xl bg-card border border-border shadow-xs flex flex-col justify-between card-hover">
-            <div>
-              <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[10px] font-bold uppercase tracking-wider">
-                Campus Care
-              </span>
-              <h3 className="text-sm font-semibold text-foreground mt-2">
-                Check-in with Counselor
-              </h3>
-              <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
-                Schedule a casual 20-minute chat with Dr. Radhika or campus counseling for guidance on time management.
-              </p>
-            </div>
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() => setIsBookingOpen(true)}
-              className="mt-4 rounded-xl text-xs font-semibold w-full"
-            >
-              Schedule Session
-            </Button>
-          </div>
-        </div>
+        )}
       </div>
 
       {/* Modals */}

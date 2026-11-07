@@ -40,9 +40,9 @@ async def get_current_recommendations(
     assessment = await assessment_repository.get_latest_for_student(db, student_id=current_user.id)
     
     if not assessment:
-        return recommendation_service.get_recommendations_for_profile(
+        return RecommendationResponse(
             risk_level=RiskLevel.LOW,
-            primary_emotion="joy"
+            activities=[]
         )
 
     # 2. Query latest primary emotion

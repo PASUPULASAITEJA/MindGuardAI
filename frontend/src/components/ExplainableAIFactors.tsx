@@ -353,6 +353,41 @@ export const ExplainableAIFactors: React.FC<ExplainableAIFactorsProps> = ({
     );
   }
 
+  // If no authentic data has been captured yet, show empty calibration state
+  if (!hasAssessment && lateNightMins === 0 && totalScreenMins === 0 && !surveyScore && !sentimentScore) {
+    return (
+      <Card className={`shadow-sm border-border/80 ${className}`}>
+        <CardHeader className="pb-3">
+          <div className="flex items-center gap-2">
+            <div className="p-1.5 rounded-lg bg-primary/10 text-primary">
+              <Brain className="h-4 w-4" />
+            </div>
+            <div>
+              <CardTitle className="text-sm font-extrabold text-foreground flex items-center gap-1.5">
+                What Affects Your Wellness Score
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-secondary text-muted-foreground tracking-wide">
+                  Awaiting Assessment
+                </span>
+              </CardTitle>
+              <CardDescription className="text-xs text-muted-foreground">
+                Feature attribution and explainable AI factors will generate after your first check-in
+              </CardDescription>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="p-6 rounded-xl bg-muted/20 border border-border/40 text-center space-y-2">
+            <Info className="w-6 h-6 mx-auto text-primary/70" />
+            <p className="text-xs font-semibold text-foreground">No assessment or check-in data recorded yet</p>
+            <p className="text-[11px] text-muted-foreground max-w-sm mx-auto">
+              Once you log your daily mood check-in or take a PHQ-9/GAD-7 screener, the Explainable AI engine will illustrate the exact behavioral and emotional factors driving your score.
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
   // --- Fallback Mode: Telemetry-driven Rule-based calculation if API is unavailable ---
   const circadianRisk = lateNightMins > 60 ? 32 : lateNightMins > 15 ? 18 : 6;
   const linguisticRisk = sentimentScore < -0.3 ? 38 : sentimentScore < 0.1 ? 22 : 8;
