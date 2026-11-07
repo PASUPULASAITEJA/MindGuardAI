@@ -164,7 +164,7 @@ export const ConsentSettingsManager: React.FC = () => {
               Granular Consent & Privacy Controls
             </CardTitle>
             <CardDescription className="text-xs md:text-sm">
-              Control the 4 data surfaces powering MindBridge AI. Changes are append-only and cryptographically logged.
+              Control the 4 data surfaces powering MindGuard AI. Changes are append-only and cryptographically logged.
             </CardDescription>
           </div>
           <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-primary/10 text-primary border border-primary/20 shrink-0 self-start sm:self-auto">
@@ -312,7 +312,7 @@ export const ConsentSettingsManager: React.FC = () => {
         <div className="p-3 rounded-xl bg-accent/20 border border-border/70 flex items-start gap-2.5 text-xs text-muted-foreground">
           <Info className="h-4 w-4 text-primary shrink-0 mt-0.5" />
           <span>
-            <strong className="text-foreground">Privacy Guarantee:</strong> MindBridge AI respects student autonomy. Revoking consent immediately blocks server endpoints from serving or processing the respective data category.
+            <strong className="text-foreground">Privacy Guarantee:</strong> MindGuard AI respects student autonomy. Revoking consent immediately blocks server endpoints from serving or processing the respective data category.
           </span>
         </div>
       </CardContent>

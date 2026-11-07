@@ -102,7 +102,7 @@ export const NotificationAnalyticsView: React.FC<NotificationAnalyticsViewProps>
               Privacy-Guaranteed Notification Counting
             </p>
             <p>
-              MindBridge tallies incoming event frequencies across system channels to analyze digital fatigue.
+              MindGuard tallies incoming event frequencies across system channels to analyze digital fatigue.
               Under strict privacy rules, notification bodies, private message contents, senders, and OTPs are never inspected or recorded.
             </p>
           </div>
@@ -110,7 +110,7 @@ export const NotificationAnalyticsView: React.FC<NotificationAnalyticsViewProps>
 
         <EmptyStateCard
           title="No notification telemetry recorded yet."
-          description="Ensure the MindBridge Desktop Agent is running with accessibility/notification permissions on your operating system."
+          description="Ensure the MindGuard Desktop Agent is running with accessibility/notification permissions on your operating system."
           onOpenDevices={onNavigateTab ? () => onNavigateTab("devices") : undefined}
         />
       </div>

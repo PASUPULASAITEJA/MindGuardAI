@@ -18,6 +18,7 @@ import {
   PhoneCall,
 } from "lucide-react";
 import ThemeToggle from "@/components/layouts/ThemeToggle";
+import { telemetry } from "@/services/telemetry";
 
 const loginSchema = z.object({
   email: z.string().min(2, "Please enter your username or university email address."),
@@ -34,6 +35,7 @@ export const Login: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [honey, setHoney] = useState("");
 
   const {
     register,
@@ -50,7 +52,14 @@ export const Login: React.FC = () => {
   });
 
   const onSubmit = async (data: LoginFormValues) => {
+    // Bot & spam mitigation: reject if honeypot was populated
+    if (honey) {
+      console.warn("Automated bot pattern trapped.");
+      return;
+    }
+
     setIsSubmitting(true);
+    telemetry.trackEvent("security", "login_attempt");
     try {
       const loggedUser = await login(data.email, data.password, rememberMe);
 
@@ -120,18 +129,18 @@ export const Login: React.FC = () => {
               <img src="/logo.png" alt="MindGuardAI Logo" className="w-full h-full object-contain" />
             </div>
             <div className="flex items-center gap-1 font-extrabold text-xl tracking-tight text-white">
-              <span>MindBridge</span>
-              <span className="text-white/90 font-serif italic text-2xl ml-0.5">AI</span>
+              <span>MindGuard</span>
+              <span className="text-white/90">AI</span>
             </div>
           </Link>
 
           {/* Headline & Body */}
           <div className="mt-14 max-w-md">
             <h2 className="text-3xl font-extrabold text-white leading-snug">
-              A better connection to your wellbeing.
+              Protecting student wellbeing — before crisis hits.
             </h2>
             <p className="text-sm text-white/70 mt-3 max-w-xs leading-relaxed">
-              MindBridge AI detects burnout early using authentic circadian analysis, emotion reflection, and validated PHQ-9 &amp; GAD-7 screeners.
+              MindGuardAI detects burnout early using emotion NLP, sleep analysis, and validated PHQ-9 & GAD-7 screeners.
             </p>
           </div>
 
@@ -186,8 +195,8 @@ export const Login: React.FC = () => {
             <img src="/logo.png" alt="MindGuardAI Logo" className="w-full h-full object-contain" />
           </div>
           <div className="flex items-center gap-1 font-bold text-lg tracking-tight text-foreground">
-            <span>MindBridge</span>
-            <span className="text-primary font-serif italic text-xl ml-0.5">AI</span>
+            <span>MindGuard</span>
+            <span className="text-primary">AI</span>
           </div>
         </Link>
 
@@ -205,6 +214,18 @@ export const Login: React.FC = () => {
 
           {/* Form */}
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            {/* Bot & Spam honeypot trap */}
+            <input
+              type="text"
+              name="institution_verification_code"
+              value={honey}
+              onChange={(e) => setHoney(e.target.value)}
+              tabIndex={-1}
+              autoComplete="off"
+              className="hidden opacity-0 absolute -z-50 pointer-events-none"
+              aria-hidden="true"
+            />
+
             {/* Email field */}
             <div className="space-y-1.5">
               <label

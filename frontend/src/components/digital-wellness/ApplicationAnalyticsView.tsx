@@ -146,7 +146,7 @@ export const ApplicationAnalyticsView: React.FC<ApplicationAnalyticsViewProps> =
         </div>
         <EmptyStateCard
           title="No application data available yet. Start monitoring to see your digital wellness analytics."
-          description="MindBridge desktop agent tracks foreground application windows with zero synthetic estimates."
+          description="MindGuard desktop agent tracks foreground application windows with zero synthetic estimates."
           onOpenDevices={onNavigateTab ? () => onNavigateTab("devices") : undefined}
         />
       </div>

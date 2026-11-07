@@ -166,10 +166,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
             {!isCollapsed && (
               <div className="flex flex-col min-w-0">
                 <span className="font-bold text-sm tracking-tight text-foreground truncate">
-                  MindBridge<span className="text-primary font-serif italic text-base ml-0.5">AI</span>
+                  MindGuard<span className="text-primary">AI</span>
                 </span>
-                <span className="text-[10px] text-muted-foreground uppercase tracking-widest font-medium truncate -mt-0.5">
-                  Calm Intelligence
+                <span className="text-[10px] text-muted-foreground uppercase tracking-wider font-semibold truncate -mt-0.5">
+                  Campus Care
                 </span>
               </div>
             )}

@@ -76,9 +76,14 @@ async def get_current_user(
 def require_role(allowed_roles: List[UserRole]):
     """
     FastAPI RBAC dependency creator to enforce required user roles on endpoints.
+    Super Admin automatically inherits all Administrator authorizations.
     """
+    effective_roles = set(allowed_roles)
+    if UserRole.ADMIN in effective_roles:
+        effective_roles.add(UserRole.SUPER_ADMIN)
+
     async def dependency(current_user: User = Depends(get_current_user)) -> User:
-        if current_user.role not in allowed_roles:
+        if current_user.role not in effective_roles:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail={

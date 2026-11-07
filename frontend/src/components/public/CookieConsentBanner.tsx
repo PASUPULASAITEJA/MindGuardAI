@@ -55,7 +55,7 @@ export const CookieConsentBanner: React.FC = () => {
         </div>
 
         <p className="text-xs text-muted-foreground leading-relaxed">
-          MindBridge AI uses essential local storage and session tokens strictly to keep your account authenticated and protect your digital phenotyping privacy. Read our{" "}
+          MindGuard AI uses essential local storage and session tokens strictly to keep your account authenticated and protect your digital phenotyping privacy. Read our{" "}
           <Link to="/privacy" className="text-primary underline font-medium hover:text-primary/80">
             Privacy Policy
           </Link>{" "}

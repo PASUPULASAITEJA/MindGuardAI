@@ -54,8 +54,13 @@ class MLService:
                 
                 # 1. Load fine-tuned DistilBERT without uninitialized head warnings
                 if os.path.exists(self.nlp_hf_dir):
-                    self.tokenizer = AutoTokenizer.from_pretrained(self.nlp_hf_dir)
-                    self.emotion_model = AutoModelForSequenceClassification.from_pretrained(self.nlp_hf_dir)
+                    tok_file = os.path.join(self.nlp_hf_dir, "tokenizer.json")
+                    if os.path.exists(tok_file):
+                        from transformers import PreTrainedTokenizerFast
+                        self.tokenizer = PreTrainedTokenizerFast(tokenizer_file=tok_file)
+                    else:
+                        self.tokenizer = AutoTokenizer.from_pretrained(self.nlp_hf_dir, local_files_only=True)
+                    self.emotion_model = AutoModelForSequenceClassification.from_pretrained(self.nlp_hf_dir, local_files_only=True)
                 else:
                     from transformers import AutoConfig
                     self.tokenizer = AutoTokenizer.from_pretrained("distilbert-base-uncased")

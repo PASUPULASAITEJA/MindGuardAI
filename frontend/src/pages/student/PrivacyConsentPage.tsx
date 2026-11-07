@@ -35,7 +35,7 @@ export const PrivacyConsentPage: React.FC = () => {
               <ShinyText text="Privacy & Consent Governance Center" />
             </h1>
             <p className="text-xs text-muted-foreground">
-              Understand how your wellbeing data is protected, encrypted, and managed across MindBridge AI.
+              Understand how your wellbeing data is protected, encrypted, and managed across MindGuardAI.
             </p>
           </div>
         </div>

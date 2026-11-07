@@ -118,7 +118,7 @@ export const OnboardingConsentModal: React.FC<OnboardingConsentModalProps> = ({
             Privacy by Design (Consent First)
           </div>
           <h2 className="text-xl sm:text-2xl font-black text-foreground">
-            Welcome to MindBridge AI
+            Welcome to MindGuard AI
           </h2>
           <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
             You maintain sovereign ownership of your mental health records. Before beginning your wellness journey, please customize your data-sharing permissions below. You can update these anytime in your Settings.

@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import ThemeToggle from "@/components/layouts/ThemeToggle";
 import api from "@/services/api";
+import { telemetry } from "@/services/telemetry";
 
 const registerSchema = z
   .object({
@@ -59,6 +60,7 @@ export const Register: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [honey, setHoney] = useState("");
   const [rosterStatus, setRosterStatus] = useState<{
     checked: boolean;
     isAuthorized: boolean;
@@ -117,12 +119,18 @@ export const Register: React.FC = () => {
   }, [typedEmail, setValue]);
 
   const onSubmit = async (data: RegisterFormValues) => {
+    if (honey) {
+      console.warn("Automated bot pattern trapped.");
+      return;
+    }
+
     setIsSubmitting(true);
+    telemetry.trackEvent("security", "registration_attempt");
     try {
       await registerUser(data.email, data.password, data.role as UserRole, data.full_name);
       toast({
         title: "Account Created Successfully",
-        description: `Welcome to MindBridge AI, ${data.full_name}!`,
+        description: `Welcome to MindGuardAI, ${data.full_name}!`,
         variant: "success",
       });
       navigate(
@@ -156,8 +164,8 @@ export const Register: React.FC = () => {
               <img src="/logo.png" alt="MindGuardAI Logo" className="w-full h-full object-contain" />
             </div>
             <div className="flex items-center gap-1 font-extrabold text-xl tracking-tight text-white">
-              <span>MindBridge</span>
-              <span className="text-white/90 font-serif italic text-2xl ml-0.5">AI</span>
+              <span>MindGuard</span>
+              <span className="text-white/90">AI</span>
             </div>
           </Link>
 
@@ -222,8 +230,8 @@ export const Register: React.FC = () => {
             <img src="/logo.png" alt="MindGuardAI Logo" className="w-full h-full object-contain" />
           </div>
           <div className="flex items-center gap-1 font-bold text-lg tracking-tight text-foreground">
-            <span>MindBridge</span>
-            <span className="text-primary font-serif italic text-xl ml-0.5">AI</span>
+            <span>MindGuard</span>
+            <span className="text-primary">AI</span>
           </div>
         </Link>
 
@@ -241,6 +249,18 @@ export const Register: React.FC = () => {
 
           {/* Form */}
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            {/* Bot & Spam honeypot trap */}
+            <input
+              type="text"
+              name="institution_verification_code"
+              value={honey}
+              onChange={(e) => setHoney(e.target.value)}
+              tabIndex={-1}
+              autoComplete="off"
+              className="hidden opacity-0 absolute -z-50 pointer-events-none"
+              aria-hidden="true"
+            />
+
             {/* Full Name field */}
             <div className="space-y-1.5">
               <label

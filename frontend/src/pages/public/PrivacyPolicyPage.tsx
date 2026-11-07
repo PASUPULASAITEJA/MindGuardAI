@@ -31,7 +31,7 @@ export const PrivacyPolicyPage: React.FC = () => {
         {/* Header */}
         <div className="text-center space-y-3">
           <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
-            MindBridge AI Privacy Policy
+            MindGuard AI Privacy Policy
           </h1>
           <p className="text-muted-foreground text-sm max-w-2xl mx-auto">
             Our unwavering commitment to student confidentiality, digital phenotyping transparency, and complete personal data autonomy.
@@ -88,7 +88,7 @@ export const PrivacyPolicyPage: React.FC = () => {
               1. Information We Collect
             </h2>
             <p>
-              MindBridge AI only captures telemetry necessary for student mental wellness assessment, digital phenotyping, and circadian health insights:
+              MindGuard AI only captures telemetry necessary for student mental wellness assessment, digital phenotyping, and circadian health insights:
             </p>
             <ul className="list-disc list-inside space-y-1 pl-2">
               <li><strong>Screen & Session Telemetry:</strong> Device awake intervals, active foreground application interaction, and OS-level physical idle duration (keyboard/mouse inactivity).</li>
@@ -146,7 +146,7 @@ export const PrivacyPolicyPage: React.FC = () => {
         {/* Footer CTA */}
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-border/40">
           <p className="text-xs text-muted-foreground">
-            &copy; {new Date().getFullYear()} MindBridge AI &bull; Student Mental Wellness Platform
+            &copy; {new Date().getFullYear()} MindGuard AI &bull; NMIMS Capstone Project
           </p>
           <div className="flex items-center gap-3">
             <Link to="/terms">

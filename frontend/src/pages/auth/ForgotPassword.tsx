@@ -12,6 +12,7 @@ import api from "@/services/api";
 export const ForgotPassword: React.FC = () => {
   const { toast } = useToast();
   const [email, setEmail] = useState("");
+  const [honey, setHoney] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [resetToken, setResetToken] = useState<string | null>(null);
 
@@ -23,7 +24,15 @@ export const ForgotPassword: React.FC = () => {
 
   const handleRequestToken = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email) return;
+    if (honey) return;
+    if (!email || !email.includes("@")) {
+      toast({
+        title: "Valid Email Required",
+        description: "Please enter your valid university email address.",
+        variant: "destructive",
+      });
+      return;
+    }
 
     setIsSubmitting(true);
     try {
@@ -118,7 +127,7 @@ export const ForgotPassword: React.FC = () => {
             </div>
           </div>
           <h1 className="text-3xl font-extrabold tracking-tight text-foreground">
-            MindBridge<span className="text-primary font-serif italic text-3xl ml-0.5">AI</span>
+            MindGuard<span className="text-primary">AI</span>
           </h1>
           <p className="text-xs text-muted-foreground mt-1.5 font-medium">Self-Service Account Recovery</p>
         </div>
@@ -150,7 +159,7 @@ export const ForgotPassword: React.FC = () => {
                 <CheckCircle2 className="h-8 w-8" />
               </div>
               <p className="text-xs text-foreground/80 leading-relaxed">
-                Your password has been successfully updated. You can now log into your MindBridge AI portal.
+                Your password has been successfully updated. You can now log into your MindGuardAI portal.
               </p>
               <div className="pt-2">
                 <Link to="/login">
@@ -212,6 +221,17 @@ export const ForgotPassword: React.FC = () => {
             </form>
           ) : (
             <form onSubmit={handleRequestToken}>
+              {/* Bot & Spam honeypot trap */}
+              <input
+                type="text"
+                name="institution_verification_code"
+                value={honey}
+                onChange={(e) => setHoney(e.target.value)}
+                tabIndex={-1}
+                autoComplete="off"
+                className="hidden opacity-0 absolute -z-50 pointer-events-none"
+                aria-hidden="true"
+              />
               <CardContent className="space-y-4">
                 <FormItem>
                   <Label htmlFor="email" className="text-xs font-semibold text-foreground">Institutional Email</Label>

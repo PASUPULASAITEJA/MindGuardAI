@@ -45,10 +45,10 @@ export const TopNav: React.FC<TopNavProps> = ({ title, subtitle, onMenuClick }) 
               </button>
             )}
             <div>
-              <h2 className="leading-tight text-sm md:text-base font-bold text-foreground tracking-tight">
+              <h2 className="leading-tight text-sm md:text-base font-semibold text-foreground">
                 {title}
               </h2>
-              <p className="text-[11px] text-muted-foreground hidden sm:block font-normal">
+              <p className="text-[11px] text-muted-foreground hidden sm:block">
                 {subtitle}
               </p>
             </div>

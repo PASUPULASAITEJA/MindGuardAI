@@ -22,8 +22,7 @@ const getStoredTheme = (): Theme | null => {
 
 export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const storedTheme = getStoredTheme();
-  // Primary student experience defaults to warm ivory Light mode
-  const [theme, setThemeState] = useState<Theme>(storedTheme ?? "light");
+  const [theme, setThemeState] = useState<Theme>(storedTheme ?? getSystemTheme());
   const [hasManualPreference, setHasManualPreference] = useState<boolean>(storedTheme !== null);
 
   const applyTheme = useCallback((nextTheme: Theme) => {
