@@ -18,11 +18,29 @@ export default defineConfig({
         target: 'http://127.0.0.1:8000',
         changeOrigin: true,
         secure: false,
+        configure: (proxy) => {
+          proxy.on('error', (err: any) => {
+            if (err?.code === 'ECONNREFUSED' || err?.code === 'ECONNRESET' || err?.code === 'ECONNABORTED') {
+              // Gracefully handle backend offline or client disconnect without noisy stack traces
+              return;
+            }
+            console.warn('[vite proxy error /api]:', err?.message || err);
+          });
+        },
       },
       '/ws': {
         target: 'ws://127.0.0.1:8000',
         ws: true,
         changeOrigin: true,
+        configure: (proxy) => {
+          proxy.on('error', (err: any) => {
+            if (err?.code === 'ECONNREFUSED' || err?.code === 'ECONNRESET' || err?.code === 'ECONNABORTED') {
+              // Gracefully handle backend WebSocket offline or tab close
+              return;
+            }
+            console.warn('[vite proxy error /ws]:', err?.message || err);
+          });
+        },
       },
     },
   },
