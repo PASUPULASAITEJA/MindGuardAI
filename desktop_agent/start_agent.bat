@@ -14,3 +14,4 @@ if exist "..\backend\.venv\Scripts\python.exe" (
     python mindguard_pc_agent.py
 )
 pause
+

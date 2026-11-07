@@ -11,6 +11,7 @@ from fastapi import FastAPI, Request, Response, status
 from fastapi.responses import JSONResponse
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
+from starlette.middleware.gzip import GZipMiddleware
 from sqlalchemy.exc import SQLAlchemyError
 
 from app.core.config import settings
@@ -35,6 +36,7 @@ from app.api.v1.academic import router as academic_router
 from app.api.v1.devices import router as devices_router
 from app.api.v1.digital_wellness import router as digital_wellness_router
 from app.middleware.audit_logging import AuditLoggingMiddleware
+from app.middleware.rate_limiting import RateLimitingMiddleware
 
 from contextlib import asynccontextmanager
 from app.ml.inference import ml_service
@@ -46,31 +48,32 @@ logger = logging.getLogger("mindguard-api")
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Perform startup routines
-    logger.info("Starting up: preloading machine learning models...")
-    ml_service.load_models()
-    
-    try:
-        from app.db.session import async_engine, Base
-        from sqlalchemy import text
-        import app.models
-        async with async_engine.begin() as conn:
-            await conn.run_sync(Base.metadata.create_all)
-            # Ensure severity column exists in alerts table for SQLite
-            try:
-                await conn.execute(text("ALTER TABLE alerts ADD COLUMN severity VARCHAR(50) DEFAULT 'HIGH'"))
-            except Exception:
-                pass
-            try:
-                await conn.execute(text("ALTER TABLE alerts ADD COLUMN counselor_id CHAR(32)"))
-            except Exception:
-                pass
-            try:
-                await conn.execute(text("ALTER TABLE alerts ADD COLUMN resolved_at DATETIME"))
-            except Exception:
-                pass
-        logger.info("Database schema initialized and verified.")
-    except Exception as e:
-        logger.error(f"Database initialization error: {e}")
+    if os.environ.get("TESTING") != "true":
+        logger.info("Starting up: preloading machine learning models...")
+        ml_service.load_models()
+        
+        try:
+            from app.db.session import async_engine, Base
+            from sqlalchemy import text
+            import app.models
+            async with async_engine.begin() as conn:
+                await conn.run_sync(Base.metadata.create_all)
+                # Ensure severity column exists in alerts table for SQLite
+                try:
+                    await conn.execute(text("ALTER TABLE alerts ADD COLUMN severity VARCHAR(50) DEFAULT 'HIGH'"))
+                except Exception:
+                    pass
+                try:
+                    await conn.execute(text("ALTER TABLE alerts ADD COLUMN counselor_id CHAR(32)"))
+                except Exception:
+                    pass
+                try:
+                    await conn.execute(text("ALTER TABLE alerts ADD COLUMN resolved_at DATETIME"))
+                except Exception:
+                    pass
+            logger.info("Database schema initialized and verified.")
+        except Exception as e:
+            logger.error(f"Database initialization error: {e}")
         
     yield
     # Perform shutdown cleanups if any
@@ -83,7 +86,7 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-# 1. Configure CORS Middleware
+# 1. Configure CORS & Security Middlewares
 # Wildcards are disallowed; origins are restricted to configured values.
 app.add_middleware(
     CORSMiddleware,
@@ -92,6 +95,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+app.add_middleware(GZipMiddleware, minimum_size=1000)
+app.add_middleware(RateLimitingMiddleware, auth_limit_per_min=20, api_limit_per_min=300)
 app.add_middleware(AuditLoggingMiddleware)
 
 # 2. Configure Request ID and Timing Middleware

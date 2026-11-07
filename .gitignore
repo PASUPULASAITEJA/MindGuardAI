@@ -6,9 +6,12 @@
 # Local SQLite Databases & Runtime DB Storage
 *.db
 *.db-journal
+*.db-shm
+*.db-wal
 *.sqlite
 *.sqlite-journal
 *.sqlite3
+backups/
 
 # Agent Tooling, Caches & Buffers
 .agent/
