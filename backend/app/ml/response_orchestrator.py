@@ -173,6 +173,20 @@ class BuiltinEmpatheticGenerator(BaseLLMProvider):
         history = context.get("recent_history", [])
         last_user_msg = (messages[-1]["content"] if messages else "").lower()
 
+        # Non-Diagnostic Gate: Explicitly prevents AI from claiming to diagnose mental disorders
+        diagnostic_triggers = [
+            "diagnose", "do i have depression", "do i have anxiety", "do i have adhd",
+            "do i have bipolar", "am i depressed", "am i bipolar", "am i mentally ill",
+            "give me a diagnosis", "can you diagnose"
+        ]
+        if any(trigger in last_user_msg for trigger in diagnostic_triggers):
+            return (
+                "I completely understand why you are asking, but as an AI wellness companion, I cannot diagnose medical or psychiatric conditions. "
+                "Official clinical diagnoses can only be made by a licensed clinical psychologist, psychiatrist, or medical physician through comprehensive evaluation.\n\n"
+                "If you are experiencing persistent shifts in your mood, sleep, or ability to focus, I encourage you to schedule a confidential appointment with our campus counseling team in the **Counselor Connect** tab. "
+                "In the meantime, I am here to help you track your feelings, manage daily academic stress, and practice evidence-based coping tools."
+            )
+
         # 0. Hinglish Cultural & Code-Mixed Empathetic Dialogue
         if is_hinglish_message(last_user_msg):
             # Hinglish Gratitude
@@ -568,7 +582,10 @@ class ResponseOrchestrator:
         system_prompt = (
             "You are MindGuardAI, an empathetic student mental wellness companion. "
             "Your role is to offer warm, supportive, active listening and evidence-based coping strategies. "
-            "Never diagnose medical conditions. Keep responses concise, student-friendly, and compassionate."
+            "Under no circumstances should you claim to diagnose, cure, or treat mental illnesses or psychological disorders. "
+            "Never provide false reassurance in moments of distress (e.g. do not say 'everything will definitely be fine'). "
+            "Always maintain non-stigmatizing, compassionate, and non-judgmental language. "
+            "For medical diagnoses, clinical treatment, or crisis support, always direct students to licensed campus counselors or emergency resources."
         )
 
         messages = []

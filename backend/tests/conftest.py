@@ -8,4 +8,4 @@ from app.ml.inference import ml_service
 def mock_ml_models_loading(monkeypatch):
     """Bypasses heavy PyTorch model weights disk reading during automated tests."""
     monkeypatch.setattr(ml_service, "load_models", MagicMock())
-    ml_service.models_loaded = True
+    ml_service.models_loaded = False
