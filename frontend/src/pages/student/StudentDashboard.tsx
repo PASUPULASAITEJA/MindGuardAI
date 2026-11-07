@@ -6,7 +6,6 @@ import { useLatestAssessment, useWellnessTrends } from "@/hooks/usePredictions";
 import { useCurrentRecommendations } from "@/hooks/useRecommendations";
 import { useMoodHistory } from "@/hooks/useMood";
 import { useAuth } from "@/contexts/AuthContext";
-import { useScreenTimeTracker } from "@/hooks/useScreenTimeTracker";
 import { classifyMentalWellness } from "@/utils/wellness";
 import { cn } from "@/utils/cn";
 import { chatAPI, consentRecordsAPI } from "@/services/api";
@@ -70,8 +69,6 @@ export const StudentDashboard: React.FC = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-
-  useScreenTimeTracker();
 
   // Modals
   const [isSOSOpen, setIsSOSOpen] = useState(false);

@@ -34,7 +34,11 @@ interface SearchAnalyticsData {
   engine_breakdown: Array<{ engine: string; count: number }>;
 }
 
-export const SearchAnalyticsView: React.FC = () => {
+interface SearchAnalyticsViewProps {
+  onNavigateTab?: (tab: string) => void;
+}
+
+export const SearchAnalyticsView: React.FC<SearchAnalyticsViewProps> = ({ onNavigateTab }) => {
   const [data, setData] = useState<SearchAnalyticsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -170,6 +174,7 @@ export const SearchAnalyticsView: React.FC = () => {
         <EmptyStateCard
           title="No search analytics available yet."
           description="Enable academic search tracking in Privacy Settings and browse Google, Bing, or DuckDuckGo with the MindGuard extension."
+          onOpenDevices={onNavigateTab ? () => onNavigateTab("privacy") : undefined}
         />
       ) : (
         <>

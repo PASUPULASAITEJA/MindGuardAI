@@ -43,7 +43,11 @@ interface NotificationData {
   hourly_trend: HourlyItem[];
 }
 
-export const NotificationAnalyticsView: React.FC = () => {
+interface NotificationAnalyticsViewProps {
+  onNavigateTab?: (tab: string) => void;
+}
+
+export const NotificationAnalyticsView: React.FC<NotificationAnalyticsViewProps> = ({ onNavigateTab }) => {
   const [data, setData] = useState<NotificationData | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -107,6 +111,7 @@ export const NotificationAnalyticsView: React.FC = () => {
         <EmptyStateCard
           title="No notification telemetry recorded yet."
           description="Ensure the MindGuard Desktop Agent is running with accessibility/notification permissions on your operating system."
+          onOpenDevices={onNavigateTab ? () => onNavigateTab("devices") : undefined}
         />
       </div>
     );

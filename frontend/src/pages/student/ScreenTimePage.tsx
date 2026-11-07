@@ -129,10 +129,18 @@ export const ScreenTimePage: React.FC = () => {
         {activeTab === "overview" && (
           <DigitalWellnessOverview onNavigateTab={(t) => setActiveTab(t as TabId)} />
         )}
-        {activeTab === "applications" && <ApplicationAnalyticsView />}
-        {activeTab === "websites" && <WebsiteAnalyticsView />}
-        {activeTab === "searches" && <SearchAnalyticsView />}
-        {activeTab === "notifications" && <NotificationAnalyticsView />}
+        {activeTab === "applications" && (
+          <ApplicationAnalyticsView onNavigateTab={(t) => setActiveTab(t as TabId)} />
+        )}
+        {activeTab === "websites" && (
+          <WebsiteAnalyticsView onNavigateTab={(t) => setActiveTab(t as TabId)} />
+        )}
+        {activeTab === "searches" && (
+          <SearchAnalyticsView onNavigateTab={(t) => setActiveTab(t as TabId)} />
+        )}
+        {activeTab === "notifications" && (
+          <NotificationAnalyticsView onNavigateTab={(t) => setActiveTab(t as TabId)} />
+        )}
         {activeTab === "circadian" && <CircadianTimelineView />}
         {activeTab === "devices" && <DeviceManagementView />}
         {activeTab === "privacy" && <PrivacyConsentView />}

@@ -19,6 +19,7 @@ import {
   Monitor,
 } from "lucide-react";
 import { cn } from "@/utils/cn";
+import { useScreenTimeTracker } from "@/hooks/useScreenTimeTracker";
 
 interface DashboardLayoutProps {
   title: string;
@@ -31,6 +32,9 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ title, subtitl
   const location = useLocation();
   const { user } = useAuth();
   const { isDesktop } = useMobileDetect();
+
+  // Seamlessly track active student computer / browser session time across all guarded views
+  useScreenTimeTracker();
 
   // Close mobile drawer on route navigation or desktop switch
   React.useEffect(() => {

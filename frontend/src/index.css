@@ -4,50 +4,50 @@
 
 @layer base {
   :root {
-    /* MindGuardAI Design System — Day Mood (Clinical Daylight) */
-    --background: 210 40% 98%;          /* #F8FAFC */
-    --foreground: 222 47% 11%;          /* #0F172A */
+    /* MindBridge AI Design System — Soft Daylight */
+    --background: 210 40% 98%;          /* #F8FAFC Soft White */
+    --foreground: 222 47% 11%;          /* #10172A Deep Navy Slate */
     --card: 0 0% 100%;                  /* #FFFFFF */
     --card-foreground: 222 47% 11%;
     --popover: 0 0% 100%;
     --popover-foreground: 222 47% 11%;
-    --primary: 221 83% 53%;             /* Royal Indigo */
-    --primary-foreground: 210 40% 98%;
-    --secondary: 210 40% 96%;           /* #F1F5F9 */
-    --secondary-foreground: 222 47% 11%;
+    --primary: 253 77% 63%;             /* #7657E8 Violet Accent */
+    --primary-foreground: 0 0% 100%;
+    --secondary: 169 76% 41%;           /* #19B99A Teal Secondary Accent */
+    --secondary-foreground: 0 0% 100%;
     --muted: 210 40% 96%;               /* #F1F5F9 */
     --muted-foreground: 215 16% 45%;    /* Subdued Slate (5.8:1 WCAG AA) */
-    --accent: 210 40% 96%;
-    --accent-foreground: 222 47% 11%;
+    --accent: 253 77% 96%;
+    --accent-foreground: 253 77% 40%;
     --destructive: 347 77% 50%;         /* Rose-600 */
     --destructive-foreground: 210 40% 98%;
     --border: 214 32% 91%;              /* #E2E8F0 */
     --input: 214 32% 91%;
-    --ring: 221 83% 53%;
+    --ring: 253 77% 63%;
     --radius: 0.75rem;                  /* 12px base border radius */
   }
 
   .dark {
-    /* MindGuardAI Design System — Night Mood (Deep Midnight Sanctuary) */
-    --background: 225 43% 5%;           /* #070A11 */
-    --foreground: 210 40% 98%;          /* #F8FAFC */
-    --card: 223 45% 9%;                 /* #0D1322 */
+    /* MindBridge AI Design System — Deep Navy Sanctuary */
+    --background: 222 47% 11%;          /* #10172A Deep Navy Primary Background */
+    --foreground: 210 40% 98%;          /* #F8FAFC Soft White */
+    --card: 222 47% 14%;                 /* #151E34 Deep Navy Card Surface */
     --card-foreground: 210 40% 98%;
-    --popover: 223 45% 9%;
+    --popover: 222 47% 14%;
     --popover-foreground: 210 40% 98%;
-    --primary: 217 91% 60%;             /* Vivid Indigo Dark */
-    --primary-foreground: 225 43% 5%;
-    --secondary: 217 33% 14%;           /* #172033 */
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217 33% 14%;
-    --muted-foreground: 215 20% 65%;    /* #94A3B8 (6.4:1 WCAG AA) */
-    --accent: 217 33% 14%;
+    --primary: 253 77% 65%;             /* #7657E8 Violet Primary Accent */
+    --primary-foreground: 0 0% 100%;
+    --secondary: 169 76% 41%;           /* #19B99A Teal Secondary Accent */
+    --secondary-foreground: 0 0% 100%;
+    --muted: 222 40% 18%;               /* Slate muted */
+    --muted-foreground: 215 20% 70%;    /* #94A3B8 (7.1:1 WCAG AA contrast) */
+    --accent: 222 40% 20%;
     --accent-foreground: 210 40% 98%;
     --destructive: 347 87% 65%;         /* Soft Vivid Rose */
     --destructive-foreground: 210 40% 98%;
-    --border: 217 33% 17%;              /* #1E293B */
-    --input: 217 33% 17%;
-    --ring: 217 91% 60%;
+    --border: 222 40% 20%;              /* Deep Navy border */
+    --input: 222 40% 20%;
+    --ring: 253 77% 65%;
   }
 }
 

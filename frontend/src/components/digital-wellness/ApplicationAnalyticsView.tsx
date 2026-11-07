@@ -65,7 +65,11 @@ const CATEGORY_COLORS: Record<string, string> = {
   Other: "#64748b"
 };
 
-export const ApplicationAnalyticsView: React.FC = () => {
+interface ApplicationAnalyticsViewProps {
+  onNavigateTab?: (tab: string) => void;
+}
+
+export const ApplicationAnalyticsView: React.FC<ApplicationAnalyticsViewProps> = ({ onNavigateTab }) => {
   const [data, setData] = useState<ApplicationData | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -143,6 +147,7 @@ export const ApplicationAnalyticsView: React.FC = () => {
         <EmptyStateCard
           title="No application data available yet. Start monitoring to see your digital wellness analytics."
           description="MindGuard desktop agent tracks foreground application windows with zero synthetic estimates."
+          onOpenDevices={onNavigateTab ? () => onNavigateTab("devices") : undefined}
         />
       </div>
     );

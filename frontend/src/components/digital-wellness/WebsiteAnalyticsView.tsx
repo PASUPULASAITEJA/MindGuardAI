@@ -32,7 +32,11 @@ interface WebAnalyticsData {
   }>;
 }
 
-export const WebsiteAnalyticsView: React.FC = () => {
+interface WebsiteAnalyticsViewProps {
+  onNavigateTab?: (tab: string) => void;
+}
+
+export const WebsiteAnalyticsView: React.FC<WebsiteAnalyticsViewProps> = ({ onNavigateTab }) => {
   const [data, setData] = useState<WebAnalyticsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -81,6 +85,7 @@ export const WebsiteAnalyticsView: React.FC = () => {
         <EmptyStateCard
           title="No activity data available yet. Start monitoring to see your digital wellness analytics."
           description="Domain-level browsing duration and visit counts will appear here once you browse with the MindGuard Chrome/Edge extension active."
+          onOpenDevices={onNavigateTab ? () => onNavigateTab("devices") : undefined}
         />
       </div>
     );

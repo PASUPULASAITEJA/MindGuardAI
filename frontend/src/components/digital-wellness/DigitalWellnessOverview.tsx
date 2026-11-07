@@ -161,7 +161,7 @@ export const DigitalWellnessOverview: React.FC<DigitalWellnessOverviewProps> = (
           <div>
             <div className="flex items-center gap-2 flex-wrap">
               <span className="text-sm font-bold text-foreground">
-                Active Session: Started at {data?.first_activity_time || "10:14 AM"}
+                Active Session: {data?.first_activity_time ? `Started at ${data.first_activity_time}` : "Active Today"}
               </span>
               <Badge className="bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30 text-[11px] font-semibold px-2 py-0.5">
                 ● Live Endpoint Connected
@@ -197,7 +197,11 @@ export const DigitalWellnessOverview: React.FC<DigitalWellnessOverviewProps> = (
                 {formatHoursMins(totalAwakeMins)}
               </div>
               <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
-                Started at <span className="text-purple-500 font-semibold">{data?.first_activity_time || "10:14 AM"}</span>
+                {data?.first_activity_time ? (
+                  <>Started at <span className="text-purple-500 font-semibold">{data.first_activity_time}</span></>
+                ) : (
+                  <span>Active telemetry session</span>
+                )}
               </p>
             </div>
           </CardContent>
