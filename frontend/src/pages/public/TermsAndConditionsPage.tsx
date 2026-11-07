@@ -33,10 +33,10 @@ export const TermsAndConditionsPage: React.FC = () => {
             Terms and Conditions
           </h1>
           <p className="text-muted-foreground text-sm max-w-2xl mx-auto">
-            Please read these terms carefully before accessing or registering endpoints with the MindGuard AI platform.
+            Please read these terms carefully before accessing or registering endpoints with the MindBridge AI platform.
           </p>
           <p className="text-xs text-muted-foreground">
-            Last Updated: November 6, 2026 &bull; Version 2.2.0
+            Last Updated: November 7, 2026 &bull; Version 2.2.0
           </p>
         </div>
 
@@ -46,7 +46,7 @@ export const TermsAndConditionsPage: React.FC = () => {
           <div className="text-xs leading-relaxed space-y-1">
             <strong className="font-semibold block text-sm">Clinical & Emergency Services Disclaimer</strong>
             <p>
-              MindGuard AI is an academic and clinical decision-support platform designed to assist university wellness professionals.
+              MindBridge AI is an academic and clinical decision-support platform designed to assist university wellness professionals.
               <strong> It is NOT an emergency response system or a substitute for urgent clinical diagnosis.</strong> If you or someone you know is in immediate life-threatening danger, please contact local emergency services (112 / 911 / 988 Suicide & Crisis Lifeline) or your campus crisis hotline immediately.
             </p>
           </div>
@@ -60,7 +60,7 @@ export const TermsAndConditionsPage: React.FC = () => {
               1. Acceptance of Terms
             </h2>
             <p>
-              By accessing MindGuard AI, creating a student or counselor account, or installing the MindGuard desktop agent / browser extension, you agree to abide by these Terms and our Privacy Policy. If you do not agree, you must discontinue platform use and uninstall client software.
+              By accessing MindBridge AI, creating a student or counselor account, or installing the MindBridge desktop agent / browser extension, you agree to abide by these Terms and our Privacy Policy. If you do not agree, you must discontinue platform use and uninstall client software.
             </p>
           </section>
 
@@ -70,7 +70,7 @@ export const TermsAndConditionsPage: React.FC = () => {
               2. Permitted Student and Institutional Use
             </h2>
             <p>
-              MindGuard AI is provided for enrolled university students, authorized counselors, and designated campus administrators. Users agree to:
+              MindBridge AI is provided for enrolled university students, authorized counselors, and designated campus administrators. Users agree to:
             </p>
             <ul className="list-disc list-inside space-y-1 pl-2">
               <li>Use the platform exclusively on personal or institutional devices owned or authorized by the student.</li>
@@ -94,7 +94,7 @@ export const TermsAndConditionsPage: React.FC = () => {
               4. Intellectual Property & Research Rights
             </h2>
             <p>
-              All proprietary algorithms, machine learning models (DistilBERT classification, PHQ/GAD correlation engines), and visual interfaces are the intellectual property of the MindGuard AI research team. De-identified statistical metrics may be used for academic validation and research defense.
+              All proprietary algorithms, machine learning models (DistilBERT classification, PHQ/GAD correlation engines), and visual interfaces are the intellectual property of the MindBridge AI research team. De-identified statistical metrics may be used for academic validation and research defense.
             </p>
           </section>
 
@@ -111,7 +111,7 @@ export const TermsAndConditionsPage: React.FC = () => {
         {/* Footer */}
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-border/40">
           <p className="text-xs text-muted-foreground">
-            &copy; {new Date().getFullYear()} MindGuard AI &bull; NMIMS Capstone Project
+            &copy; {new Date().getFullYear()} MindBridge AI &bull; Student Mental Wellness Platform
           </p>
           <div className="flex items-center gap-3">
             <Link to="/privacy">

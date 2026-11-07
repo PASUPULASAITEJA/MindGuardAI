@@ -120,18 +120,18 @@ export const Login: React.FC = () => {
               <img src="/logo.png" alt="MindGuardAI Logo" className="w-full h-full object-contain" />
             </div>
             <div className="flex items-center gap-1 font-extrabold text-xl tracking-tight text-white">
-              <span>MindGuard</span>
-              <span className="text-white/90">AI</span>
+              <span>MindBridge</span>
+              <span className="text-white/90 font-serif italic text-2xl ml-0.5">AI</span>
             </div>
           </Link>
 
           {/* Headline & Body */}
           <div className="mt-14 max-w-md">
             <h2 className="text-3xl font-extrabold text-white leading-snug">
-              Protecting student wellbeing — before crisis hits.
+              A better connection to your wellbeing.
             </h2>
             <p className="text-sm text-white/70 mt-3 max-w-xs leading-relaxed">
-              MindGuardAI detects burnout early using emotion NLP, sleep analysis, and validated PHQ-9 & GAD-7 screeners.
+              MindBridge AI detects burnout early using authentic circadian analysis, emotion reflection, and validated PHQ-9 &amp; GAD-7 screeners.
             </p>
           </div>
 
@@ -186,8 +186,8 @@ export const Login: React.FC = () => {
             <img src="/logo.png" alt="MindGuardAI Logo" className="w-full h-full object-contain" />
           </div>
           <div className="flex items-center gap-1 font-bold text-lg tracking-tight text-foreground">
-            <span>MindGuard</span>
-            <span className="text-primary">AI</span>
+            <span>MindBridge</span>
+            <span className="text-primary font-serif italic text-xl ml-0.5">AI</span>
           </div>
         </Link>
 

@@ -180,7 +180,7 @@ export const PrivacyConsentView: React.FC = () => {
           <CardHeader className="pb-3">
             <CardTitle className="text-sm font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-2">
               <CheckCircle2 className="w-4 h-4" />
-              What MindGuard Collects (Transparently)
+              What MindBridge Collects (Transparently)
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-2 text-xs text-muted-foreground">
@@ -207,7 +207,7 @@ export const PrivacyConsentView: React.FC = () => {
           <CardHeader className="pb-3">
             <CardTitle className="text-sm font-bold text-rose-600 dark:text-rose-400 flex items-center gap-2">
               <XCircle className="w-4 h-4" />
-              What MindGuard NEVER Collects (Absolute Guarantee)
+              What MindBridge NEVER Collects (Absolute Guarantee)
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-2 text-xs text-muted-foreground">

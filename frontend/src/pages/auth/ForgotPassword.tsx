@@ -118,7 +118,7 @@ export const ForgotPassword: React.FC = () => {
             </div>
           </div>
           <h1 className="text-3xl font-extrabold tracking-tight text-foreground">
-            MindGuard<span className="text-primary">AI</span>
+            MindBridge<span className="text-primary font-serif italic text-3xl ml-0.5">AI</span>
           </h1>
           <p className="text-xs text-muted-foreground mt-1.5 font-medium">Self-Service Account Recovery</p>
         </div>
@@ -150,7 +150,7 @@ export const ForgotPassword: React.FC = () => {
                 <CheckCircle2 className="h-8 w-8" />
               </div>
               <p className="text-xs text-foreground/80 leading-relaxed">
-                Your password has been successfully updated. You can now log into your MindGuardAI portal.
+                Your password has been successfully updated. You can now log into your MindBridge AI portal.
               </p>
               <div className="pt-2">
                 <Link to="/login">

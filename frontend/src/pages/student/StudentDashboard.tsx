@@ -472,23 +472,23 @@ export const StudentDashboard: React.FC = () => {
       </div>
 
       {/* Screen Time & Digital Wellbeing Quick Glance */}
-      <div className="p-4 rounded-2xl bg-gradient-to-r from-blue-500/10 via-indigo-500/10 to-purple-500/10 border border-blue-500/20 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+      <div className="p-5 rounded-2xl bg-card border border-border shadow-xs flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div className="flex items-center gap-3.5">
-          <div className="w-11 h-11 rounded-xl bg-blue-500/15 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0">
+          <div className="w-11 h-11 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
             <Monitor className="w-5 h-5" />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h3 className="text-sm font-bold text-foreground">Screen Time & Digital Phenotyping</h3>
-              <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-blue-500/15 text-blue-600 dark:text-blue-400 border border-blue-500/20">
+              <h3 className="text-sm font-bold text-foreground">Screen Time &amp; Digital Phenotyping</h3>
+              <span className="text-[10px] font-semibold px-2.5 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">
                 {totalMins > 0 ? `${Math.floor(totalMins / 60)}h ${totalMins % 60}m Active` : isConnected ? "Standby" : "Not Connected"}
               </span>
             </div>
             <p className="text-xs text-muted-foreground mt-0.5">
               {totalMins > 0 ? (
-                `Breakdown: Studying (${academicMins}m) • Playing (${log?.entertainment_usage_minutes || 0}m) • Late Night (${lateNightMins}m)`
+                `Breakdown: Studying (${academicMins}m) &bull; Recreational (${log?.entertainment_usage_minutes || 0}m) &bull; Late Night (${lateNightMins}m)`
               ) : (
-                "No activity data recorded yet • Connect Desktop Agent or Extension to monitor active study time"
+                "No activity data recorded yet &bull; Connect Desktop Agent or Extension to monitor active study time"
               )}
             </p>
           </div>
@@ -498,9 +498,9 @@ export const StudentDashboard: React.FC = () => {
           <Button
             size="sm"
             onClick={() => navigate("/student/screentime")}
-            className="rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold shrink-0 shadow-xs"
+            className="rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 text-xs font-semibold shrink-0 shadow-xs"
           >
-            {totalMins > 0 ? "View Full Graphics & Apps" : "Connect Device & Monitor"}
+            {totalMins > 0 ? "View Full Analytics" : "Connect Device & Monitor"}
             <ChevronRight className="w-4 h-4 ml-1" />
           </Button>
         </GSAPMagnetic>

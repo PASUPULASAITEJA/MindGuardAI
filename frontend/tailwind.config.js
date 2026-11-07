@@ -16,7 +16,6 @@ export default {
     extend: {
       fontFamily: {
         sans: [
-          '"Plus Jakarta Sans"',
           'Inter',
           '-apple-system',
           'BlinkMacSystemFont',
@@ -24,11 +23,32 @@ export default {
           'Roboto',
           'sans-serif',
         ],
+        display: [
+          '"Plus Jakarta Sans"',
+          'Manrope',
+          'Inter',
+          'sans-serif',
+        ],
+        serif: [
+          '"Instrument Serif"',
+          'Georgia',
+          'serif',
+        ],
       },
       spacing: {
         '4.5': '1.125rem',
       },
       colors: {
+        brand: {
+          ink: "#20252B",
+          ivory: "#F7F5F0",
+          sage: "#A8BBA5",
+          orchid: "#9A82C9",
+          teal: "#4F9C91",
+          amber: "#D6A65C",
+          muted: "#747B82",
+          border: "#E7E5DF",
+        },
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",

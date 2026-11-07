@@ -84,7 +84,7 @@ export const WebsiteAnalyticsView: React.FC<WebsiteAnalyticsViewProps> = ({ onNa
       <div className="space-y-6">
         <EmptyStateCard
           title="No activity data available yet. Start monitoring to see your digital wellness analytics."
-          description="Domain-level browsing duration and visit counts will appear here once you browse with the MindGuard Chrome/Edge extension active."
+          description="Domain-level browsing duration and visit counts will appear here once you browse with the MindBridge Chrome/Edge extension active."
           onOpenDevices={onNavigateTab ? () => onNavigateTab("devices") : undefined}
         />
       </div>

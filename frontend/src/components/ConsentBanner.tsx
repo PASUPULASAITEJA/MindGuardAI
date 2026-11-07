@@ -133,7 +133,7 @@ export const ConsentBanner: React.FC<ConsentBannerProps> = ({ onConsentChange, s
             </div>
             <p className="text-xs sm:text-sm text-muted-foreground mt-1 leading-relaxed">
               {isPending
-                ? "MindGuard is a consent-first platform. Please choose whether to authorize certified university counselors to review your wellness assessments, emotional mapping, chat history, and behavioral telemetry."
+                ? "MindBridge is a consent-first platform. Please choose whether to authorize certified university counselors to review your wellness assessments, emotional mapping, chat history, and behavioral telemetry."
                 : isGranted
                 ? "Your counselors have authorized access to support your wellbeing. You can revoke this permission anytime."
                 : "Counselors are currently prohibited from accessing your wellness records, journal evaluation, or behavioral telemetry."}

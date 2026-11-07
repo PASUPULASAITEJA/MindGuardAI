@@ -122,7 +122,7 @@ export const Register: React.FC = () => {
       await registerUser(data.email, data.password, data.role as UserRole, data.full_name);
       toast({
         title: "Account Created Successfully",
-        description: `Welcome to MindGuardAI, ${data.full_name}!`,
+        description: `Welcome to MindBridge AI, ${data.full_name}!`,
         variant: "success",
       });
       navigate(
@@ -156,8 +156,8 @@ export const Register: React.FC = () => {
               <img src="/logo.png" alt="MindGuardAI Logo" className="w-full h-full object-contain" />
             </div>
             <div className="flex items-center gap-1 font-extrabold text-xl tracking-tight text-white">
-              <span>MindGuard</span>
-              <span className="text-white/90">AI</span>
+              <span>MindBridge</span>
+              <span className="text-white/90 font-serif italic text-2xl ml-0.5">AI</span>
             </div>
           </Link>
 
@@ -222,8 +222,8 @@ export const Register: React.FC = () => {
             <img src="/logo.png" alt="MindGuardAI Logo" className="w-full h-full object-contain" />
           </div>
           <div className="flex items-center gap-1 font-bold text-lg tracking-tight text-foreground">
-            <span>MindGuard</span>
-            <span className="text-primary">AI</span>
+            <span>MindBridge</span>
+            <span className="text-primary font-serif italic text-xl ml-0.5">AI</span>
           </div>
         </Link>
 

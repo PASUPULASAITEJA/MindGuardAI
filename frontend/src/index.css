@@ -4,50 +4,52 @@
 
 @layer base {
   :root {
-    /* MindBridge AI Design System — Soft Daylight */
-    --background: 210 40% 98%;          /* #F8FAFC Soft White */
-    --foreground: 222 47% 11%;          /* #10172A Deep Navy Slate */
-    --card: 0 0% 100%;                  /* #FFFFFF */
-    --card-foreground: 222 47% 11%;
+    /* MindBridge AI Design System — Calm Intelligence (Primary Warm Ivory Experience) */
+    --background: 43 32% 96%;           /* #F7F5F0 Warm Ivory tactile paper surface */
+    --foreground: 213 15% 15%;          /* #20252B Primary Ink typography */
+    --card: 0 0% 100%;                  /* #FFFFFF Crisp card surface */
+    --card-foreground: 213 15% 15%;
     --popover: 0 0% 100%;
-    --popover-foreground: 222 47% 11%;
-    --primary: 253 77% 63%;             /* #7657E8 Violet Accent */
+    --popover-foreground: 213 15% 15%;
+    --primary: 260 41% 65%;             /* #9A82C9 Orchid Accent */
     --primary-foreground: 0 0% 100%;
-    --secondary: 169 76% 41%;           /* #19B99A Teal Secondary Accent */
-    --secondary-foreground: 0 0% 100%;
-    --muted: 210 40% 96%;               /* #F1F5F9 */
-    --muted-foreground: 215 16% 45%;    /* Subdued Slate (5.8:1 WCAG AA) */
-    --accent: 253 77% 96%;
-    --accent-foreground: 253 77% 40%;
-    --destructive: 347 77% 50%;         /* Rose-600 */
-    --destructive-foreground: 210 40% 98%;
-    --border: 214 32% 91%;              /* #E2E8F0 */
-    --input: 214 32% 91%;
-    --ring: 253 77% 63%;
-    --radius: 0.75rem;                  /* 12px base border radius */
+    --secondary: 112 15% 69%;           /* #A8BBA5 Soft Sage Accent */
+    --secondary-foreground: 213 15% 15%;
+    --muted: 45 20% 92%;                /* Subdued Warm Ivory */
+    --muted-foreground: 210 6% 48%;     /* #747B82 Secondary slate text */
+    --accent: 171 33% 46%;              /* #4F9C91 Muted Teal */
+    --accent-foreground: 0 0% 100%;
+    --warning: 36 60% 60%;              /* #D6A65C Warm Amber */
+    --destructive: 350 65% 55%;         /* Soft Rust Rose */
+    --destructive-foreground: 0 0% 100%;
+    --border: 45 15% 89%;               /* #E7E5DF Hairline border */
+    --input: 45 15% 89%;
+    --ring: 260 41% 65%;
+    --radius: 0.875rem;                 /* 14px refined editorial border radius */
   }
 
   .dark {
-    /* MindBridge AI Design System — Deep Navy Sanctuary */
-    --background: 222 47% 11%;          /* #10172A Deep Navy Primary Background */
-    --foreground: 210 40% 98%;          /* #F8FAFC Soft White */
-    --card: 222 47% 14%;                 /* #151E34 Deep Navy Card Surface */
-    --card-foreground: 210 40% 98%;
-    --popover: 222 47% 14%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 253 77% 65%;             /* #7657E8 Violet Primary Accent */
-    --primary-foreground: 0 0% 100%;
-    --secondary: 169 76% 41%;           /* #19B99A Teal Secondary Accent */
-    --secondary-foreground: 0 0% 100%;
-    --muted: 222 40% 18%;               /* Slate muted */
-    --muted-foreground: 215 20% 70%;    /* #94A3B8 (7.1:1 WCAG AA contrast) */
-    --accent: 222 40% 20%;
-    --accent-foreground: 210 40% 98%;
-    --destructive: 347 87% 65%;         /* Soft Vivid Rose */
-    --destructive-foreground: 210 40% 98%;
-    --border: 222 40% 20%;              /* Deep Navy border */
-    --input: 222 40% 20%;
-    --ring: 253 77% 65%;
+    /* MindBridge AI Design System — Night Reflection & AI Sanctuary */
+    --background: 213 15% 10%;          /* #14171A Deep Charcoal Ink Background */
+    --foreground: 43 32% 96%;           /* #F7F5F0 Warm Ivory text */
+    --card: 213 16% 14%;                /* #1B2026 Deep Surface */
+    --card-foreground: 43 32% 96%;
+    --popover: 213 16% 14%;
+    --popover-foreground: 43 32% 96%;
+    --primary: 260 41% 70%;             /* #9A82C9 Orchid Accent in Dark */
+    --primary-foreground: 213 15% 10%;
+    --secondary: 112 15% 69%;           /* #A8BBA5 Soft Sage */
+    --secondary-foreground: 213 15% 10%;
+    --muted: 213 14% 18%;               /* Muted surface */
+    --muted-foreground: 210 8% 68%;     /* Subdued light slate text */
+    --accent: 171 33% 52%;              /* #4F9C91 Muted Teal */
+    --accent-foreground: 213 15% 10%;
+    --warning: 36 60% 60%;              /* #D6A65C Warm Amber */
+    --destructive: 350 70% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 213 14% 20%;              /* Deep Hairline border */
+    --input: 213 14% 20%;
+    --ring: 260 41% 70%;
   }
 }
 
@@ -57,7 +59,7 @@
   }
   
   html {
-    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     overflow-x: hidden;
@@ -65,18 +67,34 @@
   }
 
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    letter-spacing: -0.02em;
+    font-family: 'Plus Jakarta Sans', 'Manrope', -apple-system, BlinkMacSystemFont, sans-serif;
+    letter-spacing: -0.025em;
     font-weight: 700;
   }
 
   body {
     @apply bg-background text-foreground transition-colors duration-150;
-    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     overflow-x: hidden;
     width: 100%;
     min-height: 100%;
     -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Editorial Highlights */
+  .font-editorial {
+    font-family: 'Instrument Serif', Georgia, serif;
+    font-weight: 400;
+  }
+
+  .font-editorial-italic {
+    font-family: 'Instrument Serif', Georgia, serif;
+    font-style: italic;
+    font-weight: 400;
+  }
+
+  .tabular-nums {
+    font-variant-numeric: tabular-nums;
   }
 
   /* Custom Clean Minimal Scrollbar */
@@ -93,13 +111,25 @@
 }
 
 @layer components {
-  /* Clean Surface Panels */
+  /* Calm Intelligence Hairline Surfaces */
+  .editorial-card {
+    @apply bg-card border border-border rounded-2xl shadow-xs transition-all duration-200;
+  }
+
+  .editorial-card-hover {
+    @apply bg-card border border-border rounded-2xl shadow-xs transition-all duration-200 hover:border-brand-orchid/50 hover:shadow-sm;
+  }
+
+  .editorial-pill {
+    @apply inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-primary/10 text-primary border border-primary/20;
+  }
+
   .wellness-card {
-    @apply bg-card border border-border rounded-lg shadow-xs transition-all duration-200;
+    @apply bg-card border border-border rounded-2xl shadow-xs transition-all duration-200;
   }
 
   .wellness-card-hover {
-    @apply bg-card border border-border rounded-lg shadow-xs transition-all duration-200 hover:border-primary/40 hover:shadow-sm;
+    @apply bg-card border border-border rounded-2xl shadow-xs transition-all duration-200 hover:border-primary/40 hover:shadow-sm;
   }
 
   .wellness-pill {

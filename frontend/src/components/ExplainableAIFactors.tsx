@@ -345,7 +345,7 @@ export const ExplainableAIFactors: React.FC<ExplainableAIFactorsProps> = ({
           <div className="p-2.5 rounded-xl bg-muted/40 border border-border/60 flex items-start gap-2 text-[11px] text-muted-foreground">
             <Info className="h-4 w-4 text-primary shrink-0 mt-0.5" />
             <span>
-              <strong className="text-foreground">Clinical Explainability:</strong> MindGuard AI's multi-modal predictive model dynamically weights circadian sleep disruption, reflective linguistic sentiment, self-reported scores, and crisis signals to maintain transparency.
+              <strong className="text-foreground">Clinical Explainability:</strong> MindBridge AI's multi-modal predictive model dynamically weights circadian sleep disruption, reflective linguistic sentiment, self-reported scores, and crisis signals to maintain transparency.
             </span>
           </div>
         </CardContent>

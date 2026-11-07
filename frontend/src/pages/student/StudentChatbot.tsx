@@ -586,7 +586,7 @@ export const StudentChatbot: React.FC = () => {
             <div>
               <div className="flex items-center gap-2">
                 <h3 className="text-sm font-bold text-foreground">
-                  MindGuardAI Companion
+                  MindBridge AI Sanctuary
                 </h3>
                 <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] font-semibold text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
                   <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
@@ -652,7 +652,7 @@ export const StudentChatbot: React.FC = () => {
                 <LottieIllustration variant="companion" className="w-16 h-16" />
               </div>
               <h4 className="mt-2 text-base font-extrabold text-foreground">
-                MindGuardAI Sanctuary Companion
+                MindBridge AI Sanctuary Companion
               </h4>
               <p className="mt-1 max-w-md text-xs text-muted-foreground leading-relaxed">
                 A private, confidential listening space for academic stress, emotional overwhelm, or gentle guided grounding exercises.
@@ -1070,7 +1070,7 @@ export const StudentChatbot: React.FC = () => {
           </div>
 
           <div className="mt-2 flex items-center justify-between px-1 text-[11px] text-muted-foreground">
-            <span>MindGuardAI provides supportive peer guidance, not clinical diagnoses.</span>
+            <span>MindBridge AI provides supportive peer guidance, not clinical diagnoses.</span>
             <span>{inputMessage.length} / 4000</span>
           </div>
         </div>

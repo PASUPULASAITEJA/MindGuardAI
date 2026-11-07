@@ -259,7 +259,7 @@ export const ShapExplanationCard: React.FC<ShapExplanationCardProps> = ({
           <p className="text-[11px] text-muted-foreground leading-relaxed">
             <span className="font-semibold text-foreground">Clinical & Screening Notice: </span>
             {data.disclaimer || "These are factors that influenced your wellness score, not diagnosis factors."}{" "}
-            MindGuardAI uses validated screening frameworks (PHQ-9, GAD-7) and explainable machine learning as supportive tools, not clinical diagnoses.
+            MindBridge AI uses validated screening frameworks (PHQ-9, GAD-7) and explainable machine learning as supportive tools, not clinical diagnoses.
           </p>
         </div>
       </CardContent>

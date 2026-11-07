@@ -163,7 +163,7 @@ export const SearchAnalyticsView: React.FC<SearchAnalyticsViewProps> = ({ onNavi
             Privacy-First Academic Search Logging
           </p>
           <p>
-            Searches are captured via the MindGuard browser extension exclusively when explicitly opted-in.
+            Searches are captured via the MindBridge browser extension exclusively when explicitly opted-in.
             Private/incognito queries are never inspected, raw queries are never shared with counselors or third parties,
             and records can be purged at any time.
           </p>
@@ -173,7 +173,7 @@ export const SearchAnalyticsView: React.FC<SearchAnalyticsViewProps> = ({ onNavi
       {!loading && (!data || !data.has_data || data.searches.length === 0) ? (
         <EmptyStateCard
           title="No search analytics available yet."
-          description="Enable academic search tracking in Privacy Settings and browse Google, Bing, or DuckDuckGo with the MindGuard extension."
+          description="Enable academic search tracking in Privacy Settings and browse Google, Bing, or DuckDuckGo with the MindBridge extension."
           onOpenDevices={onNavigateTab ? () => onNavigateTab("privacy") : undefined}
         />
       ) : (
