@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useTheme } from "@/contexts/ThemeContext";
 import {
@@ -66,10 +66,6 @@ export const LandingPage: React.FC = () => {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
 
-  useEffect(() => {
-    document.title = "MindGuard AI | Calm Intelligence for Student Wellbeing";
-  }, []);
-
   const scrollToSection = (id: string) => {
     const el = document.getElementById(id);
     if (el) {
@@ -98,10 +94,10 @@ export const LandingPage: React.FC = () => {
       </div>
 
       {/* ── TOP NAVBAR ── */}
-      <header className="sticky top-0 z-50 w-full backdrop-blur-xl bg-background/80 dark:bg-background/85 border-b border-border/80 transition-all">
+      <header className="sticky top-0 z-50 w-full backdrop-blur-xl bg-background/80 dark:bg-[#070A11]/85 border-b border-border/80 dark:border-white/[0.08] transition-all">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2.5 group">
-            <div className="w-10 h-10 rounded-xl bg-card/90 border border-border/80 p-0.5 flex items-center justify-center shrink-0 shadow-xs overflow-hidden transition-transform group-hover:scale-105">
+            <div className="w-10 h-10 rounded-xl bg-card/90 dark:bg-white/[0.04] border border-border/80 dark:border-white/10 p-0.5 flex items-center justify-center shrink-0 shadow-xs overflow-hidden transition-transform group-hover:scale-105">
               <img src="/logo.png" alt="MindGuardAI Logo" className="w-full h-full object-contain" />
             </div>
             <div className="flex flex-col">
@@ -150,7 +146,7 @@ export const LandingPage: React.FC = () => {
           <div className="flex items-center gap-2 sm:gap-2.5">
             <button
               onClick={toggleTheme}
-              className="p-2 rounded-xl text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors border border-transparent hover:border-border/60"
+              className="p-2 rounded-xl text-muted-foreground hover:text-foreground hover:bg-secondary/70 dark:hover:bg-white/[0.06] transition-colors border border-transparent hover:border-border/60"
               title="Toggle theme"
               aria-label="Toggle dark/light theme"
             >
@@ -161,7 +157,7 @@ export const LandingPage: React.FC = () => {
               <Button
                 variant="ghost"
                 size="sm"
-                className="text-xs sm:text-sm font-semibold rounded-xl hover:text-primary"
+                className="text-xs sm:text-sm font-semibold rounded-xl hover:text-primary dark:hover:bg-white/[0.05]"
               >
                 Sign In
               </Button>
@@ -177,7 +173,7 @@ export const LandingPage: React.FC = () => {
             {/* Mobile Hamburger Button */}
             <button
               onClick={() => setIsMobileNavOpen(!isMobileNavOpen)}
-              className="p-2 md:hidden rounded-xl text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
+              className="p-2 md:hidden rounded-xl text-muted-foreground hover:text-foreground hover:bg-secondary/80 dark:hover:bg-white/[0.06] transition-colors"
               aria-label="Toggle mobile menu"
             >
               {isMobileNavOpen ? <X className="w-5 h-5 text-primary" /> : <Menu className="w-5 h-5" />}
@@ -187,7 +183,7 @@ export const LandingPage: React.FC = () => {
 
         {/* Mobile Navigation Drawer */}
         {isMobileNavOpen && (
-          <div className="md:hidden border-t border-border/80 bg-background/95 backdrop-blur-2xl px-4 py-4 space-y-3 shadow-2xl animate-in slide-in-from-top-2 duration-200">
+          <div className="md:hidden border-t border-border/80 dark:border-white/[0.08] bg-background/95 dark:bg-[#070A11]/95 backdrop-blur-2xl px-4 py-4 space-y-3 shadow-2xl animate-in slide-in-from-top-2 duration-200">
             <div className="flex flex-col space-y-1.5 text-sm font-medium">
               <button
                 onClick={() => {
@@ -248,7 +244,7 @@ export const LandingPage: React.FC = () => {
       </header>
 
       {/* ── HERO SECTION ── */}
-      <section className="hero-gradient relative min-h-screen flex items-center border-b border-border/80 overflow-hidden py-12 sm:py-20 lg:py-0">
+      <section className="hero-gradient relative min-h-screen flex items-center border-b border-border/80 dark:border-white/[0.08] overflow-hidden py-12 sm:py-20 lg:py-0">
         {/* Glow orbs — decorative depth */}
         <GlowOrb
           size={550}
@@ -280,7 +276,7 @@ export const LandingPage: React.FC = () => {
 
             <h1 className="fade-up-1 text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-foreground leading-[1.12]">
               Detect Burnout
-              <span className="bg-gradient-to-r from-violet-600 via-purple-600 to-teal-500 dark:from-violet-400 dark:via-purple-300 dark:to-teal-300 bg-clip-text text-transparent block">Before It Becomes</span>
+              <span className="bg-gradient-to-r from-blue-600 via-indigo-600 to-cyan-500 dark:from-blue-400 dark:via-indigo-300 dark:to-cyan-300 bg-clip-text text-transparent block">Before It Becomes</span>
               a Crisis.
             </h1>
 
@@ -303,23 +299,23 @@ export const LandingPage: React.FC = () => {
                 variant="outline"
                 size="lg"
                 onClick={() => scrollToSection("how-it-works")}
-                className="w-full sm:w-auto font-semibold text-foreground/90 hover:text-foreground px-6 rounded-xl border border-border bg-card/60 backdrop-blur-md hover:bg-secondary hover:border-primary/40 transition-all"
+                className="w-full sm:w-auto font-semibold text-foreground/90 hover:text-foreground px-6 rounded-xl border-border/80 dark:border-white/10 bg-card/60 dark:bg-white/[0.03] backdrop-blur-md hover:bg-secondary/70 hover:border-primary/40 transition-all"
               >
                 Explore Capabilities ↓
               </Button>
             </div>
 
             {/* Trust badges */}
-            <div className="fade-up-4 flex flex-wrap items-center gap-3 sm:gap-5 mt-8 sm:mt-10 pt-6 border-t border-border/80 text-xs text-muted-foreground">
-              <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-card/60 border border-border/70 shadow-xs">
+            <div className="fade-up-4 flex flex-wrap items-center gap-3 sm:gap-5 mt-8 sm:mt-10 pt-6 border-t border-border/80 dark:border-white/[0.08] text-xs text-muted-foreground">
+              <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-card/60 dark:bg-white/[0.03] border border-border/70 dark:border-white/[0.08] shadow-xs">
                 <FileCheck2 className="w-4 h-4 text-primary shrink-0" />
                 <span>PHQ-9 & GAD-7 Validated</span>
               </div>
-              <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-card/60 border border-border/70 shadow-xs">
+              <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-card/60 dark:bg-white/[0.03] border border-border/70 dark:border-white/[0.08] shadow-xs">
                 <BarChart3 className="w-4 h-4 text-primary shrink-0" />
                 <span>SHAP Explainable AI</span>
               </div>
-              <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-card/60 border border-border/70 shadow-xs">
+              <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-card/60 dark:bg-white/[0.03] border border-border/70 dark:border-white/[0.08] shadow-xs">
                 <Lock className="w-4 h-4 text-emerald-500 shrink-0" />
                 <span>Zero-Keystroke Privacy</span>
               </div>
@@ -348,7 +344,7 @@ export const LandingPage: React.FC = () => {
             {/* Multimodal Telemetry Grid */}
             <div className="relative rounded-2xl cinematic-glass p-5 sm:p-7 space-y-4 sm:space-y-5 overflow-hidden">
               <div className="grid grid-cols-2 gap-2.5 sm:gap-3.5">
-                <div className="p-3 sm:p-4 rounded-xl bg-background/70 dark:bg-card/60 border border-border/70 hover:border-primary/40 transition-all duration-200 space-y-1 shadow-xs">
+                <div className="p-3 sm:p-4 rounded-xl bg-background/70 dark:bg-card/60 border border-border/70 dark:border-white/[0.08] hover:border-primary/40 transition-all duration-200 space-y-1 shadow-xs">
                   <span className="text-[9px] sm:text-[10px] uppercase font-bold text-muted-foreground tracking-wider block truncate">
                     Cognitive Sentiment
                   </span>
@@ -358,15 +354,15 @@ export const LandingPage: React.FC = () => {
                   </p>
                 </div>
 
-                <div className="p-3 sm:p-4 rounded-xl bg-background/70 dark:bg-card/60 border border-border/70 hover:border-brand-teal/40 transition-all duration-200 space-y-1 shadow-xs">
+                <div className="p-3 sm:p-4 rounded-xl bg-background/70 dark:bg-card/60 border border-border/70 dark:border-white/[0.08] hover:border-blue-500/40 transition-all duration-200 space-y-1 shadow-xs">
                   <span className="text-[9px] sm:text-[10px] uppercase font-bold text-muted-foreground tracking-wider block truncate">
                     Circadian Rhythm
                   </span>
-                  <p className="text-base sm:text-xl font-extrabold text-teal">7.4h Regular</p>
+                  <p className="text-base sm:text-xl font-extrabold text-blue-500">7.4h Regular</p>
                   <p className="text-[10px] sm:text-[11px] text-muted-foreground">Fragmentation 0.12</p>
                 </div>
 
-                <div className="p-3 sm:p-4 rounded-xl bg-background/70 dark:bg-card/60 border border-border/70 hover:border-emerald-500/40 transition-all duration-200 space-y-1 shadow-xs">
+                <div className="p-3 sm:p-4 rounded-xl bg-background/70 dark:bg-card/60 border border-border/70 dark:border-white/[0.08] hover:border-emerald-500/40 transition-all duration-200 space-y-1 shadow-xs">
                   <span className="text-[9px] sm:text-[10px] uppercase font-bold text-muted-foreground tracking-wider block truncate">
                     Screen Time
                   </span>
@@ -374,7 +370,7 @@ export const LandingPage: React.FC = () => {
                   <p className="text-[10px] sm:text-[11px] text-muted-foreground">Zero-keystroke</p>
                 </div>
 
-                <div className="p-3 sm:p-4 rounded-xl bg-background/70 dark:bg-card/60 border border-border/70 hover:border-emerald-500/40 transition-all duration-200 space-y-1 shadow-xs">
+                <div className="p-3 sm:p-4 rounded-xl bg-background/70 dark:bg-card/60 border border-border/70 dark:border-white/[0.08] hover:border-emerald-500/40 transition-all duration-200 space-y-1 shadow-xs">
                   <span className="text-[9px] sm:text-[10px] uppercase font-bold text-muted-foreground tracking-wider block truncate">
                     Risk Tier
                   </span>
@@ -383,7 +379,7 @@ export const LandingPage: React.FC = () => {
                 </div>
               </div>
 
-              <div className="flex items-center justify-between pt-2.5 sm:pt-3 border-t border-border/60 text-[11px] sm:text-xs text-muted-foreground">
+              <div className="flex items-center justify-between pt-2.5 sm:pt-3 border-t border-border/60 dark:border-white/[0.08] text-[11px] sm:text-xs text-muted-foreground">
                 <span className="flex items-center gap-1.5">
                   <span className="relative flex h-2 w-2">
                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
@@ -487,7 +483,7 @@ export const LandingPage: React.FC = () => {
       <section
         id="features"
         ref={featRef as React.RefObject<HTMLElement>}
-        className="relative z-10 py-24 px-4 sm:px-6 bg-secondary/35 dark:bg-card/25 backdrop-blur-sm border-y border-border/80"
+        className="relative z-10 py-24 px-4 sm:px-6 bg-secondary/35 dark:bg-card/25 backdrop-blur-sm border-y border-border/80 dark:border-white/[0.08]"
       >
         <div className="max-w-7xl mx-auto space-y-14">
           <div className="text-center max-w-2xl mx-auto space-y-3">
@@ -582,7 +578,7 @@ export const LandingPage: React.FC = () => {
       {/* ── STATS SECTION ── */}
       <section
         ref={s1.ref as React.RefObject<HTMLElement>}
-        className="stats-gradient relative z-10 py-20 overflow-hidden border-y border-border/40 shadow-[inset_0_0_80px_rgba(0,0,0,0.4)]"
+        className="stats-gradient relative z-10 py-20 overflow-hidden border-y border-white/10 dark:border-white/[0.08] shadow-[inset_0_0_80px_rgba(0,0,0,0.5)]"
       >
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center max-w-4xl mx-auto px-6 relative z-10">
           <div>
@@ -771,7 +767,7 @@ export const LandingPage: React.FC = () => {
             </a>
             <a
               href="tel:18005990019"
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-card border border-border text-foreground font-semibold text-sm hover:bg-secondary hover:border-rose-500/30 transition-all"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-card/70 dark:bg-white/[0.04] border border-border/80 dark:border-white/10 text-foreground font-semibold text-sm hover:bg-secondary/70 hover:border-rose-500/30 transition-all"
             >
               <PhoneCall className="w-4 h-4 text-rose-500" />
               <span>KIRAN Mental Health: 1800-599-0019</span>
@@ -781,12 +777,12 @@ export const LandingPage: React.FC = () => {
       </section>
 
       {/* ── FOOTER ── */}
-      <footer className="relative z-10 border-t border-border/80 bg-card/85 dark:bg-background/90 backdrop-blur-xl py-12 px-4 sm:px-6">
+      <footer className="relative z-10 border-t border-border/80 dark:border-white/[0.08] bg-card/85 dark:bg-[#070A11]/90 backdrop-blur-xl py-12 px-4 sm:px-6">
         <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Logo + tagline */}
           <div className="space-y-3">
             <div className="flex items-center gap-2.5">
-              <div className="w-9 h-9 rounded-xl bg-card border border-border/80 p-0.5 flex items-center justify-center shrink-0 overflow-hidden shadow-xs">
+              <div className="w-9 h-9 rounded-xl bg-card/90 dark:bg-white/[0.04] border border-border/80 dark:border-white/10 p-0.5 flex items-center justify-center shrink-0 overflow-hidden shadow-xs">
                 <img src="/logo.png" alt="MindGuardAI Logo" className="w-full h-full object-contain" />
               </div>
               <span className="font-bold text-base text-foreground">MindGuardAI</span>
@@ -831,14 +827,12 @@ export const LandingPage: React.FC = () => {
                 </button>
               </li>
               <li>
-                <Link to="/privacy" className="hover:text-primary transition-colors">
+                <button
+                  onClick={() => scrollToSection("privacy")}
+                  className="hover:text-primary transition-colors"
+                >
                   Privacy Policy
-                </Link>
-              </li>
-              <li>
-                <Link to="/terms" className="hover:text-primary transition-colors">
-                  Terms of Service
-                </Link>
+                </button>
               </li>
               <li>
                 <Link to="/student/privacy" className="hover:text-primary transition-colors">

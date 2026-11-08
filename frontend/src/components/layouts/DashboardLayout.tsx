@@ -19,7 +19,6 @@ import {
   Monitor,
 } from "lucide-react";
 import { cn } from "@/utils/cn";
-import { useScreenTimeTracker } from "@/hooks/useScreenTimeTracker";
 
 interface DashboardLayoutProps {
   title: string;
@@ -32,16 +31,6 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ title, subtitl
   const location = useLocation();
   const { user } = useAuth();
   const { isDesktop } = useMobileDetect();
-
-  // Seamlessly track active student computer / browser session time across all guarded views
-  useScreenTimeTracker();
-
-  // Dynamically synchronize document head title with current page title
-  React.useEffect(() => {
-    if (title) {
-      document.title = `${title} | MindGuard AI`;
-    }
-  }, [title]);
 
   // Close mobile drawer on route navigation or desktop switch
   React.useEffect(() => {
@@ -125,7 +114,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ title, subtitl
       </main>
 
       {/* MOBILE BOTTOM TAB BAR (< md) */}
-      <nav className="fixed bottom-0 left-0 right-0 z-40 md:hidden bg-card/95 backdrop-blur-lg border-t border-border px-2 py-1.5 flex items-center justify-around">
+      <nav className="fixed bottom-0 left-0 right-0 z-40 md:hidden bg-white/95 dark:bg-slate-950/95 backdrop-blur-lg border-t border-slate-200 dark:border-slate-800 px-2 py-1.5 flex items-center justify-around">
         {mobileTabs.map((tab) => {
           const Icon = tab.icon;
           const isActive = location.pathname === tab.to;
@@ -136,8 +125,8 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ title, subtitl
               className={cn(
                 "flex flex-col items-center justify-center py-1 px-2.5 rounded-xl text-[10px] font-semibold transition-all",
                 isActive
-                  ? "text-primary font-bold scale-105"
-                  : "text-muted-foreground hover:text-foreground"
+                  ? "text-indigo-600 dark:text-indigo-400 font-bold scale-105"
+                  : "text-slate-500 hover:text-slate-900 dark:hover:text-white"
               )}
             >
               <Icon className="w-5 h-5 mb-0.5" />

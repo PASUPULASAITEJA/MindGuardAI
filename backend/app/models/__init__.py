@@ -21,25 +21,7 @@ from app.models.sleep_logs import SleepLog
 from app.models.academic import AcademicEvent, AcademicEventType
 from app.models.interventions import Intervention, InterventionType, InterventionStatus, InterventionOutcome
 
-from app.models.digital_wellness import (
-    Device,
-    ActivitySession,
-    AppUsageRecord,
-    WebUsageRecord,
-    SearchQueryRecord,
-    NotificationCountRecord,
-    DigitalWellnessConsent
-)
-
 __all__ = [
-    "Device",
-    "ActivitySession",
-    "AppUsageRecord",
-    "WebUsageRecord",
-    "SearchQueryRecord",
-    "NotificationCountRecord",
-    "DigitalWellnessConsent",
-
     "Base",
     "User",
     "UserRole",

@@ -4,66 +4,50 @@
 
 @layer base {
   :root {
-    /* MindGuard AI Design System — Calm Intelligence (Light / Primary Student Experience) */
-    --background: 40 20% 98%;           /* #FAF9F6 Warm Ivory / Soft Daylight */
-    --foreground: 215 15% 15%;          /* #20252B Primary Ink */
-    --card: 0 0% 100%;                  /* #FFFFFF Clean Pure Surface */
-    --card-foreground: 215 15% 15%;     /* #20252B */
+    /* MindGuardAI Design System — Day Mood (Clinical Daylight) */
+    --background: 210 40% 98%;          /* #F8FAFC */
+    --foreground: 222 47% 11%;          /* #0F172A */
+    --card: 0 0% 100%;                  /* #FFFFFF */
+    --card-foreground: 222 47% 11%;
     --popover: 0 0% 100%;
-    --popover-foreground: 215 15% 15%;
-    --primary: 253 77% 63%;             /* #7657E8 Signature Violet */
-    --primary-foreground: 0 0% 100%;    /* #FFFFFF */
-    --secondary: 210 20% 95%;           /* #EEF2F6 Neutral Slate (secondary buttons, headers, hovers) */
-    --secondary-foreground: 215 15% 18%;/* #20252B */
-    --muted: 210 20% 96%;               /* #F1F4F8 */
-    --muted-foreground: 215 15% 38%;    /* #505B68 Enhanced High-Contrast Neutral Slate (7.5:1 WCAG AAA) */
-    --accent: 253 77% 96%;              /* #F3EFFF Soft Violet Accent */
-    --accent-foreground: 253 77% 42%;   /* #5B3BD4 */
-    --destructive: 347 77% 50%;         /* #E11D48 Rose */
-    --destructive-foreground: 0 0% 100%;
-    --border: 36 12% 89%;               /* #E7E5DF Warm Editorial Border */
-    --input: 36 12% 89%;
-    --ring: 253 77% 63%;
+    --popover-foreground: 222 47% 11%;
+    --primary: 221 83% 53%;             /* Royal Indigo */
+    --primary-foreground: 210 40% 98%;
+    --secondary: 210 40% 96%;           /* #F1F5F9 */
+    --secondary-foreground: 222 47% 11%;
+    --muted: 210 40% 96%;               /* #F1F5F9 */
+    --muted-foreground: 215 16% 45%;    /* Subdued Slate (5.8:1 WCAG AA) */
+    --accent: 210 40% 96%;
+    --accent-foreground: 222 47% 11%;
+    --destructive: 347 77% 50%;         /* Rose-600 */
+    --destructive-foreground: 210 40% 98%;
+    --border: 214 32% 91%;              /* #E2E8F0 */
+    --input: 214 32% 91%;
+    --ring: 221 83% 53%;
     --radius: 0.75rem;                  /* 12px base border radius */
-
-    /* Brand Accent Tokens */
-    --brand-teal: 169 76% 41%;          /* #19B99A Teal Secondary Accent */
-    --brand-teal-foreground: 0 0% 100%;
-    --brand-sage: 108 15% 69%;          /* #A8BBA5 Soft Sage */
-    --brand-orchid: 260 41% 65%;        /* #9A82C9 Orchid */
-    --brand-amber: 37 61% 60%;          /* #D6A65C Warm Amber */
-    --brand-navy: 222 47% 11%;          /* #10172A Deep Navy */
   }
 
   .dark {
-    /* MindGuard AI Design System — Deep Navy Sanctuary */
-    --background: 222 47% 11%;          /* #10172A Deep Navy Primary Background */
-    --foreground: 210 40% 98%;          /* #F8FAFC Soft White */
-    --card: 222 44% 15%;                /* #151E34 Elevated Deep Navy Surface */
+    /* MindGuardAI Design System — Night Mood (Deep Midnight Sanctuary) */
+    --background: 225 43% 5%;           /* #070A11 */
+    --foreground: 210 40% 98%;          /* #F8FAFC */
+    --card: 223 45% 9%;                 /* #0D1322 */
     --card-foreground: 210 40% 98%;
-    --popover: 222 44% 15%;
+    --popover: 223 45% 9%;
     --popover-foreground: 210 40% 98%;
-    --primary: 253 82% 68%;             /* #8569F6 Vivid Violet */
-    --primary-foreground: 0 0% 100%;
-    --secondary: 222 35% 18%;           /* #182236 Subtle Dark Slate */
+    --primary: 217 91% 60%;             /* Vivid Indigo Dark */
+    --primary-foreground: 225 43% 5%;
+    --secondary: 217 33% 14%;           /* #172033 */
     --secondary-foreground: 210 40% 98%;
-    --muted: 222 35% 16%;               /* #151D2E */
-    --muted-foreground: 215 20% 74%;    /* #A0AFC1 High-Contrast Muted Text (8.2:1 WCAG AAA) */
-    --accent: 222 35% 22%;              /* #1F2B42 */
-    --accent-foreground: 253 85% 78%;
-    --destructive: 347 87% 65%;         /* #F43F5E Soft Vivid Rose */
-    --destructive-foreground: 0 0% 100%;
-    --border: 222 30% 22%;              /* #243044 Deep Navy Border */
-    --input: 222 30% 22%;
-    --ring: 253 82% 68%;
-
-    /* Brand Accent Tokens */
-    --brand-teal: 169 76% 46%;          /* #20C9A6 Vivid Teal */
-    --brand-teal-foreground: 222 47% 11%;
-    --brand-sage: 108 20% 75%;          /* #B8CBB5 */
-    --brand-orchid: 260 55% 72%;        /* #B09CE0 */
-    --brand-amber: 37 72% 64%;          /* #E5B56A */
-    --brand-navy: 222 47% 11%;
+    --muted: 217 33% 14%;
+    --muted-foreground: 215 20% 65%;    /* #94A3B8 (6.4:1 WCAG AA) */
+    --accent: 217 33% 14%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 347 87% 65%;         /* Soft Vivid Rose */
+    --destructive-foreground: 210 40% 98%;
+    --border: 217 33% 17%;              /* #1E293B */
+    --input: 217 33% 17%;
+    --ring: 217 91% 60%;
   }
 }
 
@@ -334,12 +318,12 @@
   background: linear-gradient(
     135deg,
     hsl(var(--background))            0%,
-    hsl(var(--primary) / 0.05)       25%,
-    hsl(var(--brand-teal) / 0.04)     50%,
-    hsl(var(--primary) / 0.03)       75%,
+    hsl(221 83% 53% / 0.05)          25%,
+    hsl(250 91% 60% / 0.035)         50%,
+    hsl(217 91% 60% / 0.05)          75%,
     hsl(var(--background))            100%
   );
-  background-size: 300% 300%;
+  background-size: 400% 400%;
   animation: gradient-shift 14s ease infinite;
 }
 
@@ -348,12 +332,12 @@
   background: linear-gradient(
     135deg,
     hsl(var(--background))            0%,
-    hsl(var(--primary) / 0.09)       25%,
-    hsl(var(--brand-teal) / 0.06)     50%,
-    hsl(var(--primary) / 0.07)       75%,
+    hsl(217 91% 60% / 0.08)          25%,
+    hsl(250 91% 60% / 0.05)          50%,
+    hsl(221 83% 53% / 0.07)          75%,
     hsl(var(--background))            100%
   );
-  background-size: 300% 300%;
+  background-size: 400% 400%;
   animation: gradient-shift 14s ease infinite;
 }
 
@@ -367,10 +351,10 @@
 .stats-gradient {
   background: linear-gradient(
     135deg,
-    hsl(222 47% 10%)   0%,
-    hsl(253 45% 15%)  40%,
-    hsl(169 45% 14%)  70%,
-    hsl(222 47% 10%)   100%
+    hsl(222 47% 8%)   0%,
+    hsl(221 60% 12%)  40%,
+    hsl(217 50% 10%)  70%,
+    hsl(222 47% 8%)   100%
   );
   background-size: 300% 300%;
   animation: gradient-shift-dark 10s ease infinite;
@@ -386,15 +370,15 @@
 }
 
 .glow-orb-primary {
-  background: radial-gradient(circle, rgba(118, 87, 232, 0.35) 0%, rgba(154, 130, 201, 0.22) 40%, rgba(25, 185, 154, 0.1) 65%, transparent 80%);
+  background: radial-gradient(circle, rgba(59, 130, 246, 0.35) 0%, rgba(99, 102, 241, 0.22) 40%, rgba(14, 165, 233, 0.1) 65%, transparent 80%);
 }
 
 .glow-orb-purple {
-  background: radial-gradient(circle, rgba(154, 130, 201, 0.3) 0%, rgba(118, 87, 232, 0.18) 40%, rgba(192, 132, 252, 0.08) 65%, transparent 80%);
+  background: radial-gradient(circle, rgba(168, 85, 247, 0.3) 0%, rgba(139, 92, 246, 0.18) 40%, rgba(192, 132, 252, 0.08) 65%, transparent 80%);
 }
 
 .glow-orb-emerald {
-  background: radial-gradient(circle, rgba(25, 185, 154, 0.28) 0%, rgba(79, 156, 145, 0.15) 40%, rgba(168, 187, 165, 0.07) 65%, transparent 80%);
+  background: radial-gradient(circle, rgba(16, 185, 129, 0.28) 0%, rgba(45, 212, 191, 0.15) 40%, rgba(5, 150, 105, 0.07) 65%, transparent 80%);
 }
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -453,8 +437,8 @@
   box-shadow: 0 20px 40px -12px hsl(var(--primary) / 0.16), inset 0 1px 0 0 rgba(255, 255, 255, 0.12);
 }
 .dark .cinematic-card:hover {
-  border-color: hsl(var(--primary) / 0.5);
-  box-shadow: 0 24px 50px -12px hsl(var(--primary) / 0.25), inset 0 1px 0 0 rgba(255, 255, 255, 0.12);
+  border-color: rgba(99, 102, 241, 0.45);
+  box-shadow: 0 24px 50px -12px rgba(59, 130, 246, 0.28), inset 0 1px 0 0 rgba(255, 255, 255, 0.15);
 }
 
 /* Cinematic Glow CTA Button */
@@ -507,10 +491,9 @@
   -webkit-backdrop-filter: blur(12px);
 }
 .dark .cinematic-pill {
-  background: hsl(var(--primary) / 0.12);
-  border: 1px solid hsl(var(--primary) / 0.35);
-  color: hsl(var(--primary));
-  box-shadow: 0 0 24px -2px hsl(var(--primary) / 0.25), inset 0 1px 0 0 rgba(255, 255, 255, 0.1);
+  background: rgba(59, 130, 246, 0.1);
+  border: 1px solid rgba(147, 197, 253, 0.25);
+  box-shadow: 0 0 24px -2px rgba(59, 130, 246, 0.25), inset 0 1px 0 0 rgba(255, 255, 255, 0.1);
 }
 
 /* Light refraction border glow */
@@ -523,7 +506,7 @@
   inset: -1px;
   border-radius: inherit;
   padding: 1px;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, transparent 60%, hsl(var(--primary) / 0.25) 100%);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, transparent 60%, rgba(59, 130, 246, 0.2) 100%);
   -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;
@@ -575,9 +558,9 @@
 .gradient-text {
   background: linear-gradient(
     135deg,
-    hsl(var(--primary))    0%,
-    hsl(var(--brand-orchid)) 50%,
-    hsl(var(--brand-teal)) 100%
+    hsl(var(--foreground)) 0%,
+    hsl(var(--primary))    60%,
+    hsl(217 91% 70%)       100%
   );
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;

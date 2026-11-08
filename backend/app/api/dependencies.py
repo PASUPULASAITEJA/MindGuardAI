@@ -76,14 +76,9 @@ async def get_current_user(
 def require_role(allowed_roles: List[UserRole]):
     """
     FastAPI RBAC dependency creator to enforce required user roles on endpoints.
-    Super Admin automatically inherits all Administrator authorizations.
     """
-    effective_roles = set(allowed_roles)
-    if UserRole.ADMIN in effective_roles:
-        effective_roles.add(UserRole.SUPER_ADMIN)
-
     async def dependency(current_user: User = Depends(get_current_user)) -> User:
-        if current_user.role not in effective_roles:
+        if current_user.role not in allowed_roles:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail={
@@ -98,7 +93,7 @@ def require_role(allowed_roles: List[UserRole]):
 async def verify_student_consent(db: AsyncSession, student_id: UUID) -> bool:
     """
     Verifies that a student has actively granted consent.
-    Raises HTTP 403 Forbidden if consent is missing, REVOKED, or not GRANTED.
+    Raises HTTP 403 Forbidden if consent is REVOKED or PENDING/not active.
     """
     from app.models.consent import Consent, ConsentStatus
     from sqlalchemy import select

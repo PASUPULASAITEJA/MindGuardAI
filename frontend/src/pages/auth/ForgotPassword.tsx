@@ -12,7 +12,6 @@ import api from "@/services/api";
 export const ForgotPassword: React.FC = () => {
   const { toast } = useToast();
   const [email, setEmail] = useState("");
-  const [honey, setHoney] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [resetToken, setResetToken] = useState<string | null>(null);
 
@@ -24,15 +23,7 @@ export const ForgotPassword: React.FC = () => {
 
   const handleRequestToken = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (honey) return;
-    if (!email || !email.includes("@")) {
-      toast({
-        title: "Valid Email Required",
-        description: "Please enter your valid university email address.",
-        variant: "destructive",
-      });
-      return;
-    }
+    if (!email) return;
 
     setIsSubmitting(true);
     try {
@@ -221,17 +212,6 @@ export const ForgotPassword: React.FC = () => {
             </form>
           ) : (
             <form onSubmit={handleRequestToken}>
-              {/* Bot & Spam honeypot trap */}
-              <input
-                type="text"
-                name="institution_verification_code"
-                value={honey}
-                onChange={(e) => setHoney(e.target.value)}
-                tabIndex={-1}
-                autoComplete="off"
-                className="hidden opacity-0 absolute -z-50 pointer-events-none"
-                aria-hidden="true"
-              />
               <CardContent className="space-y-4">
                 <FormItem>
                   <Label htmlFor="email" className="text-xs font-semibold text-foreground">Institutional Email</Label>

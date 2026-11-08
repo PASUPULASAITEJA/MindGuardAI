@@ -57,11 +57,7 @@ async def submit_phq9_survey(
     wellness_score = round((1.0 - (total_score / 27.0)) * 100.0, 2)
     
     # Map to risk level based on clinical thresholds
-    # Critical Clinical Safety Rule: PHQ-9 Item 9 measures passive/active suicidal thoughts.
-    # Any non-zero answer on Item 9 (index 8) mandates high-risk clinical escalation regardless of total score.
-    has_suicidal_ideation = len(payload.responses) >= 9 and payload.responses[8] > 0
-
-    if total_score >= 15 or has_suicidal_ideation:
+    if total_score >= 15:
         risk_level = RiskLevel.HIGH
     elif total_score >= 10:
         risk_level = RiskLevel.MEDIUM

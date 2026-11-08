@@ -19,7 +19,6 @@ import {
 } from "lucide-react";
 import ThemeToggle from "@/components/layouts/ThemeToggle";
 import api from "@/services/api";
-import { telemetry } from "@/services/telemetry";
 
 const registerSchema = z
   .object({
@@ -57,14 +56,9 @@ export const Register: React.FC = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  useEffect(() => {
-    document.title = "Register Account | MindGuard AI";
-  }, []);
-
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [honey, setHoney] = useState("");
   const [rosterStatus, setRosterStatus] = useState<{
     checked: boolean;
     isAuthorized: boolean;
@@ -123,13 +117,7 @@ export const Register: React.FC = () => {
   }, [typedEmail, setValue]);
 
   const onSubmit = async (data: RegisterFormValues) => {
-    if (honey) {
-      console.warn("Automated bot pattern trapped.");
-      return;
-    }
-
     setIsSubmitting(true);
-    telemetry.trackEvent("security", "registration_attempt");
     try {
       await registerUser(data.email, data.password, data.role as UserRole, data.full_name);
       toast({
@@ -253,18 +241,6 @@ export const Register: React.FC = () => {
 
           {/* Form */}
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            {/* Bot & Spam honeypot trap */}
-            <input
-              type="text"
-              name="institution_verification_code"
-              value={honey}
-              onChange={(e) => setHoney(e.target.value)}
-              tabIndex={-1}
-              autoComplete="off"
-              className="hidden opacity-0 absolute -z-50 pointer-events-none"
-              aria-hidden="true"
-            />
-
             {/* Full Name field */}
             <div className="space-y-1.5">
               <label

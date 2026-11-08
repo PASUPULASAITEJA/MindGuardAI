@@ -18,7 +18,6 @@ import {
   PhoneCall,
 } from "lucide-react";
 import ThemeToggle from "@/components/layouts/ThemeToggle";
-import { telemetry } from "@/services/telemetry";
 
 const loginSchema = z.object({
   email: z.string().min(2, "Please enter your username or university email address."),
@@ -32,14 +31,9 @@ export const Login: React.FC = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  React.useEffect(() => {
-    document.title = "Sign In | MindGuard AI";
-  }, []);
-
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [honey, setHoney] = useState("");
 
   const {
     register,
@@ -56,14 +50,7 @@ export const Login: React.FC = () => {
   });
 
   const onSubmit = async (data: LoginFormValues) => {
-    // Bot & spam mitigation: reject if honeypot was populated
-    if (honey) {
-      console.warn("Automated bot pattern trapped.");
-      return;
-    }
-
     setIsSubmitting(true);
-    telemetry.trackEvent("security", "login_attempt");
     try {
       const loggedUser = await login(data.email, data.password, rememberMe);
 
@@ -94,16 +81,16 @@ export const Login: React.FC = () => {
     }
   };
 
-  const setDemoCredentials = (email: string, pass = "password123") => {
+  const setDemoCredentials = (email: string, pass = "Student@123") => {
     setValue("email", email, { shouldValidate: true });
     setValue("password", pass, { shouldValidate: true });
   };
 
   const handleDemoNav = async (path: string, email: string) => {
-    setDemoCredentials(email, "password123");
+    setDemoCredentials(email, "Student@123");
     setIsSubmitting(true);
     try {
-      const loggedUser = await login(email, "password123", true);
+      const loggedUser = await login(email, "Student@123", true);
       toast({
         title: "Authenticated Successfully",
         description: `Signed in as ${loggedUser.role}.`,
@@ -218,18 +205,6 @@ export const Login: React.FC = () => {
 
           {/* Form */}
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            {/* Bot & Spam honeypot trap */}
-            <input
-              type="text"
-              name="institution_verification_code"
-              value={honey}
-              onChange={(e) => setHoney(e.target.value)}
-              tabIndex={-1}
-              autoComplete="off"
-              className="hidden opacity-0 absolute -z-50 pointer-events-none"
-              aria-hidden="true"
-            />
-
             {/* Email field */}
             <div className="space-y-1.5">
               <label
@@ -337,21 +312,21 @@ export const Login: React.FC = () => {
           <div className="flex gap-2 justify-center">
             <button
               type="button"
-              onClick={() => handleDemoNav("/student/dashboard", "pasupulasai.teja37@nmims.in")}
+              onClick={() => handleDemoNav("/student/dashboard", "student1@mindguard.edu")}
               className="px-3 py-1.5 rounded-lg border border-border text-xs font-medium hover:bg-secondary transition-colors"
             >
               Student Demo
             </button>
             <button
               type="button"
-              onClick={() => handleDemoNav("/counselor/dashboard", "naresh.vurukonda@nmims.edu")}
+              onClick={() => handleDemoNav("/counselor/dashboard", "counselor1@mindguard.edu")}
               className="px-3 py-1.5 rounded-lg border border-border text-xs font-medium hover:bg-secondary transition-colors"
             >
               Counsellor Demo
             </button>
             <button
               type="button"
-              onClick={() => handleDemoNav("/admin/dashboard", "raja.govindaacharyk@nmims.edu")}
+              onClick={() => handleDemoNav("/admin/dashboard", "admin@mindguard.edu")}
               className="px-3 py-1.5 rounded-lg border border-border text-xs font-medium hover:bg-secondary transition-colors"
             >
               Admin Demo

@@ -1,35 +1,28 @@
-import React, { Suspense, lazy } from "react";
+import React from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AnimatePresence } from "motion/react";
-import CookieConsentBanner from "./components/public/CookieConsentBanner";
+import LandingPage from "./pages/public/LandingPage";
+import Login from "./pages/auth/Login";
+import Register from "./pages/auth/Register";
+import ForgotPassword from "./pages/auth/ForgotPassword";
 import ProtectedRoute from "./components/ProtectedRoute";
 import DashboardLayout from "./components/layouts/DashboardLayout";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { ErrorBoundary } from "./components/ErrorBoundary";
-import PageLoader from "./components/ui/PageLoader";
 
-// Lazy-loaded routes for code-splitting and rapid initial page loads
-const LandingPage = lazy(() => import("./pages/public/LandingPage"));
-const Login = lazy(() => import("./pages/auth/Login"));
-const Register = lazy(() => import("./pages/auth/Register"));
-const ForgotPassword = lazy(() => import("./pages/auth/ForgotPassword"));
-const PrivacyPolicyPage = lazy(() => import("./pages/public/PrivacyPolicyPage"));
-const TermsAndConditionsPage = lazy(() => import("./pages/public/TermsAndConditionsPage"));
-const NotFoundPage = lazy(() => import("./pages/public/NotFoundPage"));
-
-const StudentDashboard = lazy(() => import("./pages/student/StudentDashboard"));
-const StudentChatbot = lazy(() => import("./pages/student/StudentChatbot"));
-const DailyCheckInPage = lazy(() => import("./pages/student/DailyCheckInPage"));
-const MoodHistoryPage = lazy(() => import("./pages/student/MoodHistoryPage"));
-const SelfCareResourcesPage = lazy(() => import("./pages/student/SelfCareResourcesPage"));
-const PrivacyConsentPage = lazy(() => import("./pages/student/PrivacyConsentPage"));
-const ScreenTimePage = lazy(() => import("./pages/student/ScreenTimePage"));
-const CounselorDashboard = lazy(() => import("./pages/counselor/CounselorDashboard"));
-const StudentCaseFile = lazy(() => import("./pages/counselor/StudentCaseFile"));
-const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
-const AdminAuditLogs = lazy(() => import("./pages/admin/AdminAuditLogs"));
-const Settings = lazy(() => import("./pages/settings/Settings"));
+import StudentDashboard from "./pages/student/StudentDashboard";
+import StudentChatbot from "./pages/student/StudentChatbot";
+import DailyCheckInPage from "./pages/student/DailyCheckInPage";
+import MoodHistoryPage from "./pages/student/MoodHistoryPage";
+import SelfCareResourcesPage from "./pages/student/SelfCareResourcesPage";
+import PrivacyConsentPage from "./pages/student/PrivacyConsentPage";
+import ScreenTimePage from "./pages/student/ScreenTimePage";
+import CounselorDashboard from "./pages/counselor/CounselorDashboard";
+import { StudentCaseFile } from "./pages/counselor/StudentCaseFile";
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import { AdminAuditLogs } from "./pages/admin/AdminAuditLogs";
+import Settings from "./pages/settings/Settings";
 
 // Setup global React Query client with standard stale time (5 minutes)
 const queryClient = new QueryClient({
@@ -48,15 +41,12 @@ function App() {
       <QueryClientProvider client={queryClient}>
         <ThemeProvider>
           <Router>
-            <Suspense fallback={<PageLoader />}>
-              <Routes>
+          <Routes>
             {/* Root & Public auth pages */}
             <Route path="/" element={<LandingPage />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
-            <Route path="/privacy" element={<PrivacyPolicyPage />} />
-            <Route path="/terms" element={<TermsAndConditionsPage />} />
 
 
             {/* STUDENT Guarded Pathways */}
@@ -309,11 +299,9 @@ function App() {
               }
             />
 
-              {/* 404 Dedicated Not Found Page */}
-              <Route path="*" element={<NotFoundPage />} />
-            </Routes>
-          </Suspense>
-          <CookieConsentBanner />
+            {/* Catch-all Redirect */}
+            <Route path="*" element={<Navigate to="/login" replace />} />
+          </Routes>
         </Router>
       </ThemeProvider>
     </QueryClientProvider>

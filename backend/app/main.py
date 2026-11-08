@@ -1,9 +1,5 @@
 import os
 os.environ.setdefault("OPENBLAS_NUM_THREADS", "1")
-os.environ.setdefault("TRANSFORMERS_NO_ADVISORY_WARNINGS", "1")
-_mpl_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".cache", "matplotlib"))
-os.makedirs(_mpl_dir, exist_ok=True)
-os.environ.setdefault("MPLCONFIGDIR", _mpl_dir)
 import logging
 import time
 import uuid
@@ -11,7 +7,6 @@ from fastapi import FastAPI, Request, Response, status
 from fastapi.responses import JSONResponse
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
-from starlette.middleware.gzip import GZipMiddleware
 from sqlalchemy.exc import SQLAlchemyError
 
 from app.core.config import settings
@@ -33,10 +28,7 @@ from app.api.v1.checkins import router as checkins_router, counselor_checkins_ro
 from app.api.v1.sleep import router as sleep_router, counselor_sleep_router
 from app.api.v1.interventions import router as interventions_router
 from app.api.v1.academic import router as academic_router
-from app.api.v1.devices import router as devices_router
-from app.api.v1.digital_wellness import router as digital_wellness_router
 from app.middleware.audit_logging import AuditLoggingMiddleware
-from app.middleware.rate_limiting import RateLimitingMiddleware
 
 from contextlib import asynccontextmanager
 from app.ml.inference import ml_service
@@ -48,32 +40,31 @@ logger = logging.getLogger("mindguard-api")
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Perform startup routines
-    if os.environ.get("TESTING") != "true":
-        logger.info("Starting up: preloading machine learning models...")
-        ml_service.load_models()
-        
-        try:
-            from app.db.session import async_engine, Base
-            from sqlalchemy import text
-            import app.models
-            async with async_engine.begin() as conn:
-                await conn.run_sync(Base.metadata.create_all)
-                # Ensure severity column exists in alerts table for SQLite
-                try:
-                    await conn.execute(text("ALTER TABLE alerts ADD COLUMN severity VARCHAR(50) DEFAULT 'HIGH'"))
-                except Exception:
-                    pass
-                try:
-                    await conn.execute(text("ALTER TABLE alerts ADD COLUMN counselor_id CHAR(32)"))
-                except Exception:
-                    pass
-                try:
-                    await conn.execute(text("ALTER TABLE alerts ADD COLUMN resolved_at DATETIME"))
-                except Exception:
-                    pass
-            logger.info("Database schema initialized and verified.")
-        except Exception as e:
-            logger.error(f"Database initialization error: {e}")
+    logger.info("Starting up: preloading machine learning models...")
+    ml_service.load_models()
+    
+    try:
+        from app.db.session import async_engine, Base
+        from sqlalchemy import text
+        import app.models
+        async with async_engine.begin() as conn:
+            await conn.run_sync(Base.metadata.create_all)
+            # Ensure severity column exists in alerts table for SQLite
+            try:
+                await conn.execute(text("ALTER TABLE alerts ADD COLUMN severity VARCHAR(50) DEFAULT 'HIGH'"))
+            except Exception:
+                pass
+            try:
+                await conn.execute(text("ALTER TABLE alerts ADD COLUMN counselor_id CHAR(32)"))
+            except Exception:
+                pass
+            try:
+                await conn.execute(text("ALTER TABLE alerts ADD COLUMN resolved_at DATETIME"))
+            except Exception:
+                pass
+        logger.info("Database schema initialized and verified.")
+    except Exception as e:
+        logger.error(f"Database initialization error: {e}")
         
     yield
     # Perform shutdown cleanups if any
@@ -86,7 +77,7 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-# 1. Configure CORS & Security Middlewares
+# 1. Configure CORS Middleware
 # Wildcards are disallowed; origins are restricted to configured values.
 app.add_middleware(
     CORSMiddleware,
@@ -95,8 +86,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-app.add_middleware(GZipMiddleware, minimum_size=1000)
-app.add_middleware(RateLimitingMiddleware, auth_limit_per_min=20, api_limit_per_min=300)
 app.add_middleware(AuditLoggingMiddleware)
 
 # 2. Configure Request ID and Timing Middleware
@@ -113,14 +102,6 @@ async def add_request_id_and_process_time(request: Request, call_next):
     process_time = time.time() - start_time
     response.headers["X-Request-ID"] = request_id
     response.headers["X-Process-Time"] = f"{process_time:.4f}s"
-    
-    # Production Security & HTTPS Hardening Headers
-    response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains; preload"
-    response.headers["X-Content-Type-Options"] = "nosniff"
-    response.headers["X-Frame-Options"] = "DENY"
-    response.headers["X-XSS-Protection"] = "1; mode=block"
-    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
-    response.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()"
     
     logger.info(
         f"Processed request: {request.method} {request.url.path} - status: {response.status_code} "
@@ -169,13 +150,12 @@ async def sqlalchemy_exception_handler(request: Request, exc: SQLAlchemyError):
     Handle relational database exceptions. Hides connection strings/queries from client details.
     """
     logger.error(f"SQLAlchemy Exception: {str(exc)}", exc_info=True)
-    details = {"reason": str(exc)} if settings.ENVIRONMENT == "development" else {}
     return JSONResponse(
         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
         content={
             "error_code": "INTERNAL_SERVER_ERROR",
             "message": "A database error occurred while processing the request.",
-            "details": details
+            "details": {}
         }
     )
 
@@ -253,12 +233,6 @@ app.include_router(interventions_router, prefix="/api/v1", tags=["Interventions"
 app.include_router(interventions_router, prefix="/api", tags=["Interventions"])
 app.include_router(academic_router, prefix="/api/v1", tags=["Academic Calendar"])
 app.include_router(academic_router, prefix="/api", tags=["Academic Calendar"])
-app.include_router(devices_router, prefix="/api/v1/devices", tags=["Connected Devices"])
-app.include_router(devices_router, prefix="/api/devices", tags=["Connected Devices"])
-app.include_router(digital_wellness_router, prefix="/api/v1/digital-wellness", tags=["Digital Wellness"])
-app.include_router(digital_wellness_router, prefix="/api/digital-wellness", tags=["Digital Wellness"])
-app.include_router(digital_wellness_router, prefix="/api/v1/activity", tags=["Digital Wellness"])
-app.include_router(digital_wellness_router, prefix="/api/activity", tags=["Digital Wellness"])
 
 @app.get("/health", tags=["Health"])
 @app.get("/api/health", tags=["Health"])

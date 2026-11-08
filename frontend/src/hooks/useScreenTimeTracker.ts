@@ -81,10 +81,10 @@ export const useScreenTimeTracker = () => {
                 entertainmentSeconds: entertainmentSecondsRef.current,
               })
             );
-          } catch (e) { }
+          } catch (e) {}
         }
       })
-      .catch(() => { });
+      .catch(() => {});
 
 
     // 2. User interaction listeners
@@ -137,11 +137,14 @@ export const useScreenTimeTracker = () => {
             entertainmentSeconds: entertainmentSecondsRef.current,
           })
         );
-      } catch (e) { }
+      } catch (e) {}
     }, 1000);
 
     // 4. Function to sync with MindGuard Backend API using authenticated axios client
     const syncWithBackend = async () => {
+      // If the desktop PC agent is actively tracking the system, it is authoritative.
+      // Do not post browser-only seconds that could collide with complete system metrics.
+      if (isDesktopAgentConnectedRef.current) return;
       if (activeSecondsRef.current <= 0) return;
 
       const activeMinutes = Math.max(1, Math.round(activeSecondsRef.current / 60));
@@ -164,7 +167,6 @@ export const useScreenTimeTracker = () => {
 
         // Trigger React Query refresh to immediately update the dashboard widget
         queryClient.invalidateQueries({ queryKey: ["behavioral-summary"] });
-        queryClient.invalidateQueries({ queryKey: ["digital-wellness"] });
       } catch (err) {
         // Silent background retry
       }
