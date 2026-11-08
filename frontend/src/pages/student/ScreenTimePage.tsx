@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import {
   Activity,
   Smartphone,
@@ -9,7 +9,8 @@ import {
   ShieldCheck,
   Moon,
   Eye,
-  Sparkles
+  Sparkles,
+  Calendar
 } from "lucide-react";
 import { motion } from "motion/react";
 import { Button } from "@/components/ui/button";
@@ -64,6 +65,24 @@ export const ScreenTimePage: React.FC = () => {
     return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
   });
 
+  const quickDates = useMemo(() => {
+    const list = [];
+    const today = new Date();
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(today);
+      d.setDate(today.getDate() - i);
+      const dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+      const label =
+        i === 0
+          ? "Today"
+          : i === 1
+          ? "Yesterday"
+          : d.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" });
+      list.push({ dateStr, label });
+    }
+    return list;
+  }, []);
+
   return (
     <motion.div
       variants={pageVariants}
@@ -103,6 +122,40 @@ export const ScreenTimePage: React.FC = () => {
             <Eye className="w-3.5 h-3.5 mr-1.5" />
             20-20-20 Eye Break
           </Button>
+        </div>
+      </div>
+
+      {/* Quick Date Switcher Pill Bar */}
+      <div className="flex flex-wrap items-center justify-between gap-3 p-3 rounded-2xl bg-card/80 backdrop-blur-sm border border-border/60 shadow-xs">
+        <div className="flex items-center gap-2 overflow-x-auto scrollbar-none py-0.5">
+          <Calendar className="w-4 h-4 text-primary shrink-0" />
+          <span className="text-xs font-bold text-foreground shrink-0 mr-1">Activity Date:</span>
+          <div className="flex items-center gap-1.5 flex-nowrap">
+            {quickDates.map((qd) => {
+              const isSelected = selectedDate === qd.dateStr;
+              return (
+                <button
+                  key={qd.dateStr}
+                  onClick={() => setSelectedDate(qd.dateStr)}
+                  className={`px-3 py-1 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
+                    isSelected
+                      ? "bg-primary text-primary-foreground shadow-xs font-bold scale-102"
+                      : "bg-secondary/60 text-muted-foreground hover:text-foreground hover:bg-secondary"
+                  }`}
+                >
+                  {qd.label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          <input
+            type="date"
+            value={selectedDate}
+            onChange={(e) => e.target.value && setSelectedDate(e.target.value)}
+            className="px-2.5 py-1 text-xs rounded-xl border border-border bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+          />
         </div>
       </div>
 
