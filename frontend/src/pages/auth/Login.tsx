@@ -94,16 +94,16 @@ export const Login: React.FC = () => {
     }
   };
 
-  const setDemoCredentials = (email: string, pass = "Student@123") => {
+  const setDemoCredentials = (email: string, pass = "password123") => {
     setValue("email", email, { shouldValidate: true });
     setValue("password", pass, { shouldValidate: true });
   };
 
   const handleDemoNav = async (path: string, email: string) => {
-    setDemoCredentials(email, "Student@123");
+    setDemoCredentials(email, "password123");
     setIsSubmitting(true);
     try {
-      const loggedUser = await login(email, "Student@123", true);
+      const loggedUser = await login(email, "password123", true);
       toast({
         title: "Authenticated Successfully",
         description: `Signed in as ${loggedUser.role}.`,
@@ -337,21 +337,21 @@ export const Login: React.FC = () => {
           <div className="flex gap-2 justify-center">
             <button
               type="button"
-              onClick={() => handleDemoNav("/student/dashboard", "student1@mindguard.edu")}
+              onClick={() => handleDemoNav("/student/dashboard", "pasupulasai.teja37@nmims.in")}
               className="px-3 py-1.5 rounded-lg border border-border text-xs font-medium hover:bg-secondary transition-colors"
             >
               Student Demo
             </button>
             <button
               type="button"
-              onClick={() => handleDemoNav("/counselor/dashboard", "counselor1@mindguard.edu")}
+              onClick={() => handleDemoNav("/counselor/dashboard", "naresh.vurukonda@nmims.edu")}
               className="px-3 py-1.5 rounded-lg border border-border text-xs font-medium hover:bg-secondary transition-colors"
             >
               Counsellor Demo
             </button>
             <button
               type="button"
-              onClick={() => handleDemoNav("/admin/dashboard", "admin@mindguard.edu")}
+              onClick={() => handleDemoNav("/admin/dashboard", "raja.govindaacharyk@nmims.edu")}
               className="px-3 py-1.5 rounded-lg border border-border text-xs font-medium hover:bg-secondary transition-colors"
             >
               Admin Demo

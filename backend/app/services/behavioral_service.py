@@ -548,6 +548,7 @@ class BehavioralService:
         Strictly queries real database records and desktop agent heartbeats.
         """
         now = datetime.now(timezone.utc)
+        today_iso = datetime.now().date().strftime("%Y-%m-%d")
 
         # 1. Fetch genuine behavioral telemetry logs recorded for this specific student
         stmt = (

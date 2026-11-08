@@ -222,7 +222,7 @@ export const ApplicationAnalyticsView: React.FC<ApplicationAnalyticsViewProps> =
           <Button
             variant="outline"
             size="sm"
-            onClick={fetchApps}
+            onClick={() => fetchApps()}
             disabled={refreshing}
             className="rounded-xl border-border/60 hover:bg-muted/50"
           >

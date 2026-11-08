@@ -385,25 +385,40 @@ api.interceptors.response.use(
   };
 
   export const digitalWellnessAPI = {
-    getOverview: async (params?: { date?: string; device_id?: string }) => {
+    getOverview: async (params?: { date?: string; device_id?: string } | string) => {
       const query = new URLSearchParams();
-      if (params?.date) query.append("date", params.date);
-      if (params?.device_id) query.append("device_id", params.device_id);
-      const res = await api.get(`/digital-wellness/overview?${query.toString()}`);
+      if (typeof params === "string") {
+        if (params) query.append("date", params);
+      } else if (params) {
+        if (params.date) query.append("date", params.date);
+        if (params.device_id) query.append("device_id", params.device_id);
+      }
+      const qs = query.toString();
+      const res = await api.get(`/digital-wellness/overview${qs ? `?${qs}` : ""}`);
       return res.data;
     },
-    getApplications: async (params?: { date?: string; device_id?: string }) => {
+    getApplications: async (params?: { date?: string; device_id?: string } | string) => {
       const query = new URLSearchParams();
-      if (params?.date) query.append("date", params.date);
-      if (params?.device_id) query.append("device_id", params.device_id);
-      const res = await api.get(`/digital-wellness/applications?${query.toString()}`);
+      if (typeof params === "string") {
+        if (params) query.append("date", params);
+      } else if (params) {
+        if (params.date) query.append("date", params.date);
+        if (params.device_id) query.append("device_id", params.device_id);
+      }
+      const qs = query.toString();
+      const res = await api.get(`/digital-wellness/applications${qs ? `?${qs}` : ""}`);
       return res.data;
     },
-    getWebsites: async (params?: { date?: string; device_id?: string }) => {
+    getWebsites: async (params?: { date?: string; device_id?: string } | string) => {
       const query = new URLSearchParams();
-      if (params?.date) query.append("date", params.date);
-      if (params?.device_id) query.append("device_id", params.device_id);
-      const res = await api.get(`/digital-wellness/websites?${query.toString()}`);
+      if (typeof params === "string") {
+        if (params) query.append("date", params);
+      } else if (params) {
+        if (params.date) query.append("date", params.date);
+        if (params.device_id) query.append("device_id", params.device_id);
+      }
+      const qs = query.toString();
+      const res = await api.get(`/digital-wellness/websites${qs ? `?${qs}` : ""}`);
       return res.data;
     },
     getSearches: async (params?: { limit?: number }) => {
@@ -416,11 +431,16 @@ api.interceptors.response.use(
       const res = await api.delete("/digital-wellness/searches");
       return res.data;
     },
-    getNotifications: async (params?: { date?: string; device_id?: string }) => {
+    getNotifications: async (params?: { date?: string; device_id?: string } | string) => {
       const query = new URLSearchParams();
-      if (params?.date) query.append("date", params.date);
-      if (params?.device_id) query.append("device_id", params.device_id);
-      const res = await api.get(`/digital-wellness/notifications?${query.toString()}`);
+      if (typeof params === "string") {
+        if (params) query.append("date", params);
+      } else if (params) {
+        if (params.date) query.append("date", params.date);
+        if (params.device_id) query.append("device_id", params.device_id);
+      }
+      const qs = query.toString();
+      const res = await api.get(`/digital-wellness/notifications${qs ? `?${qs}` : ""}`);
       return res.data;
     },
     getConsent: async () => {
