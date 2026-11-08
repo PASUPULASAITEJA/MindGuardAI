@@ -7,6 +7,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.models.consent_records import ConsentRecord, ConsentType
 
 class ConsentRecordRepository:
+    _last_time: Optional[datetime] = None
+
     async def create(
         self,
         db: AsyncSession,
@@ -17,8 +19,14 @@ class ConsentRecordRepository:
     ) -> ConsentRecord:
         """
         Appends an immutable consent record. Never updates existing records.
+        Guarantees strictly increasing timestamp for deterministic audit order.
         """
+        from datetime import timedelta
         now = datetime.now(timezone.utc)
+        if self._last_time and now <= self._last_time:
+            now = self._last_time + timedelta(microseconds=1000)
+        self._last_time = now
+
         record = ConsentRecord(
             id=uuid4(),
             user_id=user_id,

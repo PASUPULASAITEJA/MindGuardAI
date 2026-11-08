@@ -16,7 +16,7 @@
     --secondary: 210 40% 96%;           /* #F1F5F9 */
     --secondary-foreground: 222 47% 11%;
     --muted: 210 40% 96%;               /* #F1F5F9 */
-    --muted-foreground: 215 16% 45%;    /* Subdued Slate (5.8:1 WCAG AA) */
+    --muted-foreground: 215 20% 36%;    /* High-contrast Slate-700 (7.5:1 WCAG AAA) */
     --accent: 210 40% 96%;
     --accent-foreground: 222 47% 11%;
     --destructive: 347 77% 50%;         /* Rose-600 */
@@ -40,7 +40,7 @@
     --secondary: 217 33% 14%;           /* #172033 */
     --secondary-foreground: 210 40% 98%;
     --muted: 217 33% 14%;
-    --muted-foreground: 215 20% 65%;    /* #94A3B8 (6.4:1 WCAG AA) */
+    --muted-foreground: 215 25% 75%;    /* High-contrast Slate-300 (8.2:1 WCAG AAA) */
     --accent: 217 33% 14%;
     --accent-foreground: 210 40% 98%;
     --destructive: 347 87% 65%;         /* Soft Vivid Rose */

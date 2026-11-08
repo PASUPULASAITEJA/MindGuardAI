@@ -827,12 +827,14 @@ export const LandingPage: React.FC = () => {
                 </button>
               </li>
               <li>
-                <button
-                  onClick={() => scrollToSection("privacy")}
-                  className="hover:text-primary transition-colors"
-                >
+                <Link to="/privacy" className="hover:text-primary transition-colors">
                   Privacy Policy
-                </button>
+                </Link>
+              </li>
+              <li>
+                <Link to="/terms" className="hover:text-primary transition-colors">
+                  Terms & Conditions
+                </Link>
               </li>
               <li>
                 <Link to="/student/privacy" className="hover:text-primary transition-colors">
@@ -876,8 +878,12 @@ export const LandingPage: React.FC = () => {
 
         {/* Bottom bar */}
         <div className="max-w-7xl mx-auto mt-8 pt-6 border-t border-border flex flex-col sm:flex-row items-center justify-between text-xs text-muted-foreground gap-2">
-          <span>© {new Date().getFullYear()} MindGuardAI. All rights reserved.</span>
-          <span>Built for Student Wellbeing</span>
+          <span>&copy; {new Date().getFullYear()} MindGuardAI. All rights reserved.</span>
+          <div className="flex items-center gap-4">
+            <Link to="/privacy" className="hover:text-primary transition-colors">Privacy Policy</Link>
+            <Link to="/terms" className="hover:text-primary transition-colors">Terms of Service</Link>
+            <span>Built for Student Wellbeing</span>
+          </div>
         </div>
       </footer>
     </div>

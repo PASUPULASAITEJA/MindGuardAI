@@ -3,6 +3,10 @@ import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from "r
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AnimatePresence } from "motion/react";
 import LandingPage from "./pages/public/LandingPage";
+import { PrivacyPolicyPage } from "./pages/public/PrivacyPolicyPage";
+import { TermsAndConditionsPage } from "./pages/public/TermsAndConditionsPage";
+import { NotFoundPage } from "./pages/public/NotFoundPage";
+import { CookieConsentBanner } from "./components/public/CookieConsentBanner";
 import Login from "./pages/auth/Login";
 import Register from "./pages/auth/Register";
 import ForgotPassword from "./pages/auth/ForgotPassword";
@@ -44,6 +48,8 @@ function App() {
           <Routes>
             {/* Root & Public auth pages */}
             <Route path="/" element={<LandingPage />} />
+            <Route path="/privacy" element={<PrivacyPolicyPage />} />
+            <Route path="/terms" element={<TermsAndConditionsPage />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
@@ -299,9 +305,10 @@ function App() {
               }
             />
 
-            {/* Catch-all Redirect */}
-            <Route path="*" element={<Navigate to="/login" replace />} />
+            {/* Catch-all 404 Custom Page */}
+            <Route path="*" element={<NotFoundPage />} />
           </Routes>
+          <CookieConsentBanner />
         </Router>
       </ThemeProvider>
     </QueryClientProvider>

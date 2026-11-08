@@ -59,6 +59,7 @@ export const Register: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [honey, setHoney] = useState("");
   const [rosterStatus, setRosterStatus] = useState<{
     checked: boolean;
     isAuthorized: boolean;
@@ -117,6 +118,12 @@ export const Register: React.FC = () => {
   }, [typedEmail, setValue]);
 
   const onSubmit = async (data: RegisterFormValues) => {
+    // Bot & spam protection: reject if hidden honeypot was populated
+    if (honey) {
+      console.warn("Automated bot pattern trapped.");
+      return;
+    }
+
     setIsSubmitting(true);
     try {
       await registerUser(data.email, data.password, data.role as UserRole, data.full_name);
@@ -241,6 +248,17 @@ export const Register: React.FC = () => {
 
           {/* Form */}
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            {/* Honeypot field for bot/spam protection */}
+            <input
+              type="text"
+              name="b_security_code"
+              value={honey}
+              onChange={(e) => setHoney(e.target.value)}
+              tabIndex={-1}
+              autoComplete="off"
+              className="hidden opacity-0 pointer-events-none absolute"
+              aria-hidden="true"
+            />
             {/* Full Name field */}
             <div className="space-y-1.5">
               <label
