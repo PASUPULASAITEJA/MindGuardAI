@@ -63,12 +63,13 @@ fi
 # 4. Generate Production Environment Variables
 echo "[$(date -u)] Configuring production .env..."
 SECRET_KEY=$(openssl rand -hex 32)
+DB_PASS=$(openssl rand -hex 16)
 cat <<EOF > "${INSTALL_DIR}/.env"
 ENVIRONMENT=production
 POSTGRES_USER=mindguard_admin
-POSTGRES_PASSWORD=$(openssl rand -hex 16)
+POSTGRES_PASSWORD=${DB_PASS}
 POSTGRES_DB=mindguard
-DATABASE_URL=postgresql+asyncpg://mindguard_admin:${POSTGRES_PASSWORD}@db:5432/mindguard
+DATABASE_URL=postgresql+asyncpg://mindguard_admin:${DB_PASS}@db:5432/mindguard
 JWT_SECRET_KEY=${SECRET_KEY}
 ACCESS_TOKEN_EXPIRE_MINUTES=60
 REFRESH_TOKEN_EXPIRE_DAYS=14
