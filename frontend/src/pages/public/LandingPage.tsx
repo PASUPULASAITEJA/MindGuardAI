@@ -19,6 +19,8 @@ import {
   ChevronDown,
   Menu,
   X,
+  Smartphone,
+  Download,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -232,6 +234,12 @@ export const LandingPage: React.FC = () => {
               </button>
             </div>
             <div className="pt-2 border-t border-border/60 flex flex-col gap-2">
+              <a href="/mindguard.apk" download="mindguard.apk" onClick={() => setIsMobileNavOpen(false)}>
+                <Button variant="outline" className="w-full font-semibold rounded-xl text-sm border-emerald-500/40 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center gap-2">
+                  <Smartphone className="w-4 h-4 text-emerald-500" />
+                  Download Android APK
+                </Button>
+              </a>
               <Link to="/login" onClick={() => setIsMobileNavOpen(false)}>
                 <Button className="w-full cinematic-glow-btn bg-primary text-primary-foreground font-semibold rounded-xl text-sm shadow-sm">
                   Student Portal
@@ -285,7 +293,7 @@ export const LandingPage: React.FC = () => {
               sleep patterns, and clinical screeners — to surface early warnings weeks before students reach breaking point.
             </p>
 
-            <div className="fade-up-3 flex flex-col sm:flex-row gap-3.5 mt-6 sm:mt-8">
+            <div className="fade-up-3 flex flex-col sm:flex-row flex-wrap gap-3.5 mt-6 sm:mt-8">
               <Link to="/login" className="w-full sm:w-auto">
                 <Button
                   size="lg"
@@ -295,6 +303,16 @@ export const LandingPage: React.FC = () => {
                   <ArrowRight className="w-4 h-4 ml-2" />
                 </Button>
               </Link>
+              <a href="/mindguard.apk" download="mindguard.apk" className="w-full sm:w-auto">
+                <Button
+                  variant="outline"
+                  size="lg"
+                  className="w-full sm:w-auto font-semibold px-5 rounded-xl border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-500/20 hover:border-emerald-500/60 text-emerald-600 dark:text-emerald-400 transition-all flex items-center justify-center gap-2"
+                >
+                  <Smartphone className="w-4 h-4 text-emerald-500" />
+                  Get Mobile App (.APK)
+                </Button>
+              </a>
               <Button
                 variant="outline"
                 size="lg"
