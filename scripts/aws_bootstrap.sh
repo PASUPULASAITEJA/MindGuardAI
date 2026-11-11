@@ -60,6 +60,9 @@ else
     cd "${INSTALL_DIR}"
 fi
 
+# Ensure executable permissions on all shell scripts
+chmod -R +x "${INSTALL_DIR}/backend" "${INSTALL_DIR}/scripts" 2>/dev/null || true
+
 # 4. Generate Production Environment Variables
 echo "[$(date -u)] Configuring production .env..."
 SECRET_KEY=$(openssl rand -hex 32)
