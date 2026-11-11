@@ -54,6 +54,10 @@ class UserService:
             "role": assigned_role,
             "password_hash": hashed_password,
             "full_name": (user_in.full_name or normalized_email.split("@")[0]).strip(),
+            "phone_number": user_in.phone_number.strip() if getattr(user_in, "phone_number", None) else None,
+            "academic_department": user_in.academic_department.strip() if getattr(user_in, "academic_department", None) else None,
+            "emergency_contact_name": user_in.emergency_contact_name.strip() if getattr(user_in, "emergency_contact_name", None) else None,
+            "emergency_contact_phone": user_in.emergency_contact_phone.strip() if getattr(user_in, "emergency_contact_phone", None) else None,
             "is_active": True
         }
         

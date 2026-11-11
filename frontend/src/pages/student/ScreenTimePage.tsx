@@ -736,9 +736,16 @@ export const ScreenTimePage: React.FC = () => {
                   Classified into Studying, Playing, Normal Socializing, and Adult Content.
                 </CardDescription>
               </div>
-              <Badge className="bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/30 text-xs font-semibold">
-                Most Used: {dominantCategory.name} ({dominantPercentage}%)
-              </Badge>
+              <div className="flex items-center gap-2 flex-wrap">
+                {data?.purpose_analysis?.focus_stability_score && (
+                  <Badge className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/30 text-xs font-semibold">
+                    Focus Score: {data.purpose_analysis.focus_stability_score}%
+                  </Badge>
+                )}
+                <Badge className="bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/30 text-xs font-semibold">
+                  Most Used: {dominantCategory.name} ({dominantPercentage}%)
+                </Badge>
+              </div>
             </div>
           </CardHeader>
           <CardContent>
@@ -867,6 +874,17 @@ export const ScreenTimePage: React.FC = () => {
                   ? `Active screen exposure of ${formatHoursMins(activeLateNightMins)} occurred past midnight on this date. Nocturnal blue light delays REM sleep and increases cognitive fatigue.`
                   : "Minimal computer usage past midnight. Your natural sleep-wake cycle and melatonin production were preserved."}
               </p>
+              {data?.circadian_sleep_analysis?.sleep_regularity_index && (
+                <div className="mt-2.5 pt-2 border-t border-border/40 flex items-center justify-between text-[11px]">
+                  <span className="text-muted-foreground flex items-center gap-1 font-medium">
+                    <Sparkles className="w-3.5 h-3.5 text-primary" />
+                    Sleep Regularity Index (SRI):
+                  </span>
+                  <span className="font-bold text-foreground">
+                    {data.circadian_sleep_analysis.sleep_regularity_index} / 100
+                  </span>
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>

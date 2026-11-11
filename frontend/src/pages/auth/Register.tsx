@@ -27,6 +27,9 @@ const registerSchema = z
     role: z.enum(["STUDENT", "COUNSELOR", "ADMIN"], {
       errorMap: () => ({ message: "Please select an account type." }),
     }),
+    academic_department: z.string().optional(),
+    phone_number: z.string().optional(),
+    emergency_contact_phone: z.string().optional(),
     password: z.string().min(8, "Password must be at least 8 characters long."),
     confirm_password: z.string().min(1, "Please confirm your password."),
   })
@@ -79,12 +82,16 @@ export const Register: React.FC = () => {
       full_name: "",
       email: "",
       role: "STUDENT",
+      academic_department: "",
+      phone_number: "",
+      emergency_contact_phone: "",
       password: "",
       confirm_password: "",
     },
   });
 
   const typedEmail = watch("email");
+  const selectedRole = watch("role");
 
   // Roster verification check
   useEffect(() => {
@@ -126,7 +133,17 @@ export const Register: React.FC = () => {
 
     setIsSubmitting(true);
     try {
-      await registerUser(data.email, data.password, data.role as UserRole, data.full_name);
+      await registerUser(
+        data.email,
+        data.password,
+        data.role as UserRole,
+        data.full_name,
+        {
+          academic_department: data.academic_department?.trim() || undefined,
+          phone_number: data.phone_number?.trim() || undefined,
+          emergency_contact_phone: data.emergency_contact_phone?.trim() || undefined,
+        }
+      );
       toast({
         title: "Account Created Successfully",
         description: `Welcome to MindGuardAI, ${data.full_name}!`,
@@ -327,6 +344,54 @@ export const Register: React.FC = () => {
                 </p>
               )}
             </div>
+
+            {/* Student-specific details: Department, Phone & Emergency Contact */}
+            {selectedRole === "STUDENT" && (
+              <div className="space-y-3 p-3.5 rounded-xl border border-primary/20 bg-primary/5">
+                <div className="space-y-1">
+                  <label htmlFor="dept" className="text-xs font-semibold text-foreground flex items-center justify-between">
+                    <span>Academic Department / Branch</span>
+                    <span className="text-[10px] text-muted-foreground font-normal">Optional</span>
+                  </label>
+                  <Input
+                    id="dept"
+                    type="text"
+                    placeholder="e.g. Computer Science, 4th Year"
+                    className="rounded-xl h-9 text-xs focus:ring-2 focus:ring-primary/30 bg-background/80"
+                    {...register("academic_department")}
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                  <div className="space-y-1">
+                    <label htmlFor="phone" className="text-xs font-semibold text-foreground flex items-center justify-between">
+                      <span>Phone Number</span>
+                      <span className="text-[10px] text-muted-foreground font-normal">Optional</span>
+                    </label>
+                    <Input
+                      id="phone"
+                      type="tel"
+                      placeholder="+91 98765 43210"
+                      className="rounded-xl h-9 text-xs focus:ring-2 focus:ring-primary/30 bg-background/80"
+                      {...register("phone_number")}
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label htmlFor="emergency_phone" className="text-xs font-semibold text-foreground flex items-center justify-between">
+                      <span>Emergency Phone</span>
+                      <span className="text-[10px] text-muted-foreground font-normal">Optional</span>
+                    </label>
+                    <Input
+                      id="emergency_phone"
+                      type="tel"
+                      placeholder="Parent / Guardian"
+                      className="rounded-xl h-9 text-xs focus:ring-2 focus:ring-primary/30 bg-background/80"
+                      {...register("emergency_contact_phone")}
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Password field */}
             <div className="space-y-1.5">

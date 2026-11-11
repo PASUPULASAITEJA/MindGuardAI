@@ -891,6 +891,33 @@ class BehavioralService:
                 "total_notifications": sum(a.get("notifications", 0) for a in l_apps),
             })
 
+        # Calculate 7-Day Sleep Regularity Index (SRI) from late-night variance
+        if len(weekly_history_entries) >= 2:
+            late_series = [e.get("late_night_usage_minutes", 0) for e in weekly_history_entries]
+            avg_late = sum(late_series) / len(late_series)
+            variance_late = sum((x - avg_late) ** 2 for x in late_series) / len(late_series)
+            sri_score = round(max(35.0, min(100.0, 100.0 - (variance_late ** 0.5) * 0.8)), 1)
+        else:
+            sri_score = round(float(circadian_regularity_score), 1)
+
+        circadian_analysis["sleep_regularity_index"] = sri_score
+
+        # Calculate Cognitive Focus Score and App-Switching Transition Entropy
+        import math
+        total_foreground = sum(a.get("minutes", 0) for a in top_apps)
+        if total_foreground > 0 and len(top_apps) > 1:
+            entropy = 0.0
+            for a in top_apps:
+                p = a.get("minutes", 0) / total_foreground
+                if p > 0:
+                    entropy -= p * math.log2(p)
+            max_entropy = math.log2(len(top_apps))
+            focus_score = round(max(15.0, min(100.0, (1.0 - (entropy / max(0.1, max_entropy))) * 100)), 1)
+            entropy_val = round(entropy, 2)
+        else:
+            focus_score = 90.0
+            entropy_val = 0.5
+
         return {
             "is_agent_connected": is_connected,
             "is_currently_active": is_live,
@@ -901,6 +928,8 @@ class BehavioralService:
                 "purpose_status": purpose_status,
                 "purpose_tier": purpose_tier,
                 "purpose_advice": purpose_advice,
+                "focus_stability_score": focus_score,
+                "app_switching_entropy": entropy_val
             },
             "circadian_sleep_analysis": circadian_analysis,
             "top_apps": top_apps,

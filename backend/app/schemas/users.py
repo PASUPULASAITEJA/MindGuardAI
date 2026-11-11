@@ -11,6 +11,10 @@ class UserBase(BaseModel):
 class UserCreate(UserBase):
     full_name: Optional[str] = Field(None, max_length=255, description="Full display name or username")
     password: str = Field(..., min_length=8, description="Cleartext password (min 8 characters)")
+    phone_number: Optional[str] = Field(None, max_length=50, description="Primary contact telephone")
+    academic_department: Optional[str] = Field(None, max_length=100, description="Academic department, major, or branch")
+    emergency_contact_name: Optional[str] = Field(None, max_length=255, description="Emergency contact person name")
+    emergency_contact_phone: Optional[str] = Field(None, max_length=50, description="Emergency contact telephone")
 
 class UserUpdate(BaseModel):
     email: Optional[EmailStr] = None

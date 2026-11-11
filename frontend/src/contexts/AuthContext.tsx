@@ -15,7 +15,18 @@ interface AuthContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
   login: (email: string, password: string, rememberMe?: boolean) => Promise<User>;
-  register: (email: string, password: string, role: UserRole, full_name?: string) => Promise<void>;
+  register: (
+    email: string,
+    password: string,
+    role: UserRole,
+    full_name?: string,
+    extraDetails?: {
+      phone_number?: string;
+      academic_department?: string;
+      emergency_contact_name?: string;
+      emergency_contact_phone?: string;
+    }
+  ) => Promise<void>;
   logout: () => Promise<void>;
 }
 
@@ -153,9 +164,26 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   };
 
-  const register = async (email: string, password: string, role: UserRole, full_name?: string) => {
+  const register = async (
+    email: string,
+    password: string,
+    role: UserRole,
+    full_name?: string,
+    extraDetails?: {
+      phone_number?: string;
+      academic_department?: string;
+      emergency_contact_name?: string;
+      emergency_contact_phone?: string;
+    }
+  ) => {
     try {
-      await api.post("/auth/register", { email, password, role, full_name: full_name?.trim() });
+      await api.post("/auth/register", {
+        email,
+        password,
+        role,
+        full_name: full_name?.trim(),
+        ...extraDetails,
+      });
     } catch (error) {
       throw error;
     }
