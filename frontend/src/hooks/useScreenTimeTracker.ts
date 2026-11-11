@@ -87,7 +87,7 @@ export const useScreenTimeTracker = () => {
       .catch(() => {});
 
 
-    // 2. User interaction listeners
+    // 2. User interaction listeners with full mobile touch & visibility detection
     const handleUserActivity = () => {
       lastActiveTimestampRef.current = Date.now();
     };
@@ -96,9 +96,28 @@ export const useScreenTimeTracker = () => {
     window.addEventListener("keydown", handleUserActivity, { passive: true });
     window.addEventListener("click", handleUserActivity, { passive: true });
     window.addEventListener("scroll", handleUserActivity, { passive: true });
+    window.addEventListener("touchstart", handleUserActivity, { passive: true });
+    window.addEventListener("touchmove", handleUserActivity, { passive: true });
+    window.addEventListener("pointerdown", handleUserActivity, { passive: true });
+
+    // Handle mobile phone lock screen & app minimize
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        lastActiveTimestampRef.current = Date.now();
+      } else if (document.visibilityState === "hidden") {
+        // Phone screen locked or app minimized -> save progress immediately
+        syncWithBackend();
+      }
+    };
+    document.addEventListener("visibilitychange", handleVisibilityChange);
 
     // 3. Ticking loop every 1 second
     const tickInterval = setInterval(() => {
+      // Do not count if phone screen is locked or app is in background
+      if (document.visibilityState === "hidden") {
+        return;
+      }
+
       const now = Date.now();
       const idleTime = now - lastActiveTimestampRef.current;
 
@@ -183,6 +202,10 @@ export const useScreenTimeTracker = () => {
       window.removeEventListener("keydown", handleUserActivity);
       window.removeEventListener("click", handleUserActivity);
       window.removeEventListener("scroll", handleUserActivity);
+      window.removeEventListener("touchstart", handleUserActivity);
+      window.removeEventListener("touchmove", handleUserActivity);
+      window.removeEventListener("pointerdown", handleUserActivity);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
       clearTimeout(initialSyncTimeout);
       clearInterval(tickInterval);
       clearInterval(syncInterval);

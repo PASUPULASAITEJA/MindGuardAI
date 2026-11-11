@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from "motion/react";
 import { AmbientParticles } from "@/components/3d/AmbientParticles";
 import { useAuth } from "@/contexts/AuthContext";
 import { useMobileDetect } from "@/hooks/useMobileDetect";
+import { useScreenTimeTracker } from "@/hooks/useScreenTimeTracker";
 import {
   LayoutDashboard,
   ClipboardCheck,
@@ -31,6 +32,9 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ title, subtitl
   const location = useLocation();
   const { user } = useAuth();
   const { isDesktop } = useMobileDetect();
+
+  // Seamless, autonomous screen time tracking across all student pages & mobile screens
+  useScreenTimeTracker();
 
   // Close mobile drawer on route navigation or desktop switch
   React.useEffect(() => {

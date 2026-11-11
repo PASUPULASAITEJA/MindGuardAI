@@ -70,8 +70,6 @@ export const StudentDashboard: React.FC = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
-  useScreenTimeTracker();
-
   // Modals
   const [isSOSOpen, setIsSOSOpen] = useState(false);
   const [isBreathOpen, setIsBreathOpen] = useState(false);
