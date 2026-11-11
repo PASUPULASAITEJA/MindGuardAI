@@ -112,13 +112,19 @@ cd "${INSTALL_DIR}"
 docker compose down --remove-orphans || true
 docker compose up -d --build
 
-# 7. Configure Firewall
+# 7. Seed Initial Accounts & Historical Telemetry
+echo "[$(date -u)] Waiting for PostgreSQL database and seeding accounts..."
+sleep 15
+docker compose exec -T api python -m app.initial_data || true
+
+# 8. Configure Firewall
 ufw allow OpenSSH
 ufw allow 'Nginx Full'
+ufw allow 8000/tcp || true
 echo "y" | ufw enable || true
 
-# 8. Check Container Health
-sleep 15
+# 9. Check Container Health
+sleep 5
 docker compose ps
 
 echo "[$(date -u)] === MindGuard AI AWS Deployment Completed Successfully! ==="
