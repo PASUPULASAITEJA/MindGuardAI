@@ -392,12 +392,16 @@ export const ScreenTimePage: React.FC = () => {
       case "music": return <Music className="w-5 h-5 text-pink-500" />;
       case "message": return <MessageSquare className="w-5 h-5 text-emerald-500" />;
       case "globe": return <Globe className="w-5 h-5 text-sky-500" />;
+      case "camera": return <Smartphone className="w-5 h-5 text-pink-500" />;
+      case "video":
+      case "tv": return <Activity className="w-5 h-5 text-amber-500" />;
+      case "brain": return <Brain className="w-5 h-5 text-indigo-500" />;
       case "shield-alert": return <ShieldAlert className="w-5 h-5 text-rose-500" />;
       default:
         if (category === "Playing") return <Gamepad2 className="w-5 h-5 text-purple-500" />;
         if (category === "Normal") return <MessageSquare className="w-5 h-5 text-emerald-500" />;
         if (category === "Adult") return <ShieldAlert className="w-5 h-5 text-rose-500" />;
-        return <Laptop className="w-5 h-5 text-blue-500" />;
+        return <Smartphone className="w-5 h-5 text-blue-500" />;
     }
   };
 
@@ -441,7 +445,7 @@ export const ScreenTimePage: React.FC = () => {
             }
           >
             <span className={`w-2 h-2 rounded-full ${data?.is_agent_connected ? "bg-emerald-500 animate-pulse" : "bg-amber-500"}`} />
-            {data?.is_agent_connected ? "Live Desktop Telemetry Active" : "Passive Screen Time Tracking"}
+            {data?.is_agent_connected ? "Live Device Telemetry Active" : "Passive Screen Time Tracking"}
           </Badge>
         </div>
 
@@ -947,7 +951,7 @@ export const ScreenTimePage: React.FC = () => {
                     <ArrowUpRight className={`w-3.5 h-3.5 ${appMetricMode === "opens" ? "text-purple-500" : "text-muted-foreground"}`} />
                   </div>
                   <div className="text-lg font-bold text-foreground">{totalTimesOpened} opens</div>
-                  <span className="text-[10px] text-muted-foreground mt-0.5 block">App launches/pickups</span>
+                  <span className="text-[10px] text-muted-foreground mt-0.5 block">Phone unlocks / pickups</span>
                 </div>
 
                 {/* 3. Notifications */}
@@ -964,7 +968,7 @@ export const ScreenTimePage: React.FC = () => {
                     <Bell className={`w-3.5 h-3.5 ${appMetricMode === "notifications" ? "text-amber-500" : "text-muted-foreground"}`} />
                   </div>
                   <div className="text-lg font-bold text-foreground">{totalNotifications} received</div>
-                  <span className="text-[10px] text-muted-foreground mt-0.5 block">Windows alerts</span>
+                  <span className="text-[10px] text-muted-foreground mt-0.5 block">Smartphone alerts</span>
                 </div>
               </div>
 
