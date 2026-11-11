@@ -121,9 +121,11 @@ async def run_all_tests():
         from sqlalchemy import select
         import uuid
 
+        # Dedicated student user for workflow and consent testing (no alias)
+        fresh_student_email = "pipeline_student@mindguard.edu"
         async with AsyncSessionLocal() as session:
             test_users = [
-                ("student1@mindguard.edu", UserRole.STUDENT),
+                (fresh_student_email, UserRole.STUDENT),
                 ("counselor1@mindguard.edu", UserRole.COUNSELOR),
                 ("admin@mindguard.edu", UserRole.ADMIN),
             ]
@@ -142,7 +144,7 @@ async def run_all_tests():
                 else:
                     u.password_hash = get_password_hash("Student@123")
                     u.is_active = True
-                if email == "student1@mindguard.edu" and u:
+                if email == fresh_student_email and u:
                     from sqlalchemy import delete
                     from app.models.consent import Consent
                     await session.execute(delete(Consent).where(Consent.student_id == u.id))
@@ -151,11 +153,11 @@ async def run_all_tests():
         # Student Login
         res_student_login = await client.post(
             "/api/v1/auth/login",
-            json={"email": "student1@mindguard.edu", "password": "Student@123"}
+            json={"email": fresh_student_email, "password": "Student@123"}
         )
         student_token = res_student_login.json().get("access_token") if res_student_login.status_code == 200 else None
         record_test(
-            "Student Login (student1@mindguard.edu)",
+            f"Student Login ({fresh_student_email})",
             res_student_login.status_code == 200 and bool(student_token),
             f"Token generated: {bool(student_token)}"
         )
@@ -236,7 +238,7 @@ async def run_all_tests():
         res_profile = await client.get("/api/v1/students/me", headers=student_headers)
         record_test(
             "Get Student Profile (/api/v1/students/me)",
-            res_profile.status_code == 200 and res_profile.json().get("email") == "student1@mindguard.edu",
+            res_profile.status_code == 200 and res_profile.json().get("email") == fresh_student_email,
             f"Email: {res_profile.json().get('email')}"
         )
 
@@ -485,11 +487,14 @@ async def run_all_tests():
             from app.models.mood_checkins import MoodCheckin
             from app.models.sleep_logs import SleepLog
 
+            from app.models.consent import Consent
+
             async with AsyncSessionLocal() as session:
-                for email in ["student1@mindguard.edu", "counselor1@mindguard.edu", "admin@mindguard.edu", "testuser@gmail.com"]:
+                for email in [fresh_student_email, "student1@mindguard.edu", "counselor1@mindguard.edu", "admin@mindguard.edu", "testuser@gmail.com"]:
                     res = await session.execute(select(User).where(User.email == email))
                     u = res.scalars().first()
                     if u:
+                        await session.execute(delete(Consent).where(Consent.student_id == u.id))
                         await session.execute(delete(MoodCheckin).where(MoodCheckin.user_id == u.id))
                         await session.execute(delete(SleepLog).where(SleepLog.user_id == u.id))
                         await session.execute(delete(Alert).where(Alert.student_id == u.id))

@@ -39,13 +39,9 @@ def get_system_power_and_uptime_history_today() -> Dict[str, Any]:
     if _POWER_METRICS_CACHE["data"] and (now_ts - _POWER_METRICS_CACHE["timestamp"]) < 30.0:
         return _POWER_METRICS_CACHE["data"]
 
-    import psutil
     now_dt = datetime.now()
     today_midnight = now_dt.replace(hour=0, minute=0, second=0, microsecond=0)
     today_str = now_dt.date().isoformat()
-
-    boot_time_ts = psutil.boot_time()
-    boot_dt = datetime.fromtimestamp(boot_time_ts)
 
     total_awake_seconds = 0.0
     late_night_seconds = 0.0
@@ -54,6 +50,9 @@ def get_system_power_and_uptime_history_today() -> Dict[str, Any]:
 
     if sys.platform == "win32":
         try:
+            import psutil
+            boot_time_ts = psutil.boot_time()
+            boot_dt = datetime.fromtimestamp(boot_time_ts)
             start_time = max(today_midnight, boot_dt)
             total_awake_seconds = max(0.0, (now_dt - start_time).total_seconds())
             
