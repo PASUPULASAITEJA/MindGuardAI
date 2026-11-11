@@ -417,7 +417,7 @@ export const ScreenTimePage: React.FC = () => {
       case "Crisis / Urgent":
         return "bg-red-600 text-white animate-pulse border-red-500";
       default:
-        return "bg-slate-500/15 text-slate-600 dark:text-slate-400 border-slate-500/30";
+        return "bg-slate-500/15 text-muted-foreground border-slate-500/30";
     }
   };
 
@@ -685,9 +685,9 @@ export const ScreenTimePage: React.FC = () => {
                 className="cursor-pointer"
               >
                 <CartesianGrid strokeDasharray="3 3" stroke={isDark ? "#1e293b" : "#f1f5f9"} vertical={false} />
-                <XAxis dataKey="day" stroke="#94a3b8" fontSize={11} tickLine={false} />
+                <XAxis dataKey="day" stroke={isDark ? "#94a3b8" : "#475569"} fontSize={11} tickLine={false} />
                 <YAxis 
-                  stroke="#94a3b8" 
+                  stroke={isDark ? "#94a3b8" : "#475569"} 
                   fontSize={11} 
                   tickLine={false} 
                   width={36}
@@ -707,6 +707,7 @@ export const ScreenTimePage: React.FC = () => {
                   contentStyle={{
                     backgroundColor: isDark ? "#0f172a" : "#ffffff",
                     borderColor: isDark ? "#1e293b" : "#e2e8f0",
+                    color: isDark ? "#f8fafc" : "#0f172a",
                     borderRadius: "0.75rem",
                     fontSize: "12px",
                   }}
@@ -773,6 +774,7 @@ export const ScreenTimePage: React.FC = () => {
                         contentStyle={{
                           backgroundColor: isDark ? "#0f172a" : "#ffffff",
                           borderColor: isDark ? "#1e293b" : "#e2e8f0",
+                          color: isDark ? "#f8fafc" : "#0f172a",
                           borderRadius: "0.75rem",
                           fontSize: "12px",
                         }}
@@ -843,13 +845,14 @@ export const ScreenTimePage: React.FC = () => {
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={timeOfDayData} layout="vertical" margin={{ top: 10, right: 20, left: 20, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke={isDark ? "#1e293b" : "#f1f5f9"} />
-                  <XAxis type="number" tickFormatter={(v) => `${Math.round(v / 60)}h`} stroke="#94a3b8" fontSize={11} />
-                  <YAxis type="category" dataKey="name" width={110} stroke="#94a3b8" fontSize={10} tickLine={false} />
+                  <XAxis type="number" tickFormatter={(v) => `${Math.round(v / 60)}h`} stroke={isDark ? "#94a3b8" : "#475569"} fontSize={11} />
+                  <YAxis type="category" dataKey="name" width={110} stroke={isDark ? "#94a3b8" : "#475569"} fontSize={10} tickLine={false} />
                   <Tooltip
                     formatter={(val: any) => [`${formatHoursMins(Number(val))}`, "Usage"]}
                     contentStyle={{
                       backgroundColor: isDark ? "#0f172a" : "#ffffff",
                       borderColor: isDark ? "#1e293b" : "#e2e8f0",
+                      color: isDark ? "#f8fafc" : "#0f172a",
                       borderRadius: "0.75rem",
                       fontSize: "12px",
                     }}

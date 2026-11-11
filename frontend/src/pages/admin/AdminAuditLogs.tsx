@@ -68,7 +68,7 @@ export const AdminAuditLogs: React.FC = () => {
       case "login":
         return "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30";
       case "logout":
-        return "bg-slate-500/15 text-slate-600 dark:text-slate-400 border-slate-500/30";
+        return "bg-slate-500/15 text-muted-foreground border-slate-500/30";
       case "journal_create":
         return "bg-cyan-500/15 text-cyan-600 dark:text-cyan-400 border-cyan-500/30";
       case "journal_view":
@@ -107,7 +107,7 @@ export const AdminAuditLogs: React.FC = () => {
       case "STUDENT":
         return "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30";
       default:
-        return "bg-slate-500/15 text-slate-600 dark:text-slate-400 border-slate-500/30";
+        return "bg-slate-500/15 text-muted-foreground border-slate-500/30";
     }
   };
 

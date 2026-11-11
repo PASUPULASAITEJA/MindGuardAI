@@ -78,7 +78,7 @@ const emotionBadgeColor: Record<string, string> = {
   anxiety: "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20",
   anger: "bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20",
   fear: "bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20",
-  neutral: "bg-slate-500/10 text-slate-600 dark:text-slate-400 border-slate-500/20",
+  neutral: "bg-slate-500/10 text-muted-foreground border-slate-500/20",
 };
 
 // CBT 5-4-3-2-1 Sensory Grounding Steps
@@ -866,8 +866,8 @@ export const StudentChatbot: React.FC = () => {
                     className={cn(
                       "px-2.5 py-1 rounded-md transition-all",
                       breathingMode === "box"
-                        ? "bg-indigo-600 text-white shadow-xs"
-                        : "text-slate-600 dark:text-slate-400 hover:text-slate-900"
+                        ? "bg-primary text-primary-foreground shadow-xs"
+                        : "text-muted-foreground hover:text-foreground"
                     )}
                   >
                     Box 4-4-4-4
@@ -877,8 +877,8 @@ export const StudentChatbot: React.FC = () => {
                     className={cn(
                       "px-2.5 py-1 rounded-md transition-all",
                       breathingMode === "relax478"
-                        ? "bg-indigo-600 text-white shadow-xs"
-                        : "text-slate-600 dark:text-slate-400 hover:text-slate-900"
+                        ? "bg-primary text-primary-foreground shadow-xs"
+                        : "text-muted-foreground hover:text-foreground"
                     )}
                   >
                     Relax 4-7-8
@@ -1122,7 +1122,7 @@ export const StudentChatbot: React.FC = () => {
                       "px-2.5 py-1 rounded-lg text-xs font-semibold border transition-all",
                       selectedDistortion.id === item.id
                         ? "bg-violet-600 text-white border-violet-600 shadow-sm"
-                        : "border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-slate-600 dark:text-slate-400 hover:border-violet-300"
+                        : "border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-muted-foreground hover:border-violet-300"
                     )}
                   >
                     {item.name}

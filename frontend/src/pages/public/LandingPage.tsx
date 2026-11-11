@@ -585,7 +585,7 @@ export const LandingPage: React.FC = () => {
             <p className="text-5xl font-black text-white drop-shadow-md">
               {s1.value}%
             </p>
-            <p className="text-xs text-white/60 uppercase tracking-wider font-semibold mt-1">
+            <p className="text-xs text-white/90 uppercase tracking-wider font-bold mt-1">
               Risk Accuracy
             </p>
           </div>
@@ -593,7 +593,7 @@ export const LandingPage: React.FC = () => {
             <p className="text-5xl font-black text-white drop-shadow-md">
               {s2.value.toLocaleString()}+
             </p>
-            <p className="text-xs text-white/60 uppercase tracking-wider font-semibold mt-1">
+            <p className="text-xs text-white/90 uppercase tracking-wider font-bold mt-1">
               Students Monitored
             </p>
           </div>
@@ -601,7 +601,7 @@ export const LandingPage: React.FC = () => {
             <p className="text-5xl font-black text-white drop-shadow-md">
               {s3.value}
             </p>
-            <p className="text-xs text-white/60 uppercase tracking-wider font-semibold mt-1">
+            <p className="text-xs text-white/90 uppercase tracking-wider font-bold mt-1">
               Emotion Classes
             </p>
           </div>
@@ -609,7 +609,7 @@ export const LandingPage: React.FC = () => {
             <p className="text-5xl font-black text-white drop-shadow-md">
               {s4.value}
             </p>
-            <p className="text-xs text-white/60 uppercase tracking-wider font-semibold mt-1">
+            <p className="text-xs text-white/90 uppercase tracking-wider font-bold mt-1">
               Risk Tiers
             </p>
           </div>

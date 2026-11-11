@@ -204,7 +204,7 @@ export const WellnessTrendDashboard: React.FC<WellnessTrendDashboardProps> = ({
                         <CartesianGrid strokeDasharray="3 3" stroke={theme === "dark" ? "#334155" : "#e2e8f0"} opacity={0.5} />
                         <XAxis
                           dataKey="date"
-                          stroke={theme === "dark" ? "#64748b" : "#94a3b8"}
+                          stroke={theme === "dark" ? "#94a3b8" : "#475569"}
                           fontSize={11}
                           tickLine={false}
                           tickFormatter={(d) => {
@@ -212,7 +212,7 @@ export const WellnessTrendDashboard: React.FC<WellnessTrendDashboardProps> = ({
                             return parts.length >= 3 ? `${parts[1]}/${parts[2]}` : d;
                           }}
                         />
-                        <YAxis stroke={theme === "dark" ? "#64748b" : "#94a3b8"} fontSize={11} domain={[0, 100]} tickLine={false} width={35} />
+                        <YAxis stroke={theme === "dark" ? "#94a3b8" : "#475569"} fontSize={11} domain={[0, 100]} tickLine={false} width={35} />
                         <Tooltip
                           contentStyle={{
                             backgroundColor: theme === "dark" ? "#0f172a" : "#ffffff",
@@ -267,7 +267,7 @@ export const WellnessTrendDashboard: React.FC<WellnessTrendDashboardProps> = ({
                 >
                   <div>
                     <div className="flex items-center justify-between">
-                      <span className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                      <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
                         Average Wellness
                       </span>
                       <div className="p-2 rounded-xl bg-sky-500/10 text-sky-500 ring-1 ring-sky-500/20">
@@ -297,7 +297,7 @@ export const WellnessTrendDashboard: React.FC<WellnessTrendDashboardProps> = ({
                 >
                   <div>
                     <div className="flex items-center justify-between">
-                      <span className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                      <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
                         Period Trajectory
                       </span>
                       <div className={`p-2 rounded-xl ring-1 ${
@@ -343,7 +343,7 @@ export const WellnessTrendDashboard: React.FC<WellnessTrendDashboardProps> = ({
                 >
                   <div>
                     <div className="flex items-center justify-between">
-                      <span className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                      <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
                         Dominant Affect
                       </span>
                       <div className="p-2 rounded-xl bg-amber-500/10 text-amber-500 ring-1 ring-amber-500/20">
@@ -370,7 +370,7 @@ export const WellnessTrendDashboard: React.FC<WellnessTrendDashboardProps> = ({
                 >
                   <div>
                     <div className="flex items-center justify-between">
-                      <span className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                      <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
                         Score Volatility
                       </span>
                       <div className="p-2 rounded-xl bg-rose-500/10 text-rose-500 ring-1 ring-rose-500/20">

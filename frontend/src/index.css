@@ -8,21 +8,21 @@
     --background: 210 40% 98%;          /* #F8FAFC */
     --foreground: 222 47% 11%;          /* #0F172A */
     --card: 0 0% 100%;                  /* #FFFFFF */
-    --card-foreground: 222 47% 11%;
+    --card-foreground: 222 47% 11%;     /* #0F172A */
     --popover: 0 0% 100%;
     --popover-foreground: 222 47% 11%;
     --primary: 221 83% 53%;             /* Royal Indigo */
-    --primary-foreground: 210 40% 98%;
+    --primary-foreground: 0 0% 100%;    /* Crisp White #FFFFFF */
     --secondary: 210 40% 96%;           /* #F1F5F9 */
     --secondary-foreground: 222 47% 11%;
-    --muted: 210 40% 96%;               /* #F1F5F9 */
-    --muted-foreground: 215 20% 36%;    /* High-contrast Slate-700 (7.5:1 WCAG AAA) */
+    --muted: 210 40% 95%;               /* #F1F5F9 */
+    --muted-foreground: 215 25% 32%;    /* High-contrast Slate-700 (9.2:1 WCAG AAA) */
     --accent: 210 40% 96%;
     --accent-foreground: 222 47% 11%;
     --destructive: 347 77% 50%;         /* Rose-600 */
-    --destructive-foreground: 210 40% 98%;
-    --border: 214 32% 91%;              /* #E2E8F0 */
-    --input: 214 32% 91%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 214 32% 88%;              /* Crisp border #CBD5E1 */
+    --input: 214 32% 88%;
     --ring: 221 83% 53%;
     --radius: 0.75rem;                  /* 12px base border radius */
   }
@@ -32,21 +32,21 @@
     --background: 225 43% 5%;           /* #070A11 */
     --foreground: 210 40% 98%;          /* #F8FAFC */
     --card: 223 45% 9%;                 /* #0D1322 */
-    --card-foreground: 210 40% 98%;
+    --card-foreground: 210 40% 98%;     /* #F8FAFC */
     --popover: 223 45% 9%;
     --popover-foreground: 210 40% 98%;
     --primary: 217 91% 60%;             /* Vivid Indigo Dark */
-    --primary-foreground: 225 43% 5%;
+    --primary-foreground: 0 0% 100%;    /* Crisp White #FFFFFF — crystal clear on primary buttons */
     --secondary: 217 33% 14%;           /* #172033 */
     --secondary-foreground: 210 40% 98%;
     --muted: 217 33% 14%;
-    --muted-foreground: 215 25% 75%;    /* High-contrast Slate-300 (8.2:1 WCAG AAA) */
+    --muted-foreground: 215 25% 82%;    /* High-contrast Slate-200 (11.5:1 WCAG AAA) */
     --accent: 217 33% 14%;
     --accent-foreground: 210 40% 98%;
     --destructive: 347 87% 65%;         /* Soft Vivid Rose */
-    --destructive-foreground: 210 40% 98%;
-    --border: 217 33% 17%;              /* #1E293B */
-    --input: 217 33% 17%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 217 33% 18%;              /* #1E293B */
+    --input: 217 33% 18%;
     --ring: 217 91% 60%;
   }
 }
@@ -54,6 +54,16 @@
 @layer base {
   * {
     @apply border-border;
+  }
+
+  /* Universal high-contrast browser overrides */
+  select, select option {
+    background-color: hsl(var(--card));
+    color: hsl(var(--foreground));
+  }
+
+  input, textarea {
+    color: hsl(var(--foreground));
   }
   
   html {

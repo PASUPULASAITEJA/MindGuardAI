@@ -319,7 +319,7 @@ export const CounselorDashboard: React.FC = () => {
               <SpotlightCard className="p-4 sm:p-5 min-h-[140px] h-full flex flex-col justify-between" spotlightColor="rgba(244, 63, 94, 0.15)">
                 <div>
                   <div className="flex items-center justify-between text-muted-foreground">
-                    <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Cases Requiring Review</span>
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Cases Requiring Review</span>
                     <div className="p-1.5 rounded-lg bg-rose-500/10 text-rose-500">
                       <AlertCircle className="h-4 w-4" />
                     </div>
@@ -340,7 +340,7 @@ export const CounselorDashboard: React.FC = () => {
               <SpotlightCard className="p-4 sm:p-5 min-h-[140px] h-full flex flex-col justify-between" spotlightColor="rgba(59, 130, 246, 0.15)">
                 <div>
                   <div className="flex items-center justify-between text-muted-foreground">
-                    <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Active Interventions</span>
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Active Interventions</span>
                     <div className="p-1.5 rounded-lg bg-primary/10 text-primary">
                       <Target className="h-4 w-4" />
                     </div>
@@ -363,7 +363,7 @@ export const CounselorDashboard: React.FC = () => {
               <SpotlightCard className="p-4 sm:p-5 min-h-[140px] h-full flex flex-col justify-between" spotlightColor="rgba(99, 102, 241, 0.15)">
                 <div>
                   <div className="flex items-center justify-between text-muted-foreground">
-                    <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Consultations Scheduled</span>
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Consultations Scheduled</span>
                     <div className="p-1.5 rounded-lg bg-indigo-500/10 text-indigo-500">
                       <Calendar className="h-4 w-4" />
                     </div>
@@ -384,7 +384,7 @@ export const CounselorDashboard: React.FC = () => {
               <SpotlightCard className="p-4 sm:p-5 min-h-[140px] h-full flex flex-col justify-between" spotlightColor="rgba(16, 185, 129, 0.15)">
                 <div>
                   <div className="flex items-center justify-between text-muted-foreground">
-                    <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Observed Outcomes</span>
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Observed Outcomes</span>
                     <div className="p-1.5 rounded-lg bg-emerald-500/10 text-emerald-500">
                       <CheckCircle2 className="h-4 w-4" />
                     </div>
