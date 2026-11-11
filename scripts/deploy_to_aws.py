@@ -24,7 +24,7 @@ def parse_args():
     parser.add_argument("--access-key", default=os.getenv("AWS_ACCESS_KEY_ID"), help="AWS Access Key ID")
     parser.add_argument("--secret-key", default=os.getenv("AWS_SECRET_ACCESS_KEY"), help="AWS Secret Access Key")
     parser.add_argument("--region", default=os.getenv("AWS_DEFAULT_REGION", "ap-south-1"), help="AWS Region (default: ap-south-1 Mumbai or us-east-1)")
-    parser.add_argument("--instance-type", default="t3.medium", help="EC2 Instance Type (default: t3.medium)")
+    parser.add_argument("--instance-type", default="t3.micro", help="EC2 Instance Type (default: t3.micro for Free Tier)")
     parser.add_argument("--key-name", default=None, help="Existing EC2 Key Pair name (optional)")
     return parser.parse_args()
 

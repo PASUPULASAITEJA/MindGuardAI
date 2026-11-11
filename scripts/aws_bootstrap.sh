@@ -23,7 +23,17 @@ apt-get install -y --no-install-recommends \
     ufw \
     nginx
 
-# 2. Install Docker & Docker Compose Plugin
+# 2. Setup 4GB Swapfile for Free Tier Memory Optimization (prevents OOM during build)
+if [ ! -f /swapfile ]; then
+    echo "[$(date -u)] Creating 4GB swapfile for Free Tier memory optimization..."
+    fallocate -l 4G /swapfile || dd if=/dev/zero of=/swapfile bs=1M count=4096
+    chmod 600 /swapfile
+    mkswap /swapfile
+    swapon /swapfile
+    echo '/swapfile none swap sw 0 0' >> /etc/fstab
+fi
+
+# 3. Install Docker & Docker Compose Plugin
 if ! command -v docker &>/dev/null; then
     echo "[$(date -u)] Installing Docker Engine..."
     install -m 0755 -d /etc/apt/keyrings
