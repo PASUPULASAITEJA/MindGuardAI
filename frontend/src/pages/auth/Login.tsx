@@ -88,33 +88,6 @@ export const Login: React.FC = () => {
     }
   };
 
-  const setDemoCredentials = (email: string, pass = "password123") => {
-    setValue("email", email, { shouldValidate: true });
-    setValue("password", pass, { shouldValidate: true });
-  };
-
-  const handleDemoNav = async (path: string, email: string) => {
-    setDemoCredentials(email, "password123");
-    setIsSubmitting(true);
-    try {
-      const loggedUser = await login(email, "password123", true);
-      toast({
-        title: "Authenticated Successfully",
-        description: `Signed in as ${loggedUser.role}.`,
-        variant: "success",
-      });
-      navigate(path);
-    } catch {
-      toast({
-        title: "Authentication Failed",
-        description: "Could not authenticate demo user. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
   return (
     <div className="min-h-screen w-full flex bg-background text-foreground font-sans antialiased">
       {/* LEFT PANEL — hidden below lg, lg:flex, w-1/2 */}
@@ -319,43 +292,11 @@ export const Login: React.FC = () => {
             </Button>
           </form>
 
-          {/* Divider */}
-          <div className="relative flex items-center gap-3 my-2">
-            <div className="flex-1 border-t border-border" />
-            <span className="text-xs text-muted-foreground">or continue as</span>
-            <div className="flex-1 border-t border-border" />
-          </div>
-
-          {/* 3 demo role buttons */}
-          <div className="flex gap-2 justify-center">
-            <button
-              type="button"
-              onClick={() => handleDemoNav("/student/dashboard", "pasupulasai.teja37@nmims.in")}
-              className="px-3 py-1.5 rounded-lg border border-border text-xs font-medium hover:bg-secondary transition-colors"
-            >
-              Student Demo
-            </button>
-            <button
-              type="button"
-              onClick={() => handleDemoNav("/counselor/dashboard", "naresh.vurukonda@nmims.edu")}
-              className="px-3 py-1.5 rounded-lg border border-border text-xs font-medium hover:bg-secondary transition-colors"
-            >
-              Counsellor Demo
-            </button>
-            <button
-              type="button"
-              onClick={() => handleDemoNav("/admin/dashboard", "raja.govindaacharyk@nmims.edu")}
-              className="px-3 py-1.5 rounded-lg border border-border text-xs font-medium hover:bg-secondary transition-colors"
-            >
-              Admin Demo
-            </button>
-          </div>
-
           {/* Bottom register link */}
-          <p className="text-xs text-muted-foreground text-center mt-4">
+          <p className="text-xs text-muted-foreground text-center mt-6">
             Don&apos;t have an account?{" "}
             <Link to="/register" className="text-primary font-semibold hover:underline">
-              Register &rarr;
+              Register with University Email &rarr;
             </Link>
           </p>
         </div>
