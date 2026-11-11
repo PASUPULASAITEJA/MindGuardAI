@@ -19,8 +19,12 @@ cat > "$BUILD_DIR/AndroidManifest.xml" << 'EOF'
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="ai.mindguard.student"
-    android:versionCode="1"
-    android:versionName="1.0.0">
+    android:versionCode="2"
+    android:versionName="1.1.0">
+
+    <uses-sdk
+        android:minSdkVersion="24"
+        android:targetSdkVersion="34" />
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
@@ -166,13 +170,13 @@ cd "$BUILD_DIR"
 
 echo "=== 5. COMPILING RESOURCES (AAPT2) ==="
 "$BUILD_TOOLS/aapt2" compile --dir res -o compiled_res.zip
-"$BUILD_TOOLS/aapt2" link -I "$PLATFORM" --manifest AndroidManifest.xml --java gen -o base.apk compiled_res.zip
+"$BUILD_TOOLS/aapt2" link -I "$PLATFORM" --min-sdk-version 24 --target-sdk-version 34 --manifest AndroidManifest.xml --java gen -o base.apk compiled_res.zip
 
 echo "=== 6. COMPILING JAVA CLASSES (JAVAC) ==="
 javac -source 17 -target 17 -cp "$PLATFORM" gen/ai/mindguard/student/R.java src/ai/mindguard/student/MainActivity.java -d obj
 
 echo "=== 7. DEXING BYTECODE (D8) ==="
-"$BUILD_TOOLS/d8" obj/ai/mindguard/student/*.class --output .
+"$BUILD_TOOLS/d8" --lib "$PLATFORM" --min-api 24 obj/ai/mindguard/student/*.class --output .
 
 echo "=== 8. PACKAGING APK ==="
 zip -u base.apk classes.dex
