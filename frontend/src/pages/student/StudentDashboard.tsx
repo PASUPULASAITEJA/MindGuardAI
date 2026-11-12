@@ -122,69 +122,90 @@ export const StudentDashboard: React.FC = () => {
   const academicMins = log?.academic_usage_minutes || 0;
 
   // Wellness score computation
+  const hasAssessment = Boolean(
+    (latestAssessment as any)?.mental_wellness_score ??
+    (latestAssessment as any)?.wellness_score ??
+    (trendData?.summary?.average_wellness_score && trendData.summary.average_wellness_score > 0)
+  );
+
   const rawScore =
     (latestAssessment as any)?.mental_wellness_score ??
     (latestAssessment as any)?.wellness_score ??
     (trendData?.summary?.average_wellness_score && trendData.summary.average_wellness_score > 0
       ? trendData.summary.average_wellness_score
-      : 82);
-  const wellnessScore = Math.min(100, Math.max(0, Math.round(rawScore)));
-  const wellnessClass = classifyMentalWellness(wellnessScore);
+      : null);
+
+  const wellnessScore = rawScore !== null ? Math.min(100, Math.max(0, Math.round(rawScore))) : null;
+  const wellnessClass = wellnessScore !== null ? classifyMentalWellness(wellnessScore) : null;
 
   // Risk Level computation
-  const normalizedRisk: "LOW" | "MODERATE" | "HIGH" =
-    lateNightMins >= 120 || (latestAssessment?.risk_level as string) === "CRITICAL"
-      ? "HIGH"
-      : (latestAssessment?.risk_level as string) === "MEDIUM"
-      ? "MODERATE"
-      : "LOW";
+  const hasRiskAssessment = Boolean(latestAssessment?.risk_level);
+  const normalizedRisk: "LOW" | "MODERATE" | "HIGH" | "INITIALIZING" = !hasRiskAssessment && !hasAssessment
+    ? "INITIALIZING"
+    : lateNightMins >= 120 || (latestAssessment?.risk_level as string) === "CRITICAL"
+    ? "HIGH"
+    : (latestAssessment?.risk_level as string) === "MEDIUM"
+    ? "MODERATE"
+    : "LOW";
 
   // Score color: ≥65 text-emerald-500, 35-64 text-amber-500, <35 text-rose-500
   const scoreColorClass =
-    wellnessScore >= 65
+    wellnessScore === null
+      ? "text-muted-foreground"
+      : wellnessScore >= 65
       ? "text-emerald-500"
       : wellnessScore >= 35
       ? "text-amber-500"
       : "text-rose-500";
 
-  // Streak days calculation
-  const streakDays = Math.max(1, moodHistory.length > 0 ? Math.min(moodHistory.length, 14) : 5);
+  // Streak days calculation: 0 for brand new users with no check-ins
+  const streakDays = moodHistory.length > 0 ? Math.min(moodHistory.length, 30) : 0;
 
-  // Last check-in time
-  const lastCheckinTime = moodHistory[0]?.logged_at
-    ? new Date(moodHistory[0].logged_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
-    : "Today, 9:15 AM";
+  // Last check-in time: Checks if user has actually completed a check-in today
+  const latestMood = moodHistory[0];
+  const isCheckinToday = latestMood?.logged_at
+    ? new Date(latestMood.logged_at).toDateString() === new Date().toDateString()
+    : false;
 
-  // Chart data
+  const lastCheckinTime = isCheckinToday && latestMood?.logged_at
+    ? new Date(latestMood.logged_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+    : "Not today";
+
+  const lastCheckinSubtitle = isCheckinToday
+    ? "Completed today"
+    : latestMood?.logged_at
+    ? `Last: ${new Date(latestMood.logged_at).toLocaleDateString("en-US", { month: "short", day: "numeric" })}`
+    : "Check-in pending";
+
+  // Chart data: Purely authentic entries, zero dummy unshift
   const chartData =
     trendData?.points && trendData.points.length > 0
       ? trendData.points.map((p) => ({
           name: new Date(p.date).toLocaleDateString("en-US", { month: "short", day: "numeric" }),
           score: p.wellness_score,
         }))
-      : moodHistory.map((m) => ({
-          name: new Date(m.logged_at).toLocaleDateString("en-US", { month: "short", day: "numeric" }),
-          score: (m.self_reported_score || 7) * 10,
-        }));
+      : moodHistory
+          .filter((m) => m.logged_at)
+          .map((m) => ({
+            name: new Date(m.logged_at).toLocaleDateString("en-US", { month: "short", day: "numeric" }),
+            score: (m.self_reported_score || 7) * 10,
+          }))
+          .reverse();
 
-  if (chartData.length < 3) {
-    chartData.unshift(
-      { name: "3 wks ago", score: 72 },
-      { name: "2 wks ago", score: 78 },
-      { name: "Last wk", score: 80 }
-    );
-  }
+  // 7-day sleep data from authentic mood check-ins
+  const sleepLogs = moodHistory
+    .filter((m: any) => m.sleep_hours && m.sleep_hours > 0)
+    .slice(0, 7)
+    .reverse();
 
-  // 7-day sleep data
-  const sleepChartData = [
-    { day: "Mon", hours: 6.8 },
-    { day: "Tue", hours: 7.2 },
-    { day: "Wed", hours: 6.5 },
-    { day: "Thu", hours: 7.8 },
-    { day: "Fri", hours: 5.5 },
-    { day: "Sat", hours: 8.2 },
-    { day: "Sun", hours: 7.4 },
-  ];
+  const sleepChartData = sleepLogs.map((m: any) => ({
+    day: new Date(m.logged_at).toLocaleDateString("en-US", { weekday: "short" }),
+    hours: Number(m.sleep_hours),
+  }));
+
+  const avgSleepHours = sleepChartData.length > 0
+    ? Number((sleepChartData.reduce((acc, curr) => acc + curr.hours, 0) / sleepChartData.length).toFixed(1))
+    : 0;
 
   const studentFirstName = user?.full_name ? user.full_name.split(" ")[0] : "Student";
 
@@ -248,7 +269,7 @@ export const StudentDashboard: React.FC = () => {
         <GSAPTilt maxTilt={8} scaleOnHover={1.02} className="h-full">
           <SpotlightCard
             className="p-5 h-full"
-            spotlightColor={wellnessScore >= 65 ? "rgba(16, 185, 129, 0.15)" : wellnessScore >= 35 ? "rgba(245, 158, 11, 0.15)" : "rgba(244, 63, 94, 0.15)"}
+            spotlightColor={wellnessScore !== null && wellnessScore >= 65 ? "rgba(16, 185, 129, 0.15)" : wellnessScore !== null && wellnessScore >= 35 ? "rgba(245, 158, 11, 0.15)" : "rgba(244, 63, 94, 0.15)"}
           >
             <div className="flex items-center justify-between w-full">
               <div className="space-y-1">
@@ -256,10 +277,10 @@ export const StudentDashboard: React.FC = () => {
                   Wellness Score
                 </span>
                 <div className={cn("text-5xl font-extrabold tracking-tight", scoreColorClass)}>
-                  <AnimatedCounter value={wellnessScore} />
+                  {wellnessScore !== null ? <AnimatedCounter value={wellnessScore} /> : "--"}
                 </div>
-                <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold inline-flex items-center gap-1">
-                  +3.5% vs last week
+                <span className={cn("text-[11px] font-semibold inline-flex items-center gap-1", wellnessScore !== null ? "text-emerald-600 dark:text-emerald-400" : "text-muted-foreground")}>
+                  {wellnessScore !== null ? "Calibrated from check-ins" : "Pending first check-in"}
                 </span>
               </div>
               <div className="w-12 h-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
@@ -288,6 +309,8 @@ export const StudentDashboard: React.FC = () => {
                         ? "badge-elevated"
                         : normalizedRisk === "MODERATE"
                         ? "badge-moderate"
+                        : normalizedRisk === "INITIALIZING"
+                        ? "bg-slate-500/10 text-slate-500 border-slate-500/20"
                         : "badge-stable"
                     )}
                   >
@@ -298,6 +321,8 @@ export const StudentDashboard: React.FC = () => {
                           ? "bg-rose-500"
                           : normalizedRisk === "MODERATE"
                           ? "bg-amber-500"
+                          : normalizedRisk === "INITIALIZING"
+                          ? "bg-slate-400"
                           : "bg-emerald-500"
                       )}
                     />
@@ -321,8 +346,11 @@ export const StudentDashboard: React.FC = () => {
         {/* Stat 3: Last Check-In */}
         <GSAPTilt maxTilt={8} scaleOnHover={1.02} className="h-full">
           <SpotlightCard
-            className="p-5 h-full"
+            className="p-5 h-full cursor-pointer"
             spotlightColor="rgba(99, 102, 241, 0.15)"
+            onClick={() => {
+              if (!isCheckinToday) navigate("/student/check-in");
+            }}
           >
             <div className="flex items-center justify-between w-full">
               <div className="space-y-1">
@@ -332,8 +360,8 @@ export const StudentDashboard: React.FC = () => {
                 <div className="text-2xl font-bold text-foreground">
                   {lastCheckinTime}
                 </div>
-                <span className="text-xs text-muted-foreground block">
-                  Completed via web portal
+                <span className={cn("text-xs block", isCheckinToday ? "text-emerald-600 dark:text-emerald-400 font-medium" : "text-muted-foreground")}>
+                  {lastCheckinSubtitle}
                 </span>
               </div>
               <div className="w-12 h-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
@@ -359,11 +387,11 @@ export const StudentDashboard: React.FC = () => {
                   <span className="text-sm font-semibold text-muted-foreground">Days</span>
                 </div>
                 <span className="text-xs text-muted-foreground block">
-                  Daily mindfulness habit
+                  {streakDays > 0 ? "Daily mindfulness habit" : "Start your streak today!"}
                 </span>
               </div>
               <div className="w-12 h-12 rounded-xl bg-amber-500/10 text-amber-500 flex items-center justify-center shrink-0">
-                <Flame className="w-6 h-6 fill-amber-500" />
+                <Flame className={cn("w-6 h-6", streakDays > 0 ? "fill-amber-500 text-amber-500" : "text-muted-foreground opacity-50")} />
               </div>
             </div>
           </SpotlightCard>
@@ -524,6 +552,17 @@ export const StudentDashboard: React.FC = () => {
           <div className="h-64 w-full">
             {isLoadingTrends ? (
               <Skeleton className="w-full h-full rounded-xl" />
+            ) : chartData.length === 0 ? (
+              <div className="h-full flex flex-col items-center justify-center text-center p-6 border border-dashed border-border/60 rounded-xl text-muted-foreground">
+                <Activity className="w-8 h-8 mb-2 opacity-40 text-primary" />
+                <p className="text-sm font-semibold text-foreground">No Check-in History Yet</p>
+                <p className="text-xs text-muted-foreground mt-1 max-w-xs">
+                  Your emotional wellness trajectory will graph here automatically after your first daily check-in.
+                </p>
+                <Button size="sm" variant="outline" className="mt-3 text-xs" onClick={() => navigate("/student/check-in")}>
+                  Start Daily Check-in
+                </Button>
+              </div>
             ) : (
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
@@ -568,7 +607,7 @@ export const StudentDashboard: React.FC = () => {
                 <h2 className="text-base font-semibold text-foreground">Sleep Quality</h2>
               </div>
               <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-primary/10 text-primary">
-                7.2 hrs avg
+                {avgSleepHours > 0 ? `${avgSleepHours} hrs avg` : "No sleep logs"}
               </span>
             </div>
 
@@ -577,28 +616,38 @@ export const StudentDashboard: React.FC = () => {
             </p>
 
             <div className="h-44 w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={sleepChartData} margin={{ top: 5, right: 5, left: -25, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="currentColor" className="text-border" opacity={0.4} />
-                  <XAxis dataKey="day" tick={{ fontSize: 10 }} stroke="currentColor" className="text-muted-foreground" />
-                  <YAxis domain={[0, 10]} tick={{ fontSize: 10 }} stroke="currentColor" className="text-muted-foreground" unit="h" />
-                  <Tooltip
-                    contentStyle={{
-                      borderRadius: "8px",
-                      fontSize: "11px",
-                      backgroundColor: "hsl(var(--card))",
-                      color: "hsl(var(--card-foreground))",
-                      border: "1px solid hsl(var(--border))",
-                    }}
-                  />
-                  <Bar dataKey="hours" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
+              {sleepChartData.length === 0 ? (
+                <div className="h-full flex flex-col items-center justify-center text-center p-3 border border-dashed border-border/60 rounded-xl text-muted-foreground">
+                  <MoonStar className="w-7 h-7 mb-1.5 opacity-40 text-primary" />
+                  <p className="text-xs font-semibold text-foreground">No Sleep Logs Yet</p>
+                  <p className="text-[11px] text-muted-foreground mt-0.5 max-w-[200px]">
+                    Log your rest hours in the daily check-in to track sleep.
+                  </p>
+                </div>
+              ) : (
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={sleepChartData} margin={{ top: 5, right: 5, left: -25, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="currentColor" className="text-border" opacity={0.4} />
+                    <XAxis dataKey="day" tick={{ fontSize: 10 }} stroke="currentColor" className="text-muted-foreground" />
+                    <YAxis domain={[0, 10]} tick={{ fontSize: 10 }} stroke="currentColor" className="text-muted-foreground" unit="h" />
+                    <Tooltip
+                      contentStyle={{
+                        borderRadius: "8px",
+                        fontSize: "11px",
+                        backgroundColor: "hsl(var(--card))",
+                        color: "hsl(var(--card-foreground))",
+                        border: "1px solid hsl(var(--border))",
+                      }}
+                    />
+                    <Bar dataKey="hours" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              )}
             </div>
           </div>
 
           <div className="mt-4 pt-4 border-t border-border flex items-center justify-between text-xs text-muted-foreground">
-            <span>Circadian Debt: 1.2 hrs</span>
+            <span>Circadian Debt: {behavioralSummary?.circadian_sleep_analysis?.circadian_debt_hours ?? 0} hrs</span>
             <Button
               variant="ghost"
               size="sm"
@@ -858,8 +907,8 @@ export const StudentDashboard: React.FC = () => {
             <ShapExplanationCard predictionId={latestAssessment?.assessment_id} />
             <ExplainableAIFactors
               studentId={user?.id}
-              wellnessScore={wellnessScore}
-              riskLevel={normalizedRisk}
+              wellnessScore={wellnessScore ?? undefined}
+              riskLevel={normalizedRisk === "INITIALIZING" ? "LOW" : normalizedRisk}
               lateNightMins={lateNightMins}
               totalScreenMins={totalMins}
               sentimentScore={latestAssessment?.sentiment_score}

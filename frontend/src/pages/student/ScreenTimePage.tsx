@@ -337,9 +337,9 @@ export const ScreenTimePage: React.FC = () => {
   const totalScreenTimeMins = activeTotalMins;
   const totalTimesOpened = isSelectedToday
     ? (data?.digital_wellbeing_summary?.total_times_opened ?? 
-       allTopApps.reduce((acc: number, a: AppUsageItem) => acc + (a.times_opened || 1), 0))
+       allTopApps.reduce((acc: number, a: AppUsageItem) => acc + (a.times_opened || 0), 0))
     : (selectedPastRecord?.total_times_opened ?? 
-       allTopApps.reduce((acc: number, a: AppUsageItem) => acc + (a.times_opened || 1), 0));
+       allTopApps.reduce((acc: number, a: AppUsageItem) => acc + (a.times_opened || 0), 0));
 
   const totalNotifications = isSelectedToday
     ? (data?.digital_wellbeing_summary?.total_notifications ?? 

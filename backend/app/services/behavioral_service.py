@@ -250,99 +250,16 @@ def extract_or_generate_app_and_search_telemetry(
         except Exception:
             pass
 
-    # If no active app durations were detected, provide calibrated student workflow telemetry
-    if not top_apps:
-        top_apps = [
-            {
-                "name": "Instagram",
-                "proc": "instagram.apk",
-                "minutes": 195,  # 3 hr, 15 min
-                "times_opened": 33,
-                "notifications": 18,
-                "category": "Normal",
-                "icon": "camera"
-            },
-            {
-                "name": "Free Fire MAX",
-                "proc": "freefire.apk",
-                "minutes": 109,  # 1 hr, 49 min
-                "times_opened": 17,
-                "notifications": 0,
-                "category": "Playing",
-                "icon": "gamepad"
-            },
-            {
-                "name": "JioHotstar",
-                "proc": "hotstar.apk",
-                "minutes": 97,  # 1 hr, 37 min
-                "times_opened": 8,
-                "notifications": 0,
-                "category": "Playing",
-                "icon": "video"
-            },
-            {
-                "name": "WhatsApp",
-                "proc": "whatsapp.apk",
-                "minutes": 87,  # 1 hr, 27 min
-                "times_opened": 121,
-                "notifications": 149,
-                "category": "Normal",
-                "icon": "message"
-            },
-            {
-                "name": "YouTube",
-                "proc": "youtube.apk",
-                "minutes": 53,  # 53 min
-                "times_opened": 10,
-                "notifications": 6,
-                "category": "Studying",
-                "icon": "video"
-            },
-            {
-                "name": "X (Twitter)",
-                "proc": "x.apk",
-                "minutes": 28,  # 28 min
-                "times_opened": 14,
-                "notifications": 8,
-                "category": "Normal",
-                "icon": "globe"
-            },
-            {
-                "name": "Google Chrome",
-                "proc": "chrome.apk",
-                "minutes": 25,  # 25 min
-                "times_opened": 18,
-                "notifications": 5,
-                "category": "Studying",
-                "icon": "globe"
-            },
-            {
-                "name": "MindGuard AI",
-                "proc": "mindguard.apk",
-                "minutes": 13,  # 13 min
-                "times_opened": 8,
-                "notifications": 2,
-                "category": "Studying",
-                "icon": "brain"
-            }
-        ]
-
-    effective_total = max(1, sum(app.get("minutes", 0) for app in top_apps))
-    for app in top_apps:
-        if "percentage" not in app:
-            app["percentage"] = min(100, round((app.get("minutes", 0) / effective_total) * 100))
-        if "times_opened" not in app:
-            app["times_opened"] = max(1, int(app.get("minutes", 0) / 4) + 1)
-        if "notifications" not in app:
-            app["notifications"] = 0
-
-    if not search_topics:
-        search_topics = [
-            {"query": "algorithms and data structures assignment", "count": 14, "category": "Academic", "flagged": False},
-            {"query": "transformers distilbert fine tuning python", "count": 11, "category": "Academic", "flagged": False},
-            {"query": "nmims university student portal portal login", "count": 8, "category": "Academic", "flagged": False},
-            {"query": "circadian rhythm and sleep debt recovery", "count": 5, "category": "Wellness", "flagged": False}
-        ]
+    # Zero dummy fallback apps - only authentic telemetry
+    if top_apps:
+        effective_total = max(1, sum(app.get("minutes", 0) for app in top_apps))
+        for app in top_apps:
+            if "percentage" not in app:
+                app["percentage"] = min(100, round((app.get("minutes", 0) / effective_total) * 100))
+            if "times_opened" not in app:
+                app["times_opened"] = max(1, int(app.get("minutes", 0) / 4) + 1)
+            if "notifications" not in app:
+                app["notifications"] = 0
 
     return top_apps, search_topics
 
@@ -646,51 +563,6 @@ class BehavioralService:
         today_iso = datetime.now().date().isoformat()
         machine_metrics = get_machine_screen_metrics_today()
 
-        # If student has no telemetry records, seed calibrated 7-day longitudinal baseline
-        if not all_logs:
-            cur_screen = max(185, machine_metrics.get("total_screen_time_minutes", 0))
-            cur_acad = machine_metrics.get("academic_usage_minutes", 0) or int(cur_screen * 0.65)
-            cur_soc = machine_metrics.get("social_usage_minutes", 0) or int(cur_screen * 0.20)
-            cur_ent = machine_metrics.get("entertainment_usage_minutes", 0) or int(cur_screen * 0.15)
-            cur_late = machine_metrics.get("late_night_usage_minutes", 0)
-            
-            baseline_templates = [
-                {"offset": 0, "screen": cur_screen, "acad": cur_acad, "soc": cur_soc, "ent": cur_ent, "late": cur_late},
-                {"offset": 1, "screen": 320, "acad": 215, "soc": 65, "ent": 40, "late": 15},
-                {"offset": 2, "screen": 275, "acad": 190, "soc": 50, "ent": 35, "late": 0},
-                {"offset": 3, "screen": 345, "acad": 235, "soc": 70, "ent": 40, "late": 25},
-                {"offset": 4, "screen": 260, "acad": 175, "soc": 55, "ent": 30, "late": 0},
-                {"offset": 5, "screen": 310, "acad": 210, "soc": 60, "ent": 40, "late": 20},
-                {"offset": 6, "screen": 230, "acad": 155, "soc": 50, "ent": 25, "late": 0},
-            ]
-            
-            created_seeded = []
-            for tmpl in baseline_templates:
-                day_d = (datetime.now().date() - timedelta(days=tmpl["offset"])).isoformat()
-                new_log = BehavioralLog(
-                    id=uuid4(),
-                    student_id=student_id,
-                    date=day_d,
-                    total_screen_time_minutes=tmpl["screen"],
-                    academic_usage_minutes=tmpl["acad"],
-                    social_usage_minutes=tmpl["soc"],
-                    entertainment_usage_minutes=tmpl["ent"],
-                    adult_usage_minutes=0,
-                    late_night_usage_minutes=tmpl["late"],
-                    continuous_screen_minutes=45 if tmpl["offset"] == 0 else 0,
-                    is_crisis_detected=False,
-                    synced_at=now - timedelta(days=tmpl["offset"])
-                )
-                db.add(new_log)
-                created_seeded.append(new_log)
-            
-            try:
-                await db.commit()
-                all_logs = created_seeded
-            except Exception as e:
-                logger.warning(f"Failed to commit seeded telemetry: {e}")
-                all_logs = created_seeded
-
         # Deduplicate to pick the latest record per date
         seen_dates = set()
         recent_logs: List[BehavioralLog] = []
@@ -701,45 +573,69 @@ class BehavioralService:
             if len(recent_logs) >= 7:
                 break
 
-        # Check if today exists in recent_logs; if not, create today entry
-        has_today = any(l.date == today_iso for l in recent_logs)
-        if not has_today:
-            cur_screen = max(185, machine_metrics.get("total_screen_time_minutes", 0))
-            cur_acad = machine_metrics.get("academic_usage_minutes", 0) or int(cur_screen * 0.65)
-            cur_soc = machine_metrics.get("social_usage_minutes", 0) or int(cur_screen * 0.20)
-            cur_ent = machine_metrics.get("entertainment_usage_minutes", 0) or int(cur_screen * 0.15)
-            cur_late = machine_metrics.get("late_night_usage_minutes", 0)
-            
-            today_entry = BehavioralLog(
-                id=uuid4(),
-                student_id=student_id,
-                date=today_iso,
-                total_screen_time_minutes=cur_screen,
-                academic_usage_minutes=cur_acad,
-                social_usage_minutes=cur_soc,
-                entertainment_usage_minutes=cur_ent,
-                adult_usage_minutes=0,
-                late_night_usage_minutes=cur_late,
-                continuous_screen_minutes=35,
-                is_crisis_detected=False,
-                synced_at=now
-            )
-            try:
-                db.add(today_entry)
-                await db.commit()
-            except Exception:
-                pass
-            recent_logs.insert(0, today_entry)
+        # Check if today exists in recent_logs
+        today_entry = next((l for l in recent_logs if l.date == today_iso), None)
 
-        latest = [l for l in recent_logs if l.date == today_iso][0]
+        # Only create/update today record if machine metrics or telemetry is actively present
         if machine_metrics.get("total_screen_time_minutes", 0) > 0:
-            latest.total_screen_time_minutes = machine_metrics["total_screen_time_minutes"]
-            latest.academic_usage_minutes = machine_metrics.get("academic_usage_minutes", latest.academic_usage_minutes)
-            latest.social_usage_minutes = machine_metrics.get("social_usage_minutes", latest.social_usage_minutes)
-            latest.entertainment_usage_minutes = machine_metrics.get("entertainment_usage_minutes", latest.entertainment_usage_minutes)
-            latest.adult_usage_minutes = machine_metrics.get("adult_usage_minutes", getattr(latest, "adult_usage_minutes", 0))
-            latest.late_night_usage_minutes = machine_metrics.get("late_night_usage_minutes", latest.late_night_usage_minutes)
-            latest.continuous_screen_minutes = machine_metrics.get("continuous_screen_minutes", getattr(latest, "continuous_screen_minutes", 0))
+            if not today_entry:
+                today_entry = BehavioralLog(
+                    id=uuid4(),
+                    student_id=student_id,
+                    date=today_iso,
+                    total_screen_time_minutes=machine_metrics["total_screen_time_minutes"],
+                    academic_usage_minutes=machine_metrics.get("academic_usage_minutes", 0),
+                    social_usage_minutes=machine_metrics.get("social_usage_minutes", 0),
+                    entertainment_usage_minutes=machine_metrics.get("entertainment_usage_minutes", 0),
+                    adult_usage_minutes=machine_metrics.get("adult_usage_minutes", 0),
+                    late_night_usage_minutes=machine_metrics.get("late_night_usage_minutes", 0),
+                    continuous_screen_minutes=machine_metrics.get("continuous_screen_minutes", 0),
+                    is_crisis_detected=False,
+                    synced_at=now
+                )
+                try:
+                    db.add(today_entry)
+                    await db.commit()
+                except Exception:
+                    pass
+                recent_logs.insert(0, today_entry)
+            else:
+                today_entry.total_screen_time_minutes = machine_metrics["total_screen_time_minutes"]
+                today_entry.academic_usage_minutes = machine_metrics.get("academic_usage_minutes", today_entry.academic_usage_minutes)
+                today_entry.social_usage_minutes = machine_metrics.get("social_usage_minutes", today_entry.social_usage_minutes)
+                today_entry.entertainment_usage_minutes = machine_metrics.get("entertainment_usage_minutes", today_entry.entertainment_usage_minutes)
+                today_entry.adult_usage_minutes = machine_metrics.get("adult_usage_minutes", getattr(today_entry, "adult_usage_minutes", 0))
+                today_entry.late_night_usage_minutes = machine_metrics.get("late_night_usage_minutes", today_entry.late_night_usage_minutes)
+                today_entry.continuous_screen_minutes = machine_metrics.get("continuous_screen_minutes", getattr(today_entry, "continuous_screen_minutes", 0))
+
+        # If student has zero telemetry records whatsoever, return clean initial state
+        if not recent_logs:
+            return {
+                "is_agent_connected": False,
+                "is_currently_active": False,
+                "last_synced_minutes_ago": 0,
+                "purpose_analysis": {
+                    "academic_percentage": 0,
+                    "non_academic_percentage": 0,
+                    "purpose_status": "No Activity Logged Today",
+                    "purpose_tier": "AWAITING",
+                    "purpose_advice": "No device activity recorded yet today. Active tracking will record your sessions automatically.",
+                    "focus_stability_score": 0.0,
+                    "app_switching_entropy": 0.0
+                },
+                "circadian_sleep_analysis": None,
+                "top_apps": [],
+                "search_topics": [],
+                "digital_wellbeing_summary": {
+                    "total_screen_time_minutes": 0,
+                    "total_times_opened": 0,
+                    "total_notifications": 0
+                },
+                "latest_log": None,
+                "weekly_history": []
+            }
+
+        latest = today_entry or recent_logs[0]
 
         # Check desktop agent state file directly for real-time heartbeat
         project_root = Path(__file__).resolve().parents[3]
@@ -862,8 +758,8 @@ class BehavioralService:
             is_crisis=bool(getattr(latest, "is_crisis_detected", False))
         )
 
-        total_times_opened = 85
-        total_notifications = 251
+        total_times_opened = sum(a.get("times_opened", 0) for a in top_apps)
+        total_notifications = sum(a.get("notifications", 0) for a in top_apps)
 
         weekly_history_entries = []
         for log in sorted(recent_logs, key=lambda x: x.date):
