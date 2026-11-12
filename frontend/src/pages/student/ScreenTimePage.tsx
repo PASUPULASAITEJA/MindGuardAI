@@ -87,6 +87,24 @@ interface SearchTopicItem {
 export const ScreenTimePage: React.FC = () => {
   const { theme } = useTheme();
   const isDark = theme === "dark";
+
+  const isAndroidApp = typeof window !== "undefined" && Boolean((window as any).MindGuardPhone);
+  const [hasPhoneUsagePermission, setHasPhoneUsagePermission] = useState<boolean>(() => {
+    if (typeof window !== "undefined" && (window as any).MindGuardPhone?.hasUsagePermission) {
+      try {
+        return (window as any).MindGuardPhone.hasUsagePermission();
+      } catch (e) {
+        return true;
+      }
+    }
+    return true;
+  });
+
+  const handleRequestPhonePermission = () => {
+    if ((window as any).MindGuardPhone?.requestUsagePermission) {
+      (window as any).MindGuardPhone.requestUsagePermission();
+    }
+  };
   const { user } = useAuth();
 
   const [loading, setLoading] = useState(true);
@@ -489,6 +507,37 @@ export const ScreenTimePage: React.FC = () => {
               24/7 Crisis Hotline is available immediately at <span className="font-bold underline">988</span> or via the AI Companion.
             </p>
           </div>
+        </motion.div>
+      )}
+
+      {/* Native Android Phone Tracking Banner */}
+      {isAndroidApp && !hasPhoneUsagePermission && (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="p-4 rounded-2xl bg-gradient-to-r from-blue-500/10 via-indigo-500/10 to-purple-500/10 border border-blue-500/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-md"
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-blue-500/20 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0">
+              <Smartphone className="w-5 h-5" />
+            </div>
+            <div>
+              <h4 className="text-sm font-bold text-foreground flex items-center gap-2">
+                Enable Complete Phone Screen Time Tracking
+                <Badge variant="outline" className="text-[10px] bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/30">Android System</Badge>
+              </h4>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Grant "Usage Access" in Android Settings so MindGuard can automatically detect which apps you use (Instagram, WhatsApp, Free Fire, etc.) and what purpose you spend more time on.
+              </p>
+            </div>
+          </div>
+          <Button
+            size="sm"
+            onClick={handleRequestPhonePermission}
+            className="rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs shrink-0"
+          >
+            Grant Usage Access
+          </Button>
         </motion.div>
       )}
 

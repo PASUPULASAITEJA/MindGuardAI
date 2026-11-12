@@ -398,9 +398,9 @@ class BehavioralService:
         existing_res = await db.execute(existing_stmt)
         existing_log = existing_res.scalar_one_or_none()
 
-        # Sanity bound payload by machine uptime today
+        # Sanity bound payload: for mobile phone telemetry allow full 24h day capacity (1440 mins)
         machine_metrics = get_machine_screen_metrics_today()
-        uptime_cap = machine_metrics.get("uptime_mins_today", 1440)
+        uptime_cap = 1440 if getattr(payload, "top_apps", None) else machine_metrics.get("uptime_mins_today", 1440)
         sanitized_screen_time = min(payload.total_screen_time_minutes, uptime_cap)
 
         if existing_log:
@@ -440,7 +440,7 @@ class BehavioralService:
             existing_log.synced_at = datetime.now(timezone.utc)
             db_log = existing_log
         else:
-            initial_screen_time = max(sanitized_screen_time, machine_metrics.get("total_screen_time_minutes", 0))
+            initial_screen_time = sanitized_screen_time if getattr(payload, "top_apps", None) else max(sanitized_screen_time, machine_metrics.get("total_screen_time_minutes", 0))
             meta_json = None
             if getattr(payload, "top_apps", None) or getattr(payload, "search_topics", None):
                 meta = {}

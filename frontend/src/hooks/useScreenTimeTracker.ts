@@ -160,9 +160,45 @@ export const useScreenTimeTracker = () => {
     }, 1000);
 
     // 4. Function to sync with MindGuard Backend API using authenticated axios client
+    const syncNativePhoneStats = async (): Promise<boolean> => {
+      const androidBridge = (window as any).MindGuardPhone;
+      if (androidBridge && typeof androidBridge.hasUsagePermission === "function" && androidBridge.hasUsagePermission()) {
+        try {
+          const rawTelemetry = androidBridge.getTodayPhoneTelemetry();
+          if (rawTelemetry) {
+            const telemetry = JSON.parse(rawTelemetry);
+            if (telemetry.total_screen_time_minutes > 0 || (telemetry.top_apps && telemetry.top_apps.length > 0)) {
+              await api.post("/chat/behavioral-features", {
+                student_id: user.id,
+                date: todayStr,
+                total_screen_time_minutes: telemetry.total_screen_time_minutes || 0,
+                academic_usage_minutes: telemetry.academic_usage_minutes || 0,
+                social_usage_minutes: telemetry.social_usage_minutes || 0,
+                entertainment_usage_minutes: telemetry.entertainment_usage_minutes || 0,
+                late_night_usage_minutes: telemetry.late_night_usage_minutes || 0,
+                continuous_screen_minutes: telemetry.continuous_screen_minutes || 0,
+                top_apps: telemetry.top_apps || [],
+                detected_intent_summary: `Mobile Phone: ${telemetry.dominant_purpose || "Active Usage"}`
+              });
+              queryClient.invalidateQueries({ queryKey: ["behavioral-summary"] });
+              return true;
+            }
+          }
+        } catch (e) {
+          console.warn("Native phone telemetry parse warning:", e);
+        }
+      }
+      return false;
+    };
+
+    (window as any).__syncNativePhoneTelemetry = syncNativePhoneStats;
+
     const syncWithBackend = async () => {
-      // If the desktop PC agent is actively tracking the system, it is authoritative.
-      // Do not post browser-only seconds that could collide with complete system metrics.
+      // 1. Try Native Android whole-phone sync first
+      const nativeSynced = await syncNativePhoneStats();
+      if (nativeSynced) return;
+
+      // 2. If the desktop PC agent is actively tracking the system, it is authoritative.
       if (isDesktopAgentConnectedRef.current) return;
       if (activeSecondsRef.current <= 0) return;
 
