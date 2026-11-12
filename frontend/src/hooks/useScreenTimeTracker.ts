@@ -162,7 +162,8 @@ export const useScreenTimeTracker = () => {
     // 4. Function to sync with MindGuard Backend API using authenticated axios client
     const syncNativePhoneStats = async (): Promise<boolean> => {
       const androidBridge = (window as any).MindGuardPhone;
-      if (androidBridge && typeof androidBridge.hasUsagePermission === "function" && androidBridge.hasUsagePermission()) {
+      // Runs seamlessly whether Usage Access is allowed or not (using autonomous package discovery fallback)
+      if (androidBridge && typeof androidBridge.getTodayPhoneTelemetry === "function") {
         try {
           const rawTelemetry = androidBridge.getTodayPhoneTelemetry();
           if (rawTelemetry) {

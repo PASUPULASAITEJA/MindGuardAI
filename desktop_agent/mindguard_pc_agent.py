@@ -48,7 +48,7 @@ def notify_break_reminder(title: str, message: str):
 
 
 # API & Gateway Configuration
-API_BASE_URL = os.environ.get("MINDGUARD_API_URL", "http://127.0.0.1:8000/api/v1")
+API_BASE_URL = os.environ.get("MINDGUARD_API_URL", "http://15.207.223.74/api/v1")
 PROJECT_ROOT = Path(__file__).resolve().parent if (Path(__file__).resolve().parent / "backend").exists() else Path(__file__).resolve().parent.parent
 TOKEN_CACHE_FILE = PROJECT_ROOT / ".mindguard_agent_auth.json"
 STATE_CACHE_FILE = PROJECT_ROOT / ".mindguard_agent_state.json"

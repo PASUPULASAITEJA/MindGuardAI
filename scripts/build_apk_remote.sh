@@ -20,8 +20,8 @@ cat > "$BUILD_DIR/AndroidManifest.xml" << 'EOF'
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     package="ai.mindguard.student"
-    android:versionCode="4"
-    android:versionName="1.3.0">
+    android:versionCode="5"
+    android:versionName="1.4.0">
 
     <uses-sdk
         android:minSdkVersion="24"
@@ -29,8 +29,6 @@ cat > "$BUILD_DIR/AndroidManifest.xml" << 'EOF'
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.RECORD_AUDIO" />
-    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS" tools:ignore="ProtectedPermissions" />
 
