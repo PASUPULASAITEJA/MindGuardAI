@@ -22,6 +22,7 @@ desktop_agent/.mindguard_agent_auth.json
 *.xlsx
 *.xls
 *.docx
+!docs/*.docx
 *.doc
 *.zip
 
