@@ -68,3 +68,4 @@ def format_table_row(row, values, col_widths, is_even=False):
         run.font.color.rgb = RGBColor(0x1E, 0x29, 0x3B)
 
 print("Report helper modules initialized.")
+

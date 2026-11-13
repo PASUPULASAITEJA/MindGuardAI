@@ -62,3 +62,4 @@ To re-build the complete DOCX and PDF Capstone Reports:
 ```powershell
 python scripts/generate_full_capstone_report.py
 ```
+
